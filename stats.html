@@ -112,6 +112,10 @@
             margin-top: 15px;
             font-style: italic;
         }
+        .tag-hellsing { border-top: 5px solid #b71c1c; }
+        .tag-slime { border-top: 5px solid #00bcd4; }
+        /* 加入呢行 👇 */
+        .tag-kakegurui { border-top: 5px solid #d50000; }
     </style>
 </head>
 <body>
@@ -244,6 +248,19 @@
             <div class="progress-text" id="slime-prog">等待中...</div>
         </div>
 
+        <div class="machine-card tag-kakegurui" id="card-kakegurui">
+            <h3 class="machine-title">P 賭ケグルイ</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="kakegurui-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="kakegurui-payout">---</span>
+            </div>
+            <div class="progress-text" id="kakegurui-prog">等待中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -269,6 +286,9 @@
                         let winRate = 108 / (33.2 + 108);
                         while(true) {
                             if(Math.random() < winRate) {
+                                if (Math.random() < 0.12) {
+                                    continue;
+                                }
                                 let rr = Math.random();
                                 if(rr < 0.005) {
                                     let ext = 7500;
@@ -774,6 +794,7 @@
             await runMachineSim('lycoris', simLycoris);
             await runMachineSim('hellsing', simHellsing);
             await runMachineSim('slime', simSlime);
+            await runMachineSim('kakegurui', simKakegurui);
 
             btn.disabled = false;
             btn.innerText = "▶️ 再次演算 (100回)";
