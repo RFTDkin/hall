@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏青哥模擬器 (eフィーバーもののがたり)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #ffeb3b; }
+        
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
+        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .stats-board {
+            background-color: #1e1e1e;
+            border: 2px solid #f44336; /* 紅色主題 */
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+        }
+        .stat-item span {
+            display: block;
+            font-weight: bold;
+            color: #ff9800; /* 金色字 */
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+        
+        button {
+            background-color: #d32f2f; /* 深紅按鈕 */
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #b71c1c; }
+        button:disabled { background-color: #555; cursor: not-allowed; }
+        #btn-reset { background-color: #1976d2; }
+        #btn-reset:hover { background-color: #115293; }
+        
+        .log-container {
+            background-color: #000000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #ffeb3b; font-weight: bold; }
+        .color-hit { color: #ff5252; font-weight: bold; }
+        .color-normal { color: #b0bec5; }
+        .color-special { color: #ff1744; font-weight: bold; text-shadow: 0 0 5px #ff1744; }
+        .color-music { color: #00e676; font-style: italic; } /* 音樂提示顏色 */
+
+        .data-lamp-container {
+            background-color: #111;
+            border: 3px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(244, 67, 54, 0.3); /* 紅色光暈 */
+        }
+        .data-lamp-title {
+            color: #ff5252;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px #ff5252;
+            letter-spacing: 2px;
+        }
+        table.data-lamp {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        table.data-lamp th, table.data-lamp td {
+            border: 1px solid #333;
+            padding: 10px 5px;
+            text-align: center;
+        }
+        table.data-lamp th { background-color: #222; color: #ff5252; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #1a1a1a; }
+        table.data-lamp td.hit-spins { color: #ff9800; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ffeb3b; }
+        .empty-row { color: #555 !important; }
+    </style>
+</head>
+<body>
+
+    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ff5252;">eフィーバーもののがたり (スマパチLT)</span></h1>
+    
+    <video id="jackpot-media" src="ikudachi.mp4" style="display:none;" preload="auto"></video>
+    
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 開始抽機</button>
+                <button id="btn-reset" onclick="resetGame()">🔄 紀錄重置</button>
+            </div>
+
+            <div class="log-container" id="log-box"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead>
+                        <tr>
+                            <th>前次</th>
+                            <th>當選回轉數</th>
+                            <th>連莊數</th>
+                            <th>獲得出玉</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const jackpotMedia = document.getElementById("jackpot-media");
+        let audioUnlocked = false; 
+
+        // 再生が終了するまで待機するPromise関数
+        function playMediaAndWait(mediaElement) {
+            return new Promise((resolve) => {
+                if (!mediaElement) return resolve();
+                
+                mediaElement.currentTime = 0;
+                
+                const onEnded = () => {
+                    mediaElement.removeEventListener('ended', onEnded);
+                    resolve();
+                };
+                mediaElement.addEventListener('ended', onEnded);
+                
+                mediaElement.play().catch(e => {
+                    console.log("自動播放被阻擋", e);
+                    mediaElement.removeEventListener('ended', onEnded);
+                    resolve(); 
+                });
+            });
+        }
+
+        class FeverMononogatari {
+            constructor() {
+                this.state = "NORMAL";
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.history = [];
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+
+                if (this.session_spins % 100 === 0) {
+                    addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
+                }
+
+                // ライトミドル 1/149.9
+                if (Math.random() < (1 / 149.9)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🔥 大當たり！`, "color-hit");
+                    
+                    addLog(`🎵 播放專屬音效 (ikudachi.mp4) 中... 請稍候`, "color-music");
+                    // 映像・音声が終わるまで待機
+                    await playMediaAndWait(jackpotMedia);
+
+                    await this.normal_result();
+                    return true;
+                }
+                return false;
+            }
+
+            async normal_result() {
+                let roll = Math.random();
+
+                // LT突入率: 25.5%
+                if (roll < 0.255) {
+                    // 極少數係直接7揃い1500玉，多數係300玉突破
+                    if (roll < 0.01) {
+                        let payout = 1500;
+                        addLog("🌈 7図柄揃い! 1500玉 + SPECIAL付喪ノ戦 突入！", "color-rush");
+                        this.session_payout += payout;
+                    } else {
+                        let payout = 300;
+                        addLog("✨ チャレンジ成功! 300玉 + SPECIAL付喪ノ戦 突入！", "color-rush");
+                        this.session_payout += payout;
+                    }
+                    await this.play_lt_rush();
+                } 
+                // 74.5% 通常終了
+                else {
+                    let payout = 300;
+                    addLog("😭 チャレンジ失敗... 300玉 (通常終了)");
+                    this.session_payout += payout;
+                    addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
+                    this.record_history();
+                }
+                updateUI();
+            }
+
+            async play_lt_rush() {
+                addLog("\n===== SPECIAL付喪ノ戦 (LT) 開始 =====", "color-special");
+                this.state = "LT_RUSH";
+                let current_rush_spins = 0; // 新增轉數追蹤
+                updateUI();
+
+                while (this.state === "LT_RUSH") {
+                    await sleep(30); // 模擬轉數跳動速度
+                    current_rush_spins += 1;
+                    
+                    document.getElementById("ui-spins").innerText = `LT中: ${current_rush_spins}回転`;
+                    
+                    // 轉落抽籤：大當(1/41.1) vs 転落(1/111.1)
+                    let hitRoll = Math.random() < (1 / 41.1);
+                    let fallRoll = Math.random() < (1 / 111.1);
+
+                    if (hitRoll) {
+                        this.session_rush_count += 1;
+                        
+                        let payout = this.lt_lottery();
+                        this.session_payout += payout;
+
+                        addLog(`\n🎉 LT RUSH 當選！ (${current_rush_spins}回転)`, "color-rush");
+                        addLog(`💥 本次獲得: ${payout} 玉`);
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        addLog("⚡ 討伐継続!!", "color-rush");
+
+                        this.check_and_play_media(payout);
+                        
+                        current_rush_spins = 0; // 中獎重置轉數
+                        updateUI();
+                        await sleep(800);
+                    } else if (fallRoll) {
+                        addLog(`\n💀 敗北... 転落 (${current_rush_spins}回転で終了)`);
+                        addLog(`📈 總連莊數: ${this.session_rush_count + 1}連 (含初當)`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                        
+                        this.state = "NORMAL";
+                        this.record_history();
+                        updateUI();
+                        break;
+                    }
+                }
+            }
+
+            lt_lottery() {
+                let roll = Math.random();
+                
+                // 約50%發生神髄JUDGE (25% 6000玉, 25% 3000玉)
+                if (roll < 0.25) {
+                    addLog("🌈 神髄JUDGE 極限！ 6000玉 !!!", "color-hit");
+                    return 6000;
+                } 
+                else if (roll < 0.50) {
+                    addLog("💎 神髄JUDGE 成功！ 3000玉 !!!", "color-hit");
+                    return 3000;
+                } 
+                // 剩餘50%係1500玉
+                else {
+                    addLog("✨ 1500玉 !", "color-rush");
+                    return 1500;
+                }
+            }
+
+            check_and_play_media(payout) {
+                // RUSH中で出玉 >= 3000 の場合も再生（待機なし）
+                if (payout >= 3000) {
+                    if (jackpotMedia.paused || jackpotMedia.ended) {
+                        jackpotMedia.currentTime = 0; 
+                        jackpotMedia.play().catch(e => {
+                            console.log("瀏覽器阻擋自動播放", e);
+                        });
+                    }
+                }
+            }
+
+            record_history() {
+                this.history.unshift({
+                    spins: this.session_spins,
+                    rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
+                    payout: this.session_payout
+                });
+
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+            }
+        }
+
+        let game = new FeverMononogatari();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const btnReset = document.getElementById("btn-reset");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div");
+            div.className = `log-entry ${className}`;
+            div.innerText = text;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") {
+                document.getElementById("ui-spins").innerText = game.session_spins;
+            }
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = ""; 
+            if (historyData.length === 0) {
+                historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
+                return;
+            }
+
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `
+                    <td>${label}</td>
+                    <td class="hit-spins">${record.spins}</td>
+                    <td class="hit-rush">${record.rush}</td>
+                    <td class="hit-payout">${record.payout}</td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.disabled = true;
+            btnReset.disabled = true;
+            
+            if (!audioUnlocked) {
+                jackpotMedia.load(); 
+                audioUnlocked = true;
+            }
+            
+            addLog("\n=== 開始打玉 ===", "color-hit");
+
+            while (isPlaying) {
+                let hit = await game.play_normal();
+                updateUI();
+                
+                if (game.session_spins % 100 === 0) {
+                    await sleep(10); 
+                }
+
+                if (hit) {
+                    isPlaying = false;
+                    break;
+                }
+            }
+            
+            btnPlay.disabled = false;
+            btnReset.disabled = false;
+            btnPlay.innerText = "▶️ 繼續抽機";
+        }
+
+        function resetGame() {
+            game = new FeverMononogatari();
+            logBox.innerHTML = "";
+            renderHistoryTable([]);
+            updateUI();
+            
+            jackpotMedia.pause();
+            jackpotMedia.currentTime = 0;
+            
+            addLog("遊戲紀錄已重置。", "color-normal");
+            btnPlay.innerText = "▶️ 開始抽機";
+        }
+    </script>
+    <script src="plugin.js"></script>
+</body>
+</html>

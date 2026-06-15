@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 / 註冊 - 虛擬柏青哥大廳</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #050505;
+            color: #fff;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%);
+        }
+
+        .login-box {
+            background-color: #111;
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #00e5ff;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        h1 {
+            color: #00e5ff;
+            text-shadow: 0 0 10px #00e5ff;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 90%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background-color: #222;
+            color: white;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        button {
+            background-color: #00e5ff;
+            color: #000;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #00b8d4;
+            box-shadow: 0 0 15px #00e5ff;
+        }
+
+        .hint {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+        <h1>🎰 會員登入</h1>
+        <input type="text" id="username" placeholder="請輸入帳號名稱..." autocomplete="off">
+        <button id="login-btn" onclick="login()">登入 / 註冊</button>
+        <div class="hint">如果帳號不存在，系統會自動幫你註冊<br>並送你 50,000 円迎新本金！</div>
+    </div>
+
+    <script>
+        // 👇 將呢度換成你喺 Firebase 複製嘅 Config 👇
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
+            authDomain: "p-hall.firebaseapp.com",
+            databaseURL: "https://p-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "p-hall",
+            storageBucket: "p-hall.firebasestorage.app",
+            messagingSenderId: "656958771527",
+            appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
+            measurementId: "G-46M19VQVY2"
+        };
+        // 👆 替換結束 👆
+
+        // 初始化 Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function login() {
+            const username = document.getElementById("username").value.trim();
+            if (!username) { alert("請輸入帳號名稱！"); return; }
+
+            const btn = document.getElementById("login-btn");
+            btn.disabled = true;
+            btn.innerText = "連線中...";
+
+            // 去雲端檢查玩家是否存在
+            db.ref('users/' + username).get().then((snapshot) => {
+                if (snapshot.exists()) {
+                    // 舊玩家
+                    localStorage.setItem("pachinko_current_user", username);
+                    alert(`歡迎返嚟，${username}！`);
+                    window.location.href = "index.html";
+                } else {
+                    // 新玩家：派 50000 円
+                    db.ref('users/' + username).set({
+                        balance: 50000,
+                        daily_spins: 0,
+                        last_date: new Date().toDateString()
+                    }).then(() => {
+                        localStorage.setItem("pachinko_current_user", username);
+                        alert(`註冊成功！已派發 50,000 円本金畀你！`);
+                        window.location.href = "index.html";
+                    });
+                }
+            }).catch((error) => {
+                alert("連線失敗：" + error.message);
+                btn.disabled = false;
+                btn.innerText = "登入 / 註冊";
+            });
+        }
+    </script>
+</body>
+
+</html>

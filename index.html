@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 虛擬柏青哥大廳 (Virtual Pachinko Hall)</title>
+    <!-- 引入 Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%);
+            min-height: 100vh;
+        }
+        
+        /* 頂部導航 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            background: #111;
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        .user-info { font-size: 1.2em; font-weight: bold; color: #00e5ff; text-align: left; }
+        
+        /* 智能 Auth 按鈕設計 */
+        .auth-btn { border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1em; transition: 0.2s; }
+        .auth-btn.logout { background: #d32f2f; color: white; border: 1px solid #b71c1c; }
+        .auth-btn.logout:hover { background: #b71c1c; }
+        .auth-btn.login { background: #00e5ff; color: #000; border: 1px solid #00b8d4; }
+        .auth-btn.login:hover { background: #00b8d4; box-shadow: 0 0 10px #00e5ff; }
+
+        h1 { color: #ffeb3b; font-size: 3em; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 235, 59, 0.6); }
+        
+        /* 排行榜 */
+        .ranking-container {
+            max-width: 800px;
+            margin: 0 auto 40px auto;
+            background-color: #161b22;
+            border: 2px solid #ffca28;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(255, 202, 40, 0.2);
+        }
+        .ranking-title { color: #ffca28; font-size: 1.8em; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;}
+        table.ranking-table { width: 100%; border-collapse: collapse; color: #fff; }
+        table.ranking-table th, table.ranking-table td { padding: 12px; text-align: center; border-bottom: 1px solid #333; }
+        table.ranking-table th { color: #888; }
+        table.ranking-table tr:nth-child(1) td { color: #ffeb3b; font-weight: bold; font-size: 1.2em; } /* 金 */
+        table.ranking-table tr:nth-child(2) td { color: #e0e0e0; font-weight: bold; font-size: 1.1em;} /* 銀 */
+        table.ranking-table tr:nth-child(3) td { color: #cd7f32; font-weight: bold; font-size: 1.05em;} /* 銅 */
+
+        .hall-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .machine-card { background-color: #111; border-radius: 15px; padding: 25px 20px; text-decoration: none; color: white; transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; }
+        .machine-card:hover { transform: translateY(-10px); z-index: 10; }
+        .machine-title { font-size: 1.4em; font-weight: 900; margin: 0 0 10px 0; }
+        .machine-spec { font-size: 0.9em; color: #ccc; margin-bottom: 20px; line-height: 1.6; }
+        .play-btn { background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); padding: 10px; border-radius: 8px; font-weight: bold; letter-spacing: 1px; transition: background-color 0.3s; }
+        .machine-card:hover .play-btn { background-color: rgba(255, 255, 255, 0.2); color: #fff; }
+
+        /* 各機台專屬主題顏色 */
+        .card-bluelock { border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); } .card-bluelock:hover { box-shadow: 0 0 30px rgba(0, 229, 255, 0.6); } .card-bluelock .machine-title { color: #00e5ff; text-shadow: 0 0 5px #00e5ff; }
+        .card-dmdp { border-color: #e040fb; box-shadow: 0 0 15px rgba(224, 64, 251, 0.2); } .card-dmdp:hover { box-shadow: 0 0 30px rgba(224, 64, 251, 0.6); } .card-dmdp .machine-title { color: #e040fb; text-shadow: 0 0 5px #e040fb; }
+        .card-ghoul399 { border-color: #ff1744; box-shadow: 0 0 15px rgba(255, 23, 68, 0.2); } .card-ghoul399:hover { box-shadow: 0 0 30px rgba(255, 23, 68, 0.6); } .card-ghoul399 .machine-title { color: #ff1744; text-shadow: 0 0 5px #ff1744; }
+        .card-ghoul999 { border-color: #d50000; box-shadow: 0 0 15px rgba(213, 0, 0, 0.2); background: linear-gradient(180deg, #111 0%, #300 100%);} .card-ghoul999:hover { box-shadow: 0 0 40px rgba(213, 0, 0, 0.8); } .card-ghoul999 .machine-title { color: #ff5252; text-shadow: 0 0 10px #d50000; }
+        .card-jitsuryoku { border-color: #ffca28; box-shadow: 0 0 15px rgba(255, 202, 40, 0.2); } .card-jitsuryoku:hover { box-shadow: 0 0 30px rgba(255, 202, 40, 0.6); } .card-jitsuryoku .machine-title { color: #ffca28; text-shadow: 0 0 5px #ffca28; }
+        .card-monono { border-color: #f44336; box-shadow: 0 0 15px rgba(244, 67, 54, 0.2); } .card-monono:hover { box-shadow: 0 0 30px rgba(244, 67, 54, 0.6); } .card-monono .machine-title { color: #f44336; text-shadow: 0 0 5px #f44336; }
+        .card-lycoris { border-color: #ff5252; box-shadow: 0 0 15px rgba(255, 82, 82, 0.2); } .card-lycoris:hover { box-shadow: 0 0 30px rgba(255, 82, 82, 0.6); } .card-lycoris .machine-title { color: #ff5252; text-shadow: 0 0 5px #ff5252; }
+        .card-hellsing { border-color: #b71c1c; box-shadow: 0 0 15px rgba(183, 28, 28, 0.2); } .card-hellsing:hover { box-shadow: 0 0 30px rgba(183, 28, 28, 0.8); } .card-hellsing .machine-title { color: #ff1744; text-shadow: 0 0 10px #b71c1c; }
+        .card-slime { border-color: #00bcd4; box-shadow: 0 0 15px rgba(0, 188, 212, 0.2); } .card-slime:hover { box-shadow: 0 0 30px rgba(0, 188, 212, 0.8); } .card-slime .machine-title { color: #00bcd4; text-shadow: 0 0 10px #00bcd4; }
+        .card-kakegurui { border-color: #d50000; box-shadow: 0 0 15px rgba(213, 0, 0, 0.2); } .card-kakegurui:hover { box-shadow: 0 0 30px rgba(213, 0, 0, 0.6); } .card-kakegurui .machine-title { color: #ff5252; text-shadow: 0 0 5px #d50000; }
+        .card-stats { border-color: #4caf50; box-shadow: 0 0 15px rgba(76, 175, 80, 0.2); grid-column: 1 / -1; margin-top: 20px;} .card-stats:hover { box-shadow: 0 0 30px rgba(76, 175, 80, 0.6); } .card-stats .machine-title { color: #4caf50; text-shadow: 0 0 5px #4caf50; } .card-stats .play-btn { background-color: rgba(76, 175, 80, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <div class="user-info">
+            👤 <span id="nav-username">載入中...</span> <br>
+            💰 <span id="nav-balance" style="color: #00e676;">---</span> 円
+        </div>
+        <!-- 智能按鈕：登入/登出 -->
+        <button id="auth-btn" class="auth-btn" onclick="handleAuth()">載入中...</button>
+    </div>
+
+    <h1>🎰 虛擬柏青哥大廳</h1>
+
+    <!-- 🏆 全服排行榜 -->
+    <div class="ranking-container">
+        <h2 class="ranking-title">🏆 全伺服器富豪排行榜 TOP 10 🏆</h2>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>玩家帳號</th>
+                    <th>擁有金錢 (円)</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-body">
+                <tr><td colspan="3">讀取數據中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="hall-container">
+        
+        <!-- Blue Lock -->
+        <a href="bluelock.html" class="machine-card card-bluelock">
+            <div>
+                <h3 class="machine-title">P ブルーロック 399ver</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/399.9<br>
+                    RUSH継続率: 約77%<br>
+                    <span style="color:#00e5ff;">最大出玉: 9000個+α</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- DMDP -->
+        <a href="dmdp.html" class="machine-card card-dmdp">
+            <div>
+                <h3 class="machine-title">e DMDP 魂神9000</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/349.9<br>
+                    魂神の一撃: 50%ループ<br>
+                    <span style="color:#e040fb;">最大出玉: 10500個</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- 東京喰種 399 -->
+        <a href="ghoul399.html" class="machine-card card-ghoul399">
+            <div>
+                <h3 class="machine-title">P 東京喰種 399ver</h3>
+                <div class="machine-spec">
+                    図柄揃い確率: 1/399.9<br>
+                    RUSH継続率: 約75%<br>
+                    <span style="color:#ff1744;">最大出玉: 6000個</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- 東京喰種 999 -->
+        <a href="ghoul999.html" class="machine-card card-ghoul999">
+            <div>
+                <h3 class="machine-title">P 東京喰種 999ver</h3>
+                <div class="machine-spec">
+                    図柄揃い確率: 1/999.9<br>
+                    喰MAXループ: 50%継続<br>
+                    <span style="color:#ff5252;">初当り最大: 7500個</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- よう実 -->
+        <a href="jitsuryoku.html" class="machine-card card-jitsuryoku">
+            <div>
+                <h3 class="machine-title">eようこそ実力至上主義の教室へ</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/349.9<br>
+                    LT継続率: 約87%<br>
+                    <span style="color:#ffca28;">右打ちALL 3000個</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- もののがたり -->
+        <a href="monono.html" class="machine-card card-monono">
+            <div>
+                <h3 class="machine-title">eフィーバーもののがたり</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/149.9<br>
+                    LT継続率: 約73%<br>
+                    <span style="color:#f44336;">最大出玉: 6000個</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- リコリス・リコイル -->
+        <a href="lycoris.html" class="machine-card card-lycoris">
+            <div>
+                <h3 class="machine-title">P リコリス・リコイル</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/259.7<br>
+                    LT継続率: 約75%<br>
+                    <span style="color:#ff5252;">モードB最大: 6000個+α</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- 烈核解放 -->
+        <a href="hellsing.html" class="machine-card card-hellsing">
+            <div>
+                <h3 class="machine-title">P 烈核解放 (超孤紅の恤)</h3>
+                <div class="machine-spec">
+                    CZ確率: 1/129<br>
+                    RUSH継続率: 約77%<br>
+                    <span style="color:#ff1744;">最大出玉: 6000個 + 1G連</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- 転生したらスライムだった件 -->
+        <a href="slime.html" class="machine-card card-slime">
+            <div>
+                <h3 class="machine-title">P 転生したらスライムだった件</h3>
+                <div class="machine-spec">
+                    図柄揃い確率: 1/399.9<br>
+                    最高継続率: 約80%<br>
+                    <span style="color:#00bcd4;">右打ちALL 3000個</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- 賭ケグルイ (新機) -->
+        <a href="kakegurui.html" class="machine-card card-kakegurui">
+            <div>
+                <h3 class="machine-title">P 賭ケグルイ</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/204<br>
+                    RUSH継続率: 約75%<br>
+                    <span style="color:#ff1744;">一撃7500玉ループ搭載</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 著席する (PLAY)</div>
+        </a>
+
+        <!-- 100回 大當統計中心 -->
+        <a href="stats.html" class="machine-card card-stats">
+            <div>
+                <h3 class="machine-title">📊 100回 公平大當統計中心</h3>
+                <div class="machine-spec">
+                    自動演算系統<br>
+                    一鍵測試以上所有 10 部機種 100 次初當出玉及收支
+                </div>
+            </div>
+            <div class="play-btn">⚙️ 進入數據中心 (ENTER DATA CENTER)</div>
+        </a>
+
+    </div>
+
+    <script>
+        // 👇 將呢度換成你嘅 Config 👇
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
+            authDomain: "p-hall.firebaseapp.com",
+            databaseURL: "https://p-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "p-hall",
+            storageBucket: "p-hall.firebasestorage.app",
+            messagingSenderId: "656958771527",
+            appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
+            measurementId: "G-46M19VQVY2"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 驗證登入狀態
+        const currentUser = localStorage.getItem("pachinko_current_user");
+        const authBtn = document.getElementById("auth-btn");
+
+        if (currentUser) {
+            document.getElementById("nav-username").innerText = currentUser;
+            authBtn.innerText = "登出 (Logout)";
+            authBtn.className = "auth-btn logout";
+        } else {
+            // 訪客模式
+            document.getElementById("nav-username").innerText = "訪客 (未登入)";
+            document.getElementById("nav-username").style.color = "#888";
+            document.getElementById("nav-balance").innerText = "---";
+            authBtn.innerText = "登入 / 註冊";
+            authBtn.className = "auth-btn login";
+        }
+
+        // 實時監聽雲端金錢同排行榜 (訪客都睇到)
+        db.ref('users').on('value', (snapshot) => {
+            let users = snapshot.val() || {}; // 防呆：如果 DB 係空嘅，自動變成空 Object
+
+            // 更新自己個錢包 (如果有登入)
+            if (currentUser && users[currentUser]) {
+                document.getElementById("nav-balance").innerText = Math.round(users[currentUser].balance).toLocaleString();
+            }
+
+            // 生成排行榜
+            renderRanking(users);
+        }, (error) => {
+            console.error("讀取 Firebase 失敗: ", error);
+            document.getElementById("ranking-body").innerHTML = `<tr><td colspan="3" style="color:red;">無法讀取數據，請檢查 Firebase 權限設定！</td></tr>`;
+        });
+
+        function renderRanking(users) {
+            let rankingBody = document.getElementById("ranking-body");
+            rankingBody.innerHTML = ""; // 清空舊數據
+
+            let userKeys = Object.keys(users);
+            if (userKeys.length === 0) {
+                rankingBody.innerHTML = `<tr><td colspan="3">暫無玩家資料</td></tr>`;
+                return;
+            }
+
+            let userArray = userKeys.map(name => {
+                return { name: name, balance: users[name].balance };
+            });
+            
+            // 根據餘額由高至低排序
+            userArray.sort((a, b) => b.balance - a.balance);
+
+            let top10 = userArray.slice(0, 10);
+
+            top10.forEach((user, index) => {
+                let tr = document.createElement("tr");
+                let rankText = (index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1);
+                let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (你)</span>` : user.name;
+
+                tr.innerHTML = `
+                    <td>${rankText}</td>
+                    <td>${nameHtml}</td>
+                    <td>${Math.round(user.balance).toLocaleString()}</td>
+                `;
+                rankingBody.appendChild(tr);
+            });
+        }
+
+        // 處理登入/登出按鈕
+        function handleAuth() {
+            if (currentUser) {
+                // 如果已登入 -> 執行登出
+                localStorage.removeItem("pachinko_current_user");
+                window.location.reload(); // 刷新頁面變回訪客
+            } else {
+                // 如果未登入 -> 去註冊頁
+                window.location.href = "login.html";
+            }
+        }
+    </script>
+
+</body>
+</html>

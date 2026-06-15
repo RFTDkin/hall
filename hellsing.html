@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏青哥模擬器 (P 烈核解放 - 超孤紅の恤)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0d0000;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #ff1744; text-shadow: 0 0 15px rgba(255, 23, 68, 0.7); }
+        
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
+        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .stats-board {
+            background-color: #1a0505;
+            border: 2px solid #b71c1c; 
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+            box-shadow: inset 0 0 15px rgba(183, 28, 28, 0.5);
+        }
+        .stat-item span {
+            display: block;
+            font-weight: bold;
+            color: #ff5252; 
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+        
+        button {
+            background-color: #8e0000; 
+            color: white;
+            border: 1px solid #ff1744;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+        button:hover { background-color: #b71c1c; box-shadow: 0 0 10px #ff1744; }
+        button:disabled { background-color: #330000; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
+        #btn-reset { background-color: #424242; border-color: #616161; }
+        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
+        
+        .log-container {
+            background-color: #000000;
+            border: 1px solid #4a0000;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff5252; }
+        .color-hit { color: #ffeb3b; font-weight: bold; }
+        .color-normal { color: #9e9e9e; }
+        .color-cz { color: #b388ff; font-weight: bold; }
+        .color-ultimate { color: #d50000; font-weight: bold; text-shadow: 0 0 10px #d50000; font-size: 1.1em; }
+
+        .data-lamp-container {
+            background-color: #0a0000;
+            border: 3px solid #4a0000;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(183, 28, 28, 0.4); 
+        }
+        .data-lamp-title {
+            color: #ff1744;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px #ff1744;
+            letter-spacing: 2px;
+        }
+        table.data-lamp {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        table.data-lamp th, table.data-lamp td {
+            border: 1px solid #330000;
+            padding: 10px 5px;
+            text-align: center;
+        }
+        table.data-lamp th { background-color: #1a0000; color: #ff5252; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #0d0000; }
+        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ff5252; }
+        .empty-row { color: #555 !important; }
+    </style>
+</head>
+<body>
+
+    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ff5252;">P 烈核解放 (超孤紅の恤)</span></h1>
+    
+    <video id="jackpot-media" src="3000_bonus.mp4" style="display:none;" preload="auto"></video>
+    
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 開始抽機</button>
+                <button id="btn-reset" onclick="resetGame()">🔄 紀錄重置</button>
+            </div>
+
+            <div class="log-container" id="log-box"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead>
+                        <tr>
+                            <th>前次</th>
+                            <th>當選回轉數</th>
+                            <th>連莊數</th>
+                            <th>獲得出玉</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const jackpotMedia = document.getElementById("jackpot-media");
+        let audioUnlocked = false; 
+
+        class HellsingMachine {
+            constructor() {
+                this.state = "NORMAL";
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.history = [];
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+
+                if (this.session_spins % 100 === 0) {
+                    addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
+                }
+
+                // 烈核解放CZ確率: 1/129
+                if (Math.random() < (1 / 129)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🩸 烈核解放CZ 突入！ (10回転)`, "color-cz");
+                    
+                    let cz_success = await this.play_cz();
+                    
+                    if (cz_success) {
+                        await this.cz_result();
+                        return true; 
+                    } else {
+                        addLog(`💀 CZ失敗... 通常へ戻る`, "color-normal");
+                        return false; 
+                    }
+                }
+                return false;
+            }
+
+            async play_cz() {
+                this.state = "CZ";
+                updateUI();
+
+                // CZ 10轉，期待度 33% -> 每轉約 1/25.5
+                for(let i = 1; i <= 10; i++) {
+                    await sleep(100); 
+                    this.session_spins++; // CZ 也算回轉
+                    document.getElementById("ui-spins").innerText = `CZ中: ${i}/10`;
+                    
+                    if (Math.random() < (1 / 25.5)) {
+                        addLog(`🎉 [CZ ${i}回転目] 成功！！`, "color-hit");
+                        this.state = "NORMAL";
+                        return true;
+                    }
+                }
+                this.state = "NORMAL";
+                updateUI();
+                return false;
+            }
+
+            async cz_result() {
+                let roll = Math.random();
+                let rush = false;
+
+                if (roll < 0.073) {
+                    let payout = 1800;
+                    addLog("🌈 1800玉獲得！ 超孤紅の恤RUSH 突入！", "color-ultimate");
+                    this.session_payout += payout;
+                    rush = true;
+                } 
+                else if (roll < 0.073 + 0.437) {
+                    let payout = 1500;
+                    addLog("🩸 1500玉獲得！ 超孤紅の恤RUSH 突入！", "color-rush");
+                    this.session_payout += payout;
+                    rush = true;
+                } 
+                else {
+                    let payout = 1500;
+                    addLog("😭 1500玉獲得 (通常終了)");
+                    this.session_payout += payout;
+                    addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
+                    this.record_history();
+                }
+                updateUI();
+
+                if (rush) {
+                    await sleep(1000);
+                    await this.play_rush();
+                }
+            }
+
+            async play_rush() {
+                addLog("\n===== 🦇 超孤紅の恤RUSH (ST144回) 開始 =====", "color-ultimate");
+                this.state = "RUSH";
+                updateUI();
+
+                let st_remaining = 144;
+                while(this.state === "RUSH" && st_remaining > 0) {
+                    await sleep(30);
+                    document.getElementById("ui-spins").innerText = `ST剩餘: ${st_remaining}/144`;
+
+                    // RUSH確率 約1/99
+                    if (Math.random() < (1 / 99)) {
+                        this.session_rush_count += 1;
+                        let used_spin = 144 - st_remaining + 1;
+                        addLog(`\n🎉 RUSH 當選！ (ST ${used_spin} 回転)`, "color-hit");
+
+                        // 50% 孤紅の恤BONUS vs 50% 吸血姫BONUS
+                        if (Math.random() < 0.50) {
+                            addLog(`🔥 孤紅の恤BONUS！`, "color-ultimate");
+                            let loop = true;
+                            let total_payout = 0;
+                            let loop_count = 0;
+                            
+                            while(loop) {
+                                if (loop_count > 0) {
+                                    await sleep(600); // 1G連嘅停頓感
+                                    addLog(`🔄 1G連 孤紅の恤BONUS！ (#${loop_count + 1})`, "color-ultimate");
+                                }
+                                
+                                let br = Math.random();
+                                if (br < 0.125) {
+                                    total_payout += 6000;
+                                    this.session_payout += 6000;
+                                    addLog(`👑 狂気！ 6000玉獲得 + 1G連発生 !!! (計 ${total_payout}玉)`, "color-ultimate");
+                                    loop_count++; // 繼續 loop
+                                } else if (br < 0.125 + 0.375) {
+                                    total_payout += 4500;
+                                    this.session_payout += 4500;
+                                    addLog(`💥 激熱！ 4500玉獲得 !! (計 ${total_payout}玉)`, "color-rush");
+                                    loop = false;
+                                } else if (br < 0.50 + 0.375) {
+                                    total_payout += 3000;
+                                    this.session_payout += 3000;
+                                    addLog(`🩸 3000玉獲得 ! (計 ${total_payout}玉)`, "color-rush");
+                                    loop = false;
+                                } else {
+                                    total_payout += 1500;
+                                    this.session_payout += 1500;
+                                    addLog(`✨ 1500玉獲得 (計 ${total_payout}玉)`, "color-hit");
+                                    loop = false;
+                                }
+                                updateUI();
+                            }
+                            this.check_and_play_media(total_payout);
+                        } else {
+                            addLog(`🦇 吸血姫BONUS！ 1500玉獲得`, "color-hit");
+                            this.session_payout += 1500;
+                        }
+
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        st_remaining = 144; // Reset ST
+                        updateUI();
+                        await sleep(800);
+                    } else {
+                        st_remaining--;
+                    }
+                }
+
+                if (st_remaining === 0) {
+                    document.getElementById("ui-spins").innerText = `ST剩餘: 0/144`;
+                    addLog("\n💀 ST抜け... RUSH終了");
+                    addLog(`📈 總連莊數: ${this.session_rush_count + 1}連 (含初當)`);
+                    addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                    
+                    this.state = "NORMAL";
+                    this.record_history();
+                    updateUI();
+                }
+            }
+
+            check_and_play_media(payout) {
+                if (payout >= 3000) {
+                    if (jackpotMedia.paused || jackpotMedia.ended) {
+                        jackpotMedia.currentTime = 0; 
+                        jackpotMedia.play().catch(e => {
+                            console.log("瀏覽器阻擋自動播放", e);
+                        });
+                    }
+                }
+            }
+
+            record_history() {
+                this.history.unshift({
+                    spins: this.session_spins,
+                    rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
+                    payout: this.session_payout
+                });
+
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+            }
+        }
+
+        let game = new HellsingMachine();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const btnReset = document.getElementById("btn-reset");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div");
+            div.className = `log-entry ${className}`;
+            div.innerText = text;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") {
+                document.getElementById("ui-spins").innerText = game.session_spins;
+            }
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = ""; 
+            if (historyData.length === 0) {
+                historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
+                return;
+            }
+
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `
+                    <td>${label}</td>
+                    <td class="hit-spins">${record.spins}</td>
+                    <td class="hit-rush">${record.rush}</td>
+                    <td class="hit-payout">${record.payout}</td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.disabled = true;
+            btnReset.disabled = true;
+            
+            if (!audioUnlocked) {
+                jackpotMedia.load(); 
+                audioUnlocked = true;
+            }
+            
+            addLog("\n=== 開始打玉 ===", "color-hit");
+
+            while (isPlaying) {
+                let hit = await game.play_normal();
+                updateUI();
+                
+                if (game.session_spins % 100 === 0) {
+                    await sleep(10); 
+                }
+
+                if (hit) {
+                    isPlaying = false;
+                    break;
+                }
+            }
+            
+            btnPlay.disabled = false;
+            btnReset.disabled = false;
+            btnPlay.innerText = "▶️ 繼續抽機";
+        }
+
+        function resetGame() {
+            game = new HellsingMachine();
+            logBox.innerHTML = "";
+            renderHistoryTable([]);
+            updateUI();
+            
+            jackpotMedia.pause();
+            jackpotMedia.currentTime = 0;
+            
+            addLog("遊戲紀錄已重置。", "color-normal");
+            btnPlay.innerText = "▶️ 開始抽機";
+        }
+    </script>
+    <script src="plugin.js"></script>
+</body>
+</html>

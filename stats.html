@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏青哥 100回 綜合統計中心</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #58a6ff; text-shadow: 0 0 10px rgba(88, 166, 255, 0.5); font-weight: 900; }
+        p { color: #8b949e; margin-bottom: 30px; line-height: 1.6; }
+
+        .top-bar {
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto 20px auto;
+        }
+        .home-btn {
+            background-color: #21262d;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            border: 1px solid #30363d;
+            transition: all 0.2s;
+        }
+        .home-btn:hover { background-color: #30363d; border-color: #8b949e; }
+
+        .btn-start {
+            background-color: #238636;
+            color: #ffffff;
+            border: 1px solid rgba(240, 246, 252, 0.1);
+            padding: 15px 40px;
+            font-size: 1.5em;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(35, 134, 54, 0.4);
+            transition: all 0.2s;
+            margin-bottom: 30px;
+        }
+        .btn-start:hover { background-color: #2ea043; transform: scale(1.05); }
+        .btn-start:disabled { background-color: #21262d; color: #484f58; box-shadow: none; cursor: not-allowed; transform: scale(1); }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .machine-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .machine-card.running { border-color: #f1e05a; box-shadow: 0 0 10px rgba(241, 224, 90, 0.2); }
+        .machine-card.done { border-color: #58a6ff; }
+
+        /* 各機台顏色標籤 */
+        .tag-bluelock { border-top: 5px solid #00e5ff; }
+        .tag-dmdp { border-top: 5px solid #e040fb; }
+        .tag-ghoul399 { border-top: 5px solid #ff1744; }
+        .tag-ghoul999 { border-top: 5px solid #d50000; }
+        .tag-jitsuryoku { border-top: 5px solid #ffca28; }
+        .tag-monono { border-top: 5px solid #f44336; }
+        .tag-lycoris { border-top: 5px solid #ff5252; }
+        .tag-hellsing { border-top: 5px solid #b71c1c; }
+        .tag-slime { border-top: 5px solid #00bcd4; }
+
+        .machine-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #ffffff;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1.05em;
+        }
+        .stat-label { color: #8b949e; }
+        .stat-value { font-weight: bold; font-family: 'Courier New', Courier, monospace; font-size: 1.2em; }
+        
+        .val-spins { color: #f1e05a; }
+        .val-payout { color: #56d364; font-size: 1.3em; }
+        
+        .progress-text {
+            text-align: right;
+            font-size: 0.9em;
+            color: #8b949e;
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <a href="index.html" class="home-btn">🏠 返回主頁</a>
+    </div>
+
+    <h1>🎰 柏青哥 100回 綜合統計中心</h1>
+    <p>自動以極速演算每部機台 100 次初當，並計算平均出玉與平均當選回轉數。<br>
+       <span style="font-size:0.9em; color: #8b949e;">(包含 Charge/小當 在內，將忠實反映 Data Lamp 嘅真實跳動方式)</span></p>
+
+    <button id="btn-start" class="btn-start" onclick="runAllSimulations()">▶️ 開始瘋狂演算 (100回)</button>
+
+    <div class="grid-container">
+        <div class="machine-card tag-bluelock" id="card-bluelock">
+            <h3 class="machine-title">P ブルーロック 399ver</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="bluelock-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="bluelock-payout">---</span>
+            </div>
+            <div class="progress-text" id="bluelock-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-dmdp" id="card-dmdp">
+            <h3 class="machine-title">e DMDP 魂神9000</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="dmdp-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="dmdp-payout">---</span>
+            </div>
+            <div class="progress-text" id="dmdp-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-ghoul399" id="card-ghoul399">
+            <h3 class="machine-title">P 東京喰種 399ver</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="ghoul399-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="ghoul399-payout">---</span>
+            </div>
+            <div class="progress-text" id="ghoul399-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-ghoul999" id="card-ghoul999">
+            <h3 class="machine-title">P 東京喰種 999ver</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="ghoul999-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="ghoul999-payout">---</span>
+            </div>
+            <div class="progress-text" id="ghoul999-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-jitsuryoku" id="card-jitsuryoku">
+            <h3 class="machine-title">eようこそ実力至上主義...</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="jitsuryoku-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="jitsuryoku-payout">---</span>
+            </div>
+            <div class="progress-text" id="jitsuryoku-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-monono" id="card-monono">
+            <h3 class="machine-title">eフィーバーもののがたり</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="monono-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="monono-payout">---</span>
+            </div>
+            <div class="progress-text" id="monono-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-lycoris" id="card-lycoris">
+            <h3 class="machine-title">P リコリス・リコイル</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="lycoris-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="lycoris-payout">---</span>
+            </div>
+            <div class="progress-text" id="lycoris-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-hellsing" id="card-hellsing">
+            <h3 class="machine-title">P 烈核解放 (超孤紅の恤)</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="hellsing-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="hellsing-payout">---</span>
+            </div>
+            <div class="progress-text" id="hellsing-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-slime" id="card-slime">
+            <h3 class="machine-title">P 転生したらスライム...</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="slime-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="slime-payout">---</span>
+            </div>
+            <div class="progress-text" id="slime-prog">等待中...</div>
+        </div>
+
+    </div>
+
+    <script>
+        const ITERATIONS = 100;
+        const yieldToMain = () => new Promise(r => setTimeout(r, 10)); 
+
+        // ==========================================
+        // 1. P ブルーロック 399ver
+        // ==========================================
+        function simBlueLock() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/399.9) {
+                    let r = Math.random();
+                    let rush = false;
+                    if(r < 0.001) { payout += 1500; rush = true; }
+                    else if(r < 0.501) { payout += 1050; rush = true; }
+                    else if(r < 0.547) { payout += 300; rush = true; }
+                    else { payout += 1050; }
+
+                    if(rush) {
+                        let winRate = 108 / (33.2 + 108);
+                        while(true) {
+                            if(Math.random() < winRate) {
+                                let rr = Math.random();
+                                if(rr < 0.005) {
+                                    let ext = 7500;
+                                    while(Math.random() < 0.005) ext += 7500; 
+                                    let finalR = Math.random();
+                                    if(finalR < 0.052) ext += 6000;
+                                    else if(finalR < 0.052 + 0.198) ext += 4500;
+                                    else if(finalR < 0.250 + 0.380) ext += 3000;
+                                    else ext += 1500;
+                                    payout += ext;
+                                } 
+                                else if(rr < 0.005 + 0.052) payout += 6000;
+                                else if(rr < 0.057 + 0.198) payout += 4500;
+                                else if(rr < 0.255 + 0.380) payout += 3000;
+                                else payout += 1500;
+                            } else {
+                                break; 
+                            }
+                        }
+                    }
+                    break;
+                }
+                // Charge 中獎
+                if (Math.random() < 1/2110) { payout += 300; break; }
+            }
+            return {spins, payout};
+        }
+
+        // ==========================================
+        // 2. e DMDP 魂神9000
+        // ==========================================
+        function simDMDP() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if(Math.random() < 1/349.9) {
+                    payout += 1500;
+                    if(Math.random() < 0.51) {
+                        let winCount = 0;
+                        let inShikabane = true;
+                        let winRate = 148 / (43 + 148);
+                        while(inShikabane) {
+                            if(Math.random() < winRate) {
+                                payout += 3000;
+                                winCount++;
+                                if(winCount >= 2) {
+                                    inShikabane = false;
+                                    let inKonshin = true;
+                                    while(inKonshin) {
+                                        if(Math.random() < 0.50) {
+                                            let r = Math.random();
+                                            if(r < 0.03) payout += 10500;
+                                            else if(r < 0.50) payout += 9000;
+                                            else payout += 3000;
+                                        } else {
+                                            inKonshin = false;
+                                        }
+                                    }
+                                }
+                            } else {
+                                inShikabane = false;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return {spins, payout};
+        }
+
+        // ==========================================
+        // 3. P 東京喰種 399ver
+        // ==========================================
+        function simGhoul399() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if(Math.random() < 1/399.9) {
+                    let r = Math.random();
+                    if(r < 0.50) { 
+                        payout += 1500; 
+                        runST130();
+                    } else if(r < 0.51) { 
+                        payout += 300; 
+                        runST130();
+                    } else { 
+                        payout += 1500; 
+                    }
+                    break;
+                }
+                // Charge 中獎
+                if(Math.random() < 1/399.9) { payout += 300; break; } 
+            }
+
+            function runST130() {
+                let st = 130;
+                while(st > 0) {
+                    if(Math.random() < 1/95.3) {
+                        payout += (Math.random() < 0.03) ? 6000 : 3000;
+                        st = 130; 
+                    } else {
+                        st--;
+                    }
+                }
+            }
+            return {spins, payout};
+        }
+
+        // ==========================================
+        // 4. P 東京喰種 999ver
+        // ==========================================
+        function simGhoul999() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if(Math.random() < 1/999) {
+                    if(Math.random() < 0.50) {
+                        payout += 7500;
+                        let st = 5;
+                        while(st > 0) {
+                            if(Math.random() < 1/7.7) {
+                                payout += 3000;
+                                while(Math.random() < 0.50) payout += 3000; 
+                                st = 5;
+                            } else {
+                                st--;
+                            }
+                        }
+                    } else { 
+                        payout += 3000; 
+                    }
+                    break;
+                }
+                // Charge 中獎
+                if(Math.random() < 1/538.8) { payout += 300; break; }
+            }
+            return {spins, payout};
+        }
+
+        // ==========================================
+        // 5. eようこそ実力至上主義の教室へ
+        // ==========================================
+        function simJitsuryoku() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if(Math.random() < 1/349.9) {
+                    payout += 450;
+                    if(Math.random() < 0.50) {
+                        let hit = false;
+                        for(let i=0; i<65; i++) {
+                            if(Math.random() < 1/94.1) { hit = true; break; }
+                        }
+                        if(hit) {
+                            payout += 3000;
+                            if(Math.random() < 0.73) {
+                                let inLT = true;
+                                while(inLT) {
+                                    let ltHit = false;
+                                    for(let i=0; i<145; i++) {
+                                        if(Math.random() < 1/71.6) { ltHit = true; break; }
+                                    }
+                                    if(ltHit) {
+                                        payout += 3000;
+                                        if(Math.random() >= 0.87) inLT = false;
+                                    } else {
+                                        inLT = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return {spins, payout};
+        }
+
+        // ==========================================
+        // 6. eフィーバーもののがたり
+        // ==========================================
+        function simMononogatari() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if(Math.random() < 1/149.9) {
+                    let r = Math.random();
+                    if(r < 0.255) {
+                        payout += (r < 0.01) ? 1500 : 300;
+                        let winRate = 111.1 / (41.1 + 111.1);
+                        while(true) {
+                            if(Math.random() < winRate) {
+                                let rr = Math.random();
+                                if(rr < 0.25) payout += 6000;
+                                else if(rr < 0.50) payout += 3000;
+                                else payout += 1500;
+                            } else {
+                                break;
+                            }
+                        }
+                    } else {
+                        payout += 300;
+                    }
+                    break;
+                }
+            }
+            return {spins, payout};
+        }
+
+        // ==========================================
+        // 7. P リコリス・リコイル
+        // ==========================================
+        function simLycoris() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if(Math.random() < 1/259.7) {
+                    let r = Math.random();
+                    let enterLT = false;
+                    if(r < 0.001) { payout += 1500; enterLT = true; }
+                    else if(r < 0.450) { payout += 600; enterLT = true; }
+                    else if(r < 0.500) { payout += 310; enterLT = true; }
+                    else if(r < 0.800) { payout += 600; }
+                    else { payout += 310; }
+
+                    if(enterLT) {
+                        let mode = Math.random() < 0.30 ? "B" : "A";
+                        let st = 132;
+                        while(st > 0) {
+                            if(Math.random() < 1/97.1) {
+                                if(mode === "A") {
+                                    payout += 750;
+                                    if(Math.random() < 0.5) mode = "B";
+                                } else {
+                                    if(Math.random() < 0.5) {
+                                        payout += 6000;
+                                        while(Math.random() < 0.5) payout += 3000; 
+                                    } else {
+                                        payout += 3000;
+                                    }
+                                    mode = "A";
+                                }
+                                st = 132;
+                            } else {
+                                st--;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return {spins, payout};
+        }
+
+        // ==========================================
+        // 8. P 烈核解放 (超孤紅の恤)
+        // ==========================================
+        function simHellsing() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/129) {
+                    let czSuccess = false;
+                    for(let i=1; i<=10; i++) {
+                        spins++; 
+                        if(Math.random() < 1/25.5) { 
+                            czSuccess = true;
+                            break;
+                        }
+                    }
+                    if (czSuccess) {
+                        let r = Math.random();
+                        let rush = false;
+                        if(r < 0.073) { payout += 1800; rush = true; }
+                        else if(r < 0.073 + 0.437) { payout += 1500; rush = true; }
+                        else { payout += 1500; } 
+
+                        if(rush) {
+                            let st = 144;
+                            while(st > 0) {
+                                if(Math.random() < 1/99) {
+                                    if(Math.random() < 0.5) { 
+                                        let loop = true;
+                                        while(loop) {
+                                            let br = Math.random();
+                                            if (br < 0.125) { 
+                                                payout += 6000;
+                                            } else if (br < 0.125 + 0.375) {
+                                                payout += 4500;
+                                                loop = false;
+                                            } else if (br < 0.50 + 0.375) {
+                                                payout += 3000;
+                                                loop = false;
+                                            } else {
+                                                payout += 1500;
+                                                loop = false;
+                                            }
+                                        }
+                                    } else {
+                                        payout += 1500; 
+                                    }
+                                    st = 144; 
+                                } else {
+                                    st--;
+                                }
+                            }
+                        }
+                        break; 
+                    }
+                }
+            }
+            return {spins, payout};
+        }
+
+// ==========================================
+        // 9. P 転生したらスライムだった件 (史萊姆)
+        // ==========================================
+        function simSlime() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                // 1. 1/399.9 図柄揃い
+                if (Math.random() < 1/399.9) {
+                    payout += 1500;
+                    let rush = false;
+                    let mode = "NORMAL";
+                    
+                    if (Math.random() < 0.50) {
+                        rush = true; 
+                    } else {
+                        let hit = false;
+                        for(let i=1; i<=100; i++) {
+                            if (Math.random() < 1/399.9) {
+                                hit = true;
+                                break;
+                            }
+                        }
+                        if(hit) {
+                            payout += 3000;
+                            rush = true;
+                            if(Math.random() < 0.50) mode = "SUPER";
+                        }
+                    }
+
+                    if (rush) {
+                        let st_max = mode === "SUPER" ? 160 : 135;
+                        let current_st = st_max;
+                        
+                        while(current_st > 0) {
+                            if (Math.random() < 1/99.1) {
+                                if (mode === "NORMAL") {
+                                    if(Math.random() < 0.50) {
+                                        mode = "SUPER"; 
+                                    } else {
+                                        payout += 3000; 
+                                    }
+                                } else {
+                                    if(Math.random() < (99.1 / 793)) {
+                                        mode = "NORMAL"; 
+                                    } else {
+                                        payout += 3000; 
+                                    }
+                                }
+                                st_max = mode === "SUPER" ? 160 : 135;
+                                current_st = st_max; 
+                            } else {
+                                current_st--;
+                            }
+                        }
+                    }
+                    break;
+                }
+                // 2. 1/2800 転スラチャージ (Charge小當)
+                if (Math.random() < 1/2800) { 
+                    payout += 300; 
+                    break; 
+                }
+            }
+            return {spins, payout};
+        }
+
+// ==========================================
+        // 10. P 賭ケグルイ
+        // ==========================================
+        function simKakegurui() {
+            let spins = 0, payout = 0, chargePayout = 0;
+            while(true) {
+                spins++;
+                // 1/204 通常時大当り
+                if (Math.random() < 1/204) {
+                    // 25% 突入判決
+                    if (Math.random() < 0.25) {
+                        // 50% 成功
+                        if (Math.random() < 0.50) {
+                            payout += 7500; // 成功直接 7500玉
+                            
+                            // 進入 30% ツラヌキチャレンジ Loop
+                            let inTsuranuki = true;
+                            while(inTsuranuki) {
+                                if (Math.random() < 0.30) {
+                                    payout += 7500; // 30% 成功再上乗せ 7500
+                                } else {
+                                    payout += 1500; // 70% 失敗保底 1500
+                                    inTsuranuki = false;
+                                }
+                            }
+                            
+                            // 進入 RUSH ST135
+                            let st = 135;
+                            while(st > 0) {
+                                // 1/99 RUSH 中獎
+                                if(Math.random() < 1/99) {
+                                    payout += 1500; // 狂喜乱舞BONUS 1500玉
+                                    
+                                    // 60% 機率觸發運命の一撃 -> ツラヌキチャレンジ
+                                    if (Math.random() < 0.60) {
+                                        let inTsuranukiRush = true;
+                                        while(inTsuranukiRush) {
+                                            if (Math.random() < 0.30) {
+                                                payout += 7500;
+                                            } else {
+                                                payout += 1500;
+                                                inTsuranukiRush = false;
+                                            }
+                                        }
+                                    }
+                                    st = 135; // ST 重新設定
+                                } else {
+                                    st--;
+                                }
+                            }
+                        } else {
+                            payout += 1500; // 判決失敗 1500玉
+                        }
+                    } else {
+                        payout += 300; // 未觸發判決 300玉
+                    }
+                    break;
+                }
+            }
+            return {spins, payout, chargePayout};
+        }
+
+        // ==========================================
+        // 控制器
+        // ==========================================
+        async function runMachineSim(idPrefix, simFunc) {
+            const card = document.getElementById(`card-${idPrefix}`);
+            const elSpins = document.getElementById(`${idPrefix}-spins`);
+            const elPayout = document.getElementById(`${idPrefix}-payout`);
+            const elProg = document.getElementById(`${idPrefix}-prog`);
+
+            if(!card) return; 
+
+            card.classList.add('running');
+            card.classList.remove('done');
+            
+            let totalSpins = 0;
+            let totalPayout = 0;
+
+            for(let i = 1; i <= ITERATIONS; i++) {
+                let res = simFunc();
+                totalSpins += res.spins;
+                totalPayout += res.payout;
+                
+                if(i % 20 === 0) {
+                    elProg.innerText = `演算中... ${i}/${ITERATIONS}`;
+                    await yieldToMain();
+                }
+            }
+
+            let avgSpins = Math.round(totalSpins / ITERATIONS);
+            let avgPayout = Math.round(totalPayout / ITERATIONS);
+
+            elSpins.innerText = avgSpins.toLocaleString();
+            elPayout.innerText = avgPayout.toLocaleString() + " 玉";
+            
+            elProg.innerText = `完成 (共 ${ITERATIONS} 回)`;
+            
+            card.classList.remove('running');
+            card.classList.add('done');
+        }
+
+        async function runAllSimulations() {
+            const btn = document.getElementById("btn-start");
+            btn.disabled = true;
+            btn.innerText = "⏳ 瘋狂演算中...";
+
+            document.querySelectorAll('.val-spins, .val-payout').forEach(el => el.innerText = "---");
+            document.querySelectorAll('.progress-text').forEach(el => el.innerText = "準備中...");
+            document.querySelectorAll('.machine-card').forEach(el => {
+                el.classList.remove('running', 'done');
+            });
+
+            await yieldToMain();
+
+            await runMachineSim('bluelock', simBlueLock);
+            await runMachineSim('dmdp', simDMDP);
+            await runMachineSim('ghoul399', simGhoul399);
+            await runMachineSim('ghoul999', simGhoul999); 
+            await runMachineSim('jitsuryoku', simJitsuryoku);
+            await runMachineSim('monono', simMononogatari); 
+            await runMachineSim('lycoris', simLycoris);
+            await runMachineSim('hellsing', simHellsing);
+            await runMachineSim('slime', simSlime);
+
+            btn.disabled = false;
+            btn.innerText = "▶️ 再次演算 (100回)";
+        }
+    </script>
+</body>
+</html>
