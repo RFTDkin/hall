@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +14,12 @@
             margin: 0;
             padding: 20px;
         }
-        h1 { color: #00bcd4; text-shadow: 0 0 15px rgba(0, 188, 212, 0.7); }
-        
+
+        h1 {
+            color: #00bcd4;
+            text-shadow: 0 0 15px rgba(0, 188, 212, 0.7);
+        }
+
         .main-container {
             display: flex;
             justify-content: center;
@@ -24,13 +29,22 @@
             max-width: 1000px;
             margin: 0 auto;
         }
-        
-        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
-        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .left-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 500px;
+        }
+
+        .right-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 400px;
+        }
 
         .stats-board {
             background-color: #161b22;
-            border: 2px solid #0288d1; 
+            border: 2px solid #0288d1;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
@@ -39,16 +53,17 @@
             font-size: 1.1em;
             box-shadow: inset 0 0 15px rgba(2, 136, 209, 0.5);
         }
+
         .stat-item span {
             display: block;
             font-weight: bold;
-            color: #4fc3f7; 
+            color: #4fc3f7;
             font-size: 1.3em;
             margin-top: 5px;
         }
-        
+
         button {
-            background-color: #0288d1; 
+            background-color: #0288d1;
             color: white;
             border: 1px solid #00bcd4;
             padding: 12px 25px;
@@ -59,11 +74,30 @@
             margin: 5px;
             transition: background-color 0.2s, box-shadow 0.2s;
         }
-        button:hover { background-color: #0277bd; box-shadow: 0 0 10px #00bcd4; }
-        button:disabled { background-color: #21262d; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
-        #btn-reset { background-color: #424242; border-color: #616161; }
-        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
-        
+
+        button:hover {
+            background-color: #0277bd;
+            box-shadow: 0 0 10px #00bcd4;
+        }
+
+        button:disabled {
+            background-color: #21262d;
+            border-color: #444;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        #btn-reset {
+            background-color: #424242;
+            border-color: #616161;
+        }
+
+        #btn-reset:hover {
+            background-color: #212121;
+            box-shadow: 0 0 10px #616161;
+        }
+
         .log-container {
             background-color: #000000;
             border: 1px solid #0277bd;
@@ -75,22 +109,58 @@
             font-family: 'Courier New', Courier, monospace;
             line-height: 1.5;
         }
-        .log-entry { margin: 5px 0; }
-        .color-rush { color: #29b6f6; font-weight: bold; text-shadow: 0 0 5px #29b6f6; }
-        .color-hit { color: #ffeb3b; font-weight: bold; }
-        .color-normal { color: #9e9e9e; }
-        .color-ultimate { color: #ffca28; font-weight: bold; text-shadow: 0 0 10px #ffca28; font-size: 1.1em; }
-        .color-jitan { color: #ab47bc; font-weight: bold; }
-        .color-ctime { color: #ff5252; font-style: italic; }
-        .color-charge { color: #9c27b0; font-weight: bold; } /* 新增 Charge 顏色 */
+
+        .log-entry {
+            margin: 5px 0;
+        }
+
+        .color-rush {
+            color: #29b6f6;
+            font-weight: bold;
+            text-shadow: 0 0 5px #29b6f6;
+        }
+
+        .color-hit {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        .color-normal {
+            color: #9e9e9e;
+        }
+
+        .color-ultimate {
+            color: #ffca28;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ffca28;
+            font-size: 1.1em;
+        }
+
+        .color-jitan {
+            color: #ab47bc;
+            font-weight: bold;
+        }
+
+        .color-ctime {
+            color: #ff5252;
+            font-style: italic;
+        }
+
+        .color-charge {
+            color: #9c27b0;
+            font-weight: bold;
+        }
+
+        /* 新增 Charge 顏色 */
 
         .data-lamp-container {
             background-color: #0a0c10;
             border: 3px solid #0288d1;
             border-radius: 8px;
             padding: 15px;
-            box-shadow: 0 0 15px rgba(2, 136, 209, 0.4); 
+            box-shadow: 0 0 15px rgba(2, 136, 209, 0.4);
         }
+
         .data-lamp-title {
             color: #00bcd4;
             margin-top: 0;
@@ -100,29 +170,55 @@
             text-shadow: 0 0 5px #00bcd4;
             letter-spacing: 2px;
         }
+
         table.data-lamp {
             width: 100%;
             border-collapse: collapse;
             color: #fff;
             font-family: 'Courier New', Courier, monospace;
         }
-        table.data-lamp th, table.data-lamp td {
+
+        table.data-lamp th,
+        table.data-lamp td {
             border: 1px solid #0277bd;
             padding: 10px 5px;
             text-align: center;
         }
-        table.data-lamp th { background-color: #01579b; color: #4fc3f7; font-size: 0.9em; }
-        table.data-lamp tr:nth-child(even) { background-color: #0d1117; }
-        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
-        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
-        table.data-lamp td.hit-payout { color: #ff5252; }
-        .empty-row { color: #555 !important; }
+
+        table.data-lamp th {
+            background-color: #01579b;
+            color: #4fc3f7;
+            font-size: 0.9em;
+        }
+
+        table.data-lamp tr:nth-child(even) {
+            background-color: #0d1117;
+        }
+
+        table.data-lamp td.hit-spins {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        table.data-lamp td.hit-rush {
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        table.data-lamp td.hit-payout {
+            color: #ff5252;
+        }
+
+        .empty-row {
+            color: #555 !important;
+        }
     </style>
 </head>
+
 <body>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #4fc3f7;">P 転生したらスライムだった件</span></h1>
-    
+
     <div class="main-container">
         <div class="left-panel">
             <div class="stats-board">
@@ -152,7 +248,9 @@
                         </tr>
                     </thead>
                     <tbody id="history-tbody">
-                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                        <tr>
+                            <td colspan="4" class="empty-row">- 無紀錄 -</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -184,18 +282,18 @@
                     await this.normal_result();
                     return true;
                 }
-                
+
                 // 2. 1/2800 転スラチャージ (Charge小當)
                 if (Math.random() < (1 / 2800)) {
                     addLog(`\n[${this.session_spins} 回轉] ⚡ 転スラチャージ當選！`, "color-charge");
                     this.session_payout += 300;
                     addLog(`💥 2R 300玉獲得 (通常終了)`);
-                    
+
                     updateUI();
                     this.record_history();
-                    return true; 
+                    return true;
                 }
-                
+
                 return false;
             }
 
@@ -209,7 +307,7 @@
                     this.session_payout += payout;
                     await sleep(1000);
                     await this.play_lt("NORMAL");
-                } 
+                }
                 // 50% 1500個-B -> 時短100回
                 else {
                     let payout = 1500;
@@ -225,24 +323,27 @@
                 this.state = "JITAN";
                 updateUI();
 
-                for(let i=1; i<=100; i++) {
+                for (let i = 1; i <= 100; i++) {
                     await sleep(30);
                     document.getElementById("ui-spins").innerText = `時短中: ${i}/100`;
-                    
+
                     if (Math.random() < (1 / 399.9)) {
                         this.session_rush_count += 1;
                         addLog(`\n🎉 [時短 ${i}回転] 引き戻し成功！！`, "color-hit");
-                        
-                        let payout = 3000;
-                        this.session_payout += payout;
-                        addLog(`💥 3000玉獲得！`);
-                        
-                        if (Math.random() < 0.50) {
-                            addLog("👑 さらに覚醒！ 超開国祭(LT) へ突入！！", "color-ultimate");
+
+                        // 1. 先抽 1/793 睇下係咪直接超開国祭 (無玉)
+                        if (Math.random() < (1 / 793)) {
+                            addLog("🌈 出玉なしで『超開国祭(LT)』へ直行昇格！！", "color-ultimate");
                             await sleep(1000);
                             await this.play_lt("SUPER");
-                        } else {
+                        }
+                        // 2. 其餘情況: 獲得 3000玉，入普通開国祭
+                        else {
+                            let payout = 3000;
+                            this.session_payout += payout;
+                            addLog(`💥 3000玉獲得！`);
                             addLog("⚡ 開国祭(LT) へ突入！", "color-rush");
+
                             await sleep(1000);
                             await this.play_lt("NORMAL");
                         }
@@ -279,7 +380,7 @@
                             if (Math.random() < 0.50) {
                                 mode = "SUPER";
                                 st_max = 160;
-                                addLog(`🌈 c時短當選！ 出玉なしで『超開国祭(LT)』へ昇格！！ (ST160回)`, "color-ultimate");
+                                addLog(`🌈 出玉なしで『超開国祭(LT)』へ昇格！！ (ST160回)`, "color-ultimate");
                             } else {
                                 // 50% 3000玉大当り
                                 this.session_payout += 3000;
@@ -291,14 +392,14 @@
                             if (Math.random() < (99.1 / 793)) {
                                 mode = "NORMAL";
                                 st_max = 135;
-                                addLog(`⚠️ c時短當選... 出玉なしで『開国祭(LT)』へ降格... (ST135回)`, "color-ctime");
+                                addLog(`⚠️ 『開国祭(LT)』へ降格... (ST135回)`, "color-ctime");
                             } else {
                                 // 剩餘 87.5% 3000玉大当り
                                 this.session_payout += 3000;
                                 addLog(`👑 3000玉獲得 (10R x 2)！ 超開国祭(LT) 継続！！`, "color-ultimate");
                             }
                         }
-                        
+
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         current_st = st_max; // Reset ST
                         updateUI();
@@ -363,7 +464,7 @@
         }
 
         function renderHistoryTable(historyData) {
-            historyTbody.innerHTML = ""; 
+            historyTbody.innerHTML = "";
             if (historyData.length === 0) {
                 historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
                 return;
@@ -387,15 +488,15 @@
             isPlaying = true;
             btnPlay.disabled = true;
             btnReset.disabled = true;
-            
+
             addLog("\n=== 開始打玉 ===", "color-hit");
 
             while (isPlaying) {
                 let hit = await game.play_normal();
                 updateUI();
-                
+
                 if (game.session_spins % 100 === 0) {
-                    await sleep(10); 
+                    await sleep(10);
                 }
 
                 if (hit) {
@@ -403,7 +504,7 @@
                     break;
                 }
             }
-            
+
             btnPlay.disabled = false;
             btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續抽機";
@@ -418,8 +519,9 @@
             btnPlay.innerText = "▶️ 開始抽機";
         }
     </script>
-    
+
     <!-- 自動掛載你嘅 Plugin -->
     <script src="plugin.js"></script>
 </body>
+
 </html>
