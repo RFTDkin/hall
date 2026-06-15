@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +14,14 @@
             margin: 0;
             padding: 20px;
         }
-        h1 { color: #ff1744; text-shadow: 0 0 15px rgba(255, 23, 68, 0.7); font-weight: 900; letter-spacing: 2px; }
-        
+
+        h1 {
+            color: #ff1744;
+            text-shadow: 0 0 15px rgba(255, 23, 68, 0.7);
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
         .main-container {
             display: flex;
             justify-content: center;
@@ -24,13 +31,22 @@
             max-width: 1000px;
             margin: 0 auto;
         }
-        
-        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
-        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .left-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 500px;
+        }
+
+        .right-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 400px;
+        }
 
         .stats-board {
             background-color: #1a0000;
-            border: 2px solid #ff1744; 
+            border: 2px solid #ff1744;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
@@ -39,16 +55,17 @@
             font-size: 1.1em;
             box-shadow: inset 0 0 15px rgba(255, 23, 68, 0.3);
         }
+
         .stat-item span {
             display: block;
             font-weight: bold;
-            color: #ffca28; 
+            color: #ffca28;
             font-size: 1.3em;
             margin-top: 5px;
         }
-        
+
         button {
-            background-color: #b71c1c; 
+            background-color: #b71c1c;
             color: white;
             border: 1px solid #ff1744;
             padding: 12px 25px;
@@ -59,11 +76,32 @@
             margin: 5px;
             transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
         }
-        button:hover { background-color: #d50000; transform: scale(1.05); box-shadow: 0 0 10px #ff1744; }
-        button:disabled { background-color: #3e2723; border-color: #444; color: #777; cursor: not-allowed; transform: scale(1); box-shadow: none; }
-        #btn-reset { background-color: #424242; border-color: #616161; }
-        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
-        
+
+        button:hover {
+            background-color: #d50000;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px #ff1744;
+        }
+
+        button:disabled {
+            background-color: #3e2723;
+            border-color: #444;
+            color: #777;
+            cursor: not-allowed;
+            transform: scale(1);
+            box-shadow: none;
+        }
+
+        #btn-reset {
+            background-color: #424242;
+            border-color: #616161;
+        }
+
+        #btn-reset:hover {
+            background-color: #212121;
+            box-shadow: 0 0 10px #616161;
+        }
+
         .log-container {
             background-color: #000000;
             border: 1px solid #b71c1c;
@@ -75,14 +113,50 @@
             font-family: 'Courier New', Courier, monospace;
             line-height: 1.5;
         }
-        .log-entry { margin: 5px 0; }
-        .color-rush { color: #ffeb3b; font-weight: bold; text-shadow: 0 0 5px #ffeb3b; }
-        .color-hit { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff5252; }
-        .color-normal { color: #9e9e9e; }
-        .color-ultimate { color: #d50000; font-weight: bold; text-shadow: 0 0 10px #d50000; font-size: 1.1em; }
-        .color-fall { color: #757575; font-weight: bold; }
-        .color-music { color: #00e676; font-style: italic; }
-        .color-judge { color: #e040fb; font-weight: bold; text-shadow: 0 0 5px #e040fb; font-size: 1.1em; }
+
+        .log-entry {
+            margin: 5px 0;
+        }
+
+        .color-rush {
+            color: #ffeb3b;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ffeb3b;
+        }
+
+        .color-hit {
+            color: #ff5252;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff5252;
+        }
+
+        .color-normal {
+            color: #9e9e9e;
+        }
+
+        .color-ultimate {
+            color: #d50000;
+            font-weight: bold;
+            text-shadow: 0 0 10px #d50000;
+            font-size: 1.1em;
+        }
+
+        .color-fall {
+            color: #757575;
+            font-weight: bold;
+        }
+
+        .color-music {
+            color: #00e676;
+            font-style: italic;
+        }
+
+        .color-judge {
+            color: #e040fb;
+            font-weight: bold;
+            text-shadow: 0 0 5px #e040fb;
+            font-size: 1.1em;
+        }
 
         .data-lamp-container {
             background-color: #110000;
@@ -91,6 +165,7 @@
             padding: 15px;
             box-shadow: 0 0 15px rgba(213, 0, 0, 0.4);
         }
+
         .data-lamp-title {
             color: #ff1744;
             margin-top: 0;
@@ -100,31 +175,57 @@
             text-shadow: 0 0 5px #ff1744;
             letter-spacing: 2px;
         }
+
         table.data-lamp {
             width: 100%;
             border-collapse: collapse;
             color: #fff;
             font-family: 'Courier New', Courier, monospace;
         }
-        table.data-lamp th, table.data-lamp td {
+
+        table.data-lamp th,
+        table.data-lamp td {
             border: 1px solid #b71c1c;
             padding: 10px 5px;
             text-align: center;
         }
-        table.data-lamp th { background-color: #3e2723; color: #ff8a80; font-size: 0.9em; }
-        table.data-lamp tr:nth-child(even) { background-color: #210000; }
-        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
-        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
-        table.data-lamp td.hit-payout { color: #ff5252; }
-        .empty-row { color: #444 !important; }
+
+        table.data-lamp th {
+            background-color: #3e2723;
+            color: #ff8a80;
+            font-size: 0.9em;
+        }
+
+        table.data-lamp tr:nth-child(even) {
+            background-color: #210000;
+        }
+
+        table.data-lamp td.hit-spins {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        table.data-lamp td.hit-rush {
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        table.data-lamp td.hit-payout {
+            color: #ff5252;
+        }
+
+        .empty-row {
+            color: #444 !important;
+        }
     </style>
 </head>
+
 <body>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P 賭ケグルイ</span></h1>
-    
+
     <audio id="jackpot-media" src="https://files.catbox.moe/v5xwb2.mp4" style="display:none;" preload="auto"></audio>
-    
+
     <div class="main-container">
         <div class="left-panel">
             <div class="stats-board">
@@ -154,7 +255,9 @@
                         </tr>
                     </thead>
                     <tbody id="history-tbody">
-                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                        <tr>
+                            <td colspan="4" class="empty-row">- 無紀錄 -</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -164,24 +267,32 @@
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const jackpotMedia = document.getElementById("jackpot-media");
-        let audioUnlocked = false; 
+        let audioUnlocked = false;
 
         function playMediaAndWait(mediaElement) {
             return new Promise((resolve) => {
                 if (!mediaElement) return resolve();
-                
-                mediaElement.currentTime = 0;
-                const onEnded = () => {
-                    mediaElement.removeEventListener('ended', onEnded);
+
+                let isResolved = false;
+                const finish = () => {
+                    if (isResolved) return;
+                    isResolved = true;
+                    mediaElement.removeEventListener('ended', finish);
+                    mediaElement.removeEventListener('error', finish);
                     resolve();
                 };
-                mediaElement.addEventListener('ended', onEnded);
-                
+
+                mediaElement.currentTime = 0;
+                mediaElement.addEventListener('ended', finish);
+                mediaElement.addEventListener('error', finish);
+
                 mediaElement.play().catch(e => {
-                    console.log("自動播放被阻擋", e);
-                    mediaElement.removeEventListener('ended', onEnded);
-                    resolve(); 
+                    console.log("自動播放被阻擋或出錯", e);
+                    finish();
                 });
+
+                // 防卡死：10秒超時強制繼續
+                setTimeout(finish, 10000);
             });
         }
 
@@ -204,14 +315,14 @@
                 // 1/204 通常時大当り
                 if (Math.random() < (1 / 204)) {
                     addLog(`\n[${this.session_spins} 回轉] 🩸 大當たり！`, "color-hit");
-                    
+
                     addLog(`🎵 播放專屬音效 (kakegurui.mp4) 中... 請稍候`, "color-music");
                     await playMediaAndWait(jackpotMedia);
-                    
+
                     await this.normal_result();
                     return true;
                 }
-                
+
                 return false;
             }
 
@@ -226,8 +337,8 @@
                     addLog(`💰 累積出玉: ${this.session_payout} 玉`);
 
                     addLog("\n⚖️ 50/50ジャッジメント 発生！ (成功率50%)", "color-judge");
-                    await sleep(1500); 
-                    
+                    await sleep(1500);
+
                     let judge = Math.random();
                     if (judge < 0.50) {
                         // 成功: 額外追加 7500玉 (即共 9000玉) + ツラヌキチャレンジ
@@ -236,7 +347,7 @@
                         this.session_payout += 7500;
                         addLog("💥 絶対王政BONUS 7500玉獲得！", "color-ultimate");
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-                        
+
                         updateUI();
                         await sleep(1000);
 
@@ -245,14 +356,14 @@
                     } else {
                         // 失敗: 額外追加 1500玉 (即共 3000玉) -> 通常終了
                         addLog("💀 ジャッジメント失敗... (運否天賦BONUS)", "color-fall");
-                        
+
                         this.session_payout += 1500;
                         addLog("😭 10R 1500玉獲得 (通常終了)");
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-                        
+
                         this.record_history();
                     }
-                } 
+                }
                 // 75% 未觸發判決 (300玉)
                 else {
                     this.session_payout += 300;
@@ -267,7 +378,7 @@
             async play_tsuranuki() {
                 let inTsuranuki = true;
                 let loopCount = 1;
-                while(inTsuranuki) {
+                while (inTsuranuki) {
                     addLog(`\n⚔️ ツラヌキチャレンジ 発生！ (成功率30%)`, "color-judge");
                     await sleep(1200);
 
@@ -276,7 +387,7 @@
                         this.session_payout += 7500;
                         addLog(`🌈 成功！ 絶対王政BONUS 7500玉上乗せ！！ (ループ ${loopCount}回目)`, "color-ultimate");
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-                        
+
                         this.check_and_play_media(7500);
                         updateUI();
                         loopCount++;
@@ -286,7 +397,7 @@
                         this.session_payout += 1500;
                         addLog(`💨 チャレンジ終了... 1500玉獲得 して 絶対王政RUSH BURSTへ`, "color-normal");
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-                        
+
                         this.check_and_play_media(1500);
                         updateUI();
                         inTsuranuki = false;
@@ -305,7 +416,7 @@
                 while (this.state === "RUSH" && current_st > 0) {
                     await sleep(30);
                     let current_spin = st_max - current_st + 1;
-                    
+
                     document.getElementById("ui-spins").innerText = `RUSH中: ${current_spin}/${st_max}`;
 
                     // RUSH中 大当り確率: 1/99
@@ -334,7 +445,7 @@
 
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         addLog("👑 絶対王政RUSH BURST 継続!!", "color-rush");
-                        
+
                         current_st = st_max; // ST 回復
                         updateUI();
                         await sleep(800);
@@ -361,7 +472,7 @@
             check_and_play_media(payout) {
                 if (payout >= 1500) {
                     if (jackpotMedia.paused || jackpotMedia.ended) {
-                        jackpotMedia.currentTime = 0; 
+                        jackpotMedia.currentTime = 0;
                         jackpotMedia.play().catch(e => {
                             console.log("瀏覽器阻擋自動播放", e);
                         });
@@ -409,7 +520,7 @@
         }
 
         function renderHistoryTable(historyData) {
-            historyTbody.innerHTML = ""; 
+            historyTbody.innerHTML = "";
             if (historyData.length === 0) {
                 historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
                 return;
@@ -433,20 +544,20 @@
             isPlaying = true;
             btnPlay.disabled = true;
             btnReset.disabled = true;
-            
+
             if (!audioUnlocked) {
-                jackpotMedia.load(); 
+                jackpotMedia.load();
                 audioUnlocked = true;
             }
-            
+
             addLog("\n=== さァ、賭け狂いましょう！ ===", "color-hit");
 
             while (isPlaying) {
                 let hit = await game.play_normal();
                 updateUI();
-                
+
                 if (game.session_spins % 100 === 0) {
-                    await sleep(10); 
+                    await sleep(10);
                 }
 
                 if (hit) {
@@ -454,7 +565,7 @@
                     break;
                 }
             }
-            
+
             btnPlay.disabled = false;
             btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續狂賭";
@@ -465,14 +576,15 @@
             logBox.innerHTML = "";
             renderHistoryTable([]);
             updateUI();
-            
+
             jackpotMedia.pause();
             jackpotMedia.currentTime = 0;
-            
+
             addLog("遊戲紀錄已重置。", "color-normal");
             btnPlay.innerText = "▶️ 開始狂賭";
         }
     </script>
     <script src="plugin.js"></script>
 </body>
+
 </html>

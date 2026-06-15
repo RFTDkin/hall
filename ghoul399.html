@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +14,14 @@
             margin: 0;
             padding: 20px;
         }
-        h1 { color: #ff1744; text-shadow: 0 0 15px rgba(255, 23, 68, 0.7); font-weight: 900; letter-spacing: 2px; }
-        
+
+        h1 {
+            color: #ff1744;
+            text-shadow: 0 0 15px rgba(255, 23, 68, 0.7);
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
         .main-container {
             display: flex;
             justify-content: center;
@@ -24,13 +31,22 @@
             max-width: 1000px;
             margin: 0 auto;
         }
-        
-        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
-        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .left-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 500px;
+        }
+
+        .right-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 400px;
+        }
 
         .stats-board {
             background-color: #1a0000;
-            border: 2px solid #ff1744; 
+            border: 2px solid #ff1744;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
@@ -39,16 +55,17 @@
             font-size: 1.1em;
             box-shadow: inset 0 0 15px rgba(255, 23, 68, 0.3);
         }
+
         .stat-item span {
             display: block;
             font-weight: bold;
-            color: #ffca28; 
+            color: #ffca28;
             font-size: 1.3em;
             margin-top: 5px;
         }
-        
+
         button {
-            background-color: #b71c1c; 
+            background-color: #b71c1c;
             color: white;
             border: 1px solid #ff1744;
             padding: 12px 25px;
@@ -59,11 +76,32 @@
             margin: 5px;
             transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
         }
-        button:hover { background-color: #d50000; transform: scale(1.05); box-shadow: 0 0 10px #ff1744; }
-        button:disabled { background-color: #3e2723; border-color: #444; color: #777; cursor: not-allowed; transform: scale(1); box-shadow: none; }
-        #btn-reset { background-color: #424242; border-color: #616161; }
-        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
-        
+
+        button:hover {
+            background-color: #d50000;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px #ff1744;
+        }
+
+        button:disabled {
+            background-color: #3e2723;
+            border-color: #444;
+            color: #777;
+            cursor: not-allowed;
+            transform: scale(1);
+            box-shadow: none;
+        }
+
+        #btn-reset {
+            background-color: #424242;
+            border-color: #616161;
+        }
+
+        #btn-reset:hover {
+            background-color: #212121;
+            box-shadow: 0 0 10px #616161;
+        }
+
         .log-container {
             background-color: #000000;
             border: 1px solid #b71c1c;
@@ -75,14 +113,48 @@
             font-family: 'Courier New', Courier, monospace;
             line-height: 1.5;
         }
-        .log-entry { margin: 5px 0; }
-        .color-rush { color: #ffeb3b; font-weight: bold; text-shadow: 0 0 5px #ffeb3b; }
-        .color-hit { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff5252; }
-        .color-normal { color: #9e9e9e; }
-        .color-ultimate { color: #d50000; font-weight: bold; text-shadow: 0 0 10px #d50000; font-size: 1.1em; }
-        .color-charge { color: #9c27b0; font-weight: bold; }
-        .color-fall { color: #757575; font-weight: bold; }
-        .color-music { color: #00e676; font-style: italic; }
+
+        .log-entry {
+            margin: 5px 0;
+        }
+
+        .color-rush {
+            color: #ffeb3b;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ffeb3b;
+        }
+
+        .color-hit {
+            color: #ff5252;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff5252;
+        }
+
+        .color-normal {
+            color: #9e9e9e;
+        }
+
+        .color-ultimate {
+            color: #d50000;
+            font-weight: bold;
+            text-shadow: 0 0 10px #d50000;
+            font-size: 1.1em;
+        }
+
+        .color-charge {
+            color: #9c27b0;
+            font-weight: bold;
+        }
+
+        .color-fall {
+            color: #757575;
+            font-weight: bold;
+        }
+
+        .color-music {
+            color: #00e676;
+            font-style: italic;
+        }
 
         .data-lamp-container {
             background-color: #110000;
@@ -91,6 +163,7 @@
             padding: 15px;
             box-shadow: 0 0 15px rgba(213, 0, 0, 0.4);
         }
+
         .data-lamp-title {
             color: #ff1744;
             margin-top: 0;
@@ -100,31 +173,58 @@
             text-shadow: 0 0 5px #ff1744;
             letter-spacing: 2px;
         }
+
         table.data-lamp {
             width: 100%;
             border-collapse: collapse;
             color: #fff;
             font-family: 'Courier New', Courier, monospace;
         }
-        table.data-lamp th, table.data-lamp td {
+
+        table.data-lamp th,
+        table.data-lamp td {
             border: 1px solid #b71c1c;
             padding: 10px 5px;
             text-align: center;
         }
-        table.data-lamp th { background-color: #3e2723; color: #ff8a80; font-size: 0.9em; }
-        table.data-lamp tr:nth-child(even) { background-color: #210000; }
-        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
-        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
-        table.data-lamp td.hit-payout { color: #ff5252; }
-        .empty-row { color: #444 !important; }
+
+        table.data-lamp th {
+            background-color: #3e2723;
+            color: #ff8a80;
+            font-size: 0.9em;
+        }
+
+        table.data-lamp tr:nth-child(even) {
+            background-color: #210000;
+        }
+
+        table.data-lamp td.hit-spins {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        table.data-lamp td.hit-rush {
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        table.data-lamp td.hit-payout {
+            color: #ff5252;
+        }
+
+        .empty-row {
+            color: #444 !important;
+        }
     </style>
 </head>
+
 <body>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P 東京喰種 399ver</span></h1>
-    
-    <video id="rush-media" src="https://files.catbox.moe/t3rubq.mp4" style="display:none;" preload="auto" playsinline webkit-playsinline></video>
-    
+
+    <video id="rush-media" src="https://files.catbox.moe/t3rubq.mp4" style="display:none;" preload="auto" playsinline
+        webkit-playsinline></video>
+
     <div class="main-container">
         <div class="left-panel">
             <div class="stats-board">
@@ -154,7 +254,9 @@
                         </tr>
                     </thead>
                     <tbody id="history-tbody">
-                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                        <tr>
+                            <td colspan="4" class="empty-row">- 無紀錄 -</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -164,13 +266,23 @@
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rushMedia = document.getElementById("rush-media");
-        let audioUnlocked = false; 
+        let audioUnlocked = false;
 
         // RUSH中獎時彈出影片
         function playVideoPopupAndWait(mediaElement) {
             return new Promise((resolve) => {
                 if (!mediaElement) return resolve();
-                
+
+                let isResolved = false;
+                const finish = () => {
+                    if (isResolved) return;
+                    isResolved = true;
+                    mediaElement.removeEventListener('ended', finish);
+                    mediaElement.removeEventListener('error', finish);
+                    mediaElement.style.display = "none";
+                    resolve();
+                };
+
                 mediaElement.style.display = "block";
                 mediaElement.style.position = "fixed";
                 mediaElement.style.top = "50%";
@@ -179,25 +291,22 @@
                 mediaElement.style.zIndex = "10000";
                 mediaElement.style.width = "90vw";
                 mediaElement.style.maxWidth = "900px";
-                mediaElement.style.border = "4px solid #d50000";
+                mediaElement.style.border = "4px solid #d50000"; // 喰種紅色框
                 mediaElement.style.boxShadow = "0 0 40px rgba(213, 0, 0, 0.8)";
                 mediaElement.style.backgroundColor = "#000";
                 mediaElement.style.borderRadius = "10px";
-                
+
                 mediaElement.currentTime = 0;
-                const onEnded = () => {
-                    mediaElement.removeEventListener('ended', onEnded);
-                    mediaElement.style.display = "none";
-                    resolve();
-                };
-                mediaElement.addEventListener('ended', onEnded);
-                
+                mediaElement.addEventListener('ended', finish);
+                mediaElement.addEventListener('error', finish);
+
                 mediaElement.play().catch(e => {
-                    console.log("自動播放被阻擋", e);
-                    mediaElement.removeEventListener('ended', onEnded);
-                    mediaElement.style.display = "none";
-                    resolve(); 
+                    console.log("自動播放被阻擋或出錯", e);
+                    finish();
                 });
+
+                // 防卡死：10秒超時強制收埋影片繼續
+                setTimeout(finish, 10000);
             });
         }
 
@@ -223,7 +332,7 @@
                     await this.normal_result();
                     return true;
                 }
-                
+
                 // 1/399.9 喰種チャージ
                 if (Math.random() < (1 / 399.9)) {
                     addLog(`\n[${this.session_spins} 回轉] 喰種チャージ當選！`, "color-charge");
@@ -233,7 +342,7 @@
                     this.record_history();
                     return true;
                 }
-                
+
                 return false;
             }
 
@@ -253,7 +362,7 @@
                     this.session_payout += 1500;
                     addLog("😭 10R 1500玉獲得 (通常終了)", "color-normal");
                 }
-                
+
                 addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                 updateUI();
 
@@ -275,7 +384,7 @@
                 while (this.state === "RUSH" && current_st > 0) {
                     await sleep(30);
                     let current_spin = st_max - current_st + 1;
-                    
+
                     document.getElementById("ui-spins").innerText = `RUSH中: ${current_spin}/${st_max}`;
 
                     // RUSH中 大当り確率: 1/95.3
@@ -286,13 +395,13 @@
                         // 🌟 先判定出玉數量，決定播邊條影片 🌟
                         let payout = (Math.random() < 0.03) ? 6000 : 3000;
                         let videoSrc = (payout === 6000) ? "https://files.catbox.moe/4tpc40.mp4" : "https://files.catbox.moe/t3rubq.mp4";
-                        
+
                         rushMedia.src = videoSrc; // 動態切換影片
                         addLog(`🎵 播放專屬動畫 (${videoSrc}) 中... 請稍候`, "color-music");
                         await playVideoPopupAndWait(rushMedia);
 
                         this.session_payout += payout;
-                        
+
                         if (payout === 6000) {
                             addLog(`🔥 超絶爆発！ 6000玉獲得！`, "color-ultimate");
                         } else {
@@ -301,7 +410,7 @@
 
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         addLog("🩸 RUSH 継続!!", "color-rush");
-                        
+
                         current_st = st_max; // ST 回復
                         updateUI();
                         await sleep(800);
@@ -365,7 +474,7 @@
         }
 
         function renderHistoryTable(historyData) {
-            historyTbody.innerHTML = ""; 
+            historyTbody.innerHTML = "";
             if (historyData.length === 0) {
                 historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
                 return;
@@ -389,21 +498,21 @@
             isPlaying = true;
             btnPlay.disabled = true;
             btnReset.disabled = true;
-            
+
             if (!audioUnlocked) {
                 // 預先載入預設影片解鎖音訊權限
-                rushMedia.load(); 
+                rushMedia.load();
                 audioUnlocked = true;
             }
-            
+
             addLog("\n=== ゲーム開始 ===", "color-hit");
 
             while (isPlaying) {
                 let hit = await game.play_normal();
                 updateUI();
-                
+
                 if (game.session_spins % 100 === 0) {
-                    await sleep(10); 
+                    await sleep(10);
                 }
 
                 if (hit) {
@@ -411,7 +520,7 @@
                     break;
                 }
             }
-            
+
             btnPlay.disabled = false;
             btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續抽機";
@@ -422,15 +531,16 @@
             logBox.innerHTML = "";
             renderHistoryTable([]);
             updateUI();
-            
+
             rushMedia.pause();
             rushMedia.currentTime = 0;
             rushMedia.style.display = "none";
-            
+
             addLog("遊戲紀錄已重置。", "color-normal");
             btnPlay.innerText = "▶️ 遊戲開始";
         }
     </script>
     <script src="plugin.js"></script>
 </body>
+
 </html>

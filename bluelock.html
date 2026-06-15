@@ -276,32 +276,55 @@
         const videoBL1500LT = document.getElementById("video-bl1500lt");
         let audioUnlocked = false;
 
-        // 專門處理「播完先繼續」的 Promise 函數 (只播聲)
+// 🌟 升級版：處理「播完先繼續」的 Promise 函數 (只播聲)
         function playMediaAndWait(mediaElement) {
             return new Promise((resolve) => {
                 if (!mediaElement) return resolve();
-
-                mediaElement.currentTime = 0;
-
-                const onEnded = () => {
-                    mediaElement.removeEventListener('ended', onEnded);
+                
+                let isResolved = false;
+                
+                // 統一嘅結束處理函數
+                const finish = () => {
+                    if (isResolved) return; // 確保只會執行一次
+                    isResolved = true;
+                    mediaElement.removeEventListener('ended', finish);
+                    mediaElement.removeEventListener('error', finish);
                     resolve();
                 };
-                mediaElement.addEventListener('ended', onEnded);
 
+                mediaElement.currentTime = 0;
+                
+                // 監聽正常播完，或者發生錯誤
+                mediaElement.addEventListener('ended', finish);
+                mediaElement.addEventListener('error', finish);
+                
                 mediaElement.play().catch(e => {
-                    console.log("自動播放被阻擋", e);
-                    mediaElement.removeEventListener('ended', onEnded);
-                    resolve();
+                    console.log("自動播放被阻擋或出錯", e);
+                    finish(); 
                 });
+
+                // 🛡️ 終極防卡死：如果 10 秒後都未播完 (例如網絡卡住)，強制跳過！
+                setTimeout(finish, 10000); 
             });
         }
 
-        // 🌟 專門處理「彈出影片並等待播完」的 Promise 函數
+        // 🌟 升級版：處理「彈出影片並等待播完」的 Promise 函數
         function playVideoPopupAndWait(mediaElement) {
             return new Promise((resolve) => {
                 if (!mediaElement) return resolve();
+                
+                let isResolved = false;
 
+                const finish = () => {
+                    if (isResolved) return; // 確保只會執行一次
+                    isResolved = true;
+                    mediaElement.removeEventListener('ended', finish);
+                    mediaElement.removeEventListener('error', finish);
+                    mediaElement.style.display = "none"; // 收埋條片
+                    resolve();
+                };
+
+                // 設定影片外觀
                 mediaElement.style.display = "block";
                 mediaElement.style.position = "fixed";
                 mediaElement.style.top = "50%";
@@ -310,25 +333,24 @@
                 mediaElement.style.zIndex = "10000";
                 mediaElement.style.width = "90vw";
                 mediaElement.style.maxWidth = "900px";
-                mediaElement.style.border = "4px solid #00e5ff";
+                mediaElement.style.border = "4px solid #00e5ff"; // 注意：如果你放落其他機台，可以改返佢哋嘅主題顏色 (例如喰種改做 #d50000)
                 mediaElement.style.boxShadow = "0 0 40px rgba(0, 229, 255, 0.8)";
                 mediaElement.style.backgroundColor = "#000";
                 mediaElement.style.borderRadius = "10px";
-
+                
                 mediaElement.currentTime = 0;
-                const onEnded = () => {
-                    mediaElement.removeEventListener('ended', onEnded);
-                    mediaElement.style.display = "none";
-                    resolve();
-                };
-                mediaElement.addEventListener('ended', onEnded);
-
+                
+                // 監聽正常播完，或者發生錯誤
+                mediaElement.addEventListener('ended', finish);
+                mediaElement.addEventListener('error', finish);
+                
                 mediaElement.play().catch(e => {
-                    console.log("自動播放被阻擋", e);
-                    mediaElement.removeEventListener('ended', onEnded);
-                    mediaElement.style.display = "none";
-                    resolve();
+                    console.log("自動播放被阻擋或出錯", e);
+                    finish(); 
                 });
+
+                // 🛡️ 終極防卡死：如果 10 秒後條片都仲未完 (例如 Loading 死咗)，強制收埋並繼續派彩！
+                setTimeout(finish, 10000); 
             });
         }
 
