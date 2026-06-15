@@ -43,23 +43,50 @@
 
         h1 { color: #ffeb3b; font-size: 3em; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 235, 59, 0.6); }
         
-        /* 排行榜 */
-        .ranking-container {
-            max-width: 800px;
+        /* 排行榜通用樣式 */
+        .rankings-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
             margin: 0 auto 40px auto;
+            flex-wrap: wrap; /* 螢幕細時自動折行 */
+        }
+
+        .ranking-container {
+            flex: 1;
+            min-width: 320px;
             background-color: #161b22;
-            border: 2px solid #ffca28;
+            border: 2px solid #ffca28; /* 預設為富豪榜金邊 */
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 0 15px rgba(255, 202, 40, 0.2);
         }
-        .ranking-title { color: #ffca28; font-size: 1.8em; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;}
+        
+        /* 窮人榜專屬樣式覆蓋 */
+        .ranking-container.poor-rank {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);
+        }
+        .poor-rank .ranking-title {
+            color: #4fc3f7;
+            border-bottom: 1px solid #01579b;
+        }
+
+        .ranking-title { color: #ffca28; font-size: 1.5em; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;}
         table.ranking-table { width: 100%; border-collapse: collapse; color: #fff; }
         table.ranking-table th, table.ranking-table td { padding: 12px; text-align: center; border-bottom: 1px solid #333; }
         table.ranking-table th { color: #888; }
-        table.ranking-table tr:nth-child(1) td { color: #ffeb3b; font-weight: bold; font-size: 1.2em; } /* 金 */
-        table.ranking-table tr:nth-child(2) td { color: #e0e0e0; font-weight: bold; font-size: 1.1em;} /* 銀 */
-        table.ranking-table tr:nth-child(3) td { color: #cd7f32; font-weight: bold; font-size: 1.05em;} /* 銅 */
+        
+        /* 富豪榜前三名顏色 */
+        .ranking-table.rich tr:nth-child(1) td { color: #ffeb3b; font-weight: bold; font-size: 1.2em; } /* 金 */
+        .ranking-table.rich tr:nth-child(2) td { color: red; font-weight: bold; font-size: 1.1em;} /* 銀 */
+        .ranking-table.rich tr:nth-child(3) td { color: #cd7f32; font-weight: bold; font-size: 1.05em;} /* 銅 */
+        
+        /* 窮人榜前三名顏色 */
+        .ranking-table.poor tr:nth-child(1) td { color: #00bcd4; font-weight: bold; font-size: 1.2em; } 
+        .ranking-table.poor tr:nth-child(2) td { color: #26c6da; font-weight: bold; font-size: 1.1em;} 
+        .ranking-table.poor tr:nth-child(3) td { color: #4dd0e1; font-weight: bold; font-size: 1.05em;}
 
         .hall-container {
             display: grid;
@@ -103,21 +130,43 @@
 
     <h1>🎰 虛擬柏青哥大廳</h1>
 
-    <!-- 🏆 全服排行榜 -->
-    <div class="ranking-container">
-        <h2 class="ranking-title">🏆 全伺服器富豪排行榜 TOP 10 🏆</h2>
-        <table class="ranking-table">
-            <thead>
-                <tr>
-                    <th>排名</th>
-                    <th>玩家帳號</th>
-                    <th>擁有金錢 (円)</th>
-                </tr>
-            </thead>
-            <tbody id="ranking-body">
-                <tr><td colspan="3">讀取數據中...</td></tr>
-            </tbody>
-        </table>
+    <!-- 🏆 雙排行榜並排顯示 -->
+    <div class="rankings-wrapper">
+        
+        <!-- 全服富豪榜 -->
+        <div class="ranking-container">
+            <h2 class="ranking-title">🏆 全伺服器富豪榜 TOP 10 🏆</h2>
+            <table class="ranking-table rich">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>玩家帳號</th>
+                        <th>擁有金錢 (円)</th>
+                    </tr>
+                </thead>
+                <tbody id="ranking-body">
+                    <tr><td colspan="3">讀取數據中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 📉 全服窮人榜 -->
+        <div class="ranking-container poor-rank">
+            <h2 class="ranking-title">📉 10大窮人榜 📉</h2>
+            <table class="ranking-table poor">
+                <thead>
+                    <tr>
+                        <th>名次</th>
+                        <th>玩家帳號</th>
+                        <th>持有金錢 (円)</th>
+                    </tr>
+                </thead>
+                <tbody id="poor-ranking-body">
+                    <tr><td colspan="3">讀取數據中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
     <div class="hall-container">
@@ -308,19 +357,24 @@
             }
 
             // 生成排行榜
-            renderRanking(users);
+            renderRankings(users);
         }, (error) => {
             console.error("讀取 Firebase 失敗: ", error);
             document.getElementById("ranking-body").innerHTML = `<tr><td colspan="3" style="color:red;">無法讀取數據，請檢查 Firebase 權限設定！</td></tr>`;
+            document.getElementById("poor-ranking-body").innerHTML = `<tr><td colspan="3" style="color:red;">無法讀取數據</td></tr>`;
         });
 
-        function renderRanking(users) {
+        function renderRankings(users) {
             let rankingBody = document.getElementById("ranking-body");
+            let poorRankingBody = document.getElementById("poor-ranking-body");
+            
             rankingBody.innerHTML = ""; // 清空舊數據
+            poorRankingBody.innerHTML = "";
 
             let userKeys = Object.keys(users);
             if (userKeys.length === 0) {
                 rankingBody.innerHTML = `<tr><td colspan="3">暫無玩家資料</td></tr>`;
+                poorRankingBody.innerHTML = `<tr><td colspan="3">暫無玩家資料</td></tr>`;
                 return;
             }
 
@@ -328,12 +382,12 @@
                 return { name: name, balance: users[name].balance };
             });
             
+            // --- 處理富豪榜 ---
             // 根據餘額由高至低排序
             userArray.sort((a, b) => b.balance - a.balance);
+            let top10Rich = userArray.slice(0, 10);
 
-            let top10 = userArray.slice(0, 10);
-
-            top10.forEach((user, index) => {
+            top10Rich.forEach((user, index) => {
                 let tr = document.createElement("tr");
                 let rankText = (index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1);
                 let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (你)</span>` : user.name;
@@ -344,6 +398,24 @@
                     <td>${Math.round(user.balance).toLocaleString()}</td>
                 `;
                 rankingBody.appendChild(tr);
+            });
+            
+            // --- 處理窮人榜 ---
+            // 根據餘額由低至高排序
+            userArray.sort((a, b) => a.balance - b.balance);
+            let top10Poor = userArray.slice(0, 10);
+            
+            top10Poor.forEach((user, index) => {
+                let tr = document.createElement("tr");
+                let rankText = (index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1);
+                let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (你)</span>` : user.name;
+
+                tr.innerHTML = `
+                    <td>${rankText}</td>
+                    <td>${nameHtml}</td>
+                    <td style="color: #4fc3f7;">${Math.round(user.balance).toLocaleString()}</td>
+                `;
+                poorRankingBody.appendChild(tr);
             });
         }
 
