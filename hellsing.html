@@ -255,7 +255,6 @@
 
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
-        const jackpotMedia = document.getElementById("jackpot-media");
         const rushMedia = document.getElementById("rush-media");
         let audioUnlocked = false;
 
@@ -305,13 +304,13 @@
                 mediaElement.style.left = "50%";
                 mediaElement.style.transform = "translate(-50%, -50%)";
                 mediaElement.style.zIndex = "10000";
-                
+
                 mediaElement.style.width = "90vw";
                 mediaElement.style.maxWidth = "900px";
                 mediaElement.style.height = "auto";
-                
+
                 // 🌟 神奇裁切魔法 (趕走黑邊)
-                mediaElement.style.aspectRatio = "16 / 22"; 
+                mediaElement.style.aspectRatio = "16 / 22";
                 mediaElement.style.objectFit = "cover";
                 mediaElement.style.objectPosition = "top center";
                 mediaElement.style.backgroundColor = "transparent";
@@ -440,7 +439,7 @@
 
                             while (loop) {
                                 if (loop_count > 0) {
-                                    await sleep(600); 
+                                    await sleep(600);
                                     addLog(`🔄 1G連 孤紅の恤BONUS！ (#${loop_count + 1})`, "color-ultimate");
                                 }
 
@@ -483,7 +482,7 @@
                         }
 
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-                        st_remaining = 144; 
+                        st_remaining = 144;
                         updateUI();
                         await sleep(800);
                     } else {
@@ -504,33 +503,30 @@
             }
 
             check_and_play_media(payout) {
-                if (payout >= 3000) {
-                    if (jackpotMedia.paused || jackpotMedia.ended) {
-                        jackpotMedia.currentTime = 0;
-                        jackpotMedia.play().catch(e => { });
-                    }
-                }
+                // 呢部機唔需要播普通中獎聲，所以留空唔執行任何嘢
+            }
+        }
             }
 
-            // 🛡️ 完美純本地紀錄 (與其他機台完全一致)
-            record_history() {
-                this.history.unshift({
-                    spins: this.session_spins,
-                    rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
-                    payout: this.session_payout
-                });
+        // 🛡️ 完美純本地紀錄 (與其他機台完全一致)
+        record_history() {
+            this.history.unshift({
+                spins: this.session_spins,
+                rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
+                payout: this.session_payout
+            });
 
-                // 超過 10 個就彈走最舊嗰個
-                if (this.history.length > 10) {
-                    this.history.pop();
-                }
-                
-                renderHistoryTable(this.history);
-
-                this.session_spins = 0;
-                this.session_payout = 0;
-                this.session_rush_count = 0;
+            // 超過 10 個就彈走最舊嗰個
+            if (this.history.length > 10) {
+                this.history.pop();
             }
+
+            renderHistoryTable(this.history);
+
+            this.session_spins = 0;
+            this.session_payout = 0;
+            this.session_rush_count = 0;
+        }
         }
 
         let game = new HellsingMachine();
@@ -585,7 +581,6 @@
             btnReset.disabled = true;
 
             if (!audioUnlocked) {
-                jackpotMedia.load();
                 rushMedia.load();
                 audioUnlocked = true;
             }
@@ -616,9 +611,6 @@
             logBox.innerHTML = "";
             renderHistoryTable([]);
             updateUI();
-
-            jackpotMedia.pause();
-            jackpotMedia.currentTime = 0;
 
             rushMedia.pause();
             rushMedia.currentTime = 0;
