@@ -367,6 +367,7 @@
                     addLog("🎯 2R 300玉獲得！ 喰種ジャージでRUSH突入！", "color-rush");
                     // 🌟 新增：喰種チャージ入RUSH播專屬片 🌟
                     rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
+                    rushMedia.load(); // 👈 🌟 修正：ここにも強制読み込みを追加
                     addLog(`🎵 播放專屬動畫 (Charge入RUSH) 中... 請稍候`, "color-music");
                     await playVideoPopupAndWait(rushMedia);
                 } else {
@@ -408,6 +409,7 @@
                         let videoSrc = (payout === 6000) ? "https://files.catbox.moe/4tpc40.mp4" : "https://files.catbox.moe/t3rubq.mp4";
 
                         rushMedia.src = videoSrc; // 動態切換影片
+                        rushMedia.load();
                         addLog(`🎵 播放專屬動畫 (${videoSrc}) 中... 請稍候`, "color-music");
                         await playVideoPopupAndWait(rushMedia);
 
