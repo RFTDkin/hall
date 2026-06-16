@@ -505,28 +505,26 @@
             check_and_play_media(payout) {
                 // 呢部機唔需要播普通中獎聲，所以留空唔執行任何嘢
             }
-        }
+
+            // 🛡️ 完美純本地紀錄 (與其他機台完全一致)
+            record_history() {
+                this.history.unshift({
+                    spins: this.session_spins,
+                    rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
+                    payout: this.session_payout
+                });
+
+                // 超過 10 個就彈走最舊嗰個
+                if (this.history.length > 10) {
+                    this.history.pop();
+                }
+
+                renderHistoryTable(this.history);
+
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
             }
-
-        // 🛡️ 完美純本地紀錄 (與其他機台完全一致)
-        record_history() {
-            this.history.unshift({
-                spins: this.session_spins,
-                rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
-                payout: this.session_payout
-            });
-
-            // 超過 10 個就彈走最舊嗰個
-            if (this.history.length > 10) {
-                this.history.pop();
-            }
-
-            renderHistoryTable(this.history);
-
-            this.session_spins = 0;
-            this.session_payout = 0;
-            this.session_rush_count = 0;
-        }
         }
 
         let game = new HellsingMachine();
