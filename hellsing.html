@@ -257,9 +257,6 @@
     <script src="plugin.js"></script>
 
     <script>
-        // 🌟 神奇魔法：改名為 hellsing_v2，徹底放棄原本中毒嘅資料夾，重新開檔！
-        const machineId = "hellsing_v2"; 
-        
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const jackpotMedia = document.getElementById("jackpot-media");
         const rushMedia = document.getElementById("rush-media");
@@ -316,6 +313,7 @@
                 mediaElement.style.maxWidth = "900px";
                 mediaElement.style.height = "auto";
                 
+                // 🌟 神奇裁切魔法 (趕走黑邊)
                 mediaElement.style.aspectRatio = "16 / 22"; 
                 mediaElement.style.objectFit = "cover";
                 mediaElement.style.objectPosition = "top center";
@@ -354,6 +352,7 @@
                     addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
                 }
 
+                // 烈核解放CZ確率: 1/129
                 if (Math.random() < (1 / 129)) {
                     addLog(`\n[${this.session_spins} 回轉] 🩸 烈核解放CZ 突入！ (10回転)`, "color-cz");
 
@@ -454,6 +453,7 @@
                                     this.session_payout += 6000;
                                     addLog(`👑 狂気！ 6000玉獲得 + 1G連発生 !!! (計 ${total_payout}玉)`, "color-ultimate");
 
+                                    // 🌟 12000玉 (兩次6000) 播片
                                     if (total_payout === 12000) {
                                         addLog(`🎵 播放專屬動畫 (12000玉到達) 中... 請稍候`, "color-music");
                                         await playVideoPopupAndWait(rushMedia);
@@ -514,42 +514,20 @@
                 }
             }
 
-            // 🛡️ 樂觀渲染 UI 更新法 (Optimistic Update)
+            // 🛡️ 完美純本地紀錄 (與其他機台完全一致)
             record_history() {
-                const newRecord = {
+                this.history.unshift({
                     spins: this.session_spins,
                     rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
                     payout: this.session_payout
-                };
+                });
 
-                // 🌟 第 1 步：唔理 Firebase 死活，自己畫面即刻更新先！
-                this.history.unshift(newRecord);
-                if (this.history.length > 10) this.history.pop();
-                renderHistoryTable(this.history);
-
-                // 🌟 第 2 步：背景慢慢排隊上傳去 Firebase
-                try {
-                    const dbRef = firebase.database().ref('machine_history/' + machineId);
-                    dbRef.once('value').then(snapshot => {
-                        let data = snapshot.val();
-                        let historyList = [];
-
-                        if (data) {
-                            historyList = Array.isArray(data) ? data : Object.values(data);
-                        }
-
-                        historyList = historyList.filter(item => item && typeof item === 'object');
-                        historyList.unshift(newRecord);
-
-                        if (historyList.length > 10) {
-                            historyList = historyList.slice(0, 10);
-                        }
-
-                        dbRef.set(historyList);
-                    }).catch(e => console.error("Firebase 背景寫入失敗", e));
-                } catch (e) {
-                    console.error("Firebase未連接");
+                // 超過 10 個就彈走最舊嗰個
+                if (this.history.length > 10) {
+                    this.history.pop();
                 }
+                
+                renderHistoryTable(this.history);
 
                 this.session_spins = 0;
                 this.session_payout = 0;
@@ -580,45 +558,27 @@
             document.getElementById("ui-rush").innerText = game.session_rush_count;
         }
 
+        // 🛡️ 純本地表格渲染
         function renderHistoryTable(historyData) {
             historyTbody.innerHTML = "";
 
-            let arr = [];
-            if (historyData) {
-                arr = Array.isArray(historyData) ? historyData : Object.values(historyData);
-            }
-
-            arr = arr.filter(item => item && typeof item === 'object');
-
-            if (arr.length === 0) {
+            if (historyData.length === 0) {
                 historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
                 return;
             }
 
-            arr.slice(0, 10).forEach((record, index) => {
+            historyData.forEach((record, index) => {
                 const tr = document.createElement("tr");
                 let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
                 tr.innerHTML = `
                     <td>${label}</td>
-                    <td class="hit-spins">${record.spins || 0}</td>
-                    <td class="hit-rush">${record.rush || 0}</td>
-                    <td class="hit-payout">${record.payout || 0}</td>
+                    <td class="hit-spins">${record.spins}</td>
+                    <td class="hit-rush">${record.rush}</td>
+                    <td class="hit-payout">${record.payout}</td>
                 `;
                 historyTbody.appendChild(tr);
             });
         }
-
-        // 載入全服紀錄監聽器
-        try {
-            firebase.database().ref('machine_history/' + machineId).on('value', (snapshot) => {
-                let data = snapshot.val();
-                if (data) {
-                    game.history = Array.isArray(data) ? data : Object.values(data);
-                    game.history = game.history.filter(item => item && typeof item === 'object');
-                    renderHistoryTable(game.history);
-                }
-            });
-        } catch (e) { console.error("無法同步全服紀錄"); }
 
         async function startPlay() {
             if (isPlaying) return;
@@ -666,7 +626,7 @@
             rushMedia.currentTime = 0;
             rushMedia.style.display = "none";
 
-            addLog("本地狀態已重置 (保留全服歷史)。", "color-normal");
+            addLog("遊戲紀錄已重置。", "color-normal");
             btnPlay.innerText = "▶️ 開始抽機";
         }
     </script>
