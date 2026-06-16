@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +14,12 @@
             margin: 0;
             padding: 20px;
         }
-        h1 { color: #ff1744; text-shadow: 0 0 15px rgba(255, 23, 68, 0.7); }
-        
+
+        h1 {
+            color: #ff1744;
+            text-shadow: 0 0 15px rgba(255, 23, 68, 0.7);
+        }
+
         .main-container {
             display: flex;
             justify-content: center;
@@ -24,13 +29,22 @@
             max-width: 1000px;
             margin: 0 auto;
         }
-        
-        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
-        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .left-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 500px;
+        }
+
+        .right-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 400px;
+        }
 
         .stats-board {
             background-color: #1a0505;
-            border: 2px solid #b71c1c; 
+            border: 2px solid #b71c1c;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
@@ -39,16 +53,17 @@
             font-size: 1.1em;
             box-shadow: inset 0 0 15px rgba(183, 28, 28, 0.5);
         }
+
         .stat-item span {
             display: block;
             font-weight: bold;
-            color: #ff5252; 
+            color: #ff5252;
             font-size: 1.3em;
             margin-top: 5px;
         }
-        
+
         button {
-            background-color: #8e0000; 
+            background-color: #8e0000;
             color: white;
             border: 1px solid #ff1744;
             padding: 12px 25px;
@@ -59,11 +74,30 @@
             margin: 5px;
             transition: background-color 0.2s, box-shadow 0.2s;
         }
-        button:hover { background-color: #b71c1c; box-shadow: 0 0 10px #ff1744; }
-        button:disabled { background-color: #330000; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
-        #btn-reset { background-color: #424242; border-color: #616161; }
-        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
-        
+
+        button:hover {
+            background-color: #b71c1c;
+            box-shadow: 0 0 10px #ff1744;
+        }
+
+        button:disabled {
+            background-color: #330000;
+            border-color: #444;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        #btn-reset {
+            background-color: #424242;
+            border-color: #616161;
+        }
+
+        #btn-reset:hover {
+            background-color: #212121;
+            box-shadow: 0 0 10px #616161;
+        }
+
         .log-container {
             background-color: #000000;
             border: 1px solid #4a0000;
@@ -75,21 +109,51 @@
             font-family: 'Courier New', Courier, monospace;
             line-height: 1.5;
         }
-        .log-entry { margin: 5px 0; }
-        .color-rush { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff5252; }
-        .color-hit { color: #ffeb3b; font-weight: bold; }
-        .color-normal { color: #9e9e9e; }
-        .color-cz { color: #b388ff; font-weight: bold; }
-        .color-ultimate { color: #d50000; font-weight: bold; text-shadow: 0 0 10px #d50000; font-size: 1.1em; }
-        .color-music { color: #00e676; font-style: italic; }
+
+        .log-entry {
+            margin: 5px 0;
+        }
+
+        .color-rush {
+            color: #ff5252;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff5252;
+        }
+
+        .color-hit {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        .color-normal {
+            color: #9e9e9e;
+        }
+
+        .color-cz {
+            color: #b388ff;
+            font-weight: bold;
+        }
+
+        .color-ultimate {
+            color: #d50000;
+            font-weight: bold;
+            text-shadow: 0 0 10px #d50000;
+            font-size: 1.1em;
+        }
+
+        .color-music {
+            color: #00e676;
+            font-style: italic;
+        }
 
         .data-lamp-container {
             background-color: #0a0000;
             border: 3px solid #4a0000;
             border-radius: 8px;
             padding: 15px;
-            box-shadow: 0 0 15px rgba(183, 28, 28, 0.4); 
+            box-shadow: 0 0 15px rgba(183, 28, 28, 0.4);
         }
+
         .data-lamp-title {
             color: #ff1744;
             margin-top: 0;
@@ -99,33 +163,60 @@
             text-shadow: 0 0 5px #ff1744;
             letter-spacing: 2px;
         }
+
         table.data-lamp {
             width: 100%;
             border-collapse: collapse;
             color: #fff;
             font-family: 'Courier New', Courier, monospace;
         }
-        table.data-lamp th, table.data-lamp td {
+
+        table.data-lamp th,
+        table.data-lamp td {
             border: 1px solid #330000;
             padding: 10px 5px;
             text-align: center;
         }
-        table.data-lamp th { background-color: #1a0000; color: #ff5252; font-size: 0.9em; }
-        table.data-lamp tr:nth-child(even) { background-color: #0d0000; }
-        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
-        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
-        table.data-lamp td.hit-payout { color: #ff5252; }
-        .empty-row { color: #555 !important; }
+
+        table.data-lamp th {
+            background-color: #1a0000;
+            color: #ff5252;
+            font-size: 0.9em;
+        }
+
+        table.data-lamp tr:nth-child(even) {
+            background-color: #0d0000;
+        }
+
+        table.data-lamp td.hit-spins {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        table.data-lamp td.hit-rush {
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        table.data-lamp td.hit-payout {
+            color: #ff5252;
+        }
+
+        .empty-row {
+            color: #555 !important;
+        }
     </style>
 </head>
+
 <body>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ff5252;">P 烈核解放 (超孤紅の恤)</span></h1>
-    
+
     <audio id="jackpot-media" src="https://files.catbox.moe/c442ny.mp4" style="display:none;" preload="auto"></audio>
     <!-- 🌟 新增 12000玉 專屬影片 🌟 -->
-    <video id="rush-media" src="https://files.catbox.moe/btk3kq.mp4" style="display:none;" preload="auto" playsinline webkit-playsinline></video>
-    
+    <video id="rush-media" src="https://files.catbox.moe/btk3kq.mp4" style="display:none;" preload="auto" playsinline
+        webkit-playsinline></video>
+
     <div class="main-container">
         <div class="left-panel">
             <div class="stats-board">
@@ -155,7 +246,9 @@
                         </tr>
                     </thead>
                     <tbody id="history-tbody">
-                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                        <tr>
+                            <td colspan="4" class="empty-row">- 無紀錄 -</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -170,13 +263,13 @@
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const jackpotMedia = document.getElementById("jackpot-media");
         const rushMedia = document.getElementById("rush-media");
-        let audioUnlocked = false; 
+        let audioUnlocked = false;
 
         // 🌟 10秒防卡死版 (純聲音)
         function playMediaAndWait(mediaElement) {
             return new Promise((resolve) => {
                 if (!mediaElement) return resolve();
-                
+
                 let isResolved = false;
                 const finish = () => {
                     if (isResolved) return;
@@ -189,14 +282,14 @@
                 mediaElement.currentTime = 0;
                 mediaElement.addEventListener('ended', finish);
                 mediaElement.addEventListener('error', finish);
-                
+
                 mediaElement.play().catch(e => {
                     console.log("自動播放被阻擋或出錯", e);
-                    finish(); 
+                    finish();
                 });
 
                 // 防卡死：20秒超時強制繼續
-                setTimeout(finish, 20000); 
+                setTimeout(finish, 20000);
             });
         }
 
@@ -204,7 +297,7 @@
         function playVideoPopupAndWait(mediaElement) {
             return new Promise((resolve) => {
                 if (!mediaElement) return resolve();
-                
+
                 let isResolved = false;
                 const finish = () => {
                     if (isResolved) return;
@@ -223,27 +316,27 @@
                 mediaElement.style.zIndex = "10000";
                 mediaElement.style.width = "90vw";
                 mediaElement.style.maxWidth = "900px";
-                
+
                 // 完美消除黑邊
                 mediaElement.style.height = "auto";
-                mediaElement.style.backgroundColor = "transparent"; 
-                
+                mediaElement.style.backgroundColor = "transparent";
+
                 // Hellsing 紅色框
-                mediaElement.style.border = "4px solid #ff1744"; 
+                mediaElement.style.border = "4px solid #ff1744";
                 mediaElement.style.boxShadow = "0 0 40px rgba(255, 23, 68, 0.8)";
                 mediaElement.style.borderRadius = "10px";
-                
+
                 mediaElement.currentTime = 0;
                 mediaElement.addEventListener('ended', finish);
                 mediaElement.addEventListener('error', finish);
-                
+
                 mediaElement.play().catch(e => {
                     console.log("自動播放被阻擋或出錯", e);
-                    finish(); 
+                    finish();
                 });
 
                 // 防卡死：45秒超時強制收埋影片繼續
-                setTimeout(finish, 45000); 
+                setTimeout(finish, 45000);
             });
         }
 
@@ -266,15 +359,15 @@
                 // 烈核解放CZ確率: 1/129
                 if (Math.random() < (1 / 129)) {
                     addLog(`\n[${this.session_spins} 回轉] 🩸 烈核解放CZ 突入！ (10回転)`, "color-cz");
-                    
+
                     let cz_success = await this.play_cz();
-                    
+
                     if (cz_success) {
                         await this.cz_result();
-                        return true; 
+                        return true;
                     } else {
                         addLog(`💀 CZ失敗... 通常へ戻る`, "color-normal");
-                        return false; 
+                        return false;
                     }
                 }
                 return false;
@@ -285,11 +378,11 @@
                 updateUI();
 
                 // CZ 10轉，期待度 33% -> 每轉約 1/25.5
-                for(let i = 1; i <= 10; i++) {
-                    await sleep(100); 
-                    this.session_spins++; 
+                for (let i = 1; i <= 10; i++) {
+                    await sleep(100);
+                    this.session_spins++;
                     document.getElementById("ui-spins").innerText = `CZ中: ${i}/10`;
-                    
+
                     if (Math.random() < (1 / 25.5)) {
                         addLog(`🎉 [CZ ${i}回転目] 成功！！`, "color-hit");
                         this.state = "NORMAL";
@@ -310,13 +403,13 @@
                     addLog("🌈 1800玉獲得！ 超孤紅の恤RUSH 突入！", "color-ultimate");
                     this.session_payout += payout;
                     rush = true;
-                } 
+                }
                 else if (roll < 0.073 + 0.437) {
                     let payout = 1500;
                     addLog("🩸 1500玉獲得！ 超孤紅の恤RUSH 突入！", "color-rush");
                     this.session_payout += payout;
                     rush = true;
-                } 
+                }
                 else {
                     let payout = 1500;
                     addLog("😭 1500玉獲得 (通常終了)");
@@ -338,7 +431,7 @@
                 updateUI();
 
                 let st_remaining = 144;
-                while(this.state === "RUSH" && st_remaining > 0) {
+                while (this.state === "RUSH" && st_remaining > 0) {
                     await sleep(30);
                     document.getElementById("ui-spins").innerText = `ST剩餘: ${st_remaining}/144`;
 
@@ -354,26 +447,26 @@
                             let loop = true;
                             let total_payout = 0;
                             let loop_count = 0;
-                            
-                            while(loop) {
+
+                            while (loop) {
                                 if (loop_count > 0) {
                                     await sleep(600); // 1G連嘅停頓感
                                     addLog(`🔄 1G連 孤紅の恤BONUS！ (#${loop_count + 1})`, "color-ultimate");
                                 }
-                                
+
                                 let br = Math.random();
                                 if (br < 0.125) {
                                     total_payout += 6000;
                                     this.session_payout += 6000;
                                     addLog(`👑 狂気！ 6000玉獲得 + 1G連発生 !!! (計 ${total_payout}玉)`, "color-ultimate");
-                                    
-                                    // 🌟 新增邏輯：當 total_payout 剛好達到 12000玉 (即係中咗兩次 6000) 嘅時候播片
+
+                                    // 🌟 12000玉 (兩次6000) 播片
                                     if (total_payout === 12000) {
                                         addLog(`🎵 播放專屬動畫 (12000玉到達) 中... 請稍候`, "color-music");
                                         await playVideoPopupAndWait(rushMedia);
                                     }
 
-                                    loop_count++; // 繼續 loop
+                                    loop_count++;
                                 } else if (br < 0.125 + 0.375) {
                                     total_payout += 4500;
                                     this.session_payout += 4500;
@@ -412,7 +505,7 @@
                     addLog("\n💀 ST抜け... RUSH終了");
                     addLog(`📈 總連莊數: ${this.session_rush_count + 1}連 (含初當)`);
                     addLog(`💰 最終出玉: ${this.session_payout} 玉`);
-                    
+
                     this.state = "NORMAL";
                     this.record_history();
                     updateUI();
@@ -421,35 +514,46 @@
 
             check_and_play_media(payout) {
                 if (payout >= 3000) {
-                    // 如果播咗 12000玉嘅片，可以避免重複播普通音效，但為咗保險我哋保留 check
                     if (jackpotMedia.paused || jackpotMedia.ended) {
-                        jackpotMedia.currentTime = 0; 
-                        jackpotMedia.play().catch(e => {
-                            // ignore
-                        });
+                        jackpotMedia.currentTime = 0;
+                        jackpotMedia.play().catch(e => { });
                     }
                 }
             }
 
+            // 🛡️ 升級版 Record History：徹底解決 Firebase Array 變形問題
             record_history() {
                 const newRecord = {
                     spins: this.session_spins,
                     rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
                     payout: this.session_payout
                 };
-                
+
                 try {
                     const dbRef = firebase.database().ref('machine_history/' + machineId);
                     dbRef.once('value').then(snapshot => {
-                        let historyList = snapshot.val() || [];
+                        let data = snapshot.val();
+
+                        // 防呆：無論 Firebase 俾咩過黎，強行轉做標準 Array
+                        let historyList = [];
+                        if (data) {
+                            historyList = Array.isArray(data) ? data : Object.values(data);
+                        }
+
+                        // 插入新紀錄
                         historyList.unshift(newRecord);
-                        if (historyList.length > 10) historyList.pop();
+
+                        // 嚴格控制只保留最近 10 筆，棄用 .pop() 以免 Firebase 再次變形
+                        if (historyList.length > 10) {
+                            historyList = historyList.slice(0, 10);
+                        }
+
                         dbRef.set(historyList);
-                    });
-                } catch(e) {
+                    }).catch(e => console.error("Firebase 寫入歷史失敗", e));
+                } catch (e) {
                     console.error("Firebase未連接，僅作本地紀錄");
                     this.history.unshift(newRecord);
-                    if (this.history.length > 10) this.history.pop();
+                    if (this.history.length > 10) this.history = this.history.slice(0, 10);
                     renderHistoryTable(this.history);
                 }
 
@@ -482,21 +586,30 @@
             document.getElementById("ui-rush").innerText = game.session_rush_count;
         }
 
+        // 🛡️ 升級版 Render Table：如果數據庫中毒都唔會 Crash
         function renderHistoryTable(historyData) {
-            historyTbody.innerHTML = ""; 
-            if (historyData.length === 0) {
+            historyTbody.innerHTML = "";
+
+            // 防呆：強制轉做標準 Array
+            let arr = [];
+            if (historyData) {
+                arr = Array.isArray(historyData) ? historyData : Object.values(historyData);
+            }
+
+            if (arr.length === 0) {
                 historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
                 return;
             }
 
-            historyData.forEach((record, index) => {
+            arr.slice(0, 10).forEach((record, index) => {
+                if (!record) return; // 避開空值
                 const tr = document.createElement("tr");
                 let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
                 tr.innerHTML = `
                     <td>${label}</td>
-                    <td class="hit-spins">${record.spins}</td>
-                    <td class="hit-rush">${record.rush}</td>
-                    <td class="hit-payout">${record.payout}</td>
+                    <td class="hit-spins">${record.spins || 0}</td>
+                    <td class="hit-rush">${record.rush || 0}</td>
+                    <td class="hit-payout">${record.payout || 0}</td>
                 `;
                 historyTbody.appendChild(tr);
             });
@@ -505,31 +618,30 @@
         // 載入全服紀錄監聽器
         try {
             firebase.database().ref('machine_history/' + machineId).on('value', (snapshot) => {
-                let historyData = snapshot.val() || [];
-                renderHistoryTable(historyData);
+                renderHistoryTable(snapshot.val());
             });
-        } catch(e) { console.error("無法同步全服紀錄"); }
+        } catch (e) { console.error("無法同步全服紀錄"); }
 
         async function startPlay() {
             if (isPlaying) return;
             isPlaying = true;
             btnPlay.disabled = true;
             btnReset.disabled = true;
-            
+
             if (!audioUnlocked) {
-                jackpotMedia.load(); 
+                jackpotMedia.load();
                 rushMedia.load();
                 audioUnlocked = true;
             }
-            
+
             addLog("\n=== 開始打玉 ===", "color-hit");
 
             while (isPlaying) {
                 let hit = await game.play_normal();
                 updateUI();
-                
+
                 if (game.session_spins % 100 === 0) {
-                    await sleep(10); 
+                    await sleep(10);
                 }
 
                 if (hit) {
@@ -537,7 +649,7 @@
                     break;
                 }
             }
-            
+
             btnPlay.disabled = false;
             btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續抽機";
@@ -547,17 +659,18 @@
             game = new HellsingMachine();
             logBox.innerHTML = "";
             updateUI();
-            
+
             jackpotMedia.pause();
             jackpotMedia.currentTime = 0;
 
             rushMedia.pause();
             rushMedia.currentTime = 0;
             rushMedia.style.display = "none";
-            
+
             addLog("本地狀態已重置 (保留全服歷史)。", "color-normal");
             btnPlay.innerText = "▶️ 開始抽機";
         }
     </script>
 </body>
+
 </html>
