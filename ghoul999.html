@@ -343,12 +343,14 @@
                     addLog(`\n[${this.session_spins} 回轉] 喰種チャージ當選！`, "color-charge");
                     this.session_payout += 300;
 
-                    // 🌟 新增：加入 0.5% 機率突入 RUSH 機制 🌟
-                    if (Math.random() < 0.005) {
+                    // 🌟 1% 機率突入 RUSH 機制 🌟
+                    if (Math.random() < 0.01) {
                         addLog(`🎯 2R 300玉獲得！ 喰種ジャージでRUSH突入！`, "color-rush");
 
                         // 播 Charge 專屬影片
                         rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
+                        rushMedia.load(); // 👈 🌟 關鍵防卡死：強制載入新影片
+
                         addLog(`🎵 播放專屬動畫 (Charge入RUSH) 中... 請稍候`, "color-music");
                         await playVideoPopupAndWait(rushMedia);
 
@@ -396,7 +398,7 @@
                 updateUI();
 
                 while (this.state === "RUSH" && current_st > 0) {
-                    await sleep(300); // ST5 轉得比較慢營造緊張感
+                    await sleep(300);
                     let current_spin = st_max - current_st + 1;
 
                     document.getElementById("ui-spins").innerText = `RUSH中: ${current_spin}/${st_max}`;
@@ -406,26 +408,30 @@
                         this.session_rush_count += 1;
                         addLog(`\n🎉 [ST ${current_spin}回転] 當選！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
 
-                        // 🌟 確保轉返原本嘅 Rize 影片，避免播錯 Charge 條片 🌟
+                        // 🌟 確保轉返原本嘅 Rize 影片 🌟
                         rushMedia.src = "https://files.catbox.moe/t3rubq.mp4";
+                        rushMedia.load(); // 👈 🌟 關鍵防卡死：強制載入新影片
+
                         addLog(`🎵 播放專屬動畫 (rize.mp4) 中... 請稍候`, "color-music");
                         await playVideoPopupAndWait(rushMedia);
 
                         let payout = 3000;
                         addLog(`💥 3000玉獲得！`, "color-ultimate");
 
-                        let uwanoseCount = 0; // 🌟 記錄上乗せ次數
+                        let uwanoseCount = 0;
 
                         // 50% Loop 追加 3000玉
                         while (Math.random() < 0.50) {
                             await sleep(600);
                             payout += 3000;
-                            uwanoseCount++; // 🌟 每次成功+1
+                            uwanoseCount++;
                             addLog(`🌈 さらに上乗せ！ +3000玉 (計 ${payout}玉)`, "color-ultimate");
 
                             // 🌟 第3次上乗せ (即係達到 12000玉) 嘅時候播片！
                             if (uwanoseCount === 3) {
                                 rushMedia.src = "https://files.catbox.moe/4nkuj0.mp4";
+                                rushMedia.load(); // 👈 🌟 關鍵防卡死：強制載入 12000玉影片
+
                                 addLog(`🎵 播放專屬動畫 (12000玉到達) 中... 請稍候`, "color-music");
                                 await playVideoPopupAndWait(rushMedia);
                             }

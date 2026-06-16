@@ -212,7 +212,6 @@
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ff5252;">P 烈核解放 (超孤紅の恤)</span></h1>
 
-    <audio id="jackpot-media" src="https://files.catbox.moe/c442ny.mp4" style="display:none;" preload="auto"></audio>
     <video id="rush-media" src="https://files.catbox.moe/btk3kq.mp4" style="display:none;" preload="auto" playsinline
         webkit-playsinline></video>
 
@@ -332,7 +331,7 @@
                     finish();
                 });
 
-                setTimeout(finish, 45000);
+                setTimeout(finish, 25000);
             });
         }
 
@@ -456,6 +455,7 @@
                                     // 🌟 12000玉 (兩次6000) 播片
                                     if (total_payout === 12000) {
                                         addLog(`🎵 播放專屬動畫 (12000玉到達) 中... 請稍候`, "color-music");
+                                        rushMedia.load();
                                         await playVideoPopupAndWait(rushMedia);
                                     }
 
