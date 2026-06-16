@@ -292,6 +292,11 @@
                 mediaElement.style.width = "90vw";
                 mediaElement.style.maxWidth = "900px";
                 mediaElement.style.height = "auto";
+                // 🌟 神奇裁切魔法：對齊最頂，淨係切走下面條黑邊！ 🌟
+                // 數字越細 (例如 8.4)，下面裁走越多；數字越大 (例如 8.8)，裁走越少。
+                mediaElement.style.aspectRatio = "16 / 22";
+                mediaElement.style.objectFit = "cover";
+                mediaElement.style.objectPosition = "top center"; // 👈 將畫面頂住最上，黑邊就會被推出去下面裁走！
                 mediaElement.style.backgroundColor = "transparent";
                 mediaElement.style.border = "4px solid #d50000"; // 喰種紅色框
                 mediaElement.style.boxShadow = "0 0 40px rgba(213, 0, 0, 0.8)";
