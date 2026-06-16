@@ -213,7 +213,6 @@
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ff5252;">P 烈核解放 (超孤紅の恤)</span></h1>
 
     <audio id="jackpot-media" src="https://files.catbox.moe/c442ny.mp4" style="display:none;" preload="auto"></audio>
-    <!-- 🌟 新增 12000玉 專屬影片 🌟 -->
     <video id="rush-media" src="https://files.catbox.moe/btk3kq.mp4" style="display:none;" preload="auto" playsinline
         webkit-playsinline></video>
 
@@ -255,7 +254,6 @@
         </div>
     </div>
 
-    <!-- ⚠️ 確保 Firebase plugin 優先載入 -->
     <script src="plugin.js"></script>
 
     <script>
@@ -265,7 +263,7 @@
         const rushMedia = document.getElementById("rush-media");
         let audioUnlocked = false;
 
-        // 🌟 10秒防卡死版 (純聲音)
+        // 🌟 20秒防卡死版 (純聲音)
         function playMediaAndWait(mediaElement) {
             return new Promise((resolve) => {
                 if (!mediaElement) return resolve();
@@ -288,12 +286,11 @@
                     finish();
                 });
 
-                // 防卡死：20秒超時強制繼續
                 setTimeout(finish, 20000);
             });
         }
 
-        // 🌟 45秒防卡死版 (彈出影片，無黑邊設定)
+        // 🌟 45秒防卡死版 (包含裁切魔法)
         function playVideoPopupAndWait(mediaElement) {
             return new Promise((resolve) => {
                 if (!mediaElement) return resolve();
@@ -314,11 +311,15 @@
                 mediaElement.style.left = "50%";
                 mediaElement.style.transform = "translate(-50%, -50%)";
                 mediaElement.style.zIndex = "10000";
+                
                 mediaElement.style.width = "90vw";
                 mediaElement.style.maxWidth = "900px";
-
-                // 完美消除黑邊
                 mediaElement.style.height = "auto";
+                
+                // 🌟 神奇裁切魔法 (趕走黑邊)
+                mediaElement.style.aspectRatio = "16 / 22"; 
+                mediaElement.style.objectFit = "cover";
+                mediaElement.style.objectPosition = "top center";
                 mediaElement.style.backgroundColor = "transparent";
 
                 // Hellsing 紅色框
@@ -450,7 +451,7 @@
 
                             while (loop) {
                                 if (loop_count > 0) {
-                                    await sleep(600); // 1G連嘅停頓感
+                                    await sleep(600); 
                                     addLog(`🔄 1G連 孤紅の恤BONUS！ (#${loop_count + 1})`, "color-ultimate");
                                 }
 
@@ -521,7 +522,7 @@
                 }
             }
 
-            // 🛡️ 升級版 Record History：徹底解決 Firebase Array 變形問題
+            // 🛡️ 升級版 Record History：徹底清洗 Firebase Array
             record_history() {
                 const newRecord = {
                     spins: this.session_spins,
@@ -533,17 +534,19 @@
                     const dbRef = firebase.database().ref('machine_history/' + machineId);
                     dbRef.once('value').then(snapshot => {
                         let data = snapshot.val();
-
-                        // 防呆：無論 Firebase 俾咩過黎，強行轉做標準 Array
                         let historyList = [];
+
                         if (data) {
                             historyList = Array.isArray(data) ? data : Object.values(data);
                         }
 
+                        // 徹底清洗：過濾走所有 null、undefined 或者非物件嘅垃圾數據
+                        historyList = historyList.filter(item => item && typeof item === 'object');
+
                         // 插入新紀錄
                         historyList.unshift(newRecord);
 
-                        // 嚴格控制只保留最近 10 筆，棄用 .pop() 以免 Firebase 再次變形
+                        // 嚴格控制只保留最近 10 筆
                         if (historyList.length > 10) {
                             historyList = historyList.slice(0, 10);
                         }
@@ -553,7 +556,9 @@
                 } catch (e) {
                     console.error("Firebase未連接，僅作本地紀錄");
                     this.history.unshift(newRecord);
-                    if (this.history.length > 10) this.history = this.history.slice(0, 10);
+                    if (this.history.length > 10) {
+                        this.history = this.history.slice(0, 10);
+                    }
                     renderHistoryTable(this.history);
                 }
 
@@ -586,15 +591,17 @@
             document.getElementById("ui-rush").innerText = game.session_rush_count;
         }
 
-        // 🛡️ 升級版 Render Table：如果數據庫中毒都唔會 Crash
+        // 🛡️ 升級版 Render Table：無懼資料庫毒氣
         function renderHistoryTable(historyData) {
             historyTbody.innerHTML = "";
 
-            // 防呆：強制轉做標準 Array
             let arr = [];
             if (historyData) {
                 arr = Array.isArray(historyData) ? historyData : Object.values(historyData);
             }
+
+            // 徹底清洗：過濾走所有 null 或者非物件嘅垃圾數據
+            arr = arr.filter(item => item && typeof item === 'object');
 
             if (arr.length === 0) {
                 historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
@@ -602,7 +609,6 @@
             }
 
             arr.slice(0, 10).forEach((record, index) => {
-                if (!record) return; // 避開空值
                 const tr = document.createElement("tr");
                 let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
                 tr.innerHTML = `
