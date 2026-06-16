@@ -337,9 +337,26 @@
                 if (Math.random() < (1 / 538.8)) {
                     addLog(`\n[${this.session_spins} 回轉] 喰種チャージ當選！`, "color-charge");
                     this.session_payout += 300;
-                    addLog(`💥 2R 300玉獲得 (通常終了)`);
-                    updateUI();
-                    this.record_history();
+
+                    // 🌟 新增：加入 0.5% 機率突入 RUSH 機制 🌟
+                    if (Math.random() < 0.005) {
+                        addLog(`🎯 2R 300玉獲得！ 喰種ジャージでRUSH突入！`, "color-rush");
+
+                        // 播 Charge 專屬影片
+                        rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
+                        addLog(`🎵 播放專屬動畫 (Charge入RUSH) 中... 請稍候`, "color-music");
+                        await playVideoPopupAndWait(rushMedia);
+
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        updateUI();
+
+                        await sleep(1000);
+                        await this.play_rush();
+                    } else {
+                        addLog(`💥 2R 300玉獲得 (通常終了)`);
+                        updateUI();
+                        this.record_history();
+                    }
                     return true;
                 }
 

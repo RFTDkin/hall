@@ -358,6 +358,10 @@
                     this.session_payout += 300;
                     enterRush = true;
                     addLog("🎯 2R 300玉獲得！ 喰種ジャージでRUSH突入！", "color-rush");
+                    // 🌟 新增：喰種チャージ入RUSH播專屬片 🌟
+                    rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
+                    addLog(`🎵 播放專屬動畫 (Charge入RUSH) 中... 請稍候`, "color-music");
+                    await playVideoPopupAndWait(rushMedia);
                 } else {
                     this.session_payout += 1500;
                     addLog("😭 10R 1500玉獲得 (通常終了)", "color-normal");
