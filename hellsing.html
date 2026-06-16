@@ -81,6 +81,7 @@
         .color-normal { color: #9e9e9e; }
         .color-cz { color: #b388ff; font-weight: bold; }
         .color-ultimate { color: #d50000; font-weight: bold; text-shadow: 0 0 10px #d50000; font-size: 1.1em; }
+        .color-music { color: #00e676; font-style: italic; }
 
         .data-lamp-container {
             background-color: #0a0000;
@@ -121,7 +122,9 @@
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ff5252;">P 烈核解放 (超孤紅の恤)</span></h1>
     
-    <video id="jackpot-media" src="https://files.catbox.moe/c442ny.mp4" style="display:none;" preload="auto"></video>
+    <audio id="jackpot-media" src="https://files.catbox.moe/c442ny.mp4" style="display:none;" preload="auto"></audio>
+    <!-- 🌟 新增 12000玉 專屬影片 🌟 -->
+    <video id="rush-media" src="https://files.catbox.moe/btk3kq.mp4" style="display:none;" preload="auto" playsinline webkit-playsinline></video>
     
     <div class="main-container">
         <div class="left-panel">
@@ -159,10 +162,90 @@
         </div>
     </div>
 
+    <!-- ⚠️ 確保 Firebase plugin 優先載入 -->
+    <script src="plugin.js"></script>
+
     <script>
+        const machineId = "hellsing"; // 全服機台專屬ID
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const jackpotMedia = document.getElementById("jackpot-media");
+        const rushMedia = document.getElementById("rush-media");
         let audioUnlocked = false; 
+
+        // 🌟 10秒防卡死版 (純聲音)
+        function playMediaAndWait(mediaElement) {
+            return new Promise((resolve) => {
+                if (!mediaElement) return resolve();
+                
+                let isResolved = false;
+                const finish = () => {
+                    if (isResolved) return;
+                    isResolved = true;
+                    mediaElement.removeEventListener('ended', finish);
+                    mediaElement.removeEventListener('error', finish);
+                    resolve();
+                };
+
+                mediaElement.currentTime = 0;
+                mediaElement.addEventListener('ended', finish);
+                mediaElement.addEventListener('error', finish);
+                
+                mediaElement.play().catch(e => {
+                    console.log("自動播放被阻擋或出錯", e);
+                    finish(); 
+                });
+
+                // 防卡死：20秒超時強制繼續
+                setTimeout(finish, 20000); 
+            });
+        }
+
+        // 🌟 45秒防卡死版 (彈出影片，無黑邊設定)
+        function playVideoPopupAndWait(mediaElement) {
+            return new Promise((resolve) => {
+                if (!mediaElement) return resolve();
+                
+                let isResolved = false;
+                const finish = () => {
+                    if (isResolved) return;
+                    isResolved = true;
+                    mediaElement.removeEventListener('ended', finish);
+                    mediaElement.removeEventListener('error', finish);
+                    mediaElement.style.display = "none";
+                    resolve();
+                };
+
+                mediaElement.style.display = "block";
+                mediaElement.style.position = "fixed";
+                mediaElement.style.top = "50%";
+                mediaElement.style.left = "50%";
+                mediaElement.style.transform = "translate(-50%, -50%)";
+                mediaElement.style.zIndex = "10000";
+                mediaElement.style.width = "90vw";
+                mediaElement.style.maxWidth = "900px";
+                
+                // 完美消除黑邊
+                mediaElement.style.height = "auto";
+                mediaElement.style.backgroundColor = "transparent"; 
+                
+                // Hellsing 紅色框
+                mediaElement.style.border = "4px solid #ff1744"; 
+                mediaElement.style.boxShadow = "0 0 40px rgba(255, 23, 68, 0.8)";
+                mediaElement.style.borderRadius = "10px";
+                
+                mediaElement.currentTime = 0;
+                mediaElement.addEventListener('ended', finish);
+                mediaElement.addEventListener('error', finish);
+                
+                mediaElement.play().catch(e => {
+                    console.log("自動播放被阻擋或出錯", e);
+                    finish(); 
+                });
+
+                // 防卡死：45秒超時強制收埋影片繼續
+                setTimeout(finish, 45000); 
+            });
+        }
 
         class HellsingMachine {
             constructor() {
@@ -204,7 +287,7 @@
                 // CZ 10轉，期待度 33% -> 每轉約 1/25.5
                 for(let i = 1; i <= 10; i++) {
                     await sleep(100); 
-                    this.session_spins++; // CZ 也算回轉
+                    this.session_spins++; 
                     document.getElementById("ui-spins").innerText = `CZ中: ${i}/10`;
                     
                     if (Math.random() < (1 / 25.5)) {
@@ -283,6 +366,13 @@
                                     total_payout += 6000;
                                     this.session_payout += 6000;
                                     addLog(`👑 狂気！ 6000玉獲得 + 1G連発生 !!! (計 ${total_payout}玉)`, "color-ultimate");
+                                    
+                                    // 🌟 新增邏輯：當 total_payout 剛好達到 12000玉 (即係中咗兩次 6000) 嘅時候播片
+                                    if (total_payout === 12000) {
+                                        addLog(`🎵 播放專屬動畫 (12000玉到達) 中... 請稍候`, "color-music");
+                                        await playVideoPopupAndWait(rushMedia);
+                                    }
+
                                     loop_count++; // 繼續 loop
                                 } else if (br < 0.125 + 0.375) {
                                     total_payout += 4500;
@@ -331,24 +421,37 @@
 
             check_and_play_media(payout) {
                 if (payout >= 3000) {
+                    // 如果播咗 12000玉嘅片，可以避免重複播普通音效，但為咗保險我哋保留 check
                     if (jackpotMedia.paused || jackpotMedia.ended) {
                         jackpotMedia.currentTime = 0; 
                         jackpotMedia.play().catch(e => {
-                            console.log("瀏覽器阻擋自動播放", e);
+                            // ignore
                         });
                     }
                 }
             }
 
             record_history() {
-                this.history.unshift({
+                const newRecord = {
                     spins: this.session_spins,
                     rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
                     payout: this.session_payout
-                });
-
-                if (this.history.length > 10) this.history.pop();
-                renderHistoryTable(this.history);
+                };
+                
+                try {
+                    const dbRef = firebase.database().ref('machine_history/' + machineId);
+                    dbRef.once('value').then(snapshot => {
+                        let historyList = snapshot.val() || [];
+                        historyList.unshift(newRecord);
+                        if (historyList.length > 10) historyList.pop();
+                        dbRef.set(historyList);
+                    });
+                } catch(e) {
+                    console.error("Firebase未連接，僅作本地紀錄");
+                    this.history.unshift(newRecord);
+                    if (this.history.length > 10) this.history.pop();
+                    renderHistoryTable(this.history);
+                }
 
                 this.session_spins = 0;
                 this.session_payout = 0;
@@ -399,6 +502,14 @@
             });
         }
 
+        // 載入全服紀錄監聽器
+        try {
+            firebase.database().ref('machine_history/' + machineId).on('value', (snapshot) => {
+                let historyData = snapshot.val() || [];
+                renderHistoryTable(historyData);
+            });
+        } catch(e) { console.error("無法同步全服紀錄"); }
+
         async function startPlay() {
             if (isPlaying) return;
             isPlaying = true;
@@ -407,6 +518,7 @@
             
             if (!audioUnlocked) {
                 jackpotMedia.load(); 
+                rushMedia.load();
                 audioUnlocked = true;
             }
             
@@ -434,16 +546,18 @@
         function resetGame() {
             game = new HellsingMachine();
             logBox.innerHTML = "";
-            renderHistoryTable([]);
             updateUI();
             
             jackpotMedia.pause();
             jackpotMedia.currentTime = 0;
+
+            rushMedia.pause();
+            rushMedia.currentTime = 0;
+            rushMedia.style.display = "none";
             
-            addLog("遊戲紀錄已重置。", "color-normal");
+            addLog("本地狀態已重置 (保留全服歷史)。", "color-normal");
             btnPlay.innerText = "▶️ 開始抽機";
         }
     </script>
-    <script src="plugin.js"></script>
 </body>
 </html>
