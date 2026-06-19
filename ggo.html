@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏青哥模擬器 (P SAO オルタナティブ GGO)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0d0000;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ff4081;
+            text-shadow: 0 0 15px rgba(255, 64, 129, 0.7);
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
+        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .stats-board {
+            background-color: #1a0510;
+            border: 2px solid #c2185b;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+            box-shadow: inset 0 0 15px rgba(194, 24, 91, 0.5);
+        }
+
+        .stat-item span {
+            display: block;
+            font-weight: bold;
+            color: #ff4081;
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #880e4f;
+            color: white;
+            border: 1px solid #ff4081;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover { background-color: #ad1457; box-shadow: 0 0 10px #ff4081; }
+        button:disabled { background-color: #33001a; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
+        
+        #btn-reset { background-color: #424242; border-color: #616161; }
+        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
+
+        .log-container {
+            background-color: #000000;
+            border: 1px solid #4a001a;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #ff80ab; font-weight: bold; text-shadow: 0 0 5px #ff80ab; }
+        .color-hit { color: #ffeb3b; font-weight: bold; }
+        .color-normal { color: #9e9e9e; }
+        .color-cz { color: #00e676; font-weight: bold; }
+        .color-ultimate { color: #ff4081; font-weight: bold; text-shadow: 0 0 10px #ff4081; font-size: 1.1em; }
+        .color-fall { color: #757575; font-style: italic; }
+
+        .data-lamp-container {
+            background-color: #0a0005;
+            border: 3px solid #4a001a;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(194, 24, 91, 0.4);
+        }
+
+        .data-lamp-title {
+            color: #ff4081;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px #ff4081;
+            letter-spacing: 2px;
+        }
+
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #33001a; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #1a000a; color: #ff80ab; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #0d0005; }
+        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ff4081; font-weight: bold; }
+        .empty-row { color: #555 !important; }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ff80ab;">P SAO オルタナティブ ガンゲイル・オンライン</span></h1>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 開始抽機</button>
+                <button id="btn-reset" onclick="resetGame()">🔄 紀錄重置</button>
+            </div>
+
+            <div class="log-container" id="log-box"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead>
+                        <tr>
+                            <th>前次</th>
+                            <th>當選回轉數</th>
+                            <th>連莊數</th>
+                            <th>獲得出玉</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        class GGOMachine {
+            constructor() {
+                this.state = "NORMAL";
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.history = []; 
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+
+                if (this.session_spins % 100 === 0) {
+                    addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
+                }
+
+                // 通常時 大当り確率: 1/319.9
+                if (Math.random() < (1 / 319.9)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 大当り當選！`, "color-hit");
+
+                    // ヘソ入賞 ラウンド割合
+                    let roll = Math.random();
+
+                    // 3% -> 4500個 + SJ RUSH 直行
+                    if (roll < 0.03) {
+                        addLog("🌈 3%の奇跡！ SUPER GUN GALE BONUS (4500個獲得)！", "color-ultimate");
+                        this.session_payout += 4500;
+                        this.session_rush_count = 1;
+                        updateUI();
+                        
+                        await sleep(1500);
+                        addLog("🚀 SJ RUSH (LT 160回転) 直行！！！", "color-rush");
+                        await this.play_sj_rush();
+                    } 
+                    // 97% -> 300個 + SJ JUDGE (ST 50回転)
+                    else {
+                        addLog("💥 GUN GALE BONUS (300個獲得)！", "color-hit");
+                        this.session_payout += 300;
+                        this.session_rush_count = 1;
+                        updateUI();
+                        
+                        await sleep(1000);
+                        let breakthrough = await this.play_sj_judge();
+                        
+                        if (breakthrough) {
+                            await this.play_sj_rush();
+                        } else {
+                            addLog(`💀 SJ JUDGE 突破失敗... 通常へ戻る`, "color-fall");
+                            addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
+                            this.record_history();
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            // ST 50回転 突破モード (突破率 約40%)
+            async play_sj_judge() {
+                addLog(`\n===== 🟩 SJ JUDGE (ST 50回転) 突入 =====`, "color-cz");
+                this.state = "SJ_JUDGE";
+                updateUI();
+
+                for (let i = 1; i <= 50; i++) {
+                    await sleep(60);
+                    document.getElementById("ui-spins").innerText = `JUDGE: ${i}/50`;
+
+                    // 右打ち確率: 1/99.9
+                    if (Math.random() < (1 / 99.9)) {
+                        addLog(`\n🎉 [JUDGE ${i}回転目] 突破成功！！！`, "color-hit");
+                        
+                        // JUDGE 中當選 ALL 3600個
+                        addLog("👑 SUPER SQUAD JAM BONUS 3600獲得！", "color-ultimate");
+                        this.session_payout += 3600;
+                        this.session_rush_count += 1;
+                        updateUI();
+                        
+                        await sleep(1000);
+                        return true; 
+                    }
+                }
+                this.state = "NORMAL";
+                updateUI();
+                return false;
+            }
+
+            // ST 160回転 LTモード (継続率 約80%)
+            async play_sj_rush() {
+                addLog(`\n===== 💖 SJ RUSH (LT 160回転) 開始 =====`, "color-ultimate");
+                this.state = "SJ_RUSH";
+                updateUI();
+
+                let st_remaining = 160;
+                
+                while (this.state === "SJ_RUSH" && st_remaining > 0) {
+                    await sleep(30);
+                    document.getElementById("ui-spins").innerText = `RUSH残り: ${st_remaining}/160`;
+
+                    // 右打ち確率: 1/99.9
+                    if (Math.random() < (1 / 99.9)) {
+                        this.session_rush_count += 1;
+                        let used_spin = 160 - st_remaining + 1;
+                        addLog(`\n🎉 RUSH 當選！ (ST ${used_spin}回転目)`, "color-hit");
+
+                        // RUSH中 ラウンド振り分け
+                        let br = Math.random();
+                        let payout = 0;
+
+                        if (br < 0.30) {
+                            payout = 3600;
+                            addLog(`👑 限界突破！ SUPER SQUAD JAM BONUS 3600獲得！`, "color-ultimate");
+                        } else if (br < 0.30 + 0.20) {
+                            payout = 2100;
+                            addLog(`💥 SQUAD JAM BONUS BURST 2100獲得！`, "color-rush");
+                        } else if (br < 0.50 + 0.25) {
+                            payout = 1500;
+                            addLog(`💥 SQUAD JAM BONUS BURST 1500獲得！`, "color-rush");
+                        } else if (br < 0.75 + 0.10) {
+                            payout = 900;
+                            addLog(`✨ SQUAD JAM BONUS BURST 900獲得！`, "color-hit");
+                        } else if (br < 0.85 + 0.10) {
+                            payout = 600;
+                            addLog(`✨ ASSAULT CHARGE 600獲得`, "color-hit");
+                        } else {
+                            payout = 300;
+                            addLog(`🔫 ASSAULT CHARGE 300獲得`, "color-normal");
+                        }
+
+                        this.session_payout += payout;
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        
+                        // 重置 ST
+                        st_remaining = 160; 
+                        updateUI();
+                        await sleep(800);
+                    } else {
+                        st_remaining--;
+                    }
+                }
+
+                if (st_remaining === 0) {
+                    document.getElementById("ui-spins").innerText = `RUSH残り: 0/160`;
+                    addLog("\n💀 RUSH終了... (160回転駆け抜け)", "color-fall");
+                    addLog(`📈 總連莊數: ${this.session_rush_count}連 (含初當)`);
+                    addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+
+                    this.state = "NORMAL";
+                    this.record_history();
+                    updateUI();
+                }
+            }
+
+            // 本地 DATA LAMP 紀錄，萬發排行榜交畀 plugin 處理
+            record_history() {
+                this.history.unshift({
+                    spins: this.session_spins,
+                    rush: this.session_rush_count,
+                    payout: this.session_payout
+                });
+
+                if (this.history.length > 10) {
+                    this.history.pop();
+                }
+
+                renderHistoryTable(this.history);
+
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+            }
+        }
+
+        let game = new GGOMachine();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const btnReset = document.getElementById("btn-reset");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div");
+            div.className = `log-entry ${className}`;
+            div.innerText = text;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") {
+                document.getElementById("ui-spins").innerText = game.session_spins;
+            }
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+
+            if (historyData.length === 0) {
+                historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
+                return;
+            }
+
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `
+                    <td>${label}</td>
+                    <td class="hit-spins">${record.spins}</td>
+                    <td class="hit-rush">${record.rush}</td>
+                    <td class="hit-payout">${record.payout}</td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.disabled = true;
+            btnReset.disabled = true;
+
+            addLog("\n=== 遊戲開始 (LINK START!) ===", "color-hit");
+
+            while (isPlaying) {
+                let hit = await game.play_normal();
+                updateUI();
+
+                if (game.session_spins % 100 === 0) {
+                    await sleep(10);
+                }
+
+                if (hit) {
+                    isPlaying = false;
+                    break;
+                }
+            }
+
+            btnPlay.disabled = false;
+            btnReset.disabled = false;
+            btnPlay.innerText = "▶️ 繼續抽機";
+        }
+
+        function resetGame() {
+            game = new GGOMachine();
+            logBox.innerHTML = "";
+            renderHistoryTable([]);
+            updateUI();
+            addLog("遊戲紀錄已重置。", "color-normal");
+            btnPlay.innerText = "▶️ 開始抽機";
+        }
+    </script>
+    
+    <script src="plugin.js"></script>
+</body>
+</html>
