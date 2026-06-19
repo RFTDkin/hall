@@ -82,6 +82,8 @@
         .tag-lycoris { border-top: 5px solid #ff5252; }
         .tag-hellsing { border-top: 5px solid #b71c1c; }
         .tag-slime { border-top: 5px solid #00bcd4; }
+        .tag-kakegurui { border-top: 5px solid #d50000; }
+        .tag-ggo { border-top: 5px solid #ff4081; }
 
         .machine-title {
             font-size: 1.2em;
@@ -100,10 +102,12 @@
             font-size: 1.05em;
         }
         .stat-label { color: #8b949e; }
-        .stat-value { font-weight: bold; font-family: 'Courier New', Courier, monospace; font-size: 1.2em; }
+        .stat-value { font-weight: bold; font-family: 'Courier New', Courier, monospace; font-size: 1.1em; }
         
         .val-spins { color: #f1e05a; }
-        .val-payout { color: #56d364; font-size: 1.3em; }
+        .val-payout { color: #56d364; font-size: 1.2em; }
+        .val-max { color: #ffca28; }
+        .val-profit { color: #c9d1d9; }
         
         .progress-text {
             text-align: right;
@@ -112,10 +116,6 @@
             margin-top: 15px;
             font-style: italic;
         }
-        .tag-hellsing { border-top: 5px solid #b71c1c; }
-        .tag-slime { border-top: 5px solid #00bcd4; }
-        /* 加入呢行 👇 */
-        .tag-kakegurui { border-top: 5px solid #d50000; }
     </style>
 </head>
 <body>
@@ -125,140 +125,109 @@
     </div>
 
     <h1>🎰 柏青哥 100回 綜合統計中心</h1>
-    <p>自動以極速演算每部機台 100 次初當，並計算平均出玉與平均當選回轉數。<br>
-       <span style="font-size:0.9em; color: #8b949e;">(包含 Charge/小當 在內，將忠實反映 Data Lamp 嘅真實跳動方式)</span></p>
+    <p>自動以極速演算每部機台 100 次初當，並計算出玉與真實收支。<br>
+       <span style="font-size:0.9em; color: #8b949e;">(包含 Charge/小當 在內，金錢以 28玉交換 及 各機台千円回轉數 真實計算)</span></p>
 
     <button id="btn-start" class="btn-start" onclick="runAllSimulations()">▶️ 開始瘋狂演算 (100回)</button>
 
     <div class="grid-container">
         <div class="machine-card tag-bluelock" id="card-bluelock">
             <h3 class="machine-title">P ブルーロック 399ver</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="bluelock-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="bluelock-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="bluelock-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="bluelock-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="bluelock-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="bluelock-profit">---</span></div>
             <div class="progress-text" id="bluelock-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-dmdp" id="card-dmdp">
             <h3 class="machine-title">e DMDP 魂神9000</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="dmdp-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="dmdp-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="dmdp-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="dmdp-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="dmdp-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="dmdp-profit">---</span></div>
             <div class="progress-text" id="dmdp-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-ghoul399" id="card-ghoul399">
             <h3 class="machine-title">P 東京喰種 399ver</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="ghoul399-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="ghoul399-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="ghoul399-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="ghoul399-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="ghoul399-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="ghoul399-profit">---</span></div>
             <div class="progress-text" id="ghoul399-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-ghoul999" id="card-ghoul999">
             <h3 class="machine-title">P 東京喰種 999ver</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="ghoul999-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="ghoul999-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="ghoul999-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="ghoul999-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="ghoul999-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="ghoul999-profit">---</span></div>
             <div class="progress-text" id="ghoul999-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-jitsuryoku" id="card-jitsuryoku">
             <h3 class="machine-title">eようこそ実力至上主義...</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="jitsuryoku-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="jitsuryoku-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="jitsuryoku-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="jitsuryoku-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="jitsuryoku-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="jitsuryoku-profit">---</span></div>
             <div class="progress-text" id="jitsuryoku-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-monono" id="card-monono">
             <h3 class="machine-title">eフィーバーもののがたり</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="monono-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="monono-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="monono-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="monono-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="monono-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="monono-profit">---</span></div>
             <div class="progress-text" id="monono-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-lycoris" id="card-lycoris">
             <h3 class="machine-title">P リコリス・リコイル</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="lycoris-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="lycoris-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="lycoris-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="lycoris-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="lycoris-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="lycoris-profit">---</span></div>
             <div class="progress-text" id="lycoris-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-hellsing" id="card-hellsing">
             <h3 class="machine-title">P 烈核解放 (超孤紅の恤)</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="hellsing-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="hellsing-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="hellsing-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="hellsing-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="hellsing-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="hellsing-profit">---</span></div>
             <div class="progress-text" id="hellsing-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-slime" id="card-slime">
             <h3 class="machine-title">P 転生したらスライム...</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="slime-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="slime-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="slime-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="slime-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="slime-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="slime-profit">---</span></div>
             <div class="progress-text" id="slime-prog">等待中...</div>
         </div>
 
         <div class="machine-card tag-kakegurui" id="card-kakegurui">
             <h3 class="machine-title">P 賭ケグルイ</h3>
-            <div class="stat-row">
-                <span class="stat-label">平均當選回轉:</span>
-                <span class="stat-value val-spins" id="kakegurui-spins">---</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">平均獲得出玉:</span>
-                <span class="stat-value val-payout" id="kakegurui-payout">---</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="kakegurui-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="kakegurui-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="kakegurui-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="kakegurui-profit">---</span></div>
             <div class="progress-text" id="kakegurui-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card tag-ggo" id="card-ggo">
+            <h3 class="machine-title">P SAO オルタナティブ GGO</h3>
+            <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins" id="ggo-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="ggo-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一擊出玉:</span><span class="stat-value val-max" id="ggo-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">100回總收支:</span><span class="stat-value val-profit" id="ggo-profit">---</span></div>
+            <div class="progress-text" id="ggo-prog">等待中...</div>
         </div>
 
     </div>
@@ -268,7 +237,7 @@
         const yieldToMain = () => new Promise(r => setTimeout(r, 10)); 
 
         // ==========================================
-        // 1. P ブルーロック 399ver
+        // 各機台演算邏輯
         // ==========================================
         function simBlueLock() {
             let spins = 0, payout = 0;
@@ -286,9 +255,7 @@
                         let winRate = 108 / (33.2 + 108);
                         while(true) {
                             if(Math.random() < winRate) {
-                                if (Math.random() < 0.12) {
-                                    continue;
-                                }
+                                if (Math.random() < 0.12) continue;
                                 let rr = Math.random();
                                 if(rr < 0.005) {
                                     let ext = 7500;
@@ -304,22 +271,16 @@
                                 else if(rr < 0.057 + 0.198) payout += 4500;
                                 else if(rr < 0.255 + 0.380) payout += 3000;
                                 else payout += 1500;
-                            } else {
-                                break; 
-                            }
+                            } else break; 
                         }
                     }
                     break;
                 }
-                // Charge 中獎
                 if (Math.random() < 1/2110) { payout += 300; break; }
             }
             return {spins, payout};
         }
 
-        // ==========================================
-        // 2. e DMDP 魂神9000
-        // ==========================================
         function simDMDP() {
             let spins = 0, payout = 0;
             while(true) {
@@ -343,14 +304,10 @@
                                             if(r < 0.03) payout += 10500;
                                             else if(r < 0.50) payout += 9000;
                                             else payout += 3000;
-                                        } else {
-                                            inKonshin = false;
-                                        }
+                                        } else inKonshin = false;
                                     }
                                 }
-                            } else {
-                                inShikabane = false;
-                            }
+                            } else inShikabane = false;
                         }
                     }
                     break;
@@ -359,47 +316,31 @@
             return {spins, payout};
         }
 
-        // ==========================================
-        // 3. P 東京喰種 399ver
-        // ==========================================
         function simGhoul399() {
             let spins = 0, payout = 0;
             while(true) {
                 spins++;
                 if(Math.random() < 1/399.9) {
                     let r = Math.random();
-                    if(r < 0.50) { 
-                        payout += 1500; 
-                        runST130();
-                    } else if(r < 0.51) { 
-                        payout += 300; 
-                        runST130();
-                    } else { 
-                        payout += 1500; 
-                    }
+                    if(r < 0.50) { payout += 1500; runST130(); } 
+                    else if(r < 0.51) { payout += 300; runST130(); } 
+                    else { payout += 1500; }
                     break;
                 }
-                // Charge 中獎
                 if(Math.random() < 1/399.9) { payout += 300; break; } 
             }
-
             function runST130() {
                 let st = 130;
                 while(st > 0) {
                     if(Math.random() < 1/95.3) {
                         payout += (Math.random() < 0.03) ? 6000 : 3000;
                         st = 130; 
-                    } else {
-                        st--;
-                    }
+                    } else st--;
                 }
             }
             return {spins, payout};
         }
 
-        // ==========================================
-        // 4. P 東京喰種 999ver
-        // ==========================================
         function simGhoul999() {
             let spins = 0, payout = 0;
             while(true) {
@@ -413,24 +354,16 @@
                                 payout += 3000;
                                 while(Math.random() < 0.50) payout += 3000; 
                                 st = 5;
-                            } else {
-                                st--;
-                            }
+                            } else st--;
                         }
-                    } else { 
-                        payout += 3000; 
-                    }
+                    } else payout += 3000; 
                     break;
                 }
-                // Charge 中獎
                 if(Math.random() < 1/538.8) { payout += 300; break; }
             }
             return {spins, payout};
         }
 
-        // ==========================================
-        // 5. eようこそ実力至上主義の教室へ
-        // ==========================================
         function simJitsuryoku() {
             let spins = 0, payout = 0;
             while(true) {
@@ -439,24 +372,18 @@
                     payout += 450;
                     if(Math.random() < 0.50) {
                         let hit = false;
-                        for(let i=0; i<65; i++) {
-                            if(Math.random() < 1/94.1) { hit = true; break; }
-                        }
+                        for(let i=0; i<65; i++) if(Math.random() < 1/94.1) { hit = true; break; }
                         if(hit) {
                             payout += 3000;
                             if(Math.random() < 0.73) {
                                 let inLT = true;
                                 while(inLT) {
                                     let ltHit = false;
-                                    for(let i=0; i<145; i++) {
-                                        if(Math.random() < 1/71.6) { ltHit = true; break; }
-                                    }
+                                    for(let i=0; i<145; i++) if(Math.random() < 1/71.6) { ltHit = true; break; }
                                     if(ltHit) {
                                         payout += 3000;
                                         if(Math.random() >= 0.87) inLT = false;
-                                    } else {
-                                        inLT = false;
-                                    }
+                                    } else inLT = false;
                                 }
                             }
                         }
@@ -467,9 +394,6 @@
             return {spins, payout};
         }
 
-        // ==========================================
-        // 6. eフィーバーもののがたり
-        // ==========================================
         function simMononogatari() {
             let spins = 0, payout = 0;
             while(true) {
@@ -485,22 +409,15 @@
                                 if(rr < 0.25) payout += 6000;
                                 else if(rr < 0.50) payout += 3000;
                                 else payout += 1500;
-                            } else {
-                                break;
-                            }
+                            } else break;
                         }
-                    } else {
-                        payout += 300;
-                    }
+                    } else payout += 300;
                     break;
                 }
             }
             return {spins, payout};
         }
 
-        // ==========================================
-        // 7. P リコリス・リコイル
-        // ==========================================
         function simLycoris() {
             let spins = 0, payout = 0;
             while(true) {
@@ -526,15 +443,11 @@
                                     if(Math.random() < 0.5) {
                                         payout += 6000;
                                         while(Math.random() < 0.5) payout += 3000; 
-                                    } else {
-                                        payout += 3000;
-                                    }
+                                    } else payout += 3000;
                                     mode = "A";
                                 }
                                 st = 132;
-                            } else {
-                                st--;
-                            }
+                            } else st--;
                         }
                     }
                     break;
@@ -543,9 +456,6 @@
             return {spins, payout};
         }
 
-        // ==========================================
-        // 8. P 烈核解放 (超孤紅の恤)
-        // ==========================================
         function simHellsing() {
             let spins = 0, payout = 0;
             while(true) {
@@ -554,10 +464,7 @@
                     let czSuccess = false;
                     for(let i=1; i<=10; i++) {
                         spins++; 
-                        if(Math.random() < 1/25.5) { 
-                            czSuccess = true;
-                            break;
-                        }
+                        if(Math.random() < 1/25.5) { czSuccess = true; break; }
                     }
                     if (czSuccess) {
                         let r = Math.random();
@@ -574,26 +481,14 @@
                                         let loop = true;
                                         while(loop) {
                                             let br = Math.random();
-                                            if (br < 0.125) { 
-                                                payout += 6000;
-                                            } else if (br < 0.125 + 0.375) {
-                                                payout += 4500;
-                                                loop = false;
-                                            } else if (br < 0.50 + 0.375) {
-                                                payout += 3000;
-                                                loop = false;
-                                            } else {
-                                                payout += 1500;
-                                                loop = false;
-                                            }
+                                            if (br < 0.125) payout += 6000;
+                                            else if (br < 0.125 + 0.375) { payout += 4500; loop = false; }
+                                            else if (br < 0.50 + 0.375) { payout += 3000; loop = false; }
+                                            else { payout += 1500; loop = false; }
                                         }
-                                    } else {
-                                        payout += 1500; 
-                                    }
+                                    } else payout += 1500; 
                                     st = 144; 
-                                } else {
-                                    st--;
-                                }
+                                } else st--;
                             }
                         }
                         break; 
@@ -603,142 +498,131 @@
             return {spins, payout};
         }
 
-// ==========================================
-        // 9. P 転生したらスライムだった件 (史萊姆)
-        // ==========================================
         function simSlime() {
             let spins = 0, payout = 0;
             while(true) {
                 spins++;
-                // 1. 1/399.9 図柄揃い
                 if (Math.random() < 1/399.9) {
                     payout += 1500;
-                    let rush = false;
-                    let mode = "NORMAL";
-                    
-                    if (Math.random() < 0.50) {
-                        rush = true; 
-                    } else {
+                    let rush = false, mode = "NORMAL";
+                    if (Math.random() < 0.50) rush = true; 
+                    else {
                         let hit = false;
-                        for(let i=1; i<=100; i++) {
-                            if (Math.random() < 1/399.9) {
-                                hit = true;
-                                break;
-                            }
-                        }
-                        if(hit) {
-                            payout += 3000;
-                            rush = true;
-                            if(Math.random() < 0.50) mode = "SUPER";
-                        }
+                        for(let i=1; i<=100; i++) if (Math.random() < 1/399.9) { hit = true; break; }
+                        if(hit) { payout += 3000; rush = true; if(Math.random() < 0.50) mode = "SUPER"; }
                     }
 
                     if (rush) {
                         let st_max = mode === "SUPER" ? 160 : 135;
                         let current_st = st_max;
-                        
                         while(current_st > 0) {
                             if (Math.random() < 1/99.1) {
                                 if (mode === "NORMAL") {
-                                    if(Math.random() < 0.50) {
-                                        mode = "SUPER"; 
-                                    } else {
-                                        payout += 3000; 
-                                    }
+                                    if(Math.random() < 0.50) mode = "SUPER"; 
+                                    else payout += 3000; 
                                 } else {
-                                    if(Math.random() < (99.1 / 793)) {
-                                        mode = "NORMAL"; 
-                                    } else {
-                                        payout += 3000; 
-                                    }
+                                    if(Math.random() < (99.1 / 793)) mode = "NORMAL"; 
+                                    else payout += 3000; 
                                 }
-                                st_max = mode === "SUPER" ? 160 : 135;
-                                current_st = st_max; 
-                            } else {
-                                current_st--;
-                            }
+                                current_st = mode === "SUPER" ? 160 : 135; 
+                            } else current_st--;
                         }
                     }
                     break;
                 }
-                // 2. 1/2800 転スラチャージ (Charge小當)
-                if (Math.random() < 1/2800) { 
-                    payout += 300; 
-                    break; 
+                if (Math.random() < 1/2800) { payout += 300; break; }
+            }
+            return {spins, payout};
+        }
+
+        function simKakegurui() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/204) {
+                    if (Math.random() < 0.25) {
+                        if (Math.random() < 0.50) {
+                            payout += 7500; 
+                            let inTsuranuki = true;
+                            while(inTsuranuki) {
+                                if (Math.random() < 0.30) payout += 7500;
+                                else { payout += 1500; inTsuranuki = false; }
+                            }
+                            let st = 135;
+                            while(st > 0) {
+                                if(Math.random() < 1/99) {
+                                    payout += 1500; 
+                                    if (Math.random() < 0.60) {
+                                        let inTsuranukiRush = true;
+                                        while(inTsuranukiRush) {
+                                            if (Math.random() < 0.30) payout += 7500;
+                                            else { payout += 1500; inTsuranukiRush = false; }
+                                        }
+                                    }
+                                    st = 135;
+                                } else st--;
+                            }
+                        } else payout += 1500;
+                    } else payout += 300;
+                    break;
                 }
             }
             return {spins, payout};
         }
 
-// ==========================================
-        // 10. P 賭ケグルイ
-        // ==========================================
-        function simKakegurui() {
-            let spins = 0, payout = 0, chargePayout = 0;
+        // 新增：GGO 演算邏輯
+        function simGGO() {
+            let spins = 0, payout = 0;
             while(true) {
                 spins++;
-                // 1/204 通常時大当り
-                if (Math.random() < 1/204) {
-                    // 25% 突入判決
-                    if (Math.random() < 0.25) {
-                        // 50% 成功
-                        if (Math.random() < 0.50) {
-                            payout += 7500; // 成功直接 7500玉
-                            
-                            // 進入 30% ツラヌキチャレンジ Loop
-                            let inTsuranuki = true;
-                            while(inTsuranuki) {
-                                if (Math.random() < 0.30) {
-                                    payout += 7500; // 30% 成功再上乗せ 7500
-                                } else {
-                                    payout += 1500; // 70% 失敗保底 1500
-                                    inTsuranuki = false;
-                                }
-                            }
-                            
-                            // 進入 RUSH ST135
-                            let st = 135;
-                            while(st > 0) {
-                                // 1/99 RUSH 中獎
-                                if(Math.random() < 1/99) {
-                                    payout += 1500; // 狂喜乱舞BONUS 1500玉
-                                    
-                                    // 60% 機率觸發運命の一撃 -> ツラヌキチャレンジ
-                                    if (Math.random() < 0.60) {
-                                        let inTsuranukiRush = true;
-                                        while(inTsuranukiRush) {
-                                            if (Math.random() < 0.30) {
-                                                payout += 7500;
-                                            } else {
-                                                payout += 1500;
-                                                inTsuranukiRush = false;
-                                            }
-                                        }
-                                    }
-                                    st = 135; // ST 重新設定
-                                } else {
-                                    st--;
-                                }
-                            }
-                        } else {
-                            payout += 1500; // 判決失敗 1500玉
-                        }
+                if (Math.random() < 1/319.9) {
+                    let roll = Math.random();
+                    if (roll < 0.03) {
+                        payout += 4500;
+                        runSJRush();
                     } else {
-                        payout += 300; // 未觸發判決 300玉
+                        payout += 300;
+                        let breakthrough = false;
+                        for(let i=1; i<=50; i++) {
+                            if (Math.random() < 1/99.9) { breakthrough = true; break; }
+                        }
+                        if (breakthrough) {
+                            payout += 3600;
+                            runSJRush();
+                        }
                     }
                     break;
                 }
             }
-            return {spins, payout, chargePayout};
+            function runSJRush() {
+                let st = 160;
+                while(st > 0) {
+                    if (Math.random() < 1/99.9) {
+                        let br = Math.random();
+                        if (br < 0.30) payout += 3600;
+                        else if (br < 0.50) payout += 2100;
+                        else if (br < 0.75) payout += 1500;
+                        else if (br < 0.85) payout += 900;
+                        else if (br < 0.95) payout += 600;
+                        else payout += 300;
+                        st = 160;
+                    } else {
+                        st--;
+                    }
+                }
+            }
+            return {spins, payout};
         }
 
         // ==========================================
-        // 控制器
+        // 控制器 (加入最大出玉及收支計算)
         // ==========================================
-        async function runMachineSim(idPrefix, simFunc) {
+        async function runMachineSim(idPrefix, simFunc, spinCost) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
             const elPayout = document.getElementById(`${idPrefix}-payout`);
+            const elMax = document.getElementById(`${idPrefix}-max`);
+            const elProfit = document.getElementById(`${idPrefix}-profit`);
             const elProg = document.getElementById(`${idPrefix}-prog`);
 
             if(!card) return; 
@@ -748,11 +632,17 @@
             
             let totalSpins = 0;
             let totalPayout = 0;
+            let maxPayout = 0;
 
             for(let i = 1; i <= ITERATIONS; i++) {
                 let res = simFunc();
                 totalSpins += res.spins;
                 totalPayout += res.payout;
+                
+                // 記錄 100 次當中最癲嗰一次出玉
+                if (res.payout > maxPayout) {
+                    maxPayout = res.payout;
+                }
                 
                 if(i % 20 === 0) {
                     elProg.innerText = `演算中... ${i}/${ITERATIONS}`;
@@ -762,12 +652,26 @@
 
             let avgSpins = Math.round(totalSpins / ITERATIONS);
             let avgPayout = Math.round(totalPayout / ITERATIONS);
+            
+            // 計算真實金錢收支：出玉價值 (28玉交換) - 總投資成本
+            let totalRevenueYen = totalPayout * 3.57; 
+            let totalCostYen = totalSpins * spinCost;
+            let netProfitYen = Math.round(totalRevenueYen - totalCostYen);
 
             elSpins.innerText = avgSpins.toLocaleString();
             elPayout.innerText = avgPayout.toLocaleString() + " 玉";
+            elMax.innerText = maxPayout.toLocaleString() + " 玉";
+            
+            // 處理正負數顏色
+            if (netProfitYen > 0) {
+                elProfit.innerText = "+" + netProfitYen.toLocaleString() + " 円";
+                elProfit.style.color = "#56d364"; // 贏錢綠色
+            } else {
+                elProfit.innerText = netProfitYen.toLocaleString() + " 円";
+                elProfit.style.color = "#f85149"; // 輸錢紅色
+            }
             
             elProg.innerText = `完成 (共 ${ITERATIONS} 回)`;
-            
             card.classList.remove('running');
             card.classList.add('done');
         }
@@ -777,7 +681,10 @@
             btn.disabled = true;
             btn.innerText = "⏳ 瘋狂演算中...";
 
-            document.querySelectorAll('.val-spins, .val-payout').forEach(el => el.innerText = "---");
+            document.querySelectorAll('.val-spins, .val-payout, .val-max, .val-profit').forEach(el => {
+                el.innerText = "---";
+                el.style.color = ""; // 重設顏色
+            });
             document.querySelectorAll('.progress-text').forEach(el => el.innerText = "準備中...");
             document.querySelectorAll('.machine-card').forEach(el => {
                 el.classList.remove('running', 'done');
@@ -785,16 +692,18 @@
 
             await yieldToMain();
 
-            await runMachineSim('bluelock', simBlueLock);
-            await runMachineSim('dmdp', simDMDP);
-            await runMachineSim('ghoul399', simGhoul399);
-            await runMachineSim('ghoul999', simGhoul999); 
-            await runMachineSim('jitsuryoku', simJitsuryoku);
-            await runMachineSim('monono', simMononogatari); 
-            await runMachineSim('lycoris', simLycoris);
-            await runMachineSim('hellsing', simHellsing);
-            await runMachineSim('slime', simSlime);
-            await runMachineSim('kakegurui', simKakegurui);
+            // 傳入對應嘅「千円回轉數」成本 (1000円 / 回轉數)
+            await runMachineSim('bluelock', simBlueLock, 1000/17);
+            await runMachineSim('dmdp', simDMDP, 1000/17);
+            await runMachineSim('ghoul399', simGhoul399, 1000/17);
+            await runMachineSim('ghoul999', simGhoul999, 1000/32);   // 喰種999 係 32轉
+            await runMachineSim('jitsuryoku', simJitsuryoku, 1000/25); // 歡迎來到實力 係 25轉
+            await runMachineSim('monono', simMononogatari, 1000/17); 
+            await runMachineSim('lycoris', simLycoris, 1000/17);
+            await runMachineSim('hellsing', simHellsing, 1000/17);
+            await runMachineSim('slime', simSlime, 1000/17);
+            await runMachineSim('kakegurui', simKakegurui, 1000/17);
+            await runMachineSim('ggo', simGGO, 1000/17); // 新機 GGO
 
             btn.disabled = false;
             btn.innerText = "▶️ 再次演算 (100回)";
