@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎰 虛擬柏青哥大廳 (Virtual Pachinko Hall)</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,7 +19,7 @@
             background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%);
             min-height: 100vh;
         }
-        
+
         /* 頂部導航 */
         .top-nav {
             display: flex;
@@ -31,17 +32,53 @@
             border-radius: 12px;
             border: 1px solid #333;
         }
-        .user-info { font-size: 1.2em; font-weight: bold; color: #00e5ff; text-align: left; }
-        
-        /* 智能 Auth 按鈕設計 */
-        .auth-btn { border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1em; transition: 0.2s; }
-        .auth-btn.logout { background: #d32f2f; color: white; border: 1px solid #b71c1c; }
-        .auth-btn.logout:hover { background: #b71c1c; }
-        .auth-btn.login { background: #00e5ff; color: #000; border: 1px solid #00b8d4; }
-        .auth-btn.login:hover { background: #00b8d4; box-shadow: 0 0 10px #00e5ff; }
 
-        h1 { color: #ffeb3b; font-size: 3em; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 235, 59, 0.6); }
-        
+        .user-info {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00e5ff;
+            text-align: left;
+        }
+
+        /* 智能 Auth 按鈕設計 */
+        .auth-btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: 0.2s;
+        }
+
+        .auth-btn.logout {
+            background: #d32f2f;
+            color: white;
+            border: 1px solid #b71c1c;
+        }
+
+        .auth-btn.logout:hover {
+            background: #b71c1c;
+        }
+
+        .auth-btn.login {
+            background: #00e5ff;
+            color: #000;
+            border: 1px solid #00b8d4;
+        }
+
+        .auth-btn.login:hover {
+            background: #00b8d4;
+            box-shadow: 0 0 10px #00e5ff;
+        }
+
+        h1 {
+            color: #ffeb3b;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+        }
+
         /* 🌟 新增：店鋪實時收支看板樣式 🌟 */
         .parlor-profit-board {
             background-color: #0a0a0a;
@@ -54,17 +91,60 @@
             position: relative;
             overflow: hidden;
         }
+
         .parlor-profit-board::before {
-            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(224,64,251,0.1) 0%, transparent 70%);
-            animation: pulse 4s infinite; pointer-events: none;
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(224, 64, 251, 0.1) 0%, transparent 70%);
+            animation: pulse 4s infinite;
+            pointer-events: none;
         }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.5; } }
-        
-        .profit-title { color: #ffca28; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; }
-        .profit-amount { font-size: 3em; font-weight: 900; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
-        .profit-positive { color: #00e676; text-shadow: 0 0 15px rgba(0, 230, 118, 0.5); }
-        .profit-negative { color: #ff5252; text-shadow: 0 0 15px rgba(255, 82, 82, 0.5); }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+        }
+
+        .profit-title {
+            color: #ffca28;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .profit-amount {
+            font-size: 3em;
+            font-weight: 900;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .profit-positive {
+            color: #00e676;
+            text-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
+        }
+
+        .profit-negative {
+            color: #ff5252;
+            text-shadow: 0 0 15px rgba(255, 82, 82, 0.5);
+        }
 
         /* 排行榜通用樣式 */
         .rankings-wrapper {
@@ -73,43 +153,98 @@
             gap: 20px;
             max-width: 1200px;
             margin: 0 auto 40px auto;
-            flex-wrap: wrap; /* 螢幕細時自動折行 */
+            flex-wrap: wrap;
+            /* 螢幕細時自動折行 */
         }
 
         .ranking-container {
             flex: 1;
             min-width: 320px;
             background-color: #161b22;
-            border: 2px solid #ffca28; /* 預設為富豪榜金邊 */
+            border: 2px solid #ffca28;
+            /* 預設為富豪榜金邊 */
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 0 15px rgba(255, 202, 40, 0.2);
         }
-        
+
         /* 窮人榜專屬樣式覆蓋 */
         .ranking-container.poor-rank {
             border-color: #4fc3f7;
             box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);
         }
+
         .poor-rank .ranking-title {
             color: #4fc3f7;
             border-bottom: 1px solid #01579b;
         }
 
-        .ranking-title { color: #ffca28; font-size: 1.5em; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px;}
-        table.ranking-table { width: 100%; border-collapse: collapse; color: #fff; }
-        table.ranking-table th, table.ranking-table td { padding: 12px; text-align: center; border-bottom: 1px solid #333; }
-        table.ranking-table th { color: #888; }
-        
+        .ranking-title {
+            color: #ffca28;
+            font-size: 1.5em;
+            margin-top: 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        table.ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+        }
+
+        table.ranking-table th,
+        table.ranking-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        table.ranking-table th {
+            color: #888;
+        }
+
         /* 富豪榜前三名顏色 */
-        .ranking-table.rich tr:nth-child(1) td { color: #ffeb3b; font-weight: bold; font-size: 1.2em; } /* 金 */
-        .ranking-table.rich tr:nth-child(2) td { color: red; font-weight: bold; font-size: 1.1em;} /* 銀 */
-        .ranking-table.rich tr:nth-child(3) td { color: #cd7f32; font-weight: bold; font-size: 1.05em;} /* 銅 */
-        
+        .ranking-table.rich tr:nth-child(1) td {
+            color: #ffeb3b;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* 金 */
+        .ranking-table.rich tr:nth-child(2) td {
+            color: red;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* 銀 */
+        .ranking-table.rich tr:nth-child(3) td {
+            color: #cd7f32;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+
+        /* 銅 */
+
         /* 窮人榜前三名顏色 */
-        .ranking-table.poor tr:nth-child(1) td { color: #00bcd4; font-weight: bold; font-size: 1.2em; } 
-        .ranking-table.poor tr:nth-child(2) td { color: #26c6da; font-weight: bold; font-size: 1.1em;} 
-        .ranking-table.poor tr:nth-child(3) td { color: #4dd0e1; font-weight: bold; font-size: 1.05em;}
+        .ranking-table.poor tr:nth-child(1) td {
+            color: #00bcd4;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .ranking-table.poor tr:nth-child(2) td {
+            color: #26c6da;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .ranking-table.poor tr:nth-child(3) td {
+            color: #4dd0e1;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
 
         .hall-container {
             display: grid;
@@ -119,28 +254,230 @@
             margin: 0 auto;
         }
 
-        .machine-card { background-color: #111; border-radius: 15px; padding: 25px 20px; text-decoration: none; color: white; transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; }
-        .machine-card:hover { transform: translateY(-10px); z-index: 10; }
-        .machine-title { font-size: 1.4em; font-weight: 900; margin: 0 0 10px 0; }
-        .machine-spec { font-size: 0.9em; color: #ccc; margin-bottom: 20px; line-height: 1.6; }
-        .play-btn { background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); padding: 10px; border-radius: 8px; font-weight: bold; letter-spacing: 1px; transition: background-color 0.3s; }
-        .machine-card:hover .play-btn { background-color: rgba(255, 255, 255, 0.2); color: #fff; }
+        .machine-card {
+            background-color: #111;
+            border-radius: 15px;
+            padding: 25px 20px;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid transparent;
+        }
+
+        .machine-card:hover {
+            transform: translateY(-10px);
+            z-index: 10;
+        }
+
+        .machine-title {
+            font-size: 1.4em;
+            font-weight: 900;
+            margin: 0 0 10px 0;
+        }
+
+        .machine-spec {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .play-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: background-color 0.3s;
+        }
+
+        .machine-card:hover .play-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
 
         /* 各機台專屬主題顏色 */
-        .card-bluelock { border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); } .card-bluelock:hover { box-shadow: 0 0 30px rgba(0, 229, 255, 0.6); } .card-bluelock .machine-title { color: #00e5ff; text-shadow: 0 0 5px #00e5ff; }
-        .card-dmdp { border-color: #e040fb; box-shadow: 0 0 15px rgba(224, 64, 251, 0.2); } .card-dmdp:hover { box-shadow: 0 0 30px rgba(224, 64, 251, 0.6); } .card-dmdp .machine-title { color: #e040fb; text-shadow: 0 0 5px #e040fb; }
-        .card-ghoul399 { border-color: #ff1744; box-shadow: 0 0 15px rgba(255, 23, 68, 0.2); } .card-ghoul399:hover { box-shadow: 0 0 30px rgba(255, 23, 68, 0.6); } .card-ghoul399 .machine-title { color: #ff1744; text-shadow: 0 0 5px #ff1744; }
-        .card-ghoul999 { border-color: #d50000; box-shadow: 0 0 15px rgba(213, 0, 0, 0.2); background: linear-gradient(180deg, #111 0%, #300 100%);} .card-ghoul999:hover { box-shadow: 0 0 40px rgba(213, 0, 0, 0.8); } .card-ghoul999 .machine-title { color: #ff5252; text-shadow: 0 0 10px #d50000; }
-        .card-jitsuryoku { border-color: #ffca28; box-shadow: 0 0 15px rgba(255, 202, 40, 0.2); } .card-jitsuryoku:hover { box-shadow: 0 0 30px rgba(255, 202, 40, 0.6); } .card-jitsuryoku .machine-title { color: #ffca28; text-shadow: 0 0 5px #ffca28; }
-        .card-monono { border-color: #f44336; box-shadow: 0 0 15px rgba(244, 67, 54, 0.2); } .card-monono:hover { box-shadow: 0 0 30px rgba(244, 67, 54, 0.6); } .card-monono .machine-title { color: #f44336; text-shadow: 0 0 5px #f44336; }
-        .card-lycoris { border-color: #ff5252; box-shadow: 0 0 15px rgba(255, 82, 82, 0.2); } .card-lycoris:hover { box-shadow: 0 0 30px rgba(255, 82, 82, 0.6); } .card-lycoris .machine-title { color: #ff5252; text-shadow: 0 0 5px #ff5252; }
-        .card-hellsing { border-color: #b71c1c; box-shadow: 0 0 15px rgba(183, 28, 28, 0.2); } .card-hellsing:hover { box-shadow: 0 0 30px rgba(183, 28, 28, 0.8); } .card-hellsing .machine-title { color: #ff1744; text-shadow: 0 0 10px #b71c1c; }
-        .card-slime { border-color: #00bcd4; box-shadow: 0 0 15px rgba(0, 188, 212, 0.2); } .card-slime:hover { box-shadow: 0 0 30px rgba(0, 188, 212, 0.8); } .card-slime .machine-title { color: #00bcd4; text-shadow: 0 0 10px #00bcd4; }
-        .card-kakegurui { border-color: #d50000; box-shadow: 0 0 15px rgba(213, 0, 0, 0.2); } .card-kakegurui:hover { box-shadow: 0 0 30px rgba(213, 0, 0, 0.6); } .card-kakegurui .machine-title { color: #ff5252; text-shadow: 0 0 5px #d50000; }
-        .card-ggo { border-color: #ff4081; box-shadow: 0 0 15px rgba(255, 64, 129, 0.2); } .card-ggo:hover { box-shadow: 0 0 30px rgba(255, 64, 129, 0.6); } .card-ggo .machine-title { color: #ff4081; text-shadow: 0 0 5px #ff4081; }
-        .card-stats { border-color: #4caf50; box-shadow: 0 0 15px rgba(76, 175, 80, 0.2); grid-column: 1 / -1; margin-top: 20px;} .card-stats:hover { box-shadow: 0 0 30px rgba(76, 175, 80, 0.6); } .card-stats .machine-title { color: #4caf50; text-shadow: 0 0 5px #4caf50; } .card-stats .play-btn { background-color: rgba(76, 175, 80, 0.2); }
+        .card-bluelock {
+            border-color: #00e5ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        .card-bluelock:hover {
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.6);
+        }
+
+        .card-bluelock .machine-title {
+            color: #00e5ff;
+            text-shadow: 0 0 5px #00e5ff;
+        }
+
+        .card-dmdp {
+            border-color: #e040fb;
+            box-shadow: 0 0 15px rgba(224, 64, 251, 0.2);
+        }
+
+        .card-dmdp:hover {
+            box-shadow: 0 0 30px rgba(224, 64, 251, 0.6);
+        }
+
+        .card-dmdp .machine-title {
+            color: #e040fb;
+            text-shadow: 0 0 5px #e040fb;
+        }
+
+        .card-ghoul399 {
+            border-color: #ff1744;
+            box-shadow: 0 0 15px rgba(255, 23, 68, 0.2);
+        }
+
+        .card-ghoul399:hover {
+            box-shadow: 0 0 30px rgba(255, 23, 68, 0.6);
+        }
+
+        .card-ghoul399 .machine-title {
+            color: #ff1744;
+            text-shadow: 0 0 5px #ff1744;
+        }
+
+        .card-ghoul999 {
+            border-color: #d50000;
+            box-shadow: 0 0 15px rgba(213, 0, 0, 0.2);
+            background: linear-gradient(180deg, #111 0%, #300 100%);
+        }
+
+        .card-ghoul999:hover {
+            box-shadow: 0 0 40px rgba(213, 0, 0, 0.8);
+        }
+
+        .card-ghoul999 .machine-title {
+            color: #ff5252;
+            text-shadow: 0 0 10px #d50000;
+        }
+
+        .card-jitsuryoku {
+            border-color: #ffca28;
+            box-shadow: 0 0 15px rgba(255, 202, 40, 0.2);
+        }
+
+        .card-jitsuryoku:hover {
+            box-shadow: 0 0 30px rgba(255, 202, 40, 0.6);
+        }
+
+        .card-jitsuryoku .machine-title {
+            color: #ffca28;
+            text-shadow: 0 0 5px #ffca28;
+        }
+
+        .card-monono {
+            border-color: #f44336;
+            box-shadow: 0 0 15px rgba(244, 67, 54, 0.2);
+        }
+
+        .card-monono:hover {
+            box-shadow: 0 0 30px rgba(244, 67, 54, 0.6);
+        }
+
+        .card-monono .machine-title {
+            color: #f44336;
+            text-shadow: 0 0 5px #f44336;
+        }
+
+        .card-lycoris {
+            border-color: #ff5252;
+            box-shadow: 0 0 15px rgba(255, 82, 82, 0.2);
+        }
+
+        .card-lycoris:hover {
+            box-shadow: 0 0 30px rgba(255, 82, 82, 0.6);
+        }
+
+        .card-lycoris .machine-title {
+            color: #ff5252;
+            text-shadow: 0 0 5px #ff5252;
+        }
+
+        .card-hellsing {
+            border-color: #b71c1c;
+            box-shadow: 0 0 15px rgba(183, 28, 28, 0.2);
+        }
+
+        .card-hellsing:hover {
+            box-shadow: 0 0 30px rgba(183, 28, 28, 0.8);
+        }
+
+        .card-hellsing .machine-title {
+            color: #ff1744;
+            text-shadow: 0 0 10px #b71c1c;
+        }
+
+        .card-slime {
+            border-color: #00bcd4;
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.2);
+        }
+
+        .card-slime:hover {
+            box-shadow: 0 0 30px rgba(0, 188, 212, 0.8);
+        }
+
+        .card-slime .machine-title {
+            color: #00bcd4;
+            text-shadow: 0 0 10px #00bcd4;
+        }
+
+        .card-kakegurui {
+            border-color: #d50000;
+            box-shadow: 0 0 15px rgba(213, 0, 0, 0.2);
+        }
+
+        .card-kakegurui:hover {
+            box-shadow: 0 0 30px rgba(213, 0, 0, 0.6);
+        }
+
+        .card-kakegurui .machine-title {
+            color: #ff5252;
+            text-shadow: 0 0 5px #d50000;
+        }
+
+        .card-ggo {
+            border-color: #ff4081;
+            box-shadow: 0 0 15px rgba(255, 64, 129, 0.2);
+        }
+
+        .card-ggo:hover {
+            box-shadow: 0 0 30px rgba(255, 64, 129, 0.6);
+        }
+
+        .card-ggo .machine-title {
+            color: #ff4081;
+            text-shadow: 0 0 5px #ff4081;
+        }
+
+        .card-stats {
+            border-color: #4caf50;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.2);
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .card-stats:hover {
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.6);
+        }
+
+        .card-stats .machine-title {
+            color: #4caf50;
+            text-shadow: 0 0 5px #4caf50;
+        }
+
+        .card-stats .play-btn {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
     </style>
 </head>
+
 <body>
 
     <div class="top-nav">
@@ -160,7 +497,7 @@
     </div>
 
     <div class="rankings-wrapper">
-        
+
         <div class="ranking-container">
             <h2 class="ranking-title">🏆 全伺服器富豪榜 TOP 10 🏆</h2>
             <table class="ranking-table rich">
@@ -172,7 +509,9 @@
                     </tr>
                 </thead>
                 <tbody id="ranking-body">
-                    <tr><td colspan="3">讀取數據中...</td></tr>
+                    <tr>
+                        <td colspan="3">讀取數據中...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -188,7 +527,9 @@
                     </tr>
                 </thead>
                 <tbody id="poor-ranking-body">
-                    <tr><td colspan="3">讀取數據中...</td></tr>
+                    <tr>
+                        <td colspan="3">讀取數據中...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -196,7 +537,7 @@
     </div>
 
     <div class="hall-container">
-        
+
         <a href="bluelock.html" class="machine-card card-bluelock">
             <div>
                 <h3 class="machine-title">P ブルーロック 399ver</h3>
@@ -316,7 +657,7 @@
             </div>
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
-        
+
         <a href="ggo.html" class="machine-card card-ggo">
             <div>
                 <h3 class="machine-title">P SAO オルタナティブ GGO</h3>
@@ -376,20 +717,22 @@
 
         // 實時監聽雲端金錢同排行榜 (訪客都睇到)
         db.ref('users').on('value', (snapshot) => {
-            let users = snapshot.val() || {}; 
+            let users = snapshot.val() || {};
 
             // 1. 更新自己個錢包 (如果有登入)
             if (currentUser && users[currentUser]) {
                 document.getElementById("nav-balance").innerText = Math.round(users[currentUser].balance).toLocaleString();
             }
 
-            // 🌟 2. 新增：精準計算店鋪總收支 🌟
-            // 玩家餘額係負數(輸錢) = 店鋪賺錢；玩家正數(贏錢) = 店鋪蝕錢
+            // 🌟 2. 完美修正版：計算店鋪真實盈虧 🌟
             let totalParlorProfit = 0;
             let userKeys = Object.keys(users);
-            
+            const INITIAL_BALANCE = 50000; // 👈 填返你註冊時派畀玩家嘅初始金額
+
             userKeys.forEach(key => {
-                totalParlorProfit -= (users[key].balance || 0); 
+                let userBalance = users[key].balance || 0;
+                // 店鋪真實盈虧 = 派出去嘅 5萬 - 玩家現時手頭上嘅餘額
+                totalParlorProfit += (INITIAL_BALANCE - userBalance);
             });
 
             // 顯示店鋪收支
@@ -417,8 +760,8 @@
         function renderRankings(users) {
             let rankingBody = document.getElementById("ranking-body");
             let poorRankingBody = document.getElementById("poor-ranking-body");
-            
-            rankingBody.innerHTML = ""; 
+
+            rankingBody.innerHTML = "";
             poorRankingBody.innerHTML = "";
 
             let userKeys = Object.keys(users);
@@ -431,7 +774,7 @@
             let userArray = userKeys.map(name => {
                 return { name: name, balance: users[name].balance };
             });
-            
+
             // --- 處理富豪榜 ---
             // 根據餘額由高至低排序
             userArray.sort((a, b) => b.balance - a.balance);
@@ -449,12 +792,12 @@
                 `;
                 rankingBody.appendChild(tr);
             });
-            
+
             // --- 處理窮人榜 ---
             // 根據餘額由低至高排序
             userArray.sort((a, b) => a.balance - b.balance);
             let top10Poor = userArray.slice(0, 10);
-            
+
             top10Poor.forEach((user, index) => {
                 let tr = document.createElement("tr");
                 let rankText = (index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1);
@@ -474,7 +817,7 @@
             if (currentUser) {
                 // 如果已登入 -> 執行登出
                 localStorage.removeItem("pachinko_current_user");
-                window.location.reload(); 
+                window.location.reload();
             } else {
                 // 如果未登入 -> 去註冊頁
                 window.location.href = "login.html";
@@ -483,4 +826,5 @@
     </script>
 
 </body>
+
 </html>
