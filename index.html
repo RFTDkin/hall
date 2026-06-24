@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎰 虛擬柏青哥大廳 (Virtual Pachinko Hall)</title>
-    <!-- 引入 Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     
@@ -43,6 +42,30 @@
 
         h1 { color: #ffeb3b; font-size: 3em; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 235, 59, 0.6); }
         
+        /* 🌟 新增：店鋪實時收支看板樣式 🌟 */
+        .parlor-profit-board {
+            background-color: #0a0a0a;
+            border: 2px solid #e040fb;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+            box-shadow: 0 0 20px rgba(224, 64, 251, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .parlor-profit-board::before {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(224,64,251,0.1) 0%, transparent 70%);
+            animation: pulse 4s infinite; pointer-events: none;
+        }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.5; } }
+        
+        .profit-title { color: #ffca28; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; }
+        .profit-amount { font-size: 3em; font-weight: 900; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
+        .profit-positive { color: #00e676; text-shadow: 0 0 15px rgba(0, 230, 118, 0.5); }
+        .profit-negative { color: #ff5252; text-shadow: 0 0 15px rgba(255, 82, 82, 0.5); }
+
         /* 排行榜通用樣式 */
         .rankings-wrapper {
             display: flex;
@@ -114,8 +137,8 @@
         .card-hellsing { border-color: #b71c1c; box-shadow: 0 0 15px rgba(183, 28, 28, 0.2); } .card-hellsing:hover { box-shadow: 0 0 30px rgba(183, 28, 28, 0.8); } .card-hellsing .machine-title { color: #ff1744; text-shadow: 0 0 10px #b71c1c; }
         .card-slime { border-color: #00bcd4; box-shadow: 0 0 15px rgba(0, 188, 212, 0.2); } .card-slime:hover { box-shadow: 0 0 30px rgba(0, 188, 212, 0.8); } .card-slime .machine-title { color: #00bcd4; text-shadow: 0 0 10px #00bcd4; }
         .card-kakegurui { border-color: #d50000; box-shadow: 0 0 15px rgba(213, 0, 0, 0.2); } .card-kakegurui:hover { box-shadow: 0 0 30px rgba(213, 0, 0, 0.6); } .card-kakegurui .machine-title { color: #ff5252; text-shadow: 0 0 5px #d50000; }
-        .card-stats { border-color: #4caf50; box-shadow: 0 0 15px rgba(76, 175, 80, 0.2); grid-column: 1 / -1; margin-top: 20px;} .card-stats:hover { box-shadow: 0 0 30px rgba(76, 175, 80, 0.6); } .card-stats .machine-title { color: #4caf50; text-shadow: 0 0 5px #4caf50; } .card-stats .play-btn { background-color: rgba(76, 175, 80, 0.2); }
         .card-ggo { border-color: #ff4081; box-shadow: 0 0 15px rgba(255, 64, 129, 0.2); } .card-ggo:hover { box-shadow: 0 0 30px rgba(255, 64, 129, 0.6); } .card-ggo .machine-title { color: #ff4081; text-shadow: 0 0 5px #ff4081; }
+        .card-stats { border-color: #4caf50; box-shadow: 0 0 15px rgba(76, 175, 80, 0.2); grid-column: 1 / -1; margin-top: 20px;} .card-stats:hover { box-shadow: 0 0 30px rgba(76, 175, 80, 0.6); } .card-stats .machine-title { color: #4caf50; text-shadow: 0 0 5px #4caf50; } .card-stats .play-btn { background-color: rgba(76, 175, 80, 0.2); }
     </style>
 </head>
 <body>
@@ -125,16 +148,19 @@
             👤 <span id="nav-username">載入中...</span> <br>
             💰 <span id="nav-balance" style="color: #00e676;">---</span> 円
         </div>
-        <!-- 智能按鈕：登入/登出 -->
         <button id="auth-btn" class="auth-btn" onclick="handleAuth()">載入中...</button>
     </div>
 
     <h1>🎰 虛擬柏青哥大廳</h1>
 
-    <!-- 🏆 雙排行榜並排顯示 -->
+    <div class="parlor-profit-board">
+        <div class="profit-title">🏢 ホールリアルタイム収支 (店鋪實時總盈虧)</div>
+        <div id="parlor-profit-amount" class="profit-amount">計算中...</div>
+        <div style="color: #888; font-size: 0.85em; margin-top: 5px;">(※ 玩家輸錢 ＝ 店鋪獲利。實時同步 28玉交換率計算)</div>
+    </div>
+
     <div class="rankings-wrapper">
         
-        <!-- 全服富豪榜 -->
         <div class="ranking-container">
             <h2 class="ranking-title">🏆 全伺服器富豪榜 TOP 10 🏆</h2>
             <table class="ranking-table rich">
@@ -151,7 +177,6 @@
             </table>
         </div>
 
-        <!-- 📉 全服窮人榜 -->
         <div class="ranking-container poor-rank">
             <h2 class="ranking-title">📉 10大窮人榜 📉</h2>
             <table class="ranking-table poor">
@@ -172,7 +197,6 @@
 
     <div class="hall-container">
         
-        <!-- Blue Lock -->
         <a href="bluelock.html" class="machine-card card-bluelock">
             <div>
                 <h3 class="machine-title">P ブルーロック 399ver</h3>
@@ -185,7 +209,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- DMDP -->
         <a href="dmdp.html" class="machine-card card-dmdp">
             <div>
                 <h3 class="machine-title">e DMDP 魂神9000</h3>
@@ -198,7 +221,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 東京喰種 399 -->
         <a href="ghoul399.html" class="machine-card card-ghoul399">
             <div>
                 <h3 class="machine-title">P 東京喰種 399ver</h3>
@@ -211,7 +233,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 東京喰種 999 -->
         <a href="ghoul999.html" class="machine-card card-ghoul999">
             <div>
                 <h3 class="machine-title">P 東京喰種 999ver</h3>
@@ -224,7 +245,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- よう実 -->
         <a href="jitsuryoku.html" class="machine-card card-jitsuryoku">
             <div>
                 <h3 class="machine-title">eようこそ実力至上主義の教室へ</h3>
@@ -237,7 +257,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- もののがたり -->
         <a href="monono.html" class="machine-card card-monono">
             <div>
                 <h3 class="machine-title">eフィーバーもののがたり</h3>
@@ -250,7 +269,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- リコリス・リコイル -->
         <a href="lycoris.html" class="machine-card card-lycoris">
             <div>
                 <h3 class="machine-title">P リコリス・リコイル</h3>
@@ -263,7 +281,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 烈核解放 -->
         <a href="hellsing.html" class="machine-card card-hellsing">
             <div>
                 <h3 class="machine-title">P 烈核解放 (超孤紅の恤)</h3>
@@ -276,7 +293,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 転生したらスライムだった件 -->
         <a href="slime.html" class="machine-card card-slime">
             <div>
                 <h3 class="machine-title">P 転生したらスライムだった件</h3>
@@ -289,7 +305,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 賭ケグルイ (新機) -->
         <a href="kakegurui.html" class="machine-card card-kakegurui">
             <div>
                 <h3 class="machine-title">P 賭ケグルイ</h3>
@@ -301,8 +316,7 @@
             </div>
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
-
-        <!-- SAO GGO -->
+        
         <a href="ggo.html" class="machine-card card-ggo">
             <div>
                 <h3 class="machine-title">P SAO オルタナティブ GGO</h3>
@@ -315,13 +329,12 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 100回 大當統計中心 -->
         <a href="stats.html" class="machine-card card-stats">
             <div>
                 <h3 class="machine-title">📊 100回 公平大當統計中心</h3>
                 <div class="machine-spec">
                     自動演算系統<br>
-                    一鍵測試以上所有 10 部機種 100 次初當出玉及收支
+                    一鍵測試以上所有 11 部機種 100 次初當出玉及收支
                 </div>
             </div>
             <div class="play-btn">⚙️ 進入數據中心 (ENTER DATA CENTER)</div>
@@ -363,14 +376,37 @@
 
         // 實時監聽雲端金錢同排行榜 (訪客都睇到)
         db.ref('users').on('value', (snapshot) => {
-            let users = snapshot.val() || {}; // 防呆：如果 DB 係空嘅，自動變成空 Object
+            let users = snapshot.val() || {}; 
 
-            // 更新自己個錢包 (如果有登入)
+            // 1. 更新自己個錢包 (如果有登入)
             if (currentUser && users[currentUser]) {
                 document.getElementById("nav-balance").innerText = Math.round(users[currentUser].balance).toLocaleString();
             }
 
-            // 生成排行榜
+            // 🌟 2. 新增：精準計算店鋪總收支 🌟
+            // 玩家餘額係負數(輸錢) = 店鋪賺錢；玩家正數(贏錢) = 店鋪蝕錢
+            let totalParlorProfit = 0;
+            let userKeys = Object.keys(users);
+            
+            userKeys.forEach(key => {
+                totalParlorProfit -= (users[key].balance || 0); 
+            });
+
+            // 顯示店鋪收支
+            let profitEl = document.getElementById("parlor-profit-amount");
+            if (totalParlorProfit > 0) {
+                profitEl.innerText = "+" + Math.round(totalParlorProfit).toLocaleString() + " 円";
+                profitEl.className = "profit-amount profit-positive";
+            } else if (totalParlorProfit < 0) {
+                profitEl.innerText = Math.round(totalParlorProfit).toLocaleString() + " 円";
+                profitEl.className = "profit-amount profit-negative";
+            } else {
+                profitEl.innerText = "0 円";
+                profitEl.style.color = "#fff";
+                profitEl.style.textShadow = "none";
+            }
+
+            // 3. 生成排行榜
             renderRankings(users);
         }, (error) => {
             console.error("讀取 Firebase 失敗: ", error);
@@ -382,7 +418,7 @@
             let rankingBody = document.getElementById("ranking-body");
             let poorRankingBody = document.getElementById("poor-ranking-body");
             
-            rankingBody.innerHTML = ""; // 清空舊數據
+            rankingBody.innerHTML = ""; 
             poorRankingBody.innerHTML = "";
 
             let userKeys = Object.keys(users);
@@ -438,7 +474,7 @@
             if (currentUser) {
                 // 如果已登入 -> 執行登出
                 localStorage.removeItem("pachinko_current_user");
-                window.location.reload(); // 刷新頁面變回訪客
+                window.location.reload(); 
             } else {
                 // 如果未登入 -> 去註冊頁
                 window.location.href = "login.html";
