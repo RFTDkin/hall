@@ -232,6 +232,27 @@
             <div class="progress-text" id="bluelock-prog">等待中...</div>
         </div>
 
+        <div class="machine-card" id="card-bluelock_light" style="border-top: 5px solid #00e5ff;">
+            <h3 class="machine-title">P ブルーロック 1/120</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="bluelock_light-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="bluelock_light-payout">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">最大一擊出玉:</span>
+                <span class="stat-value val-max" id="bluelock_light-max">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">100回總收支:</span>
+                <span class="stat-value val-profit" id="bluelock_light-profit">---</span>
+            </div>
+            <div class="progress-text" id="bluelock_light-prog">等待中...</div>
+        </div>
+
         <div class="machine-card tag-dmdp" id="card-dmdp">
             <h3 class="machine-title">e DMDP 魂神9000</h3>
             <div class="stat-row"><span class="stat-label">平均當選回轉:</span><span class="stat-value val-spins"
@@ -362,6 +383,19 @@
             <div class="progress-text" id="ggo-prog">等待中...</div>
         </div>
 
+        <div class="machine-card" id="card-mushoku" style="border-top: 5px solid #4fc3f7;">
+            <h3 class="machine-title">e無職転生</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="mushoku-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="mushoku-payout">---</span>
+            </div>
+            <div class="progress-text" id="mushoku-prog">等待中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -411,6 +445,61 @@
                 if (Math.random() < 1 / 2110) { payout += 300; break; }
             }
             return { spins, payout };
+        }
+
+        // ==========================================
+        // 12. P ブルーロック 1/120 ライトver
+        // ==========================================
+        function simBlueLockLight() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/120.1) {
+                    let r = Math.random();
+                    if (r < 0.01) { payout += 700; runBLLightRush(); }
+                    else if (r < 0.06) { payout += 140; runBLLightRush(); }
+                    else {
+                        payout += 210;
+                        // 頂上決戦: 1/39.1 突破 vs 1/55 転落
+                        while(true) {
+                            if (Math.random() < 1/39.1) {
+                                payout += getBLLightRushPayout();
+                                runBLLightRush();
+                                break;
+                            } else if (Math.random() < 1/55) {
+                                break; // 転落
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+
+            function runBLLightRush() {
+                // エゴイストバトル: 1/39.1 突破 vs 1/100 転落
+                while(true) {
+                    if (Math.random() < 1/39.1) {
+                        payout += getBLLightRushPayout();
+                    } else if (Math.random() < 1/100) {
+                        break; // 転落
+                    }
+                }
+            }
+
+            function getBLLightRushPayout() {
+                let total = 0;
+                let loop = true;
+                while(loop) {
+                    let r = Math.random();
+                    if (r < 0.01) total += 2240; // エゴストラライム Loop
+                    else if (r < 0.13) { total += 1680; loop = false; }
+                    else if (r < 0.50) { total += 1120; loop = false; }
+                    else { total += 560; loop = false; }
+                }
+                return total;
+            }
+
+            return {spins, payout};
         }
 
         function simDMDP() {
@@ -765,6 +854,54 @@
         }
 
         // ==========================================
+        // 11. e無職転生
+        // ==========================================
+        function simMushoku() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/399.6) {
+                    payout += 1200;
+                    if (Math.random() < 0.54) {
+                        let st = 130;
+                        while(st > 0) {
+                            if (Math.random() < 1/90.4) {
+                                let br = Math.random();
+                                if (br < 0.235) payout += 6000;
+                                else if (br < 0.235 + 0.265) payout += 3000;
+                                else payout += 1500;
+                                st = 130;
+                            } else {
+                                st--;
+                            }
+                        }
+                    }
+                    break;
+                }
+                if (Math.random() < 1/2731.4) {
+                    payout += 300;
+                    if (Math.random() < 0.01) { // 1% 奇蹟入 RUSH
+                        let st = 130;
+                        while(st > 0) {
+                            if (Math.random() < 1/90.4) {
+                                let br = Math.random();
+                                if (br < 0.235) payout += 6000;
+                                else if (br < 0.235 + 0.265) payout += 3000;
+                                else payout += 1500;
+                                st = 130;
+                            } else {
+                                st--;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return {spins, payout};
+        }
+
+
+        // ==========================================
         // 控制器 (加入最大出玉及收支計算)
         // ==========================================
         async function runMachineSim(idPrefix, simFunc, spinCost) {
@@ -854,6 +991,8 @@
             await runMachineSim('slime', simSlime, 1000 / 17);
             await runMachineSim('kakegurui', simKakegurui, 1000 / 17);
             await runMachineSim('ggo', simGGO, 1000 / 17); // 新機 GGO
+            await runMachineSim('mushoku', simMushoku, 1000 / 17);
+            await runMachineSim('bluelock_light', simBlueLockLight, 1000 / 17); // 新機 ブルーロック 1/120
 
             btn.disabled = false;
             btn.innerText = "▶️ 再次演算 (100回)";

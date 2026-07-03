@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏青哥模擬器 (P ブルーロック 1/120 ライトver)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000814;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #00e5ff;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.7);
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
+        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .stats-board {
+            background-color: #001220;
+            border: 2px solid #009688;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+            box-shadow: inset 0 0 15px rgba(0, 150, 136, 0.5);
+        }
+
+        .stat-item span {
+            display: block;
+            font-weight: bold;
+            color: #00e5ff;
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #00695c;
+            color: white;
+            border: 1px solid #00e5ff;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover { background-color: #00897b; box-shadow: 0 0 10px #00e5ff; }
+        button:disabled { background-color: #1a2a3a; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
+        
+        #btn-reset { background-color: #424242; border-color: #616161; }
+        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
+
+        .log-container {
+            background-color: #000000;
+            border: 1px solid #009688;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #00e5ff; font-weight: bold; text-shadow: 0 0 5px #00e5ff; }
+        .color-hit { color: #ffca28; font-weight: bold; }
+        .color-normal { color: #9e9e9e; }
+        .color-ultimate { color: #ff5252; font-weight: bold; text-shadow: 0 0 10px #ff5252; font-size: 1.1em; }
+        .color-fall { color: #757575; font-style: italic; }
+        .color-music { color: #00e676; font-style: italic; } /* 新增音樂提示色 */
+
+        .data-lamp-container {
+            background-color: #00101a;
+            border: 3px solid #009688;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 150, 136, 0.4);
+        }
+
+        .data-lamp-title {
+            color: #00e5ff;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px #00e5ff;
+            letter-spacing: 2px;
+        }
+
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #009688; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #00332c; color: #00e5ff; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #001a22; }
+        table.data-lamp td.hit-spins { color: #ffca28; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #00e5ff; font-weight: bold; }
+        .empty-row { color: #555 !important; }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #00e5ff;">P ブルーロック 1/120 ライトver</span></h1>
+
+    <!-- 🌟 新增：全回轉影片播放器 🌟 -->
+    <video id="rush-media" src="https://files.catbox.moe/mx84vi.mp4" style="display:none;" preload="auto" playsinline webkit-playsinline></video>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 開始踢球</button>
+                <button id="btn-reset" onclick="resetGame()">🔄 紀錄重置</button>
+            </div>
+
+            <div class="log-container" id="log-box"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead>
+                        <tr>
+                            <th>前次</th>
+                            <th>當選回轉數</th>
+                            <th>連莊數</th>
+                            <th>獲得出玉</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        
+        // 🌟 新增：影片播放控制系統 🌟
+        const rushMedia = document.getElementById("rush-media");
+        let audioUnlocked = false;
+
+        function playVideoPopupAndWait(mediaElement) {
+            return new Promise((resolve) => {
+                if (!mediaElement) return resolve();
+
+                let isResolved = false;
+                const finish = () => {
+                    if (isResolved) return;
+                    isResolved = true;
+                    mediaElement.removeEventListener('ended', finish);
+                    mediaElement.removeEventListener('error', finish);
+                    mediaElement.style.display = "none";
+                    resolve();
+                };
+
+                mediaElement.style.display = "block";
+                mediaElement.style.position = "fixed";
+                mediaElement.style.top = "50%";
+                mediaElement.style.left = "50%";
+                mediaElement.style.transform = "translate(-50%, -50%)";
+                mediaElement.style.zIndex = "10000";
+
+                mediaElement.style.width = "90vw";
+                mediaElement.style.maxWidth = "900px";
+                mediaElement.style.height = "auto";
+                mediaElement.style.aspectRatio = "16 / 22";
+                mediaElement.style.objectFit = "cover";
+                mediaElement.style.objectPosition = "top center";
+                mediaElement.style.backgroundColor = "#000";
+                mediaElement.style.border = "4px solid #00e5ff";
+                mediaElement.style.boxShadow = "0 0 40px rgba(0, 229, 255, 0.8)";
+                mediaElement.style.borderRadius = "10px";
+
+                mediaElement.currentTime = 0;
+                mediaElement.addEventListener('ended', finish);
+                mediaElement.addEventListener('error', finish);
+
+                mediaElement.play().catch(e => {
+                    console.log("自動播放被阻擋或出錯", e);
+                    finish();
+                });
+
+                // 防卡死：50秒後強制結束播放
+                setTimeout(finish, 50000);
+            });
+        }
+
+        class BlueLockLightMachine {
+            constructor() {
+                this.state = "NORMAL";
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.history = [];
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+
+                if (this.session_spins % 100 === 0) {
+                    addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
+                }
+
+                // 通常時 大当り確率: 1/120.1
+                if (Math.random() < (1 / 120.1)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 FEVER 當選！`, "color-hit");
+
+                    let roll = Math.random();
+
+                    // 🌟 1% -> 700個 + RUSH 直行 (全回轉) 🌟
+                    if (roll < 0.01) {
+                        addLog("🌈 1%の奇跡！ 全回転 SPECIAL FEVER (700玉)！", "color-ultimate");
+                        this.session_payout += 700;
+                        this.session_rush_count = 1;
+                        updateUI();
+                        
+                        // 播放全回轉影片
+                        addLog(`🎵 播放全回転動畫中... 請稍候`, "color-music");
+                        await playVideoPopupAndWait(rushMedia);
+                        
+                        await sleep(500);
+                        await this.play_rush();
+                    } 
+                    // 5% -> 140個 + RUSH 直行
+                    else if (roll < 0.06) {
+                        addLog("🔥 記者会見 成功！ (140玉)", "color-hit");
+                        this.session_payout += 140;
+                        this.session_rush_count = 1;
+                        updateUI();
+                        
+                        await sleep(1000);
+                        await this.play_rush();
+                    }
+                    // 94% -> 210個 + 頂上決戦
+                    else {
+                        addLog("⚽ FEVER (210玉獲得)！", "color-normal");
+                        this.session_payout += 210;
+                        this.session_rush_count = 1;
+                        updateUI();
+                        
+                        await sleep(1000);
+                        await this.play_choujou_kessen();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            // 頂上決戦 (突破率 約57%)
+            async play_choujou_kessen() {
+                addLog(`\n===== ⚔️ 頂上決戦 開始 =====`, "color-normal");
+                this.state = "CHOUJOU";
+                updateUI();
+                let spin = 0;
+
+                while (this.state === "CHOUJOU") {
+                    await sleep(40);
+                    spin++;
+                    document.getElementById("ui-spins").innerText = `頂上決戦: ${spin}回転`;
+
+                    // 先抽當選 (1/39.1)
+                    if (Math.random() < (1 / 39.1)) {
+                        addLog(`\n🎉 凛に勝利！！ 頂上決戦突破！ (${spin}回転目)`, "color-hit");
+                        
+                        let payout = this.draw_rush_payout();
+                        this.session_payout += payout;
+                        this.session_rush_count += 1;
+                        updateUI();
+                        
+                        await sleep(1500);
+                        await this.play_rush();
+                        break; 
+                    } 
+                    // 再抽転落 (1/55)
+                    else if (Math.random() < (1 / 55)) {
+                        addLog(`\n💀 敗北... 通常へ戻る (${spin}回転目)`, "color-fall");
+                        addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
+                        this.state = "NORMAL";
+                        this.record_history();
+                        updateUI();
+                        break;
+                    }
+                }
+            }
+
+            // エゴイストバトル (継続率 約72%)
+            async play_rush() {
+                addLog(`\n===== 🔥 エゴイストバトル 開始 =====`, "color-rush");
+                this.state = "RUSH";
+                updateUI();
+                let spin = 0;
+
+                while (this.state === "RUSH") {
+                    await sleep(40);
+                    spin++;
+                    document.getElementById("ui-spins").innerText = `BATTLE: ${spin}回転`;
+
+                    // 先抽當選 (1/39.1)
+                    if (Math.random() < (1 / 39.1)) {
+                        this.session_rush_count += 1;
+                        addLog(`\n⚽ GOAL！！ (${spin}回転目) (總 ${this.session_rush_count}連)`, "color-hit");
+
+                        let payout = this.draw_rush_payout();
+                        this.session_payout += payout;
+                        
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        spin = 0; // 重置轉數
+                        updateUI();
+                        await sleep(1000);
+                    } 
+                    // 再抽転落 (1/100)
+                    else if (Math.random() < (1 / 100)) {
+                        addLog(`\n💀 ボールを奪われた... 転落 (${spin}回転目)`, "color-fall");
+                        addLog(`📈 總連莊數: ${this.session_rush_count}連 (含初當)`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+
+                        this.state = "NORMAL";
+                        this.record_history();
+                        updateUI();
+                        break;
+                    }
+                }
+            }
+
+            // 右打ち中 出玉抽選 (エゴストラライム 無限Loop搭載)
+            draw_rush_payout() {
+                let total = 0;
+                let loop = true;
+                let isEgoistTime = false;
+
+                while (loop) {
+                    let r = Math.random();
+                    
+                    // 1% 觸發 エゴストラライム (+2240玉並強制再抽一次)
+                    if (r < 0.01) {
+                        total += 2240;
+                        addLog(`⚡ エゴストラライム発動！！ +2240玉 (継続確定)`, "color-ultimate");
+                        isEgoistTime = true;
+                    } 
+                    // 12% -> 1680玉
+                    else if (r < 0.13) {
+                        total += 1680;
+                        if (isEgoistTime) addLog(`💥 追撃 1680玉！`); else addLog(`💥 1680玉獲得！`, "color-hit");
+                        loop = false;
+                    } 
+                    // 37% -> 1120玉
+                    else if (r < 0.50) {
+                        total += 1120;
+                        if (isEgoistTime) addLog(`✨ 追撃 1120玉！`); else addLog(`✨ 1120玉獲得`, "color-hit");
+                        loop = false;
+                    } 
+                    // 50% -> 560玉
+                    else {
+                        total += 560;
+                        if (isEgoistTime) addLog(`💧 追撃 560玉`); else addLog(`💧 560玉獲得`, "color-normal");
+                        loop = false;
+                    }
+                }
+
+                if (isEgoistTime) {
+                    addLog(`🌈 限界突破！ 一撃合計 ${total}玉 獲得！！！`, "color-ultimate");
+                }
+                
+                return total;
+            }
+
+            // 🛡️ 本地紀錄
+            record_history() {
+                this.history.unshift({
+                    spins: this.session_spins,
+                    rush: this.session_rush_count,
+                    payout: this.session_payout
+                });
+
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+            }
+        }
+
+        let game = new BlueLockLightMachine();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const btnReset = document.getElementById("btn-reset");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div");
+            div.className = `log-entry ${className}`;
+            div.innerText = text;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") {
+                document.getElementById("ui-spins").innerText = game.session_spins;
+            }
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) {
+                historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
+                return;
+            }
+
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `
+                    <td>${label}</td>
+                    <td class="hit-spins">${record.spins}</td>
+                    <td class="hit-rush">${record.rush}</td>
+                    <td class="hit-payout">${record.payout}</td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.disabled = true;
+            btnReset.disabled = true;
+
+            // 🌟 確保音訊及影片解鎖 🌟
+            if (!audioUnlocked) {
+                rushMedia.load(); 
+                audioUnlocked = true;
+            }
+
+            addLog("\n=== エゴイスト 開始 ===", "color-hit");
+
+            while (isPlaying) {
+                let hit = await game.play_normal();
+                updateUI();
+
+                if (game.session_spins % 100 === 0) {
+                    await sleep(10);
+                }
+
+                if (hit) {
+                    isPlaying = false;
+                    break;
+                }
+            }
+
+            btnPlay.disabled = false;
+            btnReset.disabled = false;
+            btnPlay.innerText = "▶️ 繼續踢球";
+        }
+
+        function resetGame() {
+            game = new BlueLockLightMachine();
+            logBox.innerHTML = "";
+            renderHistoryTable([]);
+            updateUI();
+            
+            // 🌟 重置影片 🌟
+            rushMedia.pause();
+            rushMedia.currentTime = 0;
+            rushMedia.style.display = "none";
+            
+            addLog("遊戲紀錄已重置。", "color-normal");
+            btnPlay.innerText = "▶️ 開始踢球";
+        }
+    </script>
+    
+    <!-- 引入 Firebase 外掛 -->
+    <script src="plugin.js"></script>
+</body>
+</html>
