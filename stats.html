@@ -393,6 +393,14 @@
                 <span class="stat-label">平均獲得出玉:</span>
                 <span class="stat-value val-payout" id="mushoku-payout">---</span>
             </div>
+            <div class="stat-row">
+                <span class="stat-label">最大一擊出玉:</span>
+                <span class="stat-value val-max" id="mushoku-max">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">100回總收支:</span>
+                <span class="stat-value val-profit" id="mushoku-profit">---</span>
+            </div>
             <div class="progress-text" id="mushoku-prog">等待中...</div>
         </div>
 
@@ -452,21 +460,21 @@
         // ==========================================
         function simBlueLockLight() {
             let spins = 0, payout = 0;
-            while(true) {
+            while (true) {
                 spins++;
-                if (Math.random() < 1/120.1) {
+                if (Math.random() < 1 / 120.1) {
                     let r = Math.random();
                     if (r < 0.01) { payout += 700; runBLLightRush(); }
                     else if (r < 0.06) { payout += 140; runBLLightRush(); }
                     else {
                         payout += 210;
                         // 頂上決戦: 1/39.1 突破 vs 1/55 転落
-                        while(true) {
-                            if (Math.random() < 1/39.1) {
+                        while (true) {
+                            if (Math.random() < 1 / 39.1) {
                                 payout += getBLLightRushPayout();
                                 runBLLightRush();
                                 break;
-                            } else if (Math.random() < 1/55) {
+                            } else if (Math.random() < 1 / 55) {
                                 break; // 転落
                             }
                         }
@@ -477,10 +485,10 @@
 
             function runBLLightRush() {
                 // エゴイストバトル: 1/39.1 突破 vs 1/100 転落
-                while(true) {
-                    if (Math.random() < 1/39.1) {
+                while (true) {
+                    if (Math.random() < 1 / 39.1) {
                         payout += getBLLightRushPayout();
-                    } else if (Math.random() < 1/100) {
+                    } else if (Math.random() < 1 / 100) {
                         break; // 転落
                     }
                 }
@@ -489,7 +497,7 @@
             function getBLLightRushPayout() {
                 let total = 0;
                 let loop = true;
-                while(loop) {
+                while (loop) {
                     let r = Math.random();
                     if (r < 0.01) total += 2240; // エゴストラライム Loop
                     else if (r < 0.13) { total += 1680; loop = false; }
@@ -499,7 +507,7 @@
                 return total;
             }
 
-            return {spins, payout};
+            return { spins, payout };
         }
 
         function simDMDP() {
@@ -858,14 +866,14 @@
         // ==========================================
         function simMushoku() {
             let spins = 0, payout = 0;
-            while(true) {
+            while (true) {
                 spins++;
-                if (Math.random() < 1/399.6) {
+                if (Math.random() < 1 / 399.6) {
                     payout += 1200;
                     if (Math.random() < 0.54) {
                         let st = 130;
-                        while(st > 0) {
-                            if (Math.random() < 1/90.4) {
+                        while (st > 0) {
+                            if (Math.random() < 1 / 90.4) {
                                 let br = Math.random();
                                 if (br < 0.235) payout += 6000;
                                 else if (br < 0.235 + 0.265) payout += 3000;
@@ -878,12 +886,12 @@
                     }
                     break;
                 }
-                if (Math.random() < 1/2731.4) {
+                if (Math.random() < 1 / 2731.4) {
                     payout += 300;
                     if (Math.random() < 0.01) { // 1% 奇蹟入 RUSH
                         let st = 130;
-                        while(st > 0) {
-                            if (Math.random() < 1/90.4) {
+                        while (st > 0) {
+                            if (Math.random() < 1 / 90.4) {
                                 let br = Math.random();
                                 if (br < 0.235) payout += 6000;
                                 else if (br < 0.235 + 0.265) payout += 3000;
@@ -897,7 +905,7 @@
                     break;
                 }
             }
-            return {spins, payout};
+            return { spins, payout };
         }
 
 
