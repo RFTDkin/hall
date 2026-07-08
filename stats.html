@@ -989,6 +989,7 @@
 
             // 傳入對應嘅「千円回轉數」成本 (1000円 / 回轉數)
             await runMachineSim('bluelock', simBlueLock, 1000 / 17);
+            await runMachineSim('bluelock_light', simBlueLockLight, 1000 / 17); // 新機 ブルーロック 1/120
             await runMachineSim('dmdp', simDMDP, 1000 / 17);
             await runMachineSim('ghoul399', simGhoul399, 1000 / 17);
             await runMachineSim('ghoul999', simGhoul999, 1000 / 32);   // 喰種999 係 32轉
@@ -1000,7 +1001,6 @@
             await runMachineSim('kakegurui', simKakegurui, 1000 / 17);
             await runMachineSim('ggo', simGGO, 1000 / 17); // 新機 GGO
             await runMachineSim('mushoku', simMushoku, 1000 / 17);
-            await runMachineSim('bluelock_light', simBlueLockLight, 1000 / 17); // 新機 ブルーロック 1/120
 
             btn.disabled = false;
             btn.innerText = "▶️ 再次演算 (100回)";
