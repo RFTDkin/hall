@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏青哥模擬器 (P 結城友奈は勇者である)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a0515;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ff6699;
+            text-shadow: 0 0 15px rgba(255, 102, 153, 0.7);
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
+        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .stats-board {
+            background-color: #2a0a20;
+            border: 2px solid #ff6699;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+            box-shadow: inset 0 0 15px rgba(255, 102, 153, 0.5);
+        }
+
+        .stat-item span {
+            display: block;
+            font-weight: bold;
+            color: #ffca28;
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #d81b60;
+            color: white;
+            border: 1px solid #ff6699;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover { background-color: #ad1457; box-shadow: 0 0 10px #ff6699; }
+        button:disabled { background-color: #3a1a2a; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
+        
+        #btn-reset { background-color: #424242; border-color: #616161; }
+        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
+
+        .log-container {
+            background-color: #000000;
+            border: 1px solid #ff6699;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #00e676; font-weight: bold; text-shadow: 0 0 5px #00e676; }
+        .color-mankai { color: #ffca28; font-weight: bold; text-shadow: 0 0 10px #ffca28; font-size: 1.1em; }
+        .color-hit { color: #ff6699; font-weight: bold; }
+        .color-normal { color: #9e9e9e; }
+        .color-reset { color: #03a9f4; font-weight: bold; }
+        .color-ultimate { color: #ff5252; font-weight: bold; text-shadow: 0 0 10px #ff5252; font-size: 1.1em; }
+        .color-fall { color: #757575; font-style: italic; }
+
+        .data-lamp-container {
+            background-color: #1a0515;
+            border: 3px solid #ff6699;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(255, 102, 153, 0.4);
+        }
+
+        .data-lamp-title {
+            color: #ff6699;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px #ff6699;
+            letter-spacing: 2px;
+        }
+
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #d81b60; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #4a0a20; color: #ffca28; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #2a0515; }
+        table.data-lamp td.hit-spins { color: #ff6699; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ffca28; font-weight: bold; }
+        .empty-row { color: #555 !important; }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ffca28;">P 結城友奈は勇者である (大満開RUSH)</span></h1>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 開始勇者任務</button>
+                <button id="btn-reset" onclick="resetGame()">🔄 紀錄重置</button>
+            </div>
+
+            <div class="log-container" id="log-box"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead>
+                        <tr>
+                            <th>前次</th>
+                            <th>當選回轉數</th>
+                            <th>連莊數</th>
+                            <th>獲得出玉</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        class YushaMachine {
+            constructor() {
+                this.state = "NORMAL";
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.history = []; 
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+
+                if (this.session_spins % 100 === 0) {
+                    addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
+                }
+
+                // 大当り確率: 1/349
+                if (Math.random() < (1 / 349)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 勇者チャレンジBONUS！`, "color-hit");
+                    this.session_payout += 1500;
+                    updateUI();
+                    await sleep(1000);
+
+                    // 51.5% 真・勇者RUSH突入
+                    if (Math.random() < 0.515) {
+                        addLog("🌸 チャレンジ成功！ 真・勇者RUSH 突入！", "color-rush");
+                        await sleep(1000);
+                        await this.play_rush();
+                    } 
+                    // 48.5% 通常
+                    else {
+                        addLog("😭 チャレンジ失敗... (1500玉 獲得)", "color-normal");
+                        addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
+                        this.record_history();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            async play_rush() {
+                this.state = "TRUE_HERO";
+                let st_max = 115;
+                let st_remaining = st_max;
+                
+                addLog(`\n===== 🛡️ 真・勇者RUSH (ST115回転) 開始 =====`, "color-rush");
+                updateUI();
+
+                while (this.state !== "NORMAL") {
+                    await sleep(30);
+                    st_remaining--;
+                    
+                    let modeName = this.state === "TRUE_HERO" ? "真・勇者RUSH" : "大満開RUSH";
+                    document.getElementById("ui-spins").innerText = `${modeName}: ${st_remaining}/${st_max}`;
+
+                    // 右打ち中 大当り確率: 1/96.3
+                    if (Math.random() < (1 / 96.3)) {
+                        this.session_rush_count++;
+                        let used_spin = st_max - st_remaining;
+
+                        // 【真・勇者RUSH 專屬判定】 25% ST Reset
+                        if (this.state === "TRUE_HERO" && Math.random() < 0.25) {
+                            addLog(`\n🔄 STリセット！ (出玉なし) (${used_spin}回転目)`, "color-reset");
+                            st_remaining = st_max; 
+                            updateUI();
+                            await sleep(800);
+                            continue; // 重置完繼續跑ST
+                        }
+
+                        // 【BONUS Judge】(包含大満開100% 同埋 真勇者75%)
+                        addLog(`\n🎉 BONUSジャッジ 成功！ (${used_spin}回転目)`, "color-hit");
+                        
+                        // 25% 7500玉, 75% 1500玉
+                        if (Math.random() < 0.25) {
+                            addLog(`🌈 限界突破！ 7500個 獲得！！！ (10R×5回)`, "color-ultimate");
+                            this.session_payout += 7500;
+                        } else {
+                            addLog(`✨ 1500個 獲得！`, "color-hit");
+                            this.session_payout += 1500;
+                        }
+                        
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        updateUI();
+                        await sleep(1500);
+
+                        // 只要中過 BONUS Judge，就一定會升級/維持 大満開RUSH (ST135)
+                        if (this.state === "TRUE_HERO") {
+                            this.state = "GREAT_MANKAI";
+                            st_max = 135;
+                            addLog(`\n🌸🌸 覚醒！ 大満開RUSH へ昇格！！ (ST135回転) 🌸🌸`, "color-mankai");
+                        }
+                        
+                        st_remaining = st_max; // 重置 ST
+                    }
+
+                    // ST 跑完 0 轉
+                    if (st_remaining <= 0) {
+                        document.getElementById("ui-spins").innerText = `ST残り: 0/${st_max}`;
+                        addLog(`\n💀 ST抜け... RUSH終了`, "color-fall");
+                        addLog(`📈 總連莊數: ${this.session_rush_count}連 (含初當及Reset)`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+
+                        this.state = "NORMAL";
+                        this.record_history();
+                        updateUI();
+                        break;
+                    }
+                }
+            }
+
+            record_history() {
+                this.history.unshift({
+                    spins: this.session_spins,
+                    rush: this.session_rush_count,
+                    payout: this.session_payout
+                });
+
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+            }
+        }
+
+        let game = new YushaMachine();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const btnReset = document.getElementById("btn-reset");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div");
+            div.className = `log-entry ${className}`;
+            div.innerText = text;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") {
+                document.getElementById("ui-spins").innerText = game.session_spins;
+            }
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) {
+                historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
+                return;
+            }
+
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `
+                    <td>${label}</td>
+                    <td class="hit-spins">${record.spins}</td>
+                    <td class="hit-rush">${record.rush}</td>
+                    <td class="hit-payout">${record.payout}</td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.disabled = true;
+            btnReset.disabled = true;
+
+            addLog("\n=== 勇者出擊 ===", "color-hit");
+
+            while (isPlaying) {
+                let hit = await game.play_normal();
+                updateUI();
+
+                if (game.session_spins % 100 === 0) {
+                    await sleep(10);
+                }
+
+                if (hit) {
+                    isPlaying = false;
+                    break;
+                }
+            }
+
+            btnPlay.disabled = false;
+            btnReset.disabled = false;
+            btnPlay.innerText = "▶️ 繼續打玉";
+        }
+
+        function resetGame() {
+            game = new YushaMachine();
+            logBox.innerHTML = "";
+            renderHistoryTable([]);
+            updateUI();
+            addLog("遊戲紀錄已重置。", "color-normal");
+            btnPlay.innerText = "▶️ 開始勇者任務";
+        }
+    </script>
+    
+    <script src="plugin.js"></script>
+</body>
+</html>

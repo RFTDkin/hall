@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏青哥模擬器 (e魔法少女リリカルなのは)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a001a;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ff4081;
+            text-shadow: 0 0 15px rgba(255, 64, 129, 0.7);
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
+        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .stats-board {
+            background-color: #2a002a;
+            border: 2px solid #ff4081;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+            box-shadow: inset 0 0 15px rgba(255, 64, 129, 0.5);
+        }
+
+        .stat-item span {
+            display: block;
+            font-weight: bold;
+            color: #ffca28;
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #c2185b;
+            color: white;
+            border: 1px solid #ff4081;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover { background-color: #e91e63; box-shadow: 0 0 10px #ff4081; }
+        button:disabled { background-color: #3a1a2a; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
+        
+        #btn-reset { background-color: #424242; border-color: #616161; }
+        #btn-reset:hover { background-color: #212121; box-shadow: 0 0 10px #616161; }
+
+        .log-container {
+            background-color: #000000;
+            border: 1px solid #ff4081;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #ffca28; font-weight: bold; text-shadow: 0 0 5px #ffca28; }
+        .color-hit { color: #ff4081; font-weight: bold; }
+        .color-normal { color: #9e9e9e; }
+        .color-charge { color: #ab47bc; font-weight: bold; }
+        .color-ultimate { color: #ff5252; font-weight: bold; text-shadow: 0 0 10px #ff5252; font-size: 1.1em; }
+        .color-fall { color: #757575; font-style: italic; }
+
+        .data-lamp-container {
+            background-color: #1a0515;
+            border: 3px solid #ff4081;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(255, 64, 129, 0.4);
+        }
+
+        .data-lamp-title {
+            color: #ff4081;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px #ff4081;
+            letter-spacing: 2px;
+        }
+
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #c2185b; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #4a0024; color: #ffca28; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #2a001a; }
+        table.data-lamp td.hit-spins { color: #ff4081; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ffca28; font-weight: bold; }
+        .empty-row { color: #555 !important; }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ffca28;">e魔法少女リリカルなのは</span></h1>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">STOCK數 <span id="ui-rush">0</span></div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 開始魔法</button>
+                <button id="btn-reset" onclick="resetGame()">🔄 紀錄重置</button>
+            </div>
+
+            <div class="log-container" id="log-box"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead>
+                        <tr>
+                            <th>前次</th>
+                            <th>當選回轉數</th>
+                            <th>獲得STOCK</th>
+                            <th>獲得出玉</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        class NanohaMachine {
+            constructor() {
+                this.state = "NORMAL";
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.history = []; 
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+
+                if (this.session_spins % 100 === 0) {
+                    addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
+                }
+
+                // 大当り確率: 1/348.5
+                if (Math.random() < (1 / 348.5)) {
+                    let r = Math.random();
+
+                    // 19% アクセラレイターチャンス (300玉)
+                    if (r < 0.19) {
+                        addLog(`\n[${this.session_spins} 回轉] ⚡ アクセラレイターチャンス (300玉)`, "color-charge");
+                        this.session_payout += 300;
+                        updateUI();
+                        await sleep(800);
+                        
+                        // 成功率 1/6
+                        if (Math.random() < (1 / 6)) {
+                            addLog("🌈 演出成功！ フルドライブST 突入！", "color-ultimate");
+                            await sleep(1000);
+                            await this.play_rush();
+                        } else {
+                            addLog("😭 演出失敗... (通常へ)", "color-normal");
+                            addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
+                            this.record_history();
+                        }
+                    } 
+                    // 81% 図柄揃い
+                    else {
+                        addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い！`, "color-hit");
+                        let r2 = Math.random();
+                        
+                        // 1.32% -> 3000玉 + ST
+                        if (r2 < 0.0132) {
+                            addLog("🌈 全力全開 3000 BONUS！ フルドライブST 突入！", "color-ultimate");
+                            this.session_payout += 3000;
+                            updateUI();
+                            await sleep(1000);
+                            await this.play_rush();
+                        } 
+                        // 49.34% -> 900玉 + ST
+                        else if (r2 < 0.0132 + 0.4934) {
+                            addLog("✨ リリカル BONUS (900玉)！ フルドライブST 突入！", "color-rush");
+                            this.session_payout += 900;
+                            updateUI();
+                            await sleep(1000);
+                            await this.play_rush();
+                        } 
+                        // 49.34% -> 900玉 + 時短
+                        else {
+                            addLog("💧 リリカル BONUS (900玉)... チャレンジタイムへ", "color-normal");
+                            this.session_payout += 900;
+                            updateUI();
+                            await sleep(1000);
+                            await this.play_challenge_time();
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            // チャレンジタイム (時短100回転)
+            async play_challenge_time() {
+                addLog(`\n===== ⏱️ チャレンジタイム (時短100回転) 開始 =====`, "color-normal");
+                this.state = "CHALLENGE";
+                updateUI();
+                let ct_spins = 0;
+
+                while (this.state === "CHALLENGE" && ct_spins < 100) {
+                    await sleep(20);
+                    ct_spins++;
+                    document.getElementById("ui-spins").innerText = `時短: ${ct_spins}/100`;
+
+                    // 時短中確率: 1/348.5
+                    if (Math.random() < (1 / 348.5)) {
+                        addLog(`\n🎉 引き戻し成功！！ (1500玉獲得)`, "color-ultimate");
+                        this.session_payout += 1500;
+                        updateUI();
+                        await sleep(1500);
+                        await this.play_rush();
+                        return;
+                    }
+                }
+
+                addLog("\n💀 引き戻し失敗... 通常へ戻る", "color-fall");
+                addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
+                this.state = "NORMAL";
+                this.record_history();
+                updateUI();
+            }
+
+            // フルドライブST (ST70回転 完走型)
+            async play_rush() {
+                addLog(`\n===== 🌟 フルドライブST (70回転) 開始 =====`, "color-rush");
+                this.state = "RUSH";
+                updateUI();
+
+                let st_active = true;
+
+                while (st_active) {
+                    let st_remaining = 70;
+                    let current_run_payout = 0;
+                    let current_run_hits = 0;
+
+                    // 完走型：必定跑完 70 轉
+                    while (st_remaining > 0) {
+                        await sleep(20); 
+                        st_remaining--;
+                        document.getElementById("ui-spins").innerText = `ST残り: ${st_remaining}/70`;
+
+                        // ST中確率: 1/51.6
+                        if (Math.random() < (1 / 51.6)) {
+                            current_run_hits++;
+                            let pr = Math.random();
+                            let stock_payout = 0;
+
+                            // STOCK 出玉分配
+                            if (pr < 0.02) { stock_payout = 7500; addLog(`🌈 奇跡！完全走破7500BONUS獲得！ (剩餘 ${st_remaining}轉)`, "color-ultimate"); }
+                            else if (pr < 0.07) { stock_payout = 6000; addLog(`👑 超級STOCK！6000玉獲得！ (剩餘 ${st_remaining}轉)`, "color-rush"); }
+                            else if (pr < 0.21) { stock_payout = 4500; addLog(`💥 大STOCK！4500玉獲得！ (剩餘 ${st_remaining}轉)`, "color-hit"); }
+                            else if (pr < 0.53) { stock_payout = 3000; addLog(`✨ STOCK！3000玉獲得！ (剩餘 ${st_remaining}轉)`, "color-hit"); }
+                            else { stock_payout = 1500; addLog(`💧 STOCK！1500玉獲得 (剩餘 ${st_remaining}轉)`, "color-normal"); }
+
+                            current_run_payout += stock_payout;
+                        }
+                    }
+
+                    // 70轉完結，結算一気放出
+                    if (current_run_hits > 0) {
+                        this.session_rush_count += current_run_hits;
+                        this.session_payout += current_run_payout;
+                        addLog(`\n🎉 ST完走！ STOCK一気放出：${current_run_payout} 玉！！！`, "color-ultimate");
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        updateUI();
+                        await sleep(1500);
+                        addLog(`\n🌟 ST継続！ (再突入70回転) 🌟`, "color-rush");
+                    } else {
+                        document.getElementById("ui-spins").innerText = `ST残り: 0/70`;
+                        addLog("\n💀 ST駆け抜け... フルドライブ終了", "color-fall");
+                        addLog(`📈 總獲得STOCK次數: ${this.session_rush_count}回`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+
+                        this.state = "NORMAL";
+                        this.record_history();
+                        updateUI();
+                        st_active = false;
+                    }
+                }
+            }
+
+            record_history() {
+                this.history.unshift({
+                    spins: this.session_spins,
+                    rush: this.session_rush_count,
+                    payout: this.session_payout
+                });
+
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+            }
+        }
+
+        let game = new NanohaMachine();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const btnReset = document.getElementById("btn-reset");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div");
+            div.className = `log-entry ${className}`;
+            div.innerText = text;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") {
+                document.getElementById("ui-spins").innerText = game.session_spins;
+            }
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) {
+                historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
+                return;
+            }
+
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `
+                    <td>${label}</td>
+                    <td class="hit-spins">${record.spins}</td>
+                    <td class="hit-rush">${record.rush}</td>
+                    <td class="hit-payout">${record.payout}</td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.disabled = true;
+            btnReset.disabled = true;
+
+            addLog("\n=== 魔法開始 ===", "color-hit");
+
+            while (isPlaying) {
+                let hit = await game.play_normal();
+                updateUI();
+
+                if (game.session_spins % 100 === 0) {
+                    await sleep(10);
+                }
+
+                if (hit) {
+                    isPlaying = false;
+                    break;
+                }
+            }
+
+            btnPlay.disabled = false;
+            btnReset.disabled = false;
+            btnPlay.innerText = "▶️ 繼續打玉";
+        }
+
+        function resetGame() {
+            game = new NanohaMachine();
+            logBox.innerHTML = "";
+            renderHistoryTable([]);
+            updateUI();
+            addLog("遊戲紀錄已重置。", "color-normal");
+            btnPlay.innerText = "▶️ 開始魔法";
+        }
+    </script>
+    
+    <script src="plugin.js"></script>
+</body>
+</html>

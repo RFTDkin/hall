@@ -404,6 +404,48 @@
             <div class="progress-text" id="mushoku-prog">等待中...</div>
         </div>
 
+        <div class="machine-card" id="card-nanoha" style="border-top: 5px solid #ff4081;">
+            <h3 class="machine-title">e魔法少女リリカルなのは</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="nanoha-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="nanoha-payout">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">最大一擊出玉:</span>
+                <span class="stat-value val-max" id="nanoha-max">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">100回總收支:</span>
+                <span class="stat-value val-profit" id="nanoha-profit">---</span>
+            </div>
+            <div class="progress-text" id="nanoha-prog">等待中...</div>
+        </div>
+
+        <div class="machine-card" id="card-yusha" style="border-top: 5px solid #ff6699;">
+            <h3 class="machine-title">P 結城友奈は勇者である</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="yusha-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="yusha-payout">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">最大一擊出玉:</span>
+                <span class="stat-value val-max" id="yusha-max">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">100回總收支:</span>
+                <span class="stat-value val-profit" id="yusha-profit">---</span>
+            </div>
+            <div class="progress-text" id="yusha-prog">等待中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -908,6 +950,101 @@
             return { spins, payout };
         }
 
+        // ==========================================
+        // 13. e魔法少女リリカルなのは
+        // ==========================================
+        function simNanoha() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/348.5) {
+                    let r = Math.random();
+                    if (r < 0.19) {
+                        payout += 300; 
+                        if (Math.random() < 1/6) runNanohaST();
+                    } else {
+                        let r2 = Math.random();
+                        if (r2 < 0.0132) {
+                            payout += 3000;
+                            runNanohaST();
+                        } else if (r2 < 0.0132 + 0.4934) {
+                            payout += 900;
+                            runNanohaST();
+                        } else {
+                            payout += 900;
+                            let ct_hit = false;
+                            for (let i = 0; i < 100; i++) {
+                                if (Math.random() < 1/348.5) { ct_hit = true; break; }
+                            }
+                            if (ct_hit) { payout += 1500; runNanohaST(); }
+                        }
+                    }
+                    break;
+                }
+            }
+
+            function runNanohaST() {
+                let st_active = true;
+                while(st_active) {
+                    let hits = 0;
+                    for (let i = 0; i < 70; i++) {
+                        if (Math.random() < 1/51.6) {
+                            hits++;
+                            let pr = Math.random();
+                            if (pr < 0.02) payout += 7500;
+                            else if (pr < 0.07) payout += 6000;
+                            else if (pr < 0.21) payout += 4500;
+                            else if (pr < 0.53) payout += 3000;
+                            else payout += 1500;
+                        }
+                    }
+                    if (hits === 0) st_active = false;
+                }
+            }
+            return {spins, payout};
+        }
+
+        // ==========================================
+        // 14. P 結城友奈は勇者である
+        // ==========================================
+        function simYusha() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/349) {
+                    payout += 1500;
+                    
+                    if (Math.random() < 0.515) {
+                        let mode = "TRUE_HERO";
+                        let st = 115;
+                        
+                        while(st > 0) {
+                            if (Math.random() < 1/96.3) {
+                                if (mode === "TRUE_HERO") {
+                                    if (Math.random() < 0.25) {
+                                        st = 115; // ST Reset (無出玉)
+                                    } else {
+                                        // BONUS Judge 成功，升級大満開
+                                        payout += (Math.random() < 0.25) ? 7500 : 1500;
+                                        mode = "GREAT_MANKAI";
+                                        st = 135;
+                                    }
+                                } else {
+                                    // 大満開RUSH 100% BONUS Judge
+                                    payout += (Math.random() < 0.25) ? 7500 : 1500;
+                                    st = 135;
+                                }
+                            } else {
+                                st--;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return {spins, payout};
+        }
+
 
         // ==========================================
         // 控制器 (加入最大出玉及收支計算)
@@ -1001,6 +1138,8 @@
             await runMachineSim('kakegurui', simKakegurui, 1000 / 17);
             await runMachineSim('ggo', simGGO, 1000 / 17); // 新機 GGO
             await runMachineSim('mushoku', simMushoku, 1000 / 17);
+            await runMachineSim('nanoha', simNanoha, 1000 / 17);
+            await runMachineSim('yusha', simYusha, 1000 / 17);
 
             btn.disabled = false;
             btn.innerText = "▶️ 再次演算 (100回)";
