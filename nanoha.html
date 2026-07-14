@@ -267,7 +267,7 @@
                 updateUI();
             }
 
-            // フルドライブST (ST70回転 完走型)
+// フルドライブST (ST70回転 完走型)
             async play_rush() {
                 addLog(`\n===== 🌟 フルドライブST (70回転) 開始 =====`, "color-rush");
                 this.state = "RUSH";
@@ -286,19 +286,12 @@
                         st_remaining--;
                         document.getElementById("ui-spins").innerText = `ST残り: ${st_remaining}/70`;
 
-                        // ST中確率: 1/51.6
+                        // ST中確率: 1/51.6 (每次中獎固定 1500玉)
                         if (Math.random() < (1 / 51.6)) {
                             current_run_hits++;
-                            let pr = Math.random();
-                            let stock_payout = 0;
-
-                            // STOCK 出玉分配
-                            if (pr < 0.02) { stock_payout = 7500; addLog(`🌈 奇跡！完全走破7500BONUS獲得！ (剩餘 ${st_remaining}轉)`, "color-ultimate"); }
-                            else if (pr < 0.07) { stock_payout = 6000; addLog(`👑 超級STOCK！6000玉獲得！ (剩餘 ${st_remaining}轉)`, "color-rush"); }
-                            else if (pr < 0.21) { stock_payout = 4500; addLog(`💥 大STOCK！4500玉獲得！ (剩餘 ${st_remaining}轉)`, "color-hit"); }
-                            else if (pr < 0.53) { stock_payout = 3000; addLog(`✨ STOCK！3000玉獲得！ (剩餘 ${st_remaining}轉)`, "color-hit"); }
-                            else { stock_payout = 1500; addLog(`💧 STOCK！1500玉獲得 (剩餘 ${st_remaining}轉)`, "color-normal"); }
-
+                            let stock_payout = 1500;
+                            
+                            addLog(`✨ STOCK獲得！1500玉 (剩餘 ${st_remaining}轉)`, "color-hit");
                             current_run_payout += stock_payout;
                         }
                     }
@@ -307,7 +300,13 @@
                     if (current_run_hits > 0) {
                         this.session_rush_count += current_run_hits;
                         this.session_payout += current_run_payout;
-                        addLog(`\n🎉 ST完走！ STOCK一気放出：${current_run_payout} 玉！！！`, "color-ultimate");
+                        
+                        if (current_run_hits >= 5) {
+                            addLog(`\n🌈 神引！STOCK ${current_run_hits}個一気放出：${current_run_payout} 玉！！！`, "color-ultimate");
+                        } else {
+                            addLog(`\n🎉 ST完走！ STOCK ${current_run_hits}個一気放出：${current_run_payout} 玉！`, "color-rush");
+                        }
+                        
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         updateUI();
                         await sleep(1500);

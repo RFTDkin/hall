@@ -950,7 +950,7 @@
             return { spins, payout };
         }
 
-        // ==========================================
+// ==========================================
         // 13. e魔法少女リリカルなのは
         // ==========================================
         function simNanoha() {
@@ -988,14 +988,10 @@
                 while(st_active) {
                     let hits = 0;
                     for (let i = 0; i < 70; i++) {
+                        // 修正：每次抽中必定只係 1個 STOCK = 1500玉
                         if (Math.random() < 1/51.6) {
                             hits++;
-                            let pr = Math.random();
-                            if (pr < 0.02) payout += 7500;
-                            else if (pr < 0.07) payout += 6000;
-                            else if (pr < 0.21) payout += 4500;
-                            else if (pr < 0.53) payout += 3000;
-                            else payout += 1500;
+                            payout += 1500;
                         }
                     }
                     if (hits === 0) st_active = false;
