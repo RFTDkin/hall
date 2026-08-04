@@ -446,6 +446,27 @@
             <div class="progress-text" id="yusha-prog">等待中...</div>
         </div>
 
+        <div class="machine-card" id="card-edens" style="border-top: 5px solid #4fc3f7;">
+            <h3 class="machine-title">P EDENS ZERO</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="edens-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="edens-payout">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">最大一擊出玉:</span>
+                <span class="stat-value val-max" id="edens-max">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">100回總收支:</span>
+                <span class="stat-value val-profit" id="edens-profit">---</span>
+            </div>
+            <div class="progress-text" id="edens-prog">等待中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -1041,6 +1062,57 @@
             return {spins, payout};
         }
 
+        // ==========================================
+        // 15. P EDENS ZERO
+        // ==========================================
+        function simEdens() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                let r = Math.random();
+                if (r < 1/399.9) {
+                    payout += 1500;
+                    if (Math.random() < 0.50) {
+                        runEdensRush();
+                    }
+                    break;
+                } else if (r < (1/399.9) + (1/2799.9)) {
+                    payout += 300;
+                    // チャージ唔算完，繼續 loop
+                }
+            }
+
+            function runEdensRush() {
+                let mode = "LT"; 
+                while(true) {
+                    let hitProb = mode === "LT" ? 1/1.7 : 1/1.3;
+                    let fallProb = mode === "LT" ? 1/5.7 : 1/4.2;
+                    let p_event = hitProb + fallProb;
+                    
+                    // 根據權重決定 Hit 定 Fall
+                    let isHit = Math.random() < (hitProb / p_event);
+
+                    if (!isHit) break; // 転落
+
+                    let pr = Math.random();
+                    if (mode === "LT") {
+                        if (pr < 0.007) { payout += 7500; mode = "ULTRA"; }
+                        else if (pr < 0.007 + 0.046) { payout += 6000; mode = "ULTRA"; }
+                        else if (pr < 0.007 + 0.046 + 0.110) { payout += 4500; mode = "ULTRA"; }
+                        else if (pr < 0.007 + 0.046 + 0.110 + 0.117) { payout += 3000; mode = "ULTRA"; }
+                        else { payout += 1500; }
+                    } else { // ULTRA OVER DRIVE
+                        if (pr < 0.022) { payout += 7500; }
+                        else if (pr < 0.022 + 0.141) { payout += 6000; }
+                        else if (pr < 0.022 + 0.141 + 0.336) { payout += 4500; }
+                        else if (pr < 0.022 + 0.141 + 0.336 + 0.356) { payout += 3000; }
+                        else { payout += 1500; }
+                    }
+                }
+            }
+            return {spins, payout};
+        }
+
 
         // ==========================================
         // 控制器 (加入最大出玉及收支計算)
@@ -1136,6 +1208,7 @@
             await runMachineSim('mushoku', simMushoku, 1000 / 17);
             await runMachineSim('nanoha', simNanoha, 1000 / 17);
             await runMachineSim('yusha', simYusha, 1000 / 17);
+            await runMachineSim('edens', simEdens, 1000 / 17);
 
             btn.disabled = false;
             btn.innerText = "▶️ 再次演算 (100回)";
