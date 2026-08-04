@@ -467,6 +467,27 @@
             <div class="progress-text" id="edens-prog">等待中...</div>
         </div>
 
+        <div class="machine-card" id="card-seed" style="border-top: 5px solid #29b6f6;">
+            <h3 class="machine-title">P ガンダムSEED LT</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="seed-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="seed-payout">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">最大一擊出玉:</span>
+                <span class="stat-value val-max" id="seed-max">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">100回總收支:</span>
+                <span class="stat-value val-profit" id="seed-profit">---</span>
+            </div>
+            <div class="progress-text" id="seed-prog">等待中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -1113,6 +1134,65 @@
             return {spins, payout};
         }
 
+        // ==========================================
+        // 16. P 機動戦士ガンダムSEED LT
+        // ==========================================
+        function simSeed() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/399.9) {
+                    payout += 1500;
+                    if (Math.random() < 0.52) {
+                        runSeedRush();
+                    }
+                    break;
+                }
+            }
+
+            function runSeedRush() {
+                let mode = "CLIMAX"; 
+                let st_active = true;
+                
+                while(st_active) {
+                    let hit = false;
+                    for (let i = 0; i < 130; i++) {
+                        if (Math.random() < 1/95.6) {
+                            hit = true;
+                            break;
+                        }
+                    }
+
+                    if (!hit) {
+                        st_active = false; // ST 抜け
+                    } else {
+                        let pr = Math.random();
+                        if (mode === "CLIMAX") {
+                            if (pr < 0.51) { 
+                                payout += 4500; 
+                                mode = "CLIMAX"; 
+                            } else { 
+                                payout += 3000; 
+                                mode = "RUSH"; 
+                            }
+                        } else { // 普通 RUSH
+                            if (pr < 0.03) { 
+                                payout += 4500; 
+                                mode = "CLIMAX"; 
+                            } else if (pr < 0.03 + 0.47) { 
+                                payout += 3000; 
+                                mode = "CLIMAX"; 
+                            } else { 
+                                payout += 1500; 
+                                mode = "RUSH"; 
+                            }
+                        }
+                    }
+                }
+            }
+            return {spins, payout};
+        }
+
 
         // ==========================================
         // 控制器 (加入最大出玉及收支計算)
@@ -1209,6 +1289,7 @@
             await runMachineSim('nanoha', simNanoha, 1000 / 17);
             await runMachineSim('yusha', simYusha, 1000 / 17);
             await runMachineSim('edens', simEdens, 1000 / 17);
+            await runMachineSim('seed', simSeed, 1000 / 17);
 
             btn.disabled = false;
             btn.innerText = "▶️ 再次演算 (100回)";
