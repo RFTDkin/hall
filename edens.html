@@ -240,8 +240,11 @@
                     
                     let result = this.getFalldownResult(hitProb, fallProb);
                     
-                    await sleep(200); 
-                    document.getElementById("ui-spins").innerText = `BATTLE中...`;
+                    // 🌟 修正：逐轉顯示回轉數，並減慢顯示速度 (營造戰鬥緊張感)
+                    for (let i = 1; i <= result.spins; i++) {
+                        document.getElementById("ui-spins").innerText = `BATTLE中: ${i}回転`;
+                        await sleep(150); // 150毫秒一轉，慢過 Blue Lock 好多，等你慢慢睇
+                    }
 
                     if (result.isHit) {
                         this.session_rush_count++;
@@ -251,23 +254,23 @@
                             // 絆バトルRUSH 振分 (根據計算 33% 觸發 Judgement)
                             if (pr < 0.007) {
                                 this.session_payout += 7500;
-                                addLog(`🌈 究極臨界JUDGEMENT！ 7500個獲得！！！`, "color-ultimate");
+                                addLog(`🌈 究極臨界JUDGEMENT！ 7500個獲得！！！ (${result.spins}回転目)`, "color-ultimate");
                                 this.state = "ULTRA";
                             } else if (pr < 0.007 + 0.046) {
                                 this.session_payout += 6000;
-                                addLog(`💥 究極臨界JUDGEMENT！ 6000個獲得！！`, "color-ultra");
+                                addLog(`💥 究極臨界JUDGEMENT！ 6000個獲得！！ (${result.spins}回転目)`, "color-ultra");
                                 this.state = "ULTRA";
                             } else if (pr < 0.007 + 0.046 + 0.110) {
                                 this.session_payout += 4500;
-                                addLog(`✨ 究極臨界JUDGEMENT！ 4500個獲得！`, "color-ultra");
+                                addLog(`✨ 究極臨界JUDGEMENT！ 4500個獲得！ (${result.spins}回転目)`, "color-ultra");
                                 this.state = "ULTRA";
                             } else if (pr < 0.007 + 0.046 + 0.110 + 0.117) {
                                 this.session_payout += 3000;
-                                addLog(`✨ 究極臨界JUDGEMENT！ 3000個獲得！`, "color-ultra");
+                                addLog(`✨ 究極臨界JUDGEMENT！ 3000個獲得！ (${result.spins}回転目)`, "color-ultra");
                                 this.state = "ULTRA";
                             } else {
                                 this.session_payout += 1500;
-                                addLog(`⚔️ 絆BONUS (1500玉) 獲得！`, "color-hit");
+                                addLog(`⚔️ 絆BONUS (1500玉) 獲得！ (${result.spins}回転目)`, "color-hit");
                             }
 
                             if (this.state === "ULTRA") {
@@ -279,19 +282,19 @@
                             let pr = Math.random();
                             if (pr < 0.022) {
                                 this.session_payout += 7500;
-                                addLog(`🌈 OVER DRIVE BONUS！ 7500個獲得！！！`, "color-ultimate");
+                                addLog(`🌈 OVER DRIVE BONUS！ 7500個獲得！！！ (${result.spins}回転目)`, "color-ultimate");
                             } else if (pr < 0.022 + 0.141) {
                                 this.session_payout += 6000;
-                                addLog(`💥 OVER DRIVE BONUS！ 6000個獲得！！`, "color-ultra");
+                                addLog(`💥 OVER DRIVE BONUS！ 6000個獲得！！ (${result.spins}回転目)`, "color-ultra");
                             } else if (pr < 0.022 + 0.141 + 0.336) {
                                 this.session_payout += 4500;
-                                addLog(`✨ OVER DRIVE BONUS！ 4500個獲得！`, "color-ultra");
+                                addLog(`✨ OVER DRIVE BONUS！ 4500個獲得！ (${result.spins}回転目)`, "color-ultra");
                             } else if (pr < 0.022 + 0.141 + 0.336 + 0.356) {
                                 this.session_payout += 3000;
-                                addLog(`✨ OVER DRIVE BONUS！ 3000個獲得！`, "color-ultra");
+                                addLog(`✨ OVER DRIVE BONUS！ 3000個獲得！ (${result.spins}回転目)`, "color-ultra");
                             } else {
                                 this.session_payout += 1500;
-                                addLog(`💧 魔王BONUS (1500玉) 獲得`, "color-hit");
+                                addLog(`💧 魔王BONUS (1500玉) 獲得 (${result.spins}回転目)`, "color-hit");
                             }
                         }
 
@@ -301,7 +304,7 @@
 
                     } else {
                         // 転落
-                        addLog("\n💀 バトル敗北... (転落)", "color-fall");
+                        addLog(`\n💀 バトル敗北... (転落: ${result.spins}回転目)`, "color-fall");
                         addLog(`📈 總連莊數: ${this.session_rush_count}連`);
                         addLog(`💰 最終出玉: ${this.session_payout} 玉`);
 
