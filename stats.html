@@ -488,6 +488,27 @@
             <div class="progress-text" id="seed-prog">等待中...</div>
         </div>
 
+        <div class="machine-card" id="card-sao" style="border-top: 5px solid #ffca28;">
+            <h3 class="machine-title">P ソードアート・オンライン LT</h3>
+            <div class="stat-row">
+                <span class="stat-label">平均當選回轉:</span>
+                <span class="stat-value val-spins" id="sao-spins">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">平均獲得出玉:</span>
+                <span class="stat-value val-payout" id="sao-payout">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">最大一擊出玉:</span>
+                <span class="stat-value val-max" id="sao-max">---</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">100回總收支:</span>
+                <span class="stat-value val-profit" id="sao-profit">---</span>
+            </div>
+            <div class="progress-text" id="sao-prog">等待中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -1193,6 +1214,82 @@
             return {spins, payout};
         }
 
+        // ==========================================
+        // 17. P ソードアート・オンライン LT
+        // ==========================================
+        function simSAO() {
+            let spins = 0, payout = 0;
+            
+            function getHugeBonus() {
+                return [3000, 4500, 6000, 7500, 9000][Math.floor(Math.random() * 5)];
+            }
+
+            while(true) {
+                spins++;
+                if (Math.random() < 1/199.9) {
+                    let r = Math.random();
+                    if (r < 0.015) {
+                        payout += getHugeBonus(); 
+                        runSAORush("WOU");
+                    } else if (r < 0.015 + 0.485) {
+                        payout += 300;
+                        runSAORush("SWORD");
+                    } else {
+                        payout += 300;
+                    }
+                    break;
+                }
+            }
+
+            function runSAORush(startMode) {
+                let mode = startMode;
+                let st_active = true;
+                
+                while (st_active) {
+                    let st_max = mode === "SWORD" ? 53 : 70;
+                    let hit = false;
+                    for (let i = 0; i < st_max; i++) {
+                        if (Math.random() < 1/51.6) {
+                            hit = true;
+                            break;
+                        }
+                    }
+
+                    if (!hit) {
+                        st_active = false;
+                    } else {
+                        let pr = Math.random();
+                        if (mode === "SWORD") {
+                            if (pr < 0.11) {
+                                payout += getHugeBonus();
+                                mode = "WOU";
+                            } else if (pr < 0.22) {
+                                payout += 1500;
+                                mode = "WOU";
+                            } else {
+                                payout += 1500;
+                                mode = "SWORD";
+                            }
+                        } else { // WOU Mode
+                            if (pr < 0.40) {
+                                let sd = Math.random();
+                                if (sd < 0.082) payout += 1500;
+                                else if (sd < 0.363) payout += 3000;
+                                else if (sd < 0.724) payout += 4500;
+                                else if (sd < 0.931) payout += 6000;
+                                else if (sd < 0.975) payout += 7500;
+                                else if (sd < 0.990) payout += 9000;
+                                else payout += 10500; // 簡易處理 +SWORD DRIVE
+                            } else {
+                                payout += 1500;
+                            }
+                        }
+                    }
+                }
+            }
+            return {spins, payout};
+        }
+
 
         // ==========================================
         // 控制器 (加入最大出玉及收支計算)
@@ -1290,6 +1387,7 @@
             await runMachineSim('yusha', simYusha, 1000 / 17);
             await runMachineSim('edens', simEdens, 1000 / 17);
             await runMachineSim('seed', simSeed, 1000 / 17);
+            await runMachineSim('sao', simSAO, 1000 / 20);
 
             btn.disabled = false;
             btn.innerText = "▶️ 再次演算 (100回)";

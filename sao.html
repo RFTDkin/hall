@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>柏青哥模擬器 (P EDENS ZERO)</title>
+    <title>柏青哥模擬器 (P ソードアート・オンライン LT)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #050a1f;
+            background-color: #0d1117;
             color: #e0e0e0;
             text-align: center;
             margin: 0;
@@ -16,8 +16,8 @@
         }
 
         h1 {
-            color: #4fc3f7;
-            text-shadow: 0 0 15px rgba(79, 195, 247, 0.7);
+            color: #ffca28;
+            text-shadow: 0 0 15px rgba(255, 202, 40, 0.7);
         }
 
         .main-container {
@@ -34,29 +34,29 @@
         .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
 
         .stats-board {
-            background-color: #0d1b2a;
-            border: 2px solid #4fc3f7;
+            background-color: #161b22;
+            border: 2px solid #ffca28;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-around;
             font-size: 1.1em;
-            box-shadow: inset 0 0 15px rgba(79, 195, 247, 0.5);
+            box-shadow: inset 0 0 15px rgba(255, 202, 40, 0.5);
         }
 
         .stat-item span {
             display: block;
             font-weight: bold;
-            color: #ffca28;
+            color: #4fc3f7;
             font-size: 1.3em;
             margin-top: 5px;
         }
 
         button {
-            background-color: #0277bd;
+            background-color: #c2185b; /* 預設紅色系 */
             color: white;
-            border: 1px solid #4fc3f7;
+            border: 1px solid #ff4081;
             padding: 12px 25px;
             font-size: 1.1em;
             border-radius: 5px;
@@ -66,7 +66,7 @@
             transition: background-color 0.2s, box-shadow 0.2s;
         }
 
-        button:hover { background-color: #0288d1; box-shadow: 0 0 10px #4fc3f7; }
+        button:hover { background-color: #e91e63; box-shadow: 0 0 10px #ff4081; }
         button:disabled { background-color: #1a2a3a; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
         
         #btn-reset { background-color: #424242; border-color: #616161; }
@@ -74,7 +74,7 @@
 
         .log-container {
             background-color: #000000;
-            border: 1px solid #4fc3f7;
+            border: 1px solid #ffca28;
             border-radius: 5px;
             height: 400px;
             overflow-y: auto;
@@ -85,46 +85,44 @@
         }
 
         .log-entry { margin: 5px 0; }
-        .color-rush { color: #00e676; font-weight: bold; text-shadow: 0 0 5px #00e676; }
-        .color-ultra { color: #d500f9; font-weight: bold; text-shadow: 0 0 10px #d500f9; font-size: 1.1em; }
-        .color-hit { color: #4fc3f7; font-weight: bold; }
+        .color-wou { color: #ff5252; font-weight: bold; text-shadow: 0 0 10px #ff5252; font-size: 1.1em; }
+        .color-sword { color: #00e676; font-weight: bold; text-shadow: 0 0 5px #00e676; }
+        .color-hit { color: #ffca28; font-weight: bold; }
         .color-normal { color: #9e9e9e; }
-        .color-charge { color: #ff9800; font-weight: bold; }
-        .color-ultimate { color: #ff5252; font-weight: bold; text-shadow: 0 0 10px #ff5252; font-size: 1.1em; }
         .color-fall { color: #757575; font-style: italic; }
 
         .data-lamp-container {
-            background-color: #050a1f;
-            border: 3px solid #4fc3f7;
+            background-color: #0d1117;
+            border: 3px solid #ffca28;
             border-radius: 8px;
             padding: 15px;
-            box-shadow: 0 0 15px rgba(79, 195, 247, 0.4);
+            box-shadow: 0 0 15px rgba(255, 202, 40, 0.4);
         }
 
         .data-lamp-title {
-            color: #4fc3f7;
+            color: #ffca28;
             margin-top: 0;
             margin-bottom: 15px;
             text-align: center;
             font-family: 'Courier New', Courier, monospace;
-            text-shadow: 0 0 5px #4fc3f7;
+            text-shadow: 0 0 5px #ffca28;
             letter-spacing: 2px;
         }
 
         table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
-        table.data-lamp th, table.data-lamp td { border: 1px solid #0277bd; padding: 10px 5px; text-align: center; }
-        table.data-lamp th { background-color: #0d1b2a; color: #ffca28; font-size: 0.9em; }
-        table.data-lamp tr:nth-child(even) { background-color: #081020; }
-        table.data-lamp td.hit-spins { color: #4fc3f7; font-weight: bold; }
-        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
-        table.data-lamp td.hit-payout { color: #ffca28; font-weight: bold; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #c2185b; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #161b22; color: #ffca28; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #10141a; }
+        table.data-lamp td.hit-spins { color: #ffca28; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #ff5252; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #4fc3f7; font-weight: bold; }
         .empty-row { color: #555 !important; }
     </style>
 </head>
 
 <body>
 
-    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ffca28;">P EDENS ZERO (究極LT)</span></h1>
+    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #4fc3f7;">P ソードアート・オンライン (SAO)</span></h1>
 
     <div class="main-container">
         <div class="left-panel">
@@ -135,7 +133,7 @@
             </div>
 
             <div style="margin-bottom: 15px;">
-                <button id="btn-play" onclick="startPlay()">▶️ 開始冒險</button>
+                <button id="btn-play" onclick="startPlay()">▶️ LINK START</button>
                 <button id="btn-reset" onclick="resetGame()">🔄 紀錄重置</button>
             </div>
 
@@ -165,13 +163,19 @@
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-        class EdensMachine {
+        class SaoMachine {
             constructor() {
                 this.state = "NORMAL";
                 this.session_spins = 0;
                 this.session_payout = 0;
                 this.session_rush_count = 0;
                 this.history = []; 
+            }
+
+            // 隨機產生 3000~9000+α 嘅函數
+            getRandomHugeBonus() {
+                const options = [3000, 4500, 6000, 7500, 9000];
+                return options[Math.floor(Math.random() * options.length)];
             }
 
             async play_normal() {
@@ -181,141 +185,135 @@
                     addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
                 }
 
-                let r = Math.random();
-                let prob_399 = 1 / 399.9;
-                let prob_charge = 1 / 2799.9;
-
-                // 図柄揃い (1/399.9)
-                if (r < prob_399) {
-                    addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い！ (1500玉)`, "color-hit");
-                    this.session_payout += 1500;
-                    updateUI();
-                    await sleep(1000);
-
-                    // 50% 絆バトルRUSH突入
-                    if (Math.random() < 0.50) {
-                        addLog("✨ EDENS BONUS！ 絆バトルRUSH 突入！", "color-rush");
-                        await sleep(1000);
+                // 大当り確率: 1/199.9
+                if (Math.random() < (1 / 199.9)) {
+                    let r = Math.random();
+                    
+                    // 1.5% 直行 War of Underworld
+                    if (r < 0.015) {
+                        let bonus = this.getRandomHugeBonus();
+                        addLog(`\n[${this.session_spins} 回轉] 🌈 Epilogue BONUS (ぼくの英雄)！`, "color-wou");
+                        addLog(`✨ ${bonus}個 獲得！`, "color-hit");
+                        this.session_payout += bonus;
+                        updateUI();
+                        await sleep(1500);
+                        addLog(`🔥 War of Underworld (上位ST) 直行！`, "color-wou");
+                        this.state = "WOU";
                         await this.play_rush();
-                    } else {
-                        addLog("😭 演出失敗... (通常へ戻る)", "color-normal");
+                    } 
+                    // 48.5% SWORD RUSH 突入
+                    else if (r < 0.015 + 0.485) {
+                        addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い (300玉)`, "color-hit");
+                        this.session_payout += 300;
+                        updateUI();
+                        await sleep(1000);
+                        addLog(`⚔️ SWORD RUSH (ST53回) 突入！`, "color-sword");
+                        this.state = "SWORD";
+                        await this.play_rush();
+                    } 
+                    // 50.0% 通常
+                    else {
+                        addLog(`\n[${this.session_spins} 回轉] 💧 図柄揃い (300玉)... 通常へ`, "color-normal");
+                        this.session_payout += 300;
                         addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
                         this.record_history();
+                        updateUI();
                     }
                     return true;
                 } 
-                // チャージ当たり (1/2799.9)
-                else if (r < prob_399 + prob_charge) {
-                    addLog(`\n[${this.session_spins} 回轉] ⚡ チャージ当り (300玉)`, "color-charge");
-                    this.session_payout += 300;
-                    addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
-                    
-                    // 修正：將紀錄寫入 Data Lamp，清零回轉數，並停止自動演算
-                    this.record_history(); 
-                    updateUI();
-                    return true; 
-                }
                 return false;
             }
 
-            // 處理転落式抽籤 (回傳消耗轉數及是否中獎)
-            getFalldownResult(hitProb, fallProb) {
-                let p_event = hitProb + fallProb;
-                let spins = 1;
-                // 如果機率總和小於 1，可以用對數計算空轉次數
-                if (p_event < 1) {
-                    spins = Math.floor(Math.log(Math.random()) / Math.log(1 - p_event)) + 1;
-                }
-                // 根據各自權重決定係 Hit 定係 Fall
-                let isHit = Math.random() < (hitProb / p_event);
-                return { spins, isHit };
-            }
-
             async play_rush() {
-                this.state = "LT";
-                addLog(`\n===== 🛡️ 絆バトルRUSH (LT) 開始 =====`, "color-rush");
-                updateUI();
-
-                let st_active = true;
-
-                while (st_active) {
-                    let hitProb = this.state === "LT" ? (1 / 1.7) : (1 / 1.3);
-                    let fallProb = this.state === "LT" ? (1 / 5.7) : (1 / 4.2);
+                let isPlayingRush = true;
+                
+                while (isPlayingRush) {
+                    let st_max = this.state === "SWORD" ? 53 : 70;
+                    let st_remaining = st_max;
+                    let modeName = this.state === "SWORD" ? "SWORD RUSH" : "War of Underworld";
                     
-                    let result = this.getFalldownResult(hitProb, fallProb);
-                    
-                    // 🌟 修正：逐轉顯示回轉數，並減慢顯示速度 (營造戰鬥緊張感)
-                    for (let i = 1; i <= result.spins; i++) {
-                        document.getElementById("ui-spins").innerText = `BATTLE中: ${i}回転`;
-                        await sleep(150); // 150毫秒一轉，慢過 Blue Lock 好多，等你慢慢睇
+                    addLog(`\n===== ${modeName} (ST${st_max}回) 開始 =====`, this.state === "SWORD" ? "color-sword" : "color-wou");
+                    updateUI();
+
+                    let hit = false;
+
+                    while (st_remaining > 0) {
+                        await sleep(30); 
+                        st_remaining--;
+                        document.getElementById("ui-spins").innerText = `ST残り: ${st_remaining}/${st_max}`;
+
+                        // 右打ち中確率: 1/51.6
+                        if (Math.random() < (1 / 51.6)) {
+                            this.session_rush_count++;
+                            let used_spin = st_max - st_remaining;
+                            addLog(`\n🎯 大当り！ (${used_spin}回転目)`, "color-hit");
+                            
+                            let pr = Math.random();
+
+                            if (this.state === "SWORD") {
+                                // --- SWORD RUSH 振分 ---
+                                if (pr < 0.11) {
+                                    let bonus = this.getRandomHugeBonus();
+                                    this.session_payout += bonus;
+                                    addLog(`🌈 咲け、花たち！ ${bonus}個獲得！！！`, "color-wou");
+                                    addLog(`🔥 War of Underworld へ昇格！`, "color-wou");
+                                    this.state = "WOU";
+                                } else if (pr < 0.11 + 0.11) {
+                                    this.session_payout += 1500;
+                                    addLog(`✨ 決意の刃 成功！ 1500個獲得！`, "color-hit");
+                                    addLog(`🔥 War of Underworld へ昇格！`, "color-wou");
+                                    this.state = "WOU";
+                                } else if (pr < 0.11 + 0.11 + 0.33) {
+                                    this.session_payout += 1500;
+                                    addLog(`💧 決意の刃 失敗... 1500個獲得`, "color-hit");
+                                    addLog(`⚔️ SWORD RUSH 継続`, "color-sword");
+                                } else {
+                                    this.session_payout += 1500;
+                                    addLog(`✨ BONUS 1500個獲得`, "color-hit");
+                                    addLog(`⚔️ SWORD RUSH 継続`, "color-sword");
+                                }
+                            } else {
+                                // --- War of Underworld 振分 ---
+                                if (pr < 0.40) {
+                                    // 40% 發動 SWORD DRIVE (精準比例抽籤)
+                                    let sd = Math.random();
+                                    let sd_bonus = 0;
+                                    if (sd < 0.082) sd_bonus = 1500;
+                                    else if (sd < 0.082 + 0.281) sd_bonus = 3000;
+                                    else if (sd < 0.082 + 0.281 + 0.361) sd_bonus = 4500;
+                                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207) sd_bonus = 6000;
+                                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207 + 0.044) sd_bonus = 7500;
+                                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207 + 0.044 + 0.015) sd_bonus = 9000; // 7500+1500
+                                    else sd_bonus = 10500; // 7500+SWORD DRIVE (簡易化作額外3000)
+
+                                    this.session_payout += sd_bonus;
+                                    addLog(`🌈 神器解放 SWORD DRIVE！ ${sd_bonus}個獲得！！！`, "color-wou");
+                                } else {
+                                    this.session_payout += 1500;
+                                    addLog(`✨ BONUS 1500個獲得`, "color-hit");
+                                }
+                                addLog(`🔥 War of Underworld 継続！`, "color-wou");
+                            }
+
+                            addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                            updateUI();
+                            await sleep(1500);
+                            hit = true;
+                            break; 
+                        }
                     }
 
-                    if (result.isHit) {
-                        this.session_rush_count++;
-                        
-                        if (this.state === "LT") {
-                            let pr = Math.random();
-                            // 絆バトルRUSH 振分 (根據計算 33% 觸發 Judgement)
-                            if (pr < 0.007) {
-                                this.session_payout += 7500;
-                                addLog(`🌈 究極臨界JUDGEMENT！ 7500個獲得！！！ (${result.spins}回転目)`, "color-ultimate");
-                                this.state = "ULTRA";
-                            } else if (pr < 0.007 + 0.046) {
-                                this.session_payout += 6000;
-                                addLog(`💥 究極臨界JUDGEMENT！ 6000個獲得！！ (${result.spins}回転目)`, "color-ultra");
-                                this.state = "ULTRA";
-                            } else if (pr < 0.007 + 0.046 + 0.110) {
-                                this.session_payout += 4500;
-                                addLog(`✨ 究極臨界JUDGEMENT！ 4500個獲得！ (${result.spins}回転目)`, "color-ultra");
-                                this.state = "ULTRA";
-                            } else if (pr < 0.007 + 0.046 + 0.110 + 0.117) {
-                                this.session_payout += 3000;
-                                addLog(`✨ 究極臨界JUDGEMENT！ 3000個獲得！ (${result.spins}回転目)`, "color-ultra");
-                                this.state = "ULTRA";
-                            } else {
-                                this.session_payout += 1500;
-                                addLog(`⚔️ 絆BONUS (1500玉) 獲得！ (${result.spins}回転目)`, "color-hit");
-                            }
-
-                            if (this.state === "ULTRA") {
-                                await sleep(1000);
-                                addLog(`\n🌌 覚醒！ ULTRA OVER DRIVE (究極LT) へ突入！！ 🌌`, "color-ultra");
-                            }
-                        } 
-                        else { // ULTRA OVER DRIVE 振分
-                            let pr = Math.random();
-                            if (pr < 0.022) {
-                                this.session_payout += 7500;
-                                addLog(`🌈 OVER DRIVE BONUS！ 7500個獲得！！！ (${result.spins}回転目)`, "color-ultimate");
-                            } else if (pr < 0.022 + 0.141) {
-                                this.session_payout += 6000;
-                                addLog(`💥 OVER DRIVE BONUS！ 6000個獲得！！ (${result.spins}回転目)`, "color-ultra");
-                            } else if (pr < 0.022 + 0.141 + 0.336) {
-                                this.session_payout += 4500;
-                                addLog(`✨ OVER DRIVE BONUS！ 4500個獲得！ (${result.spins}回転目)`, "color-ultra");
-                            } else if (pr < 0.022 + 0.141 + 0.336 + 0.356) {
-                                this.session_payout += 3000;
-                                addLog(`✨ OVER DRIVE BONUS！ 3000個獲得！ (${result.spins}回転目)`, "color-ultra");
-                            } else {
-                                this.session_payout += 1500;
-                                addLog(`💧 魔王BONUS (1500玉) 獲得 (${result.spins}回転目)`, "color-hit");
-                            }
-                        }
-
-                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-                        updateUI();
-                        await sleep(1000);
-
-                    } else {
-                        // 転落
-                        addLog(`\n💀 バトル敗北... (転落: ${result.spins}回転目)`, "color-fall");
+                    // ST 抜け
+                    if (!hit) {
+                        document.getElementById("ui-spins").innerText = `ST残り: 0/${st_max}`;
+                        addLog(`\n💀 ST抜け... RUSH終了`, "color-fall");
                         addLog(`📈 總連莊數: ${this.session_rush_count}連`);
                         addLog(`💰 最終出玉: ${this.session_payout} 玉`);
 
                         this.state = "NORMAL";
                         this.record_history();
                         updateUI();
-                        st_active = false;
+                        isPlayingRush = false;
                     }
                 }
             }
@@ -336,7 +334,7 @@
             }
         }
 
-        let game = new EdensMachine();
+        let game = new SaoMachine();
         let isPlaying = false;
         const logBox = document.getElementById("log-box");
         const btnPlay = document.getElementById("btn-play");
@@ -385,7 +383,7 @@
             btnPlay.disabled = true;
             btnReset.disabled = true;
 
-            addLog("\n=== 冒險開始 ===", "color-hit");
+            addLog("\n=== LINK START ===", "color-hit");
 
             while (isPlaying) {
                 let hit = await game.play_normal();
@@ -407,12 +405,12 @@
         }
 
         function resetGame() {
-            game = new EdensMachine();
+            game = new SaoMachine();
             logBox.innerHTML = "";
             renderHistoryTable([]);
             updateUI();
             addLog("遊戲紀錄已重置。", "color-normal");
-            btnPlay.innerText = "▶️ 開始冒險";
+            btnPlay.innerText = "▶️ LINK START";
         }
     </script>
     
