@@ -216,7 +216,12 @@
         <span style="font-size:0.9em; color: #8b949e;">(包含 Charge/小當 在內，金錢以 28玉交換 及 各機台千円回轉數 真實計算)</span>
     </p>
 
-    <button id="btn-start" class="btn-start" onclick="runAllSimulations()">▶️ 開始瘋狂演算 (100回)</button>
+    <!-- 將原本嘅單一按鈕換成呢段 -->
+    <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+        <button id="btn-start-100" class="btn-start" style="margin-bottom: 0;" onclick="runAllSimulations(100)">▶️ 演算 (100回)</button>
+        <button id="btn-start-1000" class="btn-start" style="background-color: #d29922; margin-bottom: 0;" onclick="runAllSimulations(1000)">▶️ 演算 (1000回)</button>
+        <button id="btn-start-10000" class="btn-start" style="background-color: #b35900; margin-bottom: 0;" onclick="runAllSimulations(10000)">▶️ 演算 (10000回)</button>
+    </div>
 
     <div class="grid-container">
         <div class="machine-card tag-bluelock" id="card-bluelock">
@@ -1291,10 +1296,8 @@
         }
 
 
-        // ==========================================
-        // 控制器 (加入最大出玉及收支計算)
-        // ==========================================
-        async function runMachineSim(idPrefix, simFunc, spinCost) {
+// 1. 更新 runMachineSim 函數 (加入 iterations 參數，並自動調節畫面更新速度)
+        async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
             const elPayout = document.getElementById(`${idPrefix}-payout`);
@@ -1311,56 +1314,62 @@
             let totalPayout = 0;
             let maxPayout = 0;
 
-            for (let i = 1; i <= ITERATIONS; i++) {
+            // 🌟 效能優化：次數越多，畫面更新頻率越低，防止 Browser 卡死
+            let yieldStep = iterations >= 10000 ? 1000 : (iterations >= 1000 ? 100 : 20);
+
+            for (let i = 1; i <= iterations; i++) {
                 let res = simFunc();
                 totalSpins += res.spins;
                 totalPayout += res.payout;
 
-                // 記錄 100 次當中最癲嗰一次出玉
                 if (res.payout > maxPayout) {
                     maxPayout = res.payout;
                 }
 
-                if (i % 20 === 0) {
-                    elProg.innerText = `演算中... ${i}/${ITERATIONS}`;
+                if (i % yieldStep === 0) {
+                    elProg.innerText = `演算中... ${i}/${iterations}`;
                     await yieldToMain();
                 }
             }
 
-            let avgSpins = Math.round(totalSpins / ITERATIONS);
-            let avgPayout = Math.round(totalPayout / ITERATIONS);
+            let avgSpins = Math.round(totalSpins / iterations);
+            let avgPayout = Math.round(totalPayout / iterations);
 
-            // 計算真實金錢收支：出玉價值 (28玉交換) - 總投資成本
             let totalRevenueYen = totalPayout * 3.57;
             let totalCostYen = totalSpins * spinCost;
             let netProfitYen = Math.round(totalRevenueYen - totalCostYen);
 
             elSpins.innerText = avgSpins.toLocaleString();
             elPayout.innerText = avgPayout.toLocaleString() + " 玉";
-            elMax.innerText = maxPayout.toLocaleString() + " 玉";
+            if(elMax) elMax.innerText = maxPayout.toLocaleString() + " 玉";
 
-            // 處理正負數顏色
-            if (netProfitYen > 0) {
-                elProfit.innerText = "+" + netProfitYen.toLocaleString() + " 円";
-                elProfit.style.color = "#56d364"; // 贏錢綠色
-            } else {
-                elProfit.innerText = netProfitYen.toLocaleString() + " 円";
-                elProfit.style.color = "#f85149"; // 輸錢紅色
+            if (elProfit) {
+                if (netProfitYen > 0) {
+                    elProfit.innerText = "+" + netProfitYen.toLocaleString() + " 円";
+                    elProfit.style.color = "#56d364"; 
+                } else {
+                    elProfit.innerText = netProfitYen.toLocaleString() + " 円";
+                    elProfit.style.color = "#f85149"; 
+                }
             }
 
-            elProg.innerText = `完成 (共 ${ITERATIONS} 回)`;
+            elProg.innerText = `完成 (共 ${iterations} 回)`;
             card.classList.remove('running');
             card.classList.add('done');
         }
 
-        async function runAllSimulations() {
-            const btn = document.getElementById("btn-start");
-            btn.disabled = true;
-            btn.innerText = "⏳ 瘋狂演算中...";
+        // 2. 更新 runAllSimulations 函數 (接收 iterations，並傳遞畀每部機)
+        async function runAllSimulations(iterations) {
+            // 鎖定所有按鈕
+            const btns = document.querySelectorAll('.btn-start');
+            btns.forEach(btn => btn.disabled = true);
+            
+            const activeBtn = document.getElementById(`btn-start-${iterations}`);
+            if (activeBtn) activeBtn.innerText = `⏳ 瘋狂演算中 (${iterations}回)...`;
 
             document.querySelectorAll('.val-spins, .val-payout, .val-max, .val-profit').forEach(el => {
                 el.innerText = "---";
-                el.style.color = ""; // 重設顏色
+                el.style.color = ""; 
             });
             document.querySelectorAll('.progress-text').forEach(el => el.innerText = "準備中...");
             document.querySelectorAll('.machine-card').forEach(el => {
@@ -1369,28 +1378,31 @@
 
             await yieldToMain();
 
-            // 傳入對應嘅「千円回轉數」成本 (1000円 / 回轉數)
-            await runMachineSim('bluelock', simBlueLock, 1000 / 17);
-            await runMachineSim('bluelock_light', simBlueLockLight, 1000 / 17); // 新機 ブルーロック 1/120
-            await runMachineSim('dmdp', simDMDP, 1000 / 17);
-            await runMachineSim('ghoul399', simGhoul399, 1000 / 17);
-            await runMachineSim('ghoul999', simGhoul999, 1000 / 32);   // 喰種999 係 32轉
-            await runMachineSim('jitsuryoku', simJitsuryoku, 1000 / 25); // 歡迎來到實力 係 25轉
-            await runMachineSim('monono', simMononogatari, 1000 / 17);
-            await runMachineSim('lycoris', simLycoris, 1000 / 17);
-            await runMachineSim('hellsing', simHellsing, 1000 / 17);
-            await runMachineSim('slime', simSlime, 1000 / 17);
-            await runMachineSim('kakegurui', simKakegurui, 1000 / 17);
-            await runMachineSim('ggo', simGGO, 1000 / 17); // 新機 GGO
-            await runMachineSim('mushoku', simMushoku, 1000 / 17);
-            await runMachineSim('nanoha', simNanoha, 1000 / 17);
-            await runMachineSim('yusha', simYusha, 1000 / 17);
-            await runMachineSim('edens', simEdens, 1000 / 17);
-            await runMachineSim('seed', simSeed, 1000 / 17);
-            await runMachineSim('sao', simSAO, 1000 / 20);
+            // 👇 ⚠️ 注意：你一定要將 , iterations 加落去你「所有」機台嘅最後尾 👇
+            await runMachineSim('bluelock', simBlueLock, 1000 / 17, iterations);
+            await runMachineSim('bluelock_light', simBlueLockLight, 1000 / 17, iterations);
+            await runMachineSim('dmdp', simDMDP, 1000 / 17, iterations);
+            await runMachineSim('ghoul399', simGhoul399, 1000 / 17, iterations);
+            await runMachineSim('ghoul999', simGhoul999, 1000 / 32, iterations);
+            await runMachineSim('jitsuryoku', simJitsuryoku, 1000 / 25, iterations);
+            await runMachineSim('monono', simMononogatari, 1000 / 17, iterations);
+            await runMachineSim('lycoris', simLycoris, 1000 / 17, iterations);
+            await runMachineSim('hellsing', simHellsing, 1000 / 17, iterations);
+            await runMachineSim('slime', simSlime, 1000 / 17, iterations);
+            await runMachineSim('kakegurui', simKakegurui, 1000 / 17, iterations);
+            await runMachineSim('ggo', simGGO, 1000 / 17, iterations);
+            await runMachineSim('mushoku', simMushoku, 1000 / 17, iterations);
+            await runMachineSim('nanoha', simNanoha, 1000 / 17, iterations);
+            await runMachineSim('yusha', simYusha, 1000 / 17, iterations);
+            await runMachineSim('edens', simEdens, 1000 / 17, iterations);
+            await runMachineSim('seed', simSeed, 1000 / 17, iterations);
+            await runMachineSim('sao', simSAO, 1000 / 20, iterations);
 
-            btn.disabled = false;
-            btn.innerText = "▶️ 再次演算 (100回)";
+            // 解鎖所有按鈕並還原文字
+            btns.forEach(btn => btn.disabled = false);
+            document.getElementById('btn-start-100').innerText = "▶️ 演算 (100回)";
+            document.getElementById('btn-start-1000').innerText = "▶️ 演算 (1000回)";
+            document.getElementById('btn-start-10000').innerText = "▶️ 演算 (10000回)";
         }
     </script>
 </body>
