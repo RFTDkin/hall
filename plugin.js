@@ -1,5 +1,5 @@
 // ==========================================
-// 柏青哥全能智能外掛系統 V10 (修復排行榜讀取 + 100% 全域日文化)
+// 柏青哥全能智能外掛系統 V14 (完美修復一万発分享掣隱藏問題)
 // ==========================================
 
 // 👇 將呢度換成你嘅 Config 👇
@@ -15,8 +15,28 @@ const firebaseConfig = {
 };
 // 👆 替換結束 👆
 
+// 🌟 新增：全域記憶系統 (紀錄清零前嘅最高出玉) 🌟
+window.latest_payout_for_share = 0;
+window.latest_rush_for_share = 0;
+
 // ==========================================
-// 1. 全域中日翻譯字典 (加入剩餘中文字)
+// 0. 全域彈窗 (Alert) 攔截翻譯
+// ==========================================
+const originalAlert = window.alert;
+window.alert = function(msg) {
+    let text = msg;
+    if (typeof text === 'string') {
+        text = text.replace(/歡迎返嚟/g, "おかえりなさい")
+                   .replace(/登入成功/g, "ログイン成功")
+                   .replace(/登出/g, "ログアウト")
+                   .replace(/溫馨提示/g, "お知らせ")
+                   .replace(/你今日嘅 4000 轉限額已經打爆咗/g, "本日の上限(4000回転)に達しました");
+    }
+    originalAlert(text);
+};
+
+// ==========================================
+// 1. 全域中日翻譯字典 (Auto-Translator)
 // ==========================================
 const dict = {
     "柏青哥模擬器": "パチンコシミュレーター",
@@ -51,9 +71,7 @@ const dict = {
     "正在播放": "再生中"
 };
 
-// 執行介面靜態翻譯
 function translateDOM() {
-    // 翻譯 body 內嘅文字
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
     let node;
     while (node = walker.nextNode()) {
@@ -127,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const exchangeRate = 3.57; 
         let currentWallet = userData.balance;
 
-        // --- 注入右上角 Header UI ---
         const pluginUI = document.createElement("div");
         pluginUI.style.cssText = "position: fixed; top: 15px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; gap: 10px;";
         pluginUI.innerHTML = `
@@ -153,11 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         renderWallet();
 
-        // --- 🌟 關鍵修復：完美還原 V7 讀取機台名邏輯，搵返你嘅 Blue Lock 數據庫！ 🌟 ---
         let originalTitle = document.title;
         let machineName = originalTitle.replace('柏青哥模擬器 (', '').replace(')', '').replace('パチンコシミュレーター (', '').trim() || "Unknown";
-        
-        // 翻譯 Browser 頂部嘅 Tab 標題
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
         let pageText = originalTitle + " " + document.body.innerText;
@@ -166,7 +180,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 25;
 
-        // --- 注入「一撃一万発」排行榜 UI ---
         let rightPanel = document.querySelector(".right-panel");
         if (rightPanel) {
             const rankingUI = document.createElement("div");
@@ -221,7 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         setTimeout(() => { if (userData.daily_spins >= 4000) disableMachine(); }, 500);
 
-        // --- 攔截 updateUI 進行扣錢、寫入 Firebase 與萬發判定 ---
         let lastUI_spins = 0;
         let lastUI_payout = 0;
 
@@ -233,14 +245,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 let spinEl = document.getElementById("ui-spins");
                 let payoutEl = document.getElementById("ui-payout");
+                let rushEl = document.getElementById("ui-rush");
+                
                 if (!spinEl || !payoutEl) return;
 
-                let new_spins = parseInt(spinEl.innerText) || 0;
-                let new_payout = parseInt(payoutEl.innerText) || 0;
+                let new_spins = parseInt(spinEl.innerText.replace(/,/g, '')) || 0;
+                let new_payout = parseInt(payoutEl.innerText.replace(/,/g, '')) || 0;
+                let new_rush = rushEl ? (parseInt(rushEl.innerText.replace(/,/g, '')) || 0) : 0;
+
+                // 🌟 核心修復：喺清零之前，偷偷記低今鋪 RUSH 嘅最高出玉同連莊數 🌟
+                if (new_payout > window.latest_payout_for_share) {
+                    window.latest_payout_for_share = new_payout;
+                    window.latest_rush_for_share = new_rush;
+                }
 
                 let spin_diff = new_spins - lastUI_spins;
                 let payout_diff = new_payout - lastUI_payout;
 
+                // Firebase 萬發紀錄判定
                 if (new_payout === 0 && lastUI_payout >= 10000) {
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
@@ -259,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (spin_diff > 0) {
                     if (userData.daily_spins >= 4000) {
                         disableMachine();
-                        alert("⚠️ お知らせ：本日の上限(4000回転)に達しました！");
+                        window.alert("⚠️ お知らせ：本日の上限(4000回転)に達しました！");
                         throw new Error("Daily spin limit reached!");
                     }
                     userData.daily_spins += spin_diff;
@@ -289,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // ==========================================
-        // 注入「影片/音效開關」與「𝕏 分享掣」
+        // 注入「影片/音效開關」與「𝕏 分享掣」 
         // ==========================================
         const btnContainer = document.querySelector("#btn-reset")?.parentNode;
         if (btnContainer) {
@@ -305,7 +327,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             btnContainer.parentNode.insertBefore(toggleDiv, btnContainer);
 
-            // 實時強制靜音機制
             setInterval(() => {
                 const chkSound = document.getElementById("chk-sound");
                 const isMuted = chkSound ? !chkSound.checked : false;
@@ -314,15 +335,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }, 500);
 
+            // 🌟 𝕏 炫耀按鈕 🌟
             const shareBtn = document.createElement("button");
             shareBtn.id = "btn-share-x";
-            shareBtn.innerText = "𝕏 結果をポスト";
-            shareBtn.style.cssText = "background-color: #000; color: white; border: 1px solid #555; display: none; margin-left: 5px; box-shadow: 0 0 10px rgba(255,255,255,0.2); cursor: pointer; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; font-weight: bold;";
+            shareBtn.innerText = "𝕏 一万発達成！ポストする";
+            shareBtn.style.cssText = "background-color: #000; color: #ffca28; border: 2px solid #ffca28; display: none; margin-left: 5px; box-shadow: 0 0 15px rgba(255, 202, 40, 0.6); cursor: pointer; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; font-weight: bold;";
             
             shareBtn.onclick = () => {
-                let payout = document.getElementById("ui-payout").innerText;
-                let rushCount = document.getElementById("ui-rush").innerText;
-                let text = `【バーチャルパチンコ運試し】\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #パチンコシミュレーター\n`;
+                // 讀取記憶入面嘅最高紀錄
+                let payout = window.latest_payout_for_share || 0;
+                let rushCount = window.latest_rush_for_share || 0;
+                
+                if (payout < 10000) {
+                    window.alert("一万発を達成してからポストしてください！");
+                    return;
+                }
+                
+                let text = `【一撃一万発達成！】\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター\n`;
                 let url = window.location.href; 
                 let shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
                 window.open(shareUrl, '_blank');
@@ -336,12 +365,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 const observer = new MutationObserver((mutations) => {
                     mutations.forEach((mutation) => {
                         if (mutation.type === "attributes" && mutation.attributeName === "disabled") {
+                            let sBtn = document.getElementById("btn-share-x");
                             if (!playBtn.disabled) {
-                                let payout = parseInt(document.getElementById("ui-payout").innerText) || 0;
-                                if (payout > 0) shareBtn.style.display = "inline-block";
                                 playBtn.innerText = "▶️ プレイ続行"; 
+                                
+                                // 🌟 遊戲停止！檢查記憶體入面嘅出玉係咪大過一萬！ 🌟
+                                if (window.latest_payout_for_share >= 10000 && sBtn) {
+                                    sBtn.style.display = "inline-block";
+                                }
                             } else {
-                                shareBtn.style.display = "none";
+                                // 遊戲開始，收埋個掣，清空記憶準備迎接下一鋪
+                                if (sBtn) sBtn.style.display = "none";
+                                window.latest_payout_for_share = 0;
+                                window.latest_rush_for_share = 0;
                             }
                         }
                     });
@@ -351,7 +387,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (resetBtn) {
                 resetBtn.addEventListener("click", () => {
-                    shareBtn.style.display = "none";
+                    let sBtn = document.getElementById("btn-share-x");
+                    if (sBtn) sBtn.style.display = "none";
+                    window.latest_payout_for_share = 0;
+                    window.latest_rush_for_share = 0;
                 });
             }
         }
@@ -359,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 終極防卡死攔截器 (Monkey Patching V10)
+// 終極防卡死攔截器 (Monkey Patching)
 // ==========================================
 
 const originalPlay = HTMLMediaElement.prototype.play;
