@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 虛擬柏青哥大廳 (Virtual Pachinko Hall)</title>
+    <title>🎰 バーチャル パチンコホール (Virtual Pachinko Hall)</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Noto Sans JP', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #050505;
             color: #ffffff;
             text-align: center;
@@ -79,7 +79,6 @@
             text-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
         }
 
-        /* 🌟 新增：店鋪實時收支看板樣式 🌟 */
         .parlor-profit-board {
             background-color: #0a0a0a;
             border: 2px solid #e040fb;
@@ -105,20 +104,9 @@
         }
 
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
-
-            50% {
-                transform: scale(1.05);
-                opacity: 1;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.5; }
         }
 
         .profit-title {
@@ -136,17 +124,9 @@
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
 
-        .profit-positive {
-            color: #00e676;
-            text-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
-        }
+        .profit-positive { color: #00e676; text-shadow: 0 0 15px rgba(0, 230, 118, 0.5); }
+        .profit-negative { color: #ff5252; text-shadow: 0 0 15px rgba(255, 82, 82, 0.5); }
 
-        .profit-negative {
-            color: #ff5252;
-            text-shadow: 0 0 15px rgba(255, 82, 82, 0.5);
-        }
-
-        /* 排行榜通用樣式 */
         .rankings-wrapper {
             display: flex;
             justify-content: center;
@@ -154,7 +134,6 @@
             max-width: 1200px;
             margin: 0 auto 40px auto;
             flex-wrap: wrap;
-            /* 螢幕細時自動折行 */
         }
 
         .ranking-container {
@@ -162,13 +141,11 @@
             min-width: 320px;
             background-color: #161b22;
             border: 2px solid #ffca28;
-            /* 預設為富豪榜金邊 */
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 0 15px rgba(255, 202, 40, 0.2);
         }
 
-        /* 窮人榜專屬樣式覆蓋 */
         .ranking-container.poor-rank {
             border-color: #4fc3f7;
             box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);
@@ -187,64 +164,17 @@
             padding-bottom: 10px;
         }
 
-        table.ranking-table {
-            width: 100%;
-            border-collapse: collapse;
-            color: #fff;
-        }
+        table.ranking-table { width: 100%; border-collapse: collapse; color: #fff; }
+        table.ranking-table th, table.ranking-table td { padding: 12px; text-align: center; border-bottom: 1px solid #333; }
+        table.ranking-table th { color: #888; }
 
-        table.ranking-table th,
-        table.ranking-table td {
-            padding: 12px;
-            text-align: center;
-            border-bottom: 1px solid #333;
-        }
+        .ranking-table.rich tr:nth-child(1) td { color: #ffeb3b; font-weight: bold; font-size: 1.2em; }
+        .ranking-table.rich tr:nth-child(2) td { color: red; font-weight: bold; font-size: 1.1em; }
+        .ranking-table.rich tr:nth-child(3) td { color: #cd7f32; font-weight: bold; font-size: 1.05em; }
 
-        table.ranking-table th {
-            color: #888;
-        }
-
-        /* 富豪榜前三名顏色 */
-        .ranking-table.rich tr:nth-child(1) td {
-            color: #ffeb3b;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        /* 金 */
-        .ranking-table.rich tr:nth-child(2) td {
-            color: red;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        /* 銀 */
-        .ranking-table.rich tr:nth-child(3) td {
-            color: #cd7f32;
-            font-weight: bold;
-            font-size: 1.05em;
-        }
-
-        /* 銅 */
-
-        /* 窮人榜前三名顏色 */
-        .ranking-table.poor tr:nth-child(1) td {
-            color: #00bcd4;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        .ranking-table.poor tr:nth-child(2) td {
-            color: #26c6da;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .ranking-table.poor tr:nth-child(3) td {
-            color: #4dd0e1;
-            font-weight: bold;
-            font-size: 1.05em;
-        }
+        .ranking-table.poor tr:nth-child(1) td { color: #00bcd4; font-weight: bold; font-size: 1.2em; }
+        .ranking-table.poor tr:nth-child(2) td { color: #26c6da; font-weight: bold; font-size: 1.1em; }
+        .ranking-table.poor tr:nth-child(3) td { color: #4dd0e1; font-weight: bold; font-size: 1.05em; }
 
         .hall-container {
             display: grid;
@@ -267,24 +197,9 @@
             border: 2px solid transparent;
         }
 
-        .machine-card:hover {
-            transform: translateY(-10px);
-            z-index: 10;
-        }
-
-        .machine-title {
-            font-size: 1.4em;
-            font-weight: 900;
-            margin: 0 0 10px 0;
-        }
-
-        .machine-spec {
-            font-size: 0.9em;
-            color: #ccc;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
+        .machine-card:hover { transform: translateY(-10px); z-index: 10; }
+        .machine-title { font-size: 1.4em; font-weight: 900; margin: 0 0 10px 0; }
+        .machine-spec { font-size: 0.9em; color: #ccc; margin-bottom: 20px; line-height: 1.6; }
         .play-btn {
             background-color: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -294,187 +209,57 @@
             letter-spacing: 1px;
             transition: background-color 0.3s;
         }
-
-        .machine-card:hover .play-btn {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: #fff;
-        }
+        .machine-card:hover .play-btn { background-color: rgba(255, 255, 255, 0.2); color: #fff; }
 
         /* 各機台專屬主題顏色 */
-        .card-bluelock {
-            border-color: #00e5ff;
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
-        }
+        .card-bluelock { border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
+        .card-bluelock:hover { box-shadow: 0 0 30px rgba(0, 229, 255, 0.6); }
+        .card-bluelock .machine-title { color: #00e5ff; text-shadow: 0 0 5px #00e5ff; }
 
-        .card-bluelock:hover {
-            box-shadow: 0 0 30px rgba(0, 229, 255, 0.6);
-        }
+        .card-dmdp { border-color: #e040fb; box-shadow: 0 0 15px rgba(224, 64, 251, 0.2); }
+        .card-dmdp:hover { box-shadow: 0 0 30px rgba(224, 64, 251, 0.6); }
+        .card-dmdp .machine-title { color: #e040fb; text-shadow: 0 0 5px #e040fb; }
 
-        .card-bluelock .machine-title {
-            color: #00e5ff;
-            text-shadow: 0 0 5px #00e5ff;
-        }
+        .card-ghoul399 { border-color: #ff1744; box-shadow: 0 0 15px rgba(255, 23, 68, 0.2); }
+        .card-ghoul399:hover { box-shadow: 0 0 30px rgba(255, 23, 68, 0.6); }
+        .card-ghoul399 .machine-title { color: #ff1744; text-shadow: 0 0 5px #ff1744; }
 
-        .card-dmdp {
-            border-color: #e040fb;
-            box-shadow: 0 0 15px rgba(224, 64, 251, 0.2);
-        }
+        .card-ghoul999 { border-color: #d50000; box-shadow: 0 0 15px rgba(213, 0, 0, 0.2); background: linear-gradient(180deg, #111 0%, #300 100%); }
+        .card-ghoul999:hover { box-shadow: 0 0 40px rgba(213, 0, 0, 0.8); }
+        .card-ghoul999 .machine-title { color: #ff5252; text-shadow: 0 0 10px #d50000; }
 
-        .card-dmdp:hover {
-            box-shadow: 0 0 30px rgba(224, 64, 251, 0.6);
-        }
+        .card-jitsuryoku { border-color: #ffca28; box-shadow: 0 0 15px rgba(255, 202, 40, 0.2); }
+        .card-jitsuryoku:hover { box-shadow: 0 0 30px rgba(255, 202, 40, 0.6); }
+        .card-jitsuryoku .machine-title { color: #ffca28; text-shadow: 0 0 5px #ffca28; }
 
-        .card-dmdp .machine-title {
-            color: #e040fb;
-            text-shadow: 0 0 5px #e040fb;
-        }
+        .card-monono { border-color: #f44336; box-shadow: 0 0 15px rgba(244, 67, 54, 0.2); }
+        .card-monono:hover { box-shadow: 0 0 30px rgba(244, 67, 54, 0.6); }
+        .card-monono .machine-title { color: #f44336; text-shadow: 0 0 5px #f44336; }
 
-        .card-ghoul399 {
-            border-color: #ff1744;
-            box-shadow: 0 0 15px rgba(255, 23, 68, 0.2);
-        }
+        .card-lycoris { border-color: #ff5252; box-shadow: 0 0 15px rgba(255, 82, 82, 0.2); }
+        .card-lycoris:hover { box-shadow: 0 0 30px rgba(255, 82, 82, 0.6); }
+        .card-lycoris .machine-title { color: #ff5252; text-shadow: 0 0 5px #ff5252; }
 
-        .card-ghoul399:hover {
-            box-shadow: 0 0 30px rgba(255, 23, 68, 0.6);
-        }
+        .card-hellsing { border-color: #b71c1c; box-shadow: 0 0 15px rgba(183, 28, 28, 0.2); }
+        .card-hellsing:hover { box-shadow: 0 0 30px rgba(183, 28, 28, 0.8); }
+        .card-hellsing .machine-title { color: #ff1744; text-shadow: 0 0 10px #b71c1c; }
 
-        .card-ghoul399 .machine-title {
-            color: #ff1744;
-            text-shadow: 0 0 5px #ff1744;
-        }
+        .card-slime { border-color: #00bcd4; box-shadow: 0 0 15px rgba(0, 188, 212, 0.2); }
+        .card-slime:hover { box-shadow: 0 0 30px rgba(0, 188, 212, 0.8); }
+        .card-slime .machine-title { color: #00bcd4; text-shadow: 0 0 10px #00bcd4; }
 
-        .card-ghoul999 {
-            border-color: #d50000;
-            box-shadow: 0 0 15px rgba(213, 0, 0, 0.2);
-            background: linear-gradient(180deg, #111 0%, #300 100%);
-        }
+        .card-kakegurui { border-color: #d50000; box-shadow: 0 0 15px rgba(213, 0, 0, 0.2); }
+        .card-kakegurui:hover { box-shadow: 0 0 30px rgba(213, 0, 0, 0.6); }
+        .card-kakegurui .machine-title { color: #ff5252; text-shadow: 0 0 5px #d50000; }
 
-        .card-ghoul999:hover {
-            box-shadow: 0 0 40px rgba(213, 0, 0, 0.8);
-        }
+        .card-ggo { border-color: #ff4081; box-shadow: 0 0 15px rgba(255, 64, 129, 0.2); }
+        .card-ggo:hover { box-shadow: 0 0 30px rgba(255, 64, 129, 0.6); }
+        .card-ggo .machine-title { color: #ff4081; text-shadow: 0 0 5px #ff4081; }
 
-        .card-ghoul999 .machine-title {
-            color: #ff5252;
-            text-shadow: 0 0 10px #d50000;
-        }
-
-        .card-jitsuryoku {
-            border-color: #ffca28;
-            box-shadow: 0 0 15px rgba(255, 202, 40, 0.2);
-        }
-
-        .card-jitsuryoku:hover {
-            box-shadow: 0 0 30px rgba(255, 202, 40, 0.6);
-        }
-
-        .card-jitsuryoku .machine-title {
-            color: #ffca28;
-            text-shadow: 0 0 5px #ffca28;
-        }
-
-        .card-monono {
-            border-color: #f44336;
-            box-shadow: 0 0 15px rgba(244, 67, 54, 0.2);
-        }
-
-        .card-monono:hover {
-            box-shadow: 0 0 30px rgba(244, 67, 54, 0.6);
-        }
-
-        .card-monono .machine-title {
-            color: #f44336;
-            text-shadow: 0 0 5px #f44336;
-        }
-
-        .card-lycoris {
-            border-color: #ff5252;
-            box-shadow: 0 0 15px rgba(255, 82, 82, 0.2);
-        }
-
-        .card-lycoris:hover {
-            box-shadow: 0 0 30px rgba(255, 82, 82, 0.6);
-        }
-
-        .card-lycoris .machine-title {
-            color: #ff5252;
-            text-shadow: 0 0 5px #ff5252;
-        }
-
-        .card-hellsing {
-            border-color: #b71c1c;
-            box-shadow: 0 0 15px rgba(183, 28, 28, 0.2);
-        }
-
-        .card-hellsing:hover {
-            box-shadow: 0 0 30px rgba(183, 28, 28, 0.8);
-        }
-
-        .card-hellsing .machine-title {
-            color: #ff1744;
-            text-shadow: 0 0 10px #b71c1c;
-        }
-
-        .card-slime {
-            border-color: #00bcd4;
-            box-shadow: 0 0 15px rgba(0, 188, 212, 0.2);
-        }
-
-        .card-slime:hover {
-            box-shadow: 0 0 30px rgba(0, 188, 212, 0.8);
-        }
-
-        .card-slime .machine-title {
-            color: #00bcd4;
-            text-shadow: 0 0 10px #00bcd4;
-        }
-
-        .card-kakegurui {
-            border-color: #d50000;
-            box-shadow: 0 0 15px rgba(213, 0, 0, 0.2);
-        }
-
-        .card-kakegurui:hover {
-            box-shadow: 0 0 30px rgba(213, 0, 0, 0.6);
-        }
-
-        .card-kakegurui .machine-title {
-            color: #ff5252;
-            text-shadow: 0 0 5px #d50000;
-        }
-
-        .card-ggo {
-            border-color: #ff4081;
-            box-shadow: 0 0 15px rgba(255, 64, 129, 0.2);
-        }
-
-        .card-ggo:hover {
-            box-shadow: 0 0 30px rgba(255, 64, 129, 0.6);
-        }
-
-        .card-ggo .machine-title {
-            color: #ff4081;
-            text-shadow: 0 0 5px #ff4081;
-        }
-
-        .card-stats {
-            border-color: #4caf50;
-            box-shadow: 0 0 15px rgba(76, 175, 80, 0.2);
-            grid-column: 1 / -1;
-            margin-top: 20px;
-        }
-
-        .card-stats:hover {
-            box-shadow: 0 0 30px rgba(76, 175, 80, 0.6);
-        }
-
-        .card-stats .machine-title {
-            color: #4caf50;
-            text-shadow: 0 0 5px #4caf50;
-        }
-
-        .card-stats .play-btn {
-            background-color: rgba(76, 175, 80, 0.2);
-        }
+        .card-stats { border-color: #4caf50; box-shadow: 0 0 15px rgba(76, 175, 80, 0.2); grid-column: 1 / -1; margin-top: 20px; }
+        .card-stats:hover { box-shadow: 0 0 30px rgba(76, 175, 80, 0.6); }
+        .card-stats .machine-title { color: #4caf50; text-shadow: 0 0 5px #4caf50; }
+        .card-stats .play-btn { background-color: rgba(76, 175, 80, 0.2); }
     </style>
 </head>
 
@@ -482,58 +267,52 @@
 
     <div class="top-nav">
         <div class="user-info">
-            👤 <span id="nav-username">載入中...</span> <br>
+            👤 <span id="nav-username">読込中...</span> <br>
             💰 <span id="nav-balance" style="color: #00e676;">---</span> 円
         </div>
-        <button id="auth-btn" class="auth-btn" onclick="handleAuth()">載入中...</button>
+        <button id="auth-btn" class="auth-btn" onclick="handleAuth()">読込中...</button>
     </div>
 
-    <h1>🎰 虛擬柏青哥大廳</h1>
+    <h1>🎰 バーチャル パチンコホール</h1>
 
     <div class="parlor-profit-board">
-        <div class="profit-title">🏢 ホールリアルタイム収支 (店鋪實時總盈虧)</div>
+        <div class="profit-title">🏢 ホールリアルタイム収支 (店舗の実質損益)</div>
         <div id="parlor-profit-amount" class="profit-amount">計算中...</div>
-        <div style="color: #888; font-size: 0.85em; margin-top: 5px;">(※ 玩家輸錢 ＝ 店鋪獲利。實時同步 28玉交換率計算)</div>
+        <div style="color: #888; font-size: 0.85em; margin-top: 5px;">(※ プレイヤーの負け ＝ 店舗の利益。28玉交換率でリアルタイム同期)</div>
     </div>
 
     <div class="rankings-wrapper">
-
         <div class="ranking-container">
-            <h2 class="ranking-title">🏆 全伺服器富豪榜 TOP 10 🏆</h2>
+            <h2 class="ranking-title">🏆 全サーバー富豪ランキング TOP 10 🏆</h2>
             <table class="ranking-table rich">
                 <thead>
                     <tr>
-                        <th>排名</th>
-                        <th>玩家帳號</th>
-                        <th>擁有金錢 (円)</th>
+                        <th>順位</th>
+                        <th>プレイヤー名</th>
+                        <th>所持金 (円)</th>
                     </tr>
                 </thead>
                 <tbody id="ranking-body">
-                    <tr>
-                        <td colspan="3">讀取數據中...</td>
-                    </tr>
+                    <tr><td colspan="3">データ読込中...</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="ranking-container poor-rank">
-            <h2 class="ranking-title">📉 10大窮人榜 📉</h2>
+            <h2 class="ranking-title">📉 貧民ランキング ワースト10 📉</h2>
             <table class="ranking-table poor">
                 <thead>
                     <tr>
-                        <th>名次</th>
-                        <th>玩家帳號</th>
-                        <th>持有金錢 (円)</th>
+                        <th>順位</th>
+                        <th>プレイヤー名</th>
+                        <th>所持金 (円)</th>
                     </tr>
                 </thead>
                 <tbody id="poor-ranking-body">
-                    <tr>
-                        <td colspan="3">讀取數據中...</td>
-                    </tr>
+                    <tr><td colspan="3">データ読込中...</td></tr>
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <div class="hall-container">
@@ -550,7 +329,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 新增卡片：ブルーロック 120 -->
         <a href="bluelock_light.html" class="machine-card" style="border-color: #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);">
             <div>
                 <h3 class="machine-title" style="color: #00e5ff; text-shadow: 0 0 5px #00e5ff;">P ブルーロック 1/120</h3>
@@ -695,7 +473,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-                <!-- 新增卡片：魔法少女リリカルなのは -->
         <a href="nanoha.html" class="machine-card" style="border-color: #ff4081; box-shadow: 0 0 15px rgba(255, 64, 129, 0.2);">
             <div>
                 <h3 class="machine-title" style="color: #ff4081; text-shadow: 0 0 5px #ff4081;">e魔法少女リリカルなのは</h3>
@@ -708,7 +485,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 新增卡片：結城友奈は勇者である -->
         <a href="yusha.html" class="machine-card" style="border-color: #ff6699; box-shadow: 0 0 15px rgba(255, 102, 153, 0.2);">
             <div>
                 <h3 class="machine-title" style="color: #ff6699; text-shadow: 0 0 5px #ff6699;">P 結城友奈は勇者である</h3>
@@ -721,7 +497,6 @@
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-<!-- 新增卡片：P EDENS ZERO -->
         <a href="edens.html" class="machine-card" style="border-color: #4fc3f7; box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);">
             <div>
                 <h3 class="machine-title" style="color: #4fc3f7; text-shadow: 0 0 5px #4fc3f7;">P EDENS ZERO</h3>
@@ -731,11 +506,9 @@
                     <span style="color:#d500f9; font-weight:bold;">究極LT: 85%で3000個以上！</span>
                 </div>
             </div>
-            <!-- 刪除咗自訂背景色，變返預設紅色 -->
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 新增卡片：P 機動戦士ガンダムSEED LT -->
         <a href="seed.html" class="machine-card" style="border-color: #29b6f6; box-shadow: 0 0 15px rgba(41, 182, 246, 0.2);">
             <div>
                 <h3 class="machine-title" style="color: #29b6f6; text-shadow: 0 0 5px #29b6f6;">P 機動戦士ガンダムSEED LT</h3>
@@ -745,11 +518,9 @@
                     <span style="color:#ff5252; font-weight:bold;">CLIMAXループ率: 約51%で4500個！</span>
                 </div>
             </div>
-            <!-- 刪除咗自訂背景色，變返預設紅色 -->
             <div class="play-btn">▶️ 著席する (PLAY)</div>
         </a>
 
-        <!-- 新增卡片：P ソードアート・オンライン -->
         <a href="sao.html" class="machine-card" style="border-color: #ffca28; box-shadow: 0 0 15px rgba(255, 202, 40, 0.2);">
             <div>
                 <h3 class="machine-title" style="color: #ffca28; text-shadow: 0 0 5px #ffca28;">P ソードアート・オンライン LT</h3>
@@ -764,13 +535,13 @@
 
         <a href="stats.html" class="machine-card card-stats">
             <div>
-                <h3 class="machine-title">📊 100回 公平大當統計中心</h3>
+                <h3 class="machine-title">📊 総合収支シミュレーション</h3>
                 <div class="machine-spec">
-                    自動演算系統<br>
-                    一鍵測試以上所有 11 部機種 100 次初當出玉及收支
+                    自動演算システム<br>
+                    ワンクリックで全機種の初当り・出玉・収支を高速検証
                 </div>
             </div>
-            <div class="play-btn">⚙️ 進入數據中心 (ENTER DATA CENTER)</div>
+            <div class="play-btn">⚙️ データセンターへ (ENTER DATA CENTER)</div>
         </a>
 
     </div>
@@ -796,38 +567,33 @@
 
         if (currentUser) {
             document.getElementById("nav-username").innerText = currentUser;
-            authBtn.innerText = "登出 (Logout)";
+            authBtn.innerText = "ログアウト (Logout)";
             authBtn.className = "auth-btn logout";
         } else {
-            // 訪客模式
-            document.getElementById("nav-username").innerText = "訪客 (未登入)";
+            document.getElementById("nav-username").innerText = "ゲスト (未ログイン)";
             document.getElementById("nav-username").style.color = "#888";
             document.getElementById("nav-balance").innerText = "---";
-            authBtn.innerText = "登入 / 註冊";
+            authBtn.innerText = "ログイン / 新規登録";
             authBtn.className = "auth-btn login";
         }
 
-        // 實時監聽雲端金錢同排行榜 (訪客都睇到)
+        // 實時監聽雲端金錢同排行榜
         db.ref('users').on('value', (snapshot) => {
             let users = snapshot.val() || {};
 
-            // 1. 更新自己個錢包 (如果有登入)
             if (currentUser && users[currentUser]) {
                 document.getElementById("nav-balance").innerText = Math.round(users[currentUser].balance).toLocaleString();
             }
 
-            // 🌟 2. 完美修正版：計算店鋪真實盈虧 🌟
             let totalParlorProfit = 0;
             let userKeys = Object.keys(users);
-            const INITIAL_BALANCE = 50000; // 👈 填返你註冊時派畀玩家嘅初始金額
+            const INITIAL_BALANCE = 50000; 
 
             userKeys.forEach(key => {
                 let userBalance = users[key].balance || 0;
-                // 店鋪真實盈虧 = 派出去嘅 5萬 - 玩家現時手頭上嘅餘額
                 totalParlorProfit += (INITIAL_BALANCE - userBalance);
             });
 
-            // 顯示店鋪收支
             let profitEl = document.getElementById("parlor-profit-amount");
             if (totalParlorProfit > 0) {
                 profitEl.innerText = "+" + Math.round(totalParlorProfit).toLocaleString() + " 円";
@@ -841,12 +607,11 @@
                 profitEl.style.textShadow = "none";
             }
 
-            // 3. 生成排行榜
             renderRankings(users);
         }, (error) => {
-            console.error("讀取 Firebase 失敗: ", error);
-            document.getElementById("ranking-body").innerHTML = `<tr><td colspan="3" style="color:red;">無法讀取數據，請檢查 Firebase 權限設定！</td></tr>`;
-            document.getElementById("poor-ranking-body").innerHTML = `<tr><td colspan="3" style="color:red;">無法讀取數據</td></tr>`;
+            console.error("Firebase エラー: ", error);
+            document.getElementById("ranking-body").innerHTML = `<tr><td colspan="3" style="color:red;">データ読み込み失敗</td></tr>`;
+            document.getElementById("poor-ranking-body").innerHTML = `<tr><td colspan="3" style="color:red;">データ読み込み失敗</td></tr>`;
         });
 
         function renderRankings(users) {
@@ -858,8 +623,8 @@
 
             let userKeys = Object.keys(users);
             if (userKeys.length === 0) {
-                rankingBody.innerHTML = `<tr><td colspan="3">暫無玩家資料</td></tr>`;
-                poorRankingBody.innerHTML = `<tr><td colspan="3">暫無玩家資料</td></tr>`;
+                rankingBody.innerHTML = `<tr><td colspan="3">データがありません</td></tr>`;
+                poorRankingBody.innerHTML = `<tr><td colspan="3">データがありません</td></tr>`;
                 return;
             }
 
@@ -867,56 +632,38 @@
                 return { name: name, balance: users[name].balance };
             });
 
-            // --- 處理富豪榜 ---
-            // 根據餘額由高至低排序
+            // 富豪榜
             userArray.sort((a, b) => b.balance - a.balance);
             let top10Rich = userArray.slice(0, 10);
-
             top10Rich.forEach((user, index) => {
                 let tr = document.createElement("tr");
                 let rankText = (index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1);
-                let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (你)</span>` : user.name;
-
-                tr.innerHTML = `
-                    <td>${rankText}</td>
-                    <td>${nameHtml}</td>
-                    <td>${Math.round(user.balance).toLocaleString()}</td>
-                `;
+                let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (あなた)</span>` : user.name;
+                tr.innerHTML = `<td>${rankText}</td><td>${nameHtml}</td><td>${Math.round(user.balance).toLocaleString()}</td>`;
                 rankingBody.appendChild(tr);
             });
 
-            // --- 處理窮人榜 ---
-            // 根據餘額由低至高排序
+            // 窮人榜
             userArray.sort((a, b) => a.balance - b.balance);
             let top10Poor = userArray.slice(0, 10);
-
             top10Poor.forEach((user, index) => {
                 let tr = document.createElement("tr");
                 let rankText = (index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1);
-                let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (你)</span>` : user.name;
-
-                tr.innerHTML = `
-                    <td>${rankText}</td>
-                    <td>${nameHtml}</td>
-                    <td style="color: #4fc3f7;">${Math.round(user.balance).toLocaleString()}</td>
-                `;
+                let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (あなた)</span>` : user.name;
+                tr.innerHTML = `<td>${rankText}</td><td>${nameHtml}</td><td style="color: #4fc3f7;">${Math.round(user.balance).toLocaleString()}</td>`;
                 poorRankingBody.appendChild(tr);
             });
         }
 
-        // 處理登入/登出按鈕
         function handleAuth() {
             if (currentUser) {
-                // 如果已登入 -> 執行登出
                 localStorage.removeItem("pachinko_current_user");
                 window.location.reload();
             } else {
-                // 如果未登入 -> 去註冊頁
                 window.location.href = "login.html";
             }
         }
     </script>
-
 </body>
 
 </html>
