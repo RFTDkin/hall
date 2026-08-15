@@ -1,8 +1,7 @@
 // ==========================================
-// 柏青哥全能智能外掛系統 V14 (完美修復一万発分享掣隱藏問題)
+// 柏青哥全能智能外掛系統 V17 (新增每日收支追蹤 daily_profit)
 // ==========================================
 
-// 👇 將呢度換成你嘅 Config 👇
 const firebaseConfig = {
     apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
     authDomain: "p-hall.firebaseapp.com",
@@ -13,15 +12,10 @@ const firebaseConfig = {
     appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
     measurementId: "G-46M19VQVY2"
 };
-// 👆 替換結束 👆
 
-// 🌟 新增：全域記憶系統 (紀錄清零前嘅最高出玉) 🌟
 window.latest_payout_for_share = 0;
 window.latest_rush_for_share = 0;
 
-// ==========================================
-// 0. 全域彈窗 (Alert) 攔截翻譯
-// ==========================================
 const originalAlert = window.alert;
 window.alert = function(msg) {
     let text = msg;
@@ -30,14 +24,12 @@ window.alert = function(msg) {
                    .replace(/登入成功/g, "ログイン成功")
                    .replace(/登出/g, "ログアウト")
                    .replace(/溫馨提示/g, "お知らせ")
-                   .replace(/你今日嘅 4000 轉限額已經打爆咗/g, "本日の上限(4000回転)に達しました");
+                   .replace(/你今日嘅 4000 轉限額已經打爆咗/g, "本日の上限(4000回転)に達しました")
+                   .replace(/請獲得出玉後再分享/g, "出玉を獲得してからポストしてください");
     }
     originalAlert(text);
 };
 
-// ==========================================
-// 1. 全域中日翻譯字典 (Auto-Translator)
-// ==========================================
 const dict = {
     "柏青哥模擬器": "パチンコシミュレーター",
     "返回主頁": "ホールに戻る",
@@ -86,7 +78,6 @@ function translateDOM() {
             node.nodeValue = text;
         }
     }
-
     const btnPlay = document.getElementById("btn-play");
     const btnReset = document.getElementById("btn-reset");
     if (btnPlay && btnPlay.innerText.includes("▶️")) btnPlay.innerText = "▶️ 遊技開始";
@@ -94,14 +85,9 @@ function translateDOM() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    
     translateDOM();
-
     const currentUser = localStorage.getItem("pachinko_current_user");
-    if (!currentUser) {
-        window.location.href = "login.html";
-        return;
-    }
+    if (!currentUser) { window.location.href = "login.html"; return; }
 
     const scriptApp = document.createElement('script');
     scriptApp.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
@@ -111,10 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const scriptDb = document.createElement('script');
         scriptDb.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js";
         document.head.appendChild(scriptDb);
-
-        scriptDb.onload = () => {
-            initPlugin(); 
-        };
+        scriptDb.onload = () => { initPlugin(); };
     };
 
     function initPlugin() {
@@ -123,18 +106,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const userRef = db.ref('users/' + currentUser);
 
         userRef.get().then((snapshot) => {
-            if (!snapshot.exists()) {
-                window.location.href = "login.html";
-                return;
-            }
+            if (!snapshot.exists()) { window.location.href = "login.html"; return; }
 
             let userData = snapshot.val();
             const todayStr = new Date().toDateString();
 
+            // 🌟 核心升級：每日首次登入，將「今日旋轉數」同「今日收支」清零 🌟
             if (userData.last_date !== todayStr) {
                 userData.daily_spins = 0;
+                userData.daily_profit = 0; 
                 userData.last_date = todayStr;
-                userRef.update({ daily_spins: 0, last_date: todayStr });
+                userRef.update({ daily_spins: 0, daily_profit: 0, last_date: todayStr });
             }
 
             runMachineLogic(db, userRef, userData);
@@ -149,13 +131,16 @@ document.addEventListener("DOMContentLoaded", () => {
         pluginUI.style.cssText = "position: fixed; top: 15px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; gap: 10px;";
         pluginUI.innerHTML = `
             <a href="index.html" style="background-color: #222; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 1px solid #777; box-shadow: 0 0 10px rgba(0,0,0,0.5);">🏠 ホールに戻る</a>
-            
-            <div style="background: #111; border: 2px solid #ffca28; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 0 15px rgba(255, 202, 40, 0.4); text-align: center; min-width: 160px;">
+            <div style="background: #111; border: 2px solid #ffca28; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 0 15px rgba(255, 202, 40, 0.4); text-align: center; min-width: 160px; max-width: 250px;">
                 👤 <span style="color:#00e5ff;">${currentUser}</span><br>
                 💰 所持金<br>
                 <span id="global-wallet" style="font-size: 1.4em;">0</span> 円
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
                 <div style="font-size: 0.9em; color: #fff;">本日の回転数: <br><span id="daily-spins-ui" style="color:#ffeb3b; font-size:1.2em;">${userData.daily_spins}</span> / 4000 回転</div>
+                <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
+                <div style="font-size: 0.75em; color: #ff7b72; text-align: left; font-weight: normal; line-height: 1.4;">
+                    ※免責事項：当サイトの「円」およびデータはすべて架空のものです。実際の現金や景品等への交換は一切できません。完全無料のシミュレーションゲームです。
+                </div>
             </div>
         `;
         document.body.appendChild(pluginUI);
@@ -176,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let pageText = originalTitle + " " + document.body.innerText;
         let spinCost = 1000 / 17;
-
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 25;
 
@@ -188,12 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
             rankingUI.innerHTML = `
                 <h3 class="data-lamp-title" style="color: #ffeb3b; font-size: 1.1em;">🏆 歴代出玉ランキング<br><span style="font-size:0.7em; color:#fff;">(一撃一万発 OVER)</span></h3>
                 <table class="data-lamp">
-                    <thead>
-                        <tr><th>順位</th><th>プレイヤー</th><th>出玉</th><th>日付</th></tr>
-                    </thead>
-                    <tbody id="machine-ranking-body">
-                        <tr><td colspan="4" class="empty-row">データ読込中...</td></tr>
-                    </tbody>
+                    <thead><tr><th>順位</th><th>プレイヤー</th><th>出玉</th><th>日付</th></tr></thead>
+                    <tbody id="machine-ranking-body"><tr><td colspan="4" class="empty-row">データ読込中...</td></tr></tbody>
                 </table>
             `;
             rightPanel.appendChild(rankingUI);
@@ -205,7 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     tbody.innerHTML = `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`;
                     return;
                 }
-
                 let records = [];
                 snapshot.forEach(child => { records.push(child.val()); });
                 records.sort((a, b) => b.payout - a.payout);
@@ -214,12 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     let rankText = (idx === 0) ? "🥇" : (idx === 1) ? "🥈" : (idx === 2) ? "🥉" : (idx + 1);
                     let userColor = rec.user === currentUser ? "#00e5ff" : "#ccc";
                     let tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${rankText}</td>
-                        <td style="color:${userColor}; font-weight:bold;">${rec.user}</td>
-                        <td style="color:#ff5252; font-weight:bold;">${rec.payout.toLocaleString()}</td>
-                        <td style="font-size:0.8em; color:#888;">${rec.date}</td>
-                    `;
+                    tr.innerHTML = `<td>${rankText}</td><td style="color:${userColor}; font-weight:bold;">${rec.user}</td><td style="color:#ff5252; font-weight:bold;">${rec.payout.toLocaleString()}</td><td style="font-size:0.8em; color:#888;">${rec.date}</td>`;
                     tbody.appendChild(tr);
                 });
             });
@@ -227,10 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function disableMachine() {
             let playBtn = document.getElementById("btn-play");
-            if (playBtn) {
-                playBtn.disabled = true;
-                playBtn.innerText = "⛔ 本日 4000 回転の上限到達";
-            }
+            if (playBtn) { playBtn.disabled = true; playBtn.innerText = "⛔ 本日 4000 回転の上限到達"; }
         }
         setTimeout(() => { if (userData.daily_spins >= 4000) disableMachine(); }, 500);
 
@@ -239,10 +210,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (typeof window.updateUI === "function") {
             const originalUpdateUI = window.updateUI;
-
             window.updateUI = function () {
                 originalUpdateUI();
-
                 let spinEl = document.getElementById("ui-spins");
                 let payoutEl = document.getElementById("ui-payout");
                 let rushEl = document.getElementById("ui-rush");
@@ -253,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 let new_payout = parseInt(payoutEl.innerText.replace(/,/g, '')) || 0;
                 let new_rush = rushEl ? (parseInt(rushEl.innerText.replace(/,/g, '')) || 0) : 0;
 
-                // 🌟 核心修復：喺清零之前，偷偷記低今鋪 RUSH 嘅最高出玉同連莊數 🌟
                 if (new_payout > window.latest_payout_for_share) {
                     window.latest_payout_for_share = new_payout;
                     window.latest_rush_for_share = new_rush;
@@ -262,21 +230,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 let spin_diff = new_spins - lastUI_spins;
                 let payout_diff = new_payout - lastUI_payout;
 
-                // Firebase 萬發紀錄判定
                 if (new_payout === 0 && lastUI_payout >= 10000) {
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
-                    db.ref('machine_rankings/' + machineName).push({
-                        user: currentUser,
-                        payout: lastUI_payout,
-                        date: dateStr
-                    });
+                    db.ref('machine_rankings/' + machineName).push({ user: currentUser, payout: lastUI_payout, date: dateStr });
                 }
 
                 if (spin_diff < 0) spin_diff = new_spins;
                 if (payout_diff < 0) payout_diff = new_payout;
 
                 let needUpdateCloud = false;
+                let sessionNetProfit = 0; // 🌟 紀錄今鋪賺蝕幾多 🌟
 
                 if (spin_diff > 0) {
                     if (userData.daily_spins >= 4000) {
@@ -285,38 +249,41 @@ document.addEventListener("DOMContentLoaded", () => {
                         throw new Error("Daily spin limit reached!");
                     }
                     userData.daily_spins += spin_diff;
-                    currentWallet -= (spin_diff * spinCost);
+                    let cost = spin_diff * spinCost;
+                    currentWallet -= cost;
+                    sessionNetProfit -= cost;
                     needUpdateCloud = true;
                 }
 
                 if (payout_diff > 0) {
-                    currentWallet += (payout_diff * exchangeRate);
+                    let gain = payout_diff * exchangeRate;
+                    currentWallet += gain;
+                    sessionNetProfit += gain;
                     needUpdateCloud = true;
                 }
 
                 if (needUpdateCloud) {
                     userData.balance = currentWallet;
+                    userData.daily_profit = (userData.daily_profit || 0) + sessionNetProfit;
+                    
                     userRef.update({
                         balance: currentWallet,
-                        daily_spins: userData.daily_spins
+                        daily_spins: userData.daily_spins,
+                        daily_profit: userData.daily_profit // 🌟 實時更新今日收支 🌟
                     });
                 }
 
                 renderWallet();
                 lastUI_spins = new_spins;
                 lastUI_payout = new_payout;
-
                 if (userData.daily_spins >= 4000) disableMachine();
             };
         }
 
-        // ==========================================
-        // 注入「影片/音效開關」與「𝕏 分享掣」 
-        // ==========================================
         const btnContainer = document.querySelector("#btn-reset")?.parentNode;
         if (btnContainer) {
             const toggleDiv = document.createElement("div");
-            toggleDiv.style.cssText = "background-color: #111; border: 1px solid #333; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 10px;";
+            toggleDiv.style.cssText = "background-color: #111; border: 1px solid #333; padding: 10px; border-radius: 8px; margin-bottom: 5px; display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 10px;";
             toggleDiv.innerHTML = `
                 <label style="color: #ffca28; font-weight: bold; cursor: pointer;">
                     <input type="checkbox" id="chk-sound" checked style="transform: scale(1.2); margin-right: 5px;"> 📢 音効 / 先バレ
@@ -327,30 +294,26 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             btnContainer.parentNode.insertBefore(toggleDiv, btnContainer);
 
+            const noteDiv = document.createElement("div");
+            noteDiv.style.cssText = "font-size: 0.85em; color: #8b949e; margin-bottom: 15px; margin-top: 0;";
+            noteDiv.innerText = "※機種によっては「先バレ」や「動画演出」が搭載されていない場合があります。";
+            btnContainer.parentNode.insertBefore(noteDiv, btnContainer);
+
             setInterval(() => {
                 const chkSound = document.getElementById("chk-sound");
                 const isMuted = chkSound ? !chkSound.checked : false;
-                document.querySelectorAll("audio, video").forEach(media => {
-                    media.muted = isMuted;
-                });
+                document.querySelectorAll("audio, video").forEach(media => { media.muted = isMuted; });
             }, 500);
 
-            // 🌟 𝕏 炫耀按鈕 🌟
             const shareBtn = document.createElement("button");
             shareBtn.id = "btn-share-x";
             shareBtn.innerText = "𝕏 一万発達成！ポストする";
             shareBtn.style.cssText = "background-color: #000; color: #ffca28; border: 2px solid #ffca28; display: none; margin-left: 5px; box-shadow: 0 0 15px rgba(255, 202, 40, 0.6); cursor: pointer; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; font-weight: bold;";
             
             shareBtn.onclick = () => {
-                // 讀取記憶入面嘅最高紀錄
                 let payout = window.latest_payout_for_share || 0;
                 let rushCount = window.latest_rush_for_share || 0;
-                
-                if (payout < 10000) {
-                    window.alert("一万発を達成してからポストしてください！");
-                    return;
-                }
-                
+                if (payout < 10000) { window.alert("一万発を達成してからポストしてください！"); return; }
                 let text = `【一撃一万発達成！】\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター\n`;
                 let url = window.location.href; 
                 let shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
@@ -368,13 +331,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             let sBtn = document.getElementById("btn-share-x");
                             if (!playBtn.disabled) {
                                 playBtn.innerText = "▶️ プレイ続行"; 
-                                
-                                // 🌟 遊戲停止！檢查記憶體入面嘅出玉係咪大過一萬！ 🌟
-                                if (window.latest_payout_for_share >= 10000 && sBtn) {
-                                    sBtn.style.display = "inline-block";
-                                }
+                                if (window.latest_payout_for_share >= 10000 && sBtn) sBtn.style.display = "inline-block";
                             } else {
-                                // 遊戲開始，收埋個掣，清空記憶準備迎接下一鋪
                                 if (sBtn) sBtn.style.display = "none";
                                 window.latest_payout_for_share = 0;
                                 window.latest_rush_for_share = 0;
@@ -391,15 +349,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (sBtn) sBtn.style.display = "none";
                     window.latest_payout_for_share = 0;
                     window.latest_rush_for_share = 0;
+                    setTimeout(() => { if (playBtn) playBtn.innerText = "▶️ 遊技開始"; }, 50);
                 });
             }
         }
     }
 });
-
-// ==========================================
-// 終極防卡死攔截器 (Monkey Patching)
-// ==========================================
 
 const originalPlay = HTMLMediaElement.prototype.play;
 HTMLMediaElement.prototype.play = function() {
@@ -407,18 +362,11 @@ HTMLMediaElement.prototype.play = function() {
     const chkSound = document.getElementById("chk-sound");
     const skipVideo = chkVideo && !chkVideo.checked;
     const skipSound = chkSound && !chkSound.checked;
-
-    if (chkSound && !chkSound.checked) {
-        this.muted = true;
-    }
-
+    if (chkSound && !chkSound.checked) this.muted = true;
     if (skipVideo || skipSound) {
-        setTimeout(() => {
-            this.dispatchEvent(new Event("ended"));
-        }, 10);
+        setTimeout(() => { this.dispatchEvent(new Event("ended")); }, 10);
         return Promise.resolve();
     }
-
     return originalPlay.apply(this, arguments);
 };
 
@@ -431,21 +379,13 @@ if (typeof window.addLog === "function") {
         const skipSound = chkSound && !chkSound.checked;
         
         if ((skipVideo || skipSound) && (text.includes("播放") || text.includes("再生") || text.includes("mp4") || text.includes("音效") || text.includes("請稍候"))) {
-            
             originalAddLog("⚡ (演出・BGM スキップ設定中)", "color-normal");
-            
             const originalSetTimeout = window.setTimeout;
             window.setTimeout = function(callback, ms) {
-                if (ms >= 1000) { 
-                    return originalSetTimeout(callback, 10);
-                }
+                if (ms >= 1000) return originalSetTimeout(callback, 10);
                 return originalSetTimeout(callback, ms);
             };
-            
-            originalSetTimeout(() => {
-                window.setTimeout = originalSetTimeout;
-            }, 100);
-            
+            originalSetTimeout(() => { window.setTimeout = originalSetTimeout; }, 100);
             return; 
         }
         
@@ -465,9 +405,7 @@ setTimeout(() => {
         window.playVideoPopupAndWait = function(mediaElement) {
             const chkVideo = document.getElementById("chk-video");
             const chkSound = document.getElementById("chk-sound");
-            if ((chkVideo && !chkVideo.checked) || (chkSound && !chkSound.checked)) {
-                return Promise.resolve(); 
-            }
+            if ((chkVideo && !chkVideo.checked) || (chkSound && !chkSound.checked)) return Promise.resolve(); 
             return originalPlayVideo(mediaElement);
         };
     }
