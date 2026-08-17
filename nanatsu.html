@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>柏青哥模擬器 (P 七つの大罪 319ver)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #050b14;
+            color: #eeeeee;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ff9100;
+            text-shadow: 0 0 15px rgba(255, 145, 0, 0.7);
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 500px;
+        }
+
+        .right-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 400px;
+        }
+
+        .stats-board {
+            background-color: #0b192c;
+            border: 2px solid #ff9100;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+            box-shadow: inset 0 0 10px rgba(255, 145, 0, 0.3);
+        }
+
+        .stat-item span {
+            display: block;
+            font-weight: bold;
+            color: #ffeb3b;
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+
+        button {
+            background: linear-gradient(180deg, #ff9100 0%, #e65100 100%);
+            color: white;
+            border: 1px solid #ffca28;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px #ff9100;
+        }
+
+        button:disabled {
+            background: #1c2a38;
+            border-color: #444;
+            color: #777;
+            cursor: not-allowed;
+            transform: scale(1);
+            box-shadow: none;
+        }
+
+        .log-container {
+            background-color: #000000;
+            border: 1px solid #e65100;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff5252; }
+        .color-hit { color: #ffeb3b; font-weight: bold; text-shadow: 0 0 5px #ffeb3b; }
+        .color-charge { color: #00e5ff; font-weight: bold; }
+        .color-normal { color: #90caf9; }
+        .color-ultimate { color: #ffea00; font-weight: 900; text-shadow: 0 0 10px #ffea00; font-size: 1.1em; }
+        .color-fall { color: #757575; font-weight: bold; }
+
+        .data-lamp-container {
+            background-color: #0a111a;
+            border: 3px solid #e65100;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(230, 81, 0, 0.4);
+        }
+
+        .data-lamp-title {
+            color: #ff9100;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px #ff9100;
+            letter-spacing: 2px;
+        }
+
+        table.data-lamp {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        table.data-lamp th,
+        table.data-lamp td {
+            border: 1px solid #e65100;
+            padding: 10px 5px;
+            text-align: center;
+        }
+
+        table.data-lamp th {
+            background-color: #3e1700;
+            color: #ffca28;
+            font-size: 0.9em;
+        }
+
+        table.data-lamp tr:nth-child(even) {
+            background-color: #1a0a00;
+        }
+
+        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ff5252; }
+        .empty-row { color: #444 !important; }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P 七つの大罪 319ver</span></h1>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 遊技開始</button>
+            </div>
+
+            <div class="log-container" id="log-box"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead>
+                        <tr>
+                            <th>前次</th>
+                            <th>當選回轉數</th>
+                            <th>連莊數</th>
+                            <th>獲得出玉</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="4" class="empty-row">- 無紀錄 -</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        class Nanatsu {
+            constructor() {
+                this.state = "NORMAL";
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.challenge_spins = 0;
+                this.history = [];
+            }
+
+            async play_step() {
+                if (this.state === "CHALLENGE") {
+                    return await this.play_challenge();
+                } else {
+                    return await this.play_normal();
+                }
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+
+                if (this.session_spins % 100 === 0) {
+                    addLog(`現在回轉数: ${this.session_spins}`, "color-normal");
+                }
+
+                if (Math.random() < (1 / 319.7)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 大当り！ Sins BONUS`, "color-hit");
+                    this.session_payout += 450;
+                    this.session_rush_count = 1;
+                    addLog(`450玉獲得！ SEVEN RUSHチャレンジ (時短100回) 突入！`, "color-charge");
+                    
+                    this.state = "CHALLENGE";
+                    this.challenge_spins = 0;
+                    updateUI();
+                    await sleep(1000);
+                    return false; 
+                }
+                return false;
+            }
+
+            // 🌟 修正ポイント：チャレンジ中も数字がリアルタイムで回るようにループ化 🌟
+            async play_challenge() {
+                addLog(`\n===== SEVEN RUSHチャレンジ 開始 =====`, "color-charge");
+                
+                while (this.challenge_spins < 100) {
+                    await sleep(40); // 緊張感を出すためのディレイ（1回転あたり40ミリ秒）
+                    this.challenge_spins += 1;
+                    this.session_spins += 1;
+
+                    // UIの回転数をリアルタイムで更新
+                    document.getElementById("ui-spins").innerText = `CHALLENGE: ${this.challenge_spins}/100`;
+
+                    // 大当り抽選 (約1/196.2)
+                    if (Math.random() < (1 / 196.2)) {
+                        addLog(`\n🎉 SEVEN RUSHチャレンジ突破！！ (${this.challenge_spins}回転目で大当り)`, "color-ultimate");
+                        this.state = "RUSH";
+                        updateUI();
+                        await sleep(1000);
+                        await this.play_rush();
+                        return true; 
+                    }
+                }
+
+                // 100回転スルーした場合
+                addLog(`💀 チャレンジ失敗 (100回転スルー)`, "color-fall");
+                this.state = "NORMAL";
+                this.record_history();
+                updateUI();
+                return true;
+            }
+
+            async play_rush() {
+                addLog(`\n===== SEVEN RUSH 開始 =====`, "color-rush");
+                updateUI();
+
+                while (this.state === "RUSH") {
+                    await sleep(30);
+                    this.session_rush_count += 1;
+
+                    let r = Math.random() * 100;
+
+                    if (r < 25.0) { 
+                        this.session_payout += 1500;
+                        addLog(`💀 【RUSH終了】 1500玉獲得 (計 ${this.session_rush_count}連)`, "color-fall");
+                        this.state = "NORMAL";
+                        this.record_history();
+                        updateUI();
+                        break;
+                    } else if (r < 27.2) { 
+                        this.session_payout += 1500;
+                        addLog(`🔥 【継続】 RUSH BONUS (1500玉)`, "color-hit");
+                    } else { 
+                        let r2 = Math.random() * 100;
+                        if (r2 < 55.5) {
+                            this.session_payout += 2700;
+                            addLog(`✨ 【継続】 PERFECT BONUS (2700玉)`, "color-ultimate");
+                        } else if (r2 < 88.6) {
+                            this.session_payout += 3900;
+                            addLog(`✨ 【継続】 PERFECT BONUS (3900玉)`, "color-ultimate");
+                        } else if (r2 < 98.4) {
+                            this.session_payout += 5100;
+                            addLog(`✨ 【継続】 PERFECT BONUS (5100玉)`, "color-ultimate");
+                        } else if (r2 < 99.9) {
+                            this.session_payout += 6300;
+                            addLog(`✨ 【継続】 PERFECT BONUS (6300玉)`, "color-ultimate");
+                        } else {
+                            this.session_payout += 7500;
+                            addLog(`👑 【継続】 PERFECT BONUS ✨7500玉✨`, "color-ultimate");
+                        }
+                    }
+                    updateUI();
+                    await sleep(800); // 連続大当りの間に少し余韻を持たせる
+                }
+            }
+
+            record_history() {
+                this.history.unshift({
+                    spins: this.session_spins,
+                    rush: this.session_rush_count,
+                    payout: this.session_payout
+                });
+
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.challenge_spins = 0;
+            }
+        }
+
+        let game = new Nanatsu();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div");
+            div.className = `log-entry ${className}`;
+            div.innerText = text;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            // チャレンジ中以外は通常の回転数を表示
+            if (game.state !== "CHALLENGE") {
+                document.getElementById("ui-spins").innerText = game.session_spins;
+            }
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) {
+                historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
+                return;
+            }
+
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `
+                    <td>${label}</td>
+                    <td class="hit-spins">${record.spins}</td>
+                    <td class="hit-rush">${record.rush}</td>
+                    <td class="hit-payout">${record.payout}</td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.disabled = true;
+
+            addLog("\n=== 遊技開始 ===", "color-hit");
+
+            while (isPlaying) {
+                let ended = await game.play_step();
+                updateUI();
+
+                if (game.session_spins % 100 === 0 && game.state === "NORMAL") {
+                    await sleep(10);
+                }
+
+                if (ended) {
+                    isPlaying = false;
+                    break;
+                }
+            }
+
+            btnPlay.disabled = false;
+            btnPlay.innerText = "▶️ プレイ続行";
+        }
+    </script>
+    <script src="plugin.js"></script>
+</body>
+
+</html>

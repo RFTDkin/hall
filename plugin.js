@@ -1,5 +1,5 @@
 // ==========================================
-// 柏青哥全能智能外掛系統 V17 (新增每日收支追蹤 daily_profit)
+// パチンコ全能プラグイン V23 (完全日文化・初当り等の残存中文修復版)
 // ==========================================
 
 const firebaseConfig = {
@@ -16,51 +16,47 @@ const firebaseConfig = {
 window.latest_payout_for_share = 0;
 window.latest_rush_for_share = 0;
 
+const rainbowStyle = document.createElement('style');
+rainbowStyle.innerHTML = `
+    .rainbow-text {
+        background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: rainbow-bg 2s linear infinite;
+        font-weight: 900;
+    }
+    @keyframes rainbow-bg {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+`;
+document.head.appendChild(rainbowStyle);
+
 const originalAlert = window.alert;
 window.alert = function(msg) {
-    let text = msg;
-    if (typeof text === 'string') {
-        text = text.replace(/歡迎返嚟/g, "おかえりなさい")
-                   .replace(/登入成功/g, "ログイン成功")
-                   .replace(/登出/g, "ログアウト")
-                   .replace(/溫馨提示/g, "お知らせ")
-                   .replace(/你今日嘅 4000 轉限額已經打爆咗/g, "本日の上限(4000回転)に達しました")
-                   .replace(/請獲得出玉後再分享/g, "出玉を獲得してからポストしてください");
-    }
+    let text = typeof msg === 'string' ? msg : msg;
+    text = text.replace(/歡迎返嚟/g, "おかえりなさい")
+               .replace(/登入成功/g, "ログイン成功")
+               .replace(/登出/g, "ログアウト")
+               .replace(/溫馨提示/g, "お知らせ")
+               .replace(/你今日嘅 10000 轉限額已經打爆咗/g, "本日の上限(10000回転)に達しました")
+               .replace(/請獲得出玉後再分享/g, "出玉を獲得してからポストしてください");
     originalAlert(text);
 };
 
+// 🌟 徹底的な完全日文化辞書 (初当り等の残存中文を完全に排除) 🌟
 const dict = {
-    "柏青哥模擬器": "パチンコシミュレーター",
-    "返回主頁": "ホールに戻る",
-    "當前轉數": "現在回転数",
-    "現在回轉數": "現在回転数",
-    "回轉": "回転",
-    "本次出玉": "獲得出玉",
-    "本次總出玉": "総獲得出玉",
-    "累積出玉": "累計出玉",
-    "最終出玉": "最終出玉",
-    "本次連莊": "連チャン数",
-    "連莊數": "連チャン",
-    "連莊数": "連チャン",
-    "總連莊數": "総連チャン数",
-    "前次": "前回",
-    "當選回轉數": "初当り回転",
-    "當選回轉数": "初当り回転",
-    "獲得出玉": "獲得出玉",
-    "- 無紀錄 -": "- 履歴なし -",
-    "DATA LAMP (最近10次)": "データランプ (直近10回)",
-    "紀錄重置": "リセット",
-    "遊戲紀錄已重置。": "プレイ履歴をリセットしました。",
-    "繼續打玉": "プレイ続行",
-    "開始魔法": "遊技開始",
-    "開始冒險": "遊技開始",
-    "發進 (PLAY)": "遊技開始",
-    "LINK START": "遊技開始",
-    "等待中...": "待機中...",
-    "播放專屬音效": "専用BGM再生",
-    "請稍候": "お待ちください",
-    "正在播放": "再生中"
+    "柏青哥模擬器": "パチンコシミュレーター", "返回主頁": "ホールに戻る", "當前轉數": "現在回転数",
+    "現在回轉數": "現在回転数", "回轉": "回転", "本次出玉": "獲得出玉", "本次總出玉": "総獲得出玉",
+    "累積出玉": "累計出玉", "最終出玉": "最終出玉", "本次連莊": "連チャン数", "連莊數": "連チャン",
+    "連莊数": "連チャン", "總連莊數": "総連チャン数", "前次": "前回", "當選回轉數": "初当り回転",
+    "當選回轉数": "初当り回転",  "獲得出玉": "獲得出玉", "- 無紀錄 -": "- 履歴なし -",
+    "DATA LAMP (最近10次)": "データランプ (直近10回)", "(最近10次)": "(直近10回)", "最近10次": "直近10回",
+    "紀錄重置": "リセット", "遊戲紀錄已重置。": "プレイ履歴をリセットしました。", "繼續打玉": "プレイ続行",
+    "開始魔法": "遊技開始", "開始冒險": "遊技開始", "發進 (PLAY)": "遊技開始",
+    "LINK START": "遊技開始", "等待中...": "待機中...", "播放專屬音效": "専用BGM再生",
+    "請稍候": "お待ちください", "正在播放": "再生中", "開始打玉": "遊技開始", "含初當": "初当たり含む","遊戲開始": "遊技開始"
 };
 
 function translateDOM() {
@@ -70,77 +66,92 @@ function translateDOM() {
         let text = node.nodeValue;
         let originalText = text;
         for (let [zh, ja] of Object.entries(dict)) {
-            if (text.includes(zh)) {
-                text = text.replace(new RegExp(zh, 'g'), ja);
-            }
+            if (text.includes(zh)) text = text.replace(new RegExp(zh, 'g'), ja);
         }
-        if (text !== originalText) {
-            node.nodeValue = text;
-        }
+        if (text !== originalText) node.nodeValue = text;
     }
     const btnPlay = document.getElementById("btn-play");
-    const btnReset = document.getElementById("btn-reset");
     if (btnPlay && btnPlay.innerText.includes("▶️")) btnPlay.innerText = "▶️ 遊技開始";
-    if (btnReset) btnReset.innerText = "🔄 リセット";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const btnReset = document.getElementById("btn-reset");
+    if (btnReset) btnReset.remove();
     translateDOM();
-    const currentUser = localStorage.getItem("pachinko_current_user");
-    if (!currentUser) { window.location.href = "login.html"; return; }
 
     const scriptApp = document.createElement('script');
     scriptApp.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
     document.head.appendChild(scriptApp);
 
     scriptApp.onload = () => {
-        const scriptDb = document.createElement('script');
-        scriptDb.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js";
-        document.head.appendChild(scriptDb);
-        scriptDb.onload = () => { initPlugin(); };
+        const scriptAuth = document.createElement('script');
+        scriptAuth.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js";
+        document.head.appendChild(scriptAuth);
+
+        scriptAuth.onload = () => {
+            const scriptDb = document.createElement('script');
+            scriptDb.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js";
+            document.head.appendChild(scriptDb);
+            scriptDb.onload = () => { initPlugin(); };
+        };
     };
 
     function initPlugin() {
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.database();
-        const userRef = db.ref('users/' + currentUser);
 
-        userRef.get().then((snapshot) => {
-            if (!snapshot.exists()) { window.location.href = "login.html"; return; }
+        auth.onAuthStateChanged((user) => {
+            if (!user) { window.location.href = "login.html"; return; }
+            const uid = user.uid;
+            const userRef = db.ref('users/' + uid);
 
-            let userData = snapshot.val();
-            const todayStr = new Date().toDateString();
+            userRef.get().then((snapshot) => {
+                if (!snapshot.exists()) { auth.signOut(); window.location.href = "login.html"; return; }
+                let userData = snapshot.val();
+                let currentUserName = userData.username || "Guest";
+                const todayStr = new Date().toDateString();
 
-            // 🌟 核心升級：每日首次登入，將「今日旋轉數」同「今日收支」清零 🌟
-            if (userData.last_date !== todayStr) {
-                userData.daily_spins = 0;
-                userData.daily_profit = 0; 
-                userData.last_date = todayStr;
-                userRef.update({ daily_spins: 0, daily_profit: 0, last_date: todayStr });
-            }
+                if (userData.last_date !== todayStr) {
+                    userData.daily_spins = 0;
+                    userData.daily_profit = 0; 
+                    userData.last_date = todayStr;
+                    userRef.update({ daily_spins: 0, daily_profit: 0, last_date: todayStr });
+                }
 
-            runMachineLogic(db, userRef, userData);
+                runMachineLogic(db, auth, uid, currentUserName, userRef, userData);
+            });
         });
     }
 
-    function runMachineLogic(db, userRef, userData) {
+    function runMachineLogic(db, auth, uid, currentUserName, userRef, userData) {
         const exchangeRate = 3.57; 
         let currentWallet = userData.balance;
 
+        let currentMaxHamari = 0;
+        db.ref('server_records/max_hamari').on('value', (snap) => {
+            if (snap.exists()) {
+                currentMaxHamari = snap.val().spins || 0;
+            }
+        });
+
         const pluginUI = document.createElement("div");
         pluginUI.style.cssText = "position: fixed; top: 15px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; gap: 10px;";
+        
+        let displayNameHtml = userData.has_completed 
+            ? `<span class="rainbow-text">${currentUserName}</span>` 
+            : `<span style="color:#00e5ff;">${currentUserName}</span>`;
+
         pluginUI.innerHTML = `
             <a href="index.html" style="background-color: #222; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 1px solid #777; box-shadow: 0 0 10px rgba(0,0,0,0.5);">🏠 ホールに戻る</a>
             <div style="background: #111; border: 2px solid #ffca28; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 0 15px rgba(255, 202, 40, 0.4); text-align: center; min-width: 160px; max-width: 250px;">
-                👤 <span style="color:#00e5ff;">${currentUser}</span><br>
+                👤 <span id="ui-username">${displayNameHtml}</span><br>
                 💰 所持金<br>
                 <span id="global-wallet" style="font-size: 1.4em;">0</span> 円
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
-                <div style="font-size: 0.9em; color: #fff;">本日の回転数: <br><span id="daily-spins-ui" style="color:#ffeb3b; font-size:1.2em;">${userData.daily_spins}</span> / 4000 回転</div>
+                <div style="font-size: 0.9em; color: #fff;">本日の回転数: <br><span id="daily-spins-ui" style="color:#ffeb3b; font-size:1.2em;">${userData.daily_spins}</span> / 10000 回転</div>
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
-                <div style="font-size: 0.75em; color: #ff7b72; text-align: left; font-weight: normal; line-height: 1.4;">
-                    ※免責事項：当サイトの「円」およびデータはすべて架空のものです。実際の現金や景品等への交換は一切できません。完全無料のシミュレーションゲームです。
-                </div>
+                <div style="font-size: 0.75em; color: #ff7b72; text-align: left; font-weight: normal; line-height: 1.4;">※免責事項：当サイトの「円」等は架空のものです。</div>
             </div>
         `;
         document.body.appendChild(pluginUI);
@@ -191,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 records.slice(0, 10).forEach((rec, idx) => {
                     let rankText = (idx === 0) ? "🥇" : (idx === 1) ? "🥈" : (idx === 2) ? "🥉" : (idx + 1);
-                    let userColor = rec.user === currentUser ? "#00e5ff" : "#ccc";
+                    let userColor = rec.user === currentUserName ? "#00e5ff" : "#ccc";
                     let tr = document.createElement("tr");
                     tr.innerHTML = `<td>${rankText}</td><td style="color:${userColor}; font-weight:bold;">${rec.user}</td><td style="color:#ff5252; font-weight:bold;">${rec.payout.toLocaleString()}</td><td style="font-size:0.8em; color:#888;">${rec.date}</td>`;
                     tbody.appendChild(tr);
@@ -199,19 +210,25 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        function disableMachine() {
+        function disableMachine(msgText = "⛔ 本日 10000 回転の上限到達") {
             let playBtn = document.getElementById("btn-play");
-            if (playBtn) { playBtn.disabled = true; playBtn.innerText = "⛔ 本日 4000 回転の上限到達"; }
+            if (playBtn) { 
+                playBtn.disabled = true; 
+                playBtn.innerText = msgText; 
+            }
         }
-        setTimeout(() => { if (userData.daily_spins >= 4000) disableMachine(); }, 500);
+        setTimeout(() => { if (userData.daily_spins >= 10000) disableMachine(); }, 500);
 
         let lastUI_spins = 0;
         let lastUI_payout = 0;
+        let completeTriggeredThisRush = false;
 
         if (typeof window.updateUI === "function") {
             const originalUpdateUI = window.updateUI;
             window.updateUI = function () {
                 originalUpdateUI();
+                translateDOM();
+
                 let spinEl = document.getElementById("ui-spins");
                 let payoutEl = document.getElementById("ui-payout");
                 let rushEl = document.getElementById("ui-rush");
@@ -222,6 +239,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 let new_payout = parseInt(payoutEl.innerText.replace(/,/g, '')) || 0;
                 let new_rush = rushEl ? (parseInt(rushEl.innerText.replace(/,/g, '')) || 0) : 0;
 
+                // 🌟 修正：只有當前轉數『嚴格大於』資料庫紀錄，先至允許上傳覆蓋！ 🌟
+                if (new_spins > 0 && new_spins > currentMaxHamari) {
+                    currentMaxHamari = new_spins;
+                    const todayDate = new Date();
+                    const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
+                    
+                    db.ref('server_records/max_hamari').set({
+                        user: currentUserName,
+                        spins: new_spins,
+                        machine: machineName,
+                        date: dateStr
+                    });
+                }
+
                 if (new_payout > window.latest_payout_for_share) {
                     window.latest_payout_for_share = new_payout;
                     window.latest_rush_for_share = new_rush;
@@ -230,22 +261,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 let spin_diff = new_spins - lastUI_spins;
                 let payout_diff = new_payout - lastUI_payout;
 
-                if (new_payout === 0 && lastUI_payout >= 10000) {
-                    const todayDate = new Date();
-                    const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
-                    db.ref('machine_rankings/' + machineName).push({ user: currentUser, payout: lastUI_payout, date: dateStr });
+                if (new_payout === 0) {
+                    completeTriggeredThisRush = false; 
+                    if (lastUI_payout >= 10000) {
+                        const todayDate = new Date();
+                        const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
+                        db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
+                    }
                 }
 
                 if (spin_diff < 0) spin_diff = new_spins;
                 if (payout_diff < 0) payout_diff = new_payout;
 
                 let needUpdateCloud = false;
-                let sessionNetProfit = 0; // 🌟 紀錄今鋪賺蝕幾多 🌟
+                let sessionNetProfit = 0;
 
                 if (spin_diff > 0) {
-                    if (userData.daily_spins >= 4000) {
+                    if (userData.daily_spins >= 10000) {
                         disableMachine();
-                        window.alert("⚠️ お知らせ：本日の上限(4000回転)に達しました！");
+                        window.alert("⚠️ お知らせ：本日の上限(10000回転)に達しました！");
                         throw new Error("Daily spin limit reached!");
                     }
                     userData.daily_spins += spin_diff;
@@ -269,42 +303,39 @@ document.addEventListener("DOMContentLoaded", () => {
                     userRef.update({
                         balance: currentWallet,
                         daily_spins: userData.daily_spins,
-                        daily_profit: userData.daily_profit // 🌟 實時更新今日收支 🌟
+                        daily_profit: userData.daily_profit
                     });
                 }
 
                 renderWallet();
                 lastUI_spins = new_spins;
                 lastUI_payout = new_payout;
-                if (userData.daily_spins >= 4000) disableMachine();
+
+                if (new_payout >= 95000 && !completeTriggeredThisRush) {
+                    completeTriggeredThisRush = true;
+                    if (!userData.has_completed) {
+                        userData.has_completed = true;
+                        userRef.update({ has_completed: true });
+                        document.getElementById("ui-username").innerHTML = `<span class="rainbow-text">${currentUserName}</span>`;
+                        window.alert("🎉【コンプリート機能 発動】🎉\n95,000発達成おめでとうございます！\n名誉の証として、プレイヤー名が虹色に輝くようになりました！\n\n※コンプリート機能により、現在のRUSHは強制終了となります。");
+                    } else {
+                        window.alert("🎉【コンプリート機能 発動】🎉\n95,000発到達！\n\n※コンプリート機能により、現在のRUSHは強制終了となります。");
+                    }
+                    setTimeout(() => {
+                        let playBtn = document.getElementById("btn-play");
+                        if (playBtn) playBtn.disabled = false;
+                        window.updateUI();
+                    }, 100);
+                }
+
+                if (userData.daily_spins >= 10000) disableMachine();
             };
         }
 
-        const btnContainer = document.querySelector("#btn-reset")?.parentNode;
+        const playBtn = document.getElementById("btn-play");
+        const btnContainer = playBtn ? playBtn.parentNode : null;
+        
         if (btnContainer) {
-            const toggleDiv = document.createElement("div");
-            toggleDiv.style.cssText = "background-color: #111; border: 1px solid #333; padding: 10px; border-radius: 8px; margin-bottom: 5px; display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 10px;";
-            toggleDiv.innerHTML = `
-                <label style="color: #ffca28; font-weight: bold; cursor: pointer;">
-                    <input type="checkbox" id="chk-sound" checked style="transform: scale(1.2); margin-right: 5px;"> 📢 音効 / 先バレ
-                </label>
-                <label style="color: #ffca28; font-weight: bold; cursor: pointer;">
-                    <input type="checkbox" id="chk-video" checked style="transform: scale(1.2); margin-right: 5px;"> 🎬 演出動画再生
-                </label>
-            `;
-            btnContainer.parentNode.insertBefore(toggleDiv, btnContainer);
-
-            const noteDiv = document.createElement("div");
-            noteDiv.style.cssText = "font-size: 0.85em; color: #8b949e; margin-bottom: 15px; margin-top: 0;";
-            noteDiv.innerText = "※機種によっては「先バレ」や「動画演出」が搭載されていない場合があります。";
-            btnContainer.parentNode.insertBefore(noteDiv, btnContainer);
-
-            setInterval(() => {
-                const chkSound = document.getElementById("chk-sound");
-                const isMuted = chkSound ? !chkSound.checked : false;
-                document.querySelectorAll("audio, video").forEach(media => { media.muted = isMuted; });
-            }, 500);
-
             const shareBtn = document.createElement("button");
             shareBtn.id = "btn-share-x";
             shareBtn.innerText = "𝕏 一万発達成！ポストする";
@@ -314,15 +345,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 let payout = window.latest_payout_for_share || 0;
                 let rushCount = window.latest_rush_for_share || 0;
                 if (payout < 10000) { window.alert("一万発を達成してからポストしてください！"); return; }
-                let text = `【一撃一万発達成！】\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター\n`;
+                let compText = payout >= 95000 ? "\n🎉【コンプリート達成！】🎉" : "";
+                let text = `【一撃一万発達成！】${compText}\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター\n`;
                 let url = window.location.href; 
                 let shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
                 window.open(shareUrl, '_blank');
             };
             btnContainer.appendChild(shareBtn);
-
-            const playBtn = document.getElementById("btn-play");
-            const resetBtn = document.getElementById("btn-reset");
 
             if (playBtn) {
                 const observer = new MutationObserver((mutations) => {
@@ -342,58 +371,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 observer.observe(playBtn, { attributes: true });
             }
-
-            if (resetBtn) {
-                resetBtn.addEventListener("click", () => {
-                    let sBtn = document.getElementById("btn-share-x");
-                    if (sBtn) sBtn.style.display = "none";
-                    window.latest_payout_for_share = 0;
-                    window.latest_rush_for_share = 0;
-                    setTimeout(() => { if (playBtn) playBtn.innerText = "▶️ 遊技開始"; }, 50);
-                });
-            }
         }
     }
 });
 
 const originalPlay = HTMLMediaElement.prototype.play;
 HTMLMediaElement.prototype.play = function() {
-    const chkVideo = document.getElementById("chk-video");
-    const chkSound = document.getElementById("chk-sound");
-    const skipVideo = chkVideo && !chkVideo.checked;
-    const skipSound = chkSound && !chkSound.checked;
-    if (chkSound && !chkSound.checked) this.muted = true;
-    if (skipVideo || skipSound) {
-        setTimeout(() => { this.dispatchEvent(new Event("ended")); }, 10);
-        return Promise.resolve();
-    }
-    return originalPlay.apply(this, arguments);
+    this.muted = true;
+    setTimeout(() => { this.dispatchEvent(new Event("ended")); }, 10);
+    return Promise.resolve();
 };
 
 if (typeof window.addLog === "function") {
     const originalAddLog = window.addLog;
     window.addLog = function(text, className = "") {
-        const chkVideo = document.getElementById("chk-video");
-        const chkSound = document.getElementById("chk-sound");
-        const skipVideo = chkVideo && !chkVideo.checked;
-        const skipSound = chkSound && !chkSound.checked;
-        
-        if ((skipVideo || skipSound) && (text.includes("播放") || text.includes("再生") || text.includes("mp4") || text.includes("音效") || text.includes("請稍候"))) {
-            originalAddLog("⚡ (演出・BGM スキップ設定中)", "color-normal");
-            const originalSetTimeout = window.setTimeout;
-            window.setTimeout = function(callback, ms) {
-                if (ms >= 1000) return originalSetTimeout(callback, 10);
-                return originalSetTimeout(callback, ms);
-            };
-            originalSetTimeout(() => { window.setTimeout = originalSetTimeout; }, 100);
+        if (text.includes("播放") || text.includes("再生") || text.includes("mp4") || text.includes("音效") || text.includes("請稍候")) {
             return; 
         }
-        
         let translatedText = text;
+        translatedText = translatedText.replace(/STOCK獲得！(\d+)玉 \(剩餘 (\d+)轉\)/g, "STOCK獲得！$1玉 (残り $2回転)");
+        translatedText = translatedText.replace(/剩餘 (\d+) 轉/g, "残り $1 回転");
+        translatedText = translatedText.replace(/獲得 (\d+) 玉/g, "$1 玉獲得");
+        translatedText = translatedText.replace(/大當り！ (\d+)連莊/g, "大当り！ $1連チャン");
+
         for (let [zh, ja] of Object.entries(dict)) {
-            if (translatedText.includes(zh)) {
-                translatedText = translatedText.split(zh).join(ja);
-            }
+            if (translatedText.includes(zh)) translatedText = translatedText.split(zh).join(ja);
         }
         originalAddLog(translatedText, className);
     };
@@ -401,12 +403,6 @@ if (typeof window.addLog === "function") {
 
 setTimeout(() => {
     if (typeof window.playVideoPopupAndWait === "function") {
-        const originalPlayVideo = window.playVideoPopupAndWait;
-        window.playVideoPopupAndWait = function(mediaElement) {
-            const chkVideo = document.getElementById("chk-video");
-            const chkSound = document.getElementById("chk-sound");
-            if ((chkVideo && !chkVideo.checked) || (chkSound && !chkSound.checked)) return Promise.resolve(); 
-            return originalPlayVideo(mediaElement);
-        };
+        window.playVideoPopupAndWait = function() { return Promise.resolve(); };
     }
 }, 100);

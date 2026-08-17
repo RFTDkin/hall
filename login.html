@@ -1,91 +1,42 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
-
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登入 / 註冊 - 虛擬柏青哥大廳</title>
+    <title>ログイン - バーチャル パチンコホール</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #050505;
-            color: #fff;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%);
-        }
-
-        .login-box {
-            background-color: #111;
-            padding: 40px;
-            border-radius: 15px;
-            border: 2px solid #00e5ff;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
-            width: 100%;
-            max-width: 350px;
-        }
-
-        h1 {
-            color: #00e5ff;
-            text-shadow: 0 0 10px #00e5ff;
-            margin-bottom: 30px;
-        }
-
-        input {
-            width: 90%;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            background-color: #222;
-            color: white;
-            font-size: 1.1em;
-            text-align: center;
-        }
-
-        button {
-            background-color: #00e5ff;
-            color: #000;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        button:hover {
-            background-color: #00b8d4;
-            box-shadow: 0 0 15px #00e5ff;
-        }
-
-        .hint {
-            color: #888;
-            font-size: 0.85em;
-            margin-top: 15px;
-        }
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #050505; color: #fff; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%); }
+        .login-box { background: #111; border: 2px solid #00e5ff; border-radius: 15px; padding: 40px; width: 350px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.3); }
+        h1 { color: #ffeb3b; text-shadow: 0 0 10px rgba(255, 235, 59, 0.6); margin-top: 0; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; font-size: 1em; }
+        button { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: none; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.2s; }
+        .btn-submit { background: #00e5ff; color: #000; box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); }
+        .btn-submit:hover { background: #00b8d4; }
+        .toggle-text { color: #888; margin-top: 20px; cursor: pointer; font-size: 0.9em; text-decoration: underline; }
+        .toggle-text:hover { color: #fff; }
+        .hint-text { font-size: 0.8em; color: #aaa; margin-top: -5px; margin-bottom: 10px; text-align: left; padding-left: 5%; }
     </style>
 </head>
-
 <body>
 
     <div class="login-box">
-        <h1>🎰 會員登入</h1>
-        <input type="text" id="username" placeholder="請輸入帳號名稱..." autocomplete="off">
-        <button id="login-btn" onclick="login()">登入 / 註冊</button>
-        <div class="hint">如果帳號不存在，系統會自動幫你註冊<br>並送你 50,000 円迎新本金！</div>
+        <h1 id="title">ログイン</h1>
+        
+        <input type="text" id="username" placeholder="プレイヤー名" style="display:none;">
+        <input type="text" id="login-id" placeholder="ログインID (半角英数字)">
+        <input type="password" id="password" placeholder="パスワード (6文字以上)">
+        <div class="hint-text">※メールアドレスは不要です</div>
+        
+        <button class="btn-submit" id="submit-btn" onclick="handleAuth()">ログイン</button>
+        
+        <div class="toggle-text" onclick="toggleMode()" id="toggle-btn">新規登録はこちら</div>
     </div>
 
     <script>
-        // 👇 將呢度換成你喺 Firebase 複製嘅 Config 👇
+        // Firebaseのコンフィグ設定
         const firebaseConfig = {
             apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
             authDomain: "p-hall.firebaseapp.com",
@@ -96,46 +47,74 @@
             appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
             measurementId: "G-46M19VQVY2"
         };
-        // 👆 替換結束 👆
-
-        // 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.database();
 
-        function login() {
+        let isRegisterMode = false;
+
+        function toggleMode() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById("title").innerText = isRegisterMode ? "新規登録" : "ログイン";
+            document.getElementById("submit-btn").innerText = isRegisterMode ? "登録する" : "ログイン";
+            document.getElementById("toggle-btn").innerText = isRegisterMode ? "すでにアカウントをお持ちの方" : "新規登録はこちら";
+            document.getElementById("username").style.display = isRegisterMode ? "block" : "none";
+        }
+
+        function handleAuth() {
+            const loginId = document.getElementById("login-id").value.trim();
+            const password = document.getElementById("password").value;
             const username = document.getElementById("username").value.trim();
-            if (!username) { alert("請輸入帳號名稱！"); return; }
 
-            const btn = document.getElementById("login-btn");
-            btn.disabled = true;
-            btn.innerText = "連線中...";
+            if (!loginId || !password) {
+                return alert("IDとパスワードを入力してください！");
+            }
 
-            // 去雲端檢查玩家是否存在
-            db.ref('users/' + username).get().then((snapshot) => {
-                if (snapshot.exists()) {
-                    // 舊玩家
-                    localStorage.setItem("pachinko_current_user", username);
-                    alert(`お帰りなさい，${username}！`);
-                    window.location.href = "index.html";
-                } else {
-                    // 新玩家：派 50000 円
-                    db.ref('users/' + username).set({
-                        balance: 50000,
-                        daily_spins: 0,
-                        last_date: new Date().toDateString()
-                    }).then(() => {
-                        localStorage.setItem("pachinko_current_user", username);
-                        alert(`註冊成功！已派發 50,000 円本金畀你！`);
+            if (!/^[a-zA-Z0-9]+$/.test(loginId)) {
+                return alert("IDは半角英数字のみ使用可能です！");
+            }
+
+            // FirebaseのEmail要件を回避するためのダミードメイン
+            const dummyEmail = loginId + "@phall.local";
+
+            if (isRegisterMode) {
+                if (!username) return alert("プレイヤー名を入力してください！");
+                
+                auth.createUserWithEmailAndPassword(dummyEmail, password)
+                    .then((userCredential) => {
+                        return db.ref('users/' + userCredential.user.uid).set({
+                            username: username,
+                            balance: 50000,
+                            daily_spins: 0,
+                            daily_profit: 0,
+                            last_date: new Date().toDateString()
+                        });
+                    })
+                    .then(() => {
+                        alert("登録完了！50,000円をプレゼントしました！");
                         window.location.href = "index.html";
+                    })
+                    .catch((error) => {
+                        if (error.code === 'auth/email-already-in-use') {
+                            alert("このIDはすでに使用されています。");
+                        } else if (error.code === 'auth/weak-password') {
+                            alert("パスワードは6文字以上にしてください。");
+                        } else {
+                            alert("登録エラー: " + error.message);
+                        }
                     });
-                }
-            }).catch((error) => {
-                alert("連線失敗：" + error.message);
-                btn.disabled = false;
-                btn.innerText = "登入 / 註冊";
-            });
+            } else {
+                auth.signInWithEmailAndPassword(dummyEmail, password)
+                    .then(() => { window.location.href = "index.html"; })
+                    .catch((error) => {
+                        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                            alert("IDまたはパスワードが間違っています。");
+                        } else {
+                            alert("ログインエラー: " + error.message);
+                        }
+                    });
+            }
         }
     </script>
 </body>
-
 </html>

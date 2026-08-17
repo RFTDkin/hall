@@ -32,6 +32,16 @@
         .val-profit { color: #c9d1d9; }
         .progress-text { text-align: right; font-size: 0.9em; color: #8b949e; margin-top: 15px; font-style: italic; }
 
+        .rainbow-text {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow-bg 2s linear infinite;
+            font-weight: 900;
+        }
+        @keyframes rainbow-bg { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
         /* 各機台顏色標籤 */
         .tag-bluelock { border-top: 5px solid #00e5ff; }
         .tag-dmdp { border-top: 5px solid #e040fb; }
@@ -44,6 +54,7 @@
         .tag-slime { border-top: 5px solid #00bcd4; }
         .tag-kakegurui { border-top: 5px solid #d50000; }
         .tag-ggo { border-top: 5px solid #ff4081; }
+        .tag-nanatsu { border-top: 5px solid #ff9100; }
     </style>
 </head>
 
@@ -59,9 +70,9 @@
     </p>
 
     <div class="btn-group">
-        <button id="btn-start-100" class="btn-start" onclick="runAllSimulations(100)">▶️ 100回 演算</button>
-        <button id="btn-start-1000" class="btn-start" style="background-color: #d29922;" onclick="runAllSimulations(1000)">▶️ 1,000回 演算</button>
-        <button id="btn-start-10000" class="btn-start" style="background-color: #b35900;" onclick="runAllSimulations(10000)">▶️ 10,000回 演算</button>
+        <button id="btn-start-100" class="btn-start" onclick="runAllSimulations(100)">▶️ 100回 遊技開始</button>
+        <button id="btn-start-1000" class="btn-start" style="background-color: #d29922;" onclick="runAllSimulations(1000)">▶️ 1,000回 遊技開始</button>
+        <button id="btn-start-10000" class="btn-start" style="background-color: #b35900;" onclick="runAllSimulations(10000)">▶️ 10,000回 遊技開始</button>
     </div>
 
     <div class="grid-container">
@@ -228,12 +239,27 @@
             <div class="progress-text" id="sao-prog">待機中...</div>
         </div>
 
+        <div class="machine-card tag-nanatsu" id="card-nanatsu">
+            <h3 class="machine-title">P 七つの大罪 319ver</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="nanatsu-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="nanatsu-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="nanatsu-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="nanatsu-profit">---</span></div>
+            <div class="progress-text" id="nanatsu-prog">待機中...</div>
+        </div>
+
     </div>
 
     <script>
         const yieldToMain = () => new Promise(r => setTimeout(r, 10));
 
-        // 演算邏輯保留
+        // 🌟 核心修改：未滿95000時若中獎，允許把該次完整出玉加進去才結束 RUSH 🌟
+        function addBonusAndCheckComplete(currentPayout, bonusAmount) {
+            let newPayout = currentPayout + bonusAmount;
+            let isCompleted = currentPayout >= 95000;
+            return { payout: newPayout, isDone: isCompleted };
+        }
+
         function simBlueLock() {
             let spins = 0, payout = 0;
             while (true) {
@@ -241,15 +267,21 @@
                 if (Math.random() < 1 / 399.9) {
                     let r = Math.random();
                     let rush = false;
-                    if (r < 0.001) { payout += 1500; rush = true; }
-                    else if (r < 0.501) { payout += 1050; rush = true; }
-                    else if (r < 0.547) { payout += 300; rush = true; }
-                    else { payout += 1050; }
+                    let initialPayout = 0;
+                    if (r < 0.001) { initialPayout = 1500; rush = true; }
+                    else if (r < 0.501) { initialPayout = 1050; rush = true; }
+                    else if (r < 0.547) { initialPayout = 300; rush = true; }
+                    else { initialPayout = 1050; }
+                    
+                    payout += initialPayout;
+                    if (payout >= 95000) break;
+
                     if (rush) {
                         let winRate = 108 / (33.2 + 108);
                         while (true) {
                             if (Math.random() < winRate) {
                                 let rr = Math.random();
+                                let addP = 0;
                                 if (rr < 0.005) {
                                     let ext = 7500;
                                     while (Math.random() < 0.005) ext += 7500;
@@ -258,12 +290,15 @@
                                     else if (finalR < 0.052 + 0.198) ext += 4500;
                                     else if (finalR < 0.250 + 0.380) ext += 3000;
                                     else ext += 1500;
-                                    payout += ext;
+                                    addP = ext;
                                 }
-                                else if (rr < 0.005 + 0.052) payout += 6000;
-                                else if (rr < 0.057 + 0.198) payout += 4500;
-                                else if (rr < 0.255 + 0.380) payout += 3000;
-                                else payout += 1500;
+                                else if (rr < 0.005 + 0.052) addP = 6000;
+                                else if (rr < 0.057 + 0.198) addP = 4500;
+                                else if (rr < 0.255 + 0.380) addP = 3000;
+                                else addP = 1500;
+
+                                payout += addP;
+                                if (payout >= 95000) break;
                             } else break;
                         }
                     }
@@ -285,6 +320,7 @@
                     else {
                         payout += 210;
                         while (true) {
+                            if (payout >= 95000) break;
                             if (Math.random() < 1 / 39.1) {
                                 payout += getBLLightRushPayout();
                                 runBLLightRush();
@@ -297,6 +333,7 @@
             }
             function runBLLightRush() {
                 while (true) {
+                    if (payout >= 95000) break;
                     if (Math.random() < 1 / 39.1) { payout += getBLLightRushPayout(); } 
                     else if (Math.random() < 1 / 100) { break; }
                 }
@@ -321,21 +358,24 @@
                 spins++;
                 if (Math.random() < 1 / 349.9) {
                     payout += 1500;
+                    if (payout >= 95000) break;
                     if (Math.random() < 0.51) {
                         let winCount = 0, inShikabane = true, winRate = 148 / (43 + 148);
                         while (inShikabane) {
+                            if (payout >= 95000) { inShikabane = false; break; }
                             if (Math.random() < winRate) {
                                 payout += 3000;
                                 winCount++;
                                 if (winCount >= 2) {
                                     inShikabane = false;
                                     let inKonshin = true;
-                                    while (inKonshin) {
+                                    while (inKonshin && payout < 95000) {
                                         if (Math.random() < 0.50) {
                                             let r = Math.random();
-                                            if (r < 0.03) payout += 10500;
-                                            else if (r < 0.50) payout += 9000;
-                                            else payout += 3000;
+                                            let addP = 3000;
+                                            if (r < 0.03) addP = 10500;
+                                            else if (r < 0.50) addP = 9000;
+                                            payout += addP;
                                         } else inKonshin = false;
                                     }
                                 }
@@ -364,8 +404,11 @@
             function runST130() {
                 let st = 130;
                 while (st > 0) {
-                    if (Math.random() < 1 / 95.3) { payout += (Math.random() < 0.03) ? 6000 : 3000; st = 130; } 
-                    else st--;
+                    if (payout >= 95000) break;
+                    if (Math.random() < 1 / 95.3) { 
+                        payout += (Math.random() < 0.03) ? 6000 : 3000; 
+                        st = 130; 
+                    } else st--;
                 }
             }
             return { spins, payout };
@@ -379,10 +422,10 @@
                     if (Math.random() < 0.50) {
                         payout += 7500;
                         let st = 5;
-                        while (st > 0) {
+                        while (st > 0 && payout < 95000) {
                             if (Math.random() < 1 / 7.7) {
                                 payout += 3000;
-                                while (Math.random() < 0.50) payout += 3000;
+                                while (Math.random() < 0.50 && payout < 95000) payout += 3000;
                                 st = 5;
                             } else st--;
                         }
@@ -393,10 +436,10 @@
                     if (Math.random() < 0.005) {
                         payout += 7500;
                         let st = 5;
-                        while (st > 0) {
+                        while (st > 0 && payout < 95000) {
                             if (Math.random() < 1 / 7.7) {
                                 payout += 3000;
-                                while (Math.random() < 0.50) payout += 3000;
+                                while (Math.random() < 0.50 && payout < 95000) payout += 3000;
                                 st = 5;
                             } else st--;
                         }
@@ -413,17 +456,22 @@
                 spins++;
                 if (Math.random() < 1 / 349.9) {
                     payout += 450;
+                    if (payout >= 95000) break;
                     if (Math.random() < 0.50) {
                         let hit = false;
                         for (let i = 0; i < 65; i++) if (Math.random() < 1 / 94.1) { hit = true; break; }
                         if (hit) {
                             payout += 3000;
+                            if (payout >= 95000) break;
                             if (Math.random() < 0.73) {
                                 let inLT = true;
-                                while (inLT) {
+                                while (inLT && payout < 95000) {
                                     let ltHit = false;
                                     for (let i = 0; i < 145; i++) if (Math.random() < 1 / 71.6) { ltHit = true; break; }
-                                    if (ltHit) { payout += 3000; if (Math.random() >= 0.87) inLT = false; } 
+                                    if (ltHit) { 
+                                        payout += 3000; 
+                                        if (Math.random() >= 0.87) inLT = false; 
+                                    } 
                                     else inLT = false;
                                 }
                             }
@@ -443,8 +491,10 @@
                     let r = Math.random();
                     if (r < 0.255) {
                         payout += (r < 0.01) ? 1500 : 300;
+                        if (payout >= 95000) break;
                         let winRate = 111.1 / (41.1 + 111.1);
                         while (true) {
+                            if (payout >= 95000) break;
                             if (Math.random() < winRate) {
                                 let rr = Math.random();
                                 if (rr < 0.25) payout += 6000;
@@ -472,10 +522,11 @@
                     else if (r < 0.800) { payout += 600; }
                     else { payout += 310; }
 
-                    if (enterLT) {
+                    if (enterLT && payout < 95000) {
                         let mode = Math.random() < 0.30 ? "B" : "A";
                         let st = 132;
                         while (st > 0) {
+                            if (payout >= 95000) break;
                             if (Math.random() < 1 / 97.1) {
                                 if (mode === "A") {
                                     payout += 750;
@@ -483,7 +534,8 @@
                                 } else {
                                     if (Math.random() < 0.5) {
                                         payout += 6000;
-                                        while (Math.random() < 0.5) payout += 3000;
+                                        if (payout >= 95000) break;
+                                        while (Math.random() < 0.5 && payout < 95000) payout += 3000;
                                     } else payout += 3000;
                                     mode = "A";
                                 }
@@ -514,15 +566,16 @@
                         else if (r < 0.073 + 0.437) { payout += 1500; rush = true; }
                         else { payout += 1500; }
 
-                        if (rush) {
+                        if (rush && payout < 95000) {
                             let st = 144;
                             while (st > 0) {
+                                if (payout >= 95000) break;
                                 if (Math.random() < 1 / 99) {
                                     if (Math.random() < 0.5) {
                                         let loop = true;
-                                        while (loop) {
+                                        while (loop && payout < 95000) {
                                             let br = Math.random();
-                                            if (br < 0.125) payout += 6000;
+                                            if (br < 0.125) { payout += 6000; loop = false; }
                                             else if (br < 0.125 + 0.375) { payout += 4500; loop = false; }
                                             else if (br < 0.50 + 0.375) { payout += 3000; loop = false; }
                                             else { payout += 1500; loop = false; }
@@ -545,6 +598,7 @@
                 spins++;
                 if (Math.random() < 1 / 399.9) {
                     payout += 1500;
+                    if (payout >= 95000) break;
                     let rush = false, mode = "NORMAL";
                     if (Math.random() < 0.50) rush = true;
                     else {
@@ -553,10 +607,11 @@
                         if (hit) { payout += 3000; rush = true; if (Math.random() < 0.50) mode = "SUPER"; }
                     }
 
-                    if (rush) {
+                    if (rush && payout < 95000) {
                         let st_max = mode === "SUPER" ? 160 : 135;
                         let current_st = st_max;
                         while (current_st > 0) {
+                            if (payout >= 95000) break;
                             if (Math.random() < 1 / 99.1) {
                                 if (mode === "NORMAL") {
                                     if (Math.random() < 0.50) mode = "SUPER";
@@ -584,18 +639,19 @@
                     if (Math.random() < 0.25) {
                         if (Math.random() < 0.50) {
                             payout += 7500;
+                            if (payout >= 95000) break;
                             let inTsuranuki = true;
-                            while (inTsuranuki) {
+                            while (inTsuranuki && payout < 95000) {
                                 if (Math.random() < 0.30) payout += 7500;
                                 else { payout += 1500; inTsuranuki = false; }
                             }
                             let st = 135;
-                            while (st > 0) {
+                            while (st > 0 && payout < 95000) {
                                 if (Math.random() < 1 / 99) {
                                     payout += 1500;
-                                    if (Math.random() < 0.60) {
+                                    if (Math.random() < 0.60 && payout < 95000) {
                                         let inTsuranukiRush = true;
-                                        while (inTsuranukiRush) {
+                                        while (inTsuranukiRush && payout < 95000) {
                                             if (Math.random() < 0.30) payout += 7500;
                                             else { payout += 1500; inTsuranukiRush = false; }
                                         }
@@ -619,14 +675,14 @@
                     let roll = Math.random();
                     if (roll < 0.03) {
                         payout += 4500;
-                        runSJRush();
+                        if (payout < 95000) runSJRush();
                     } else {
                         payout += 300;
                         let breakthrough = false;
                         for (let i = 1; i <= 50; i++) {
                             if (Math.random() < 1 / 99.9) { breakthrough = true; break; }
                         }
-                        if (breakthrough) { payout += 3600; runSJRush(); }
+                        if (breakthrough && payout < 95000) { payout += 3600; runSJRush(); }
                     }
                     break;
                 }
@@ -634,6 +690,7 @@
             function runSJRush() {
                 let st = 160;
                 while (st > 0) {
+                    if (payout >= 95000) break;
                     if (Math.random() < 1 / 99.9) {
                         let br = Math.random();
                         if (br < 0.30) payout += 3600;
@@ -655,9 +712,10 @@
                 spins++;
                 if (Math.random() < 1 / 399.6) {
                     payout += 1200;
-                    if (Math.random() < 0.54) {
+                    if (payout < 95000 && Math.random() < 0.54) {
                         let st = 130;
                         while (st > 0) {
+                            if (payout >= 95000) break;
                             if (Math.random() < 1 / 90.4) {
                                 let br = Math.random();
                                 if (br < 0.235) payout += 6000;
@@ -671,9 +729,10 @@
                 }
                 if (Math.random() < 1 / 2731.4) {
                     payout += 300;
-                    if (Math.random() < 0.01) { 
+                    if (payout < 95000 && Math.random() < 0.01) { 
                         let st = 130;
                         while (st > 0) {
+                            if (payout >= 95000) break;
                             if (Math.random() < 1 / 90.4) {
                                 let br = Math.random();
                                 if (br < 0.235) payout += 6000;
@@ -697,22 +756,22 @@
                     let r = Math.random();
                     if (r < 0.19) {
                         payout += 300; 
-                        if (Math.random() < 1/6) runNanohaST();
+                        if (payout < 95000 && Math.random() < 1/6) runNanohaST();
                     } else {
                         let r2 = Math.random();
                         if (r2 < 0.0132) {
                             payout += 3000;
-                            runNanohaST();
+                            if (payout < 95000) runNanohaST();
                         } else if (r2 < 0.0132 + 0.4934) {
                             payout += 900;
-                            runNanohaST();
+                            if (payout < 95000) runNanohaST();
                         } else {
                             payout += 900;
                             let ct_hit = false;
                             for (let i = 0; i < 100; i++) {
                                 if (Math.random() < 1/348.5) { ct_hit = true; break; }
                             }
-                            if (ct_hit) { payout += 1500; runNanohaST(); }
+                            if (ct_hit && payout < 95000) { payout += 1500; runNanohaST(); }
                         }
                     }
                     break;
@@ -720,9 +779,10 @@
             }
             function runNanohaST() {
                 let st_active = true;
-                while(st_active) {
+                while(st_active && payout < 95000) {
                     let hits = 0;
                     for (let i = 0; i < 70; i++) {
+                        if (payout >= 95000) break;
                         if (Math.random() < 1/51.6) { hits++; payout += 1500; }
                     }
                     if (hits === 0) st_active = false;
@@ -737,10 +797,11 @@
                 spins++;
                 if (Math.random() < 1/349) {
                     payout += 1500;
-                    if (Math.random() < 0.515) {
+                    if (payout < 95000 && Math.random() < 0.515) {
                         let mode = "TRUE_HERO";
                         let st = 115;
                         while(st > 0) {
+                            if (payout >= 95000) break;
                             if (Math.random() < 1/96.3) {
                                 if (mode === "TRUE_HERO") {
                                     if (Math.random() < 0.25) {
@@ -770,7 +831,7 @@
                 let r = Math.random();
                 if (r < 1/399.9) {
                     payout += 1500;
-                    if (Math.random() < 0.50) { runEdensRush(); }
+                    if (payout < 95000 && Math.random() < 0.50) { runEdensRush(); }
                     break;
                 } else if (r < (1/399.9) + (1/2799.9)) {
                     payout += 300;
@@ -779,6 +840,7 @@
             function runEdensRush() {
                 let mode = "LT"; 
                 while(true) {
+                    if (payout >= 95000) break;
                     let hitProb = mode === "LT" ? 1/1.7 : 1/1.3;
                     let fallProb = mode === "LT" ? 1/5.7 : 1/4.2;
                     let p_event = hitProb + fallProb;
@@ -809,7 +871,7 @@
                 spins++;
                 if (Math.random() < 1/399.9) {
                     payout += 1500;
-                    if (Math.random() < 0.52) { runSeedRush(); }
+                    if (payout < 95000 && Math.random() < 0.52) { runSeedRush(); }
                     break;
                 }
             }
@@ -817,6 +879,7 @@
                 let mode = "CLIMAX"; 
                 let st_active = true;
                 while(st_active) {
+                    if (payout >= 95000) break;
                     let hit = false;
                     for (let i = 0; i < 130; i++) {
                         if (Math.random() < 1/95.6) { hit = true; break; }
@@ -848,10 +911,10 @@
                     let r = Math.random();
                     if (r < 0.015) {
                         payout += getHugeBonus(); 
-                        runSAORush("WOU");
+                        if (payout < 95000) runSAORush("WOU");
                     } else if (r < 0.015 + 0.485) {
                         payout += 300;
-                        runSAORush("SWORD");
+                        if (payout < 95000) runSAORush("SWORD");
                     } else {
                         payout += 300;
                     }
@@ -862,6 +925,7 @@
                 let mode = startMode;
                 let st_active = true;
                 while (st_active) {
+                    if (payout >= 95000) break;
                     let st_max = mode === "SWORD" ? 53 : 70;
                     let hit = false;
                     for (let i = 0; i < st_max; i++) {
@@ -893,6 +957,45 @@
                 }
             }
             return {spins, payout};
+        }
+
+        function simNanatsu() {
+            let spins = 0, payout = 0;
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 319.7) {
+                    payout += 450;
+                    let breakthrough = false;
+                    for (let i = 1; i <= 100; i++) {
+                        if (Math.random() < 1 / 196.2) {
+                            breakthrough = true;
+                            break;
+                        }
+                    }
+                    if (breakthrough && payout < 95000) {
+                        let st_active = true;
+                        while (st_active) {
+                            if (payout >= 95000) break;
+                            let r = Math.random() * 100;
+                            if (r < 25.0) {
+                                payout += 1500;
+                                st_active = false;
+                            } else if (r < 27.2) {
+                                payout += 1500;
+                            } else {
+                                let r2 = Math.random() * 100;
+                                if (r2 < 55.5) payout += 2700;
+                                else if (r2 < 88.6) payout += 3900;
+                                else if (r2 < 98.4) payout += 5100;
+                                else if (r2 < 99.9) payout += 6300;
+                                else payout += 7500;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
         }
 
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
@@ -937,7 +1040,14 @@
 
             elSpins.innerText = avgSpins.toLocaleString();
             elPayout.innerText = avgPayout.toLocaleString() + " 玉";
-            if(elMax) elMax.innerText = maxPayout.toLocaleString() + " 玉";
+            
+            if (elMax) {
+                if (maxPayout >= 95000) {
+                    elMax.innerHTML = `<span class="rainbow-text">${maxPayout.toLocaleString()}発 (コンプリート)</span>`;
+                } else {
+                    elMax.innerText = maxPayout.toLocaleString() + " 玉";
+                }
+            }
 
             if (elProfit) {
                 if (netProfitYen > 0) {
@@ -990,11 +1100,12 @@
             await runMachineSim('edens', simEdens, 1000 / 17, iterations);
             await runMachineSim('seed', simSeed, 1000 / 17, iterations);
             await runMachineSim('sao', simSAO, 1000 / 20, iterations);
+            await runMachineSim('nanatsu', simNanatsu, 1000 / 17, iterations);
 
             btns.forEach(btn => btn.disabled = false);
-            document.getElementById('btn-start-100').innerText = "▶️ 100回 演算";
-            document.getElementById('btn-start-1000').innerText = "▶️ 1,000回 演算";
-            document.getElementById('btn-start-10000').innerText = "▶️ 10,000回 演算";
+            document.getElementById('btn-start-100').innerText = "▶️ 100回 遊技開始";
+            document.getElementById('btn-start-1000').innerText = "▶️ 1,000回 遊技開始";
+            document.getElementById('btn-start-10000').innerText = "▶️ 10,000回 遊技開始";
         }
     </script>
 </body>

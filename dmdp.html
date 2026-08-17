@@ -247,14 +247,14 @@
                                 this.state = "KONSHIN"; // 準備進入魂神
                                 rush_active = false;
                             } else {
-                                addLog("⚡ 屍RUSH繼續!! (下一次中獎即入魂神)", "color-rush");
+                                addLog("⚡ 屍RUSH繼續!! (次当たれば渾身の一撃)", "color-rush");
                                 await sleep(800);
                                 rush_active = false; // 結束今次轉動，重新開始跳轉數
                             }
                         } 
                         else if (Math.random() < (1 / 148)) {
                             addLog(`\n💀 転落... (${current_rush_spins}回転) 屍RUSH終了`, "color-normal");
-                            addLog(`📈 總連莊數: ${this.session_rush_count + 1}連 (含初當)`);
+                            addLog(`📈 總連莊數: ${this.session_rush_count + 1}連 (初当たり含む)`);
                             addLog(`💰 最終出玉: ${this.session_payout} 玉`);
                             
                             this.state = "NORMAL";
@@ -433,7 +433,7 @@
                 audioUnlocked = true;
             }
             
-            addLog("\n=== 開始打玉 ===", "color-hit");
+            addLog("\n=== 遊技開始 ===", "color-hit");
 
             while (isPlaying) {
                 let hit = await game.play_normal();

@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 バーチャル パチンコホール (Virtual Pachinko Hall)</title>
+    <title>🎰 バーチャル パチンコホール</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
     <style>
-        body { font-family: 'Noto Sans JP', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #050505; color: #ffffff; text-align: center; margin: 0; padding: 20px; background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%); min-height: 100vh; }
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #050505; color: #ffffff; text-align: center; margin: 0; padding: 20px; background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%); min-height: 100vh; }
         .top-nav { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 30px auto; background: #111; padding: 15px 30px; border-radius: 12px; border: 1px solid #333; }
         .user-info { font-size: 1.2em; font-weight: bold; color: #00e5ff; text-align: left; }
         .auth-btn { border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1em; transition: 0.2s; }
@@ -19,20 +20,36 @@
         .auth-btn.login:hover { background: #00b8d4; box-shadow: 0 0 10px #00e5ff; }
         h1 { color: #ffeb3b; font-size: 3em; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 235, 59, 0.6); }
 
-        /* 🌟 4 大數據看板 🌟 */
-        .dashboard-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto 40px auto; }
-        .dash-card { background-color: #111; border: 2px solid #333; border-radius: 15px; padding: 20px; box-shadow: 0 0 15px rgba(0,0,0,0.5); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+        /* コンプリート者専用：虹色アニメーション */
+        .rainbow-text {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow-bg 2s linear infinite;
+            font-weight: 900;
+        }
+        @keyframes rainbow-bg {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* 🌟 5大データ看板 (レスポンシブ配置) 🌟 */
+        .dashboard-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto 40px auto; }
+        .dash-card { background-color: #111; border: 2px solid #333; border-radius: 15px; padding: 20px 15px; box-shadow: 0 0 15px rgba(0,0,0,0.5); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
         .dash-card.profit-today { border-color: #e040fb; box-shadow: 0 0 15px rgba(224, 64, 251, 0.2); }
         .dash-card.profit-alltime { border-color: #9c27b0; box-shadow: 0 0 15px rgba(156, 39, 176, 0.2); background: linear-gradient(180deg, #111 0%, #1a0022 100%); }
-        .dash-card.loser { border-color: #4fc3f7; box-shadow: 0 0 15px rgba(79, 195, 247, 0.2); }
         .dash-card.hit { border-color: #ff5252; box-shadow: 0 0 15px rgba(255, 82, 82, 0.2); }
+        .dash-card.loser { border-color: #4fc3f7; box-shadow: 0 0 15px rgba(79, 195, 247, 0.2); }
+        .dash-card.hamari { border-color: #ff9100; box-shadow: 0 0 15px rgba(255, 145, 0, 0.2); }
         
-        .dash-title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; }
+        .dash-title { font-size: 1.05em; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; }
         .profit-today .dash-title { color: #e040fb; text-shadow: 0 0 5px #e040fb; }
         .profit-alltime .dash-title { color: #d500f9; text-shadow: 0 0 5px #9c27b0; }
-        .loser .dash-title { color: #4fc3f7; text-shadow: 0 0 5px #4fc3f7; }
         .hit .dash-title { color: #ff5252; text-shadow: 0 0 5px #ff5252; }
-        .dash-value { font-size: 1.6em; font-weight: 900; font-family: 'Courier New', Courier, monospace; line-height: 1.2; }
+        .loser .dash-title { color: #4fc3f7; text-shadow: 0 0 5px #4fc3f7; }
+        .hamari .dash-title { color: #ff9100; text-shadow: 0 0 5px #ff9100; }
+        .dash-value { font-size: 1.5em; font-weight: 900; font-family: 'Courier New', Courier, monospace; line-height: 1.2; }
 
         .rankings-wrapper { display: flex; justify-content: center; gap: 20px; max-width: 1200px; margin: 0 auto 40px auto; flex-wrap: wrap; }
         .ranking-container { flex: 1; min-width: 320px; background-color: #161b22; border: 2px solid #ffca28; border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(255, 202, 40, 0.2); }
@@ -79,11 +96,12 @@
             👤 <span id="nav-username">読込中...</span> <br>
             💰 <span id="nav-balance" style="color: #00e676;">---</span> 円
         </div>
-        <button id="auth-btn" class="auth-btn" onclick="handleAuth()">読込中...</button>
+        <button id="auth-btn" class="auth-btn">読込中...</button>
     </div>
 
     <h1>🎰 バーチャル パチンコホール</h1>
 
+    <!-- 🌟 5大データ看板 🌟 -->
     <div class="dashboard-wrapper">
         <div class="dash-card profit-today">
             <div class="dash-title">🏢 本日の店舗収支</div>
@@ -107,6 +125,13 @@
             <div class="dash-title">💸 本日の養分王</div>
             <div id="today-loser" class="dash-value" style="color: #888;">集計中...</div>
             <div style="font-size: 0.7em; color: #666; margin-top: 5px;">※ 本日最も負けているプレイヤー</div>
+        </div>
+
+        <!-- 🌟 新増：史上最大ハマリ 🌟 -->
+        <div class="dash-card hamari">
+            <div class="dash-title">💀 史上最大ハマリ</div>
+            <div id="max-hamari" class="dash-value" style="color: #888;">集計中...</div>
+            <div style="font-size: 0.7em; color: #666; margin-top: 5px;">※ 全サーバー歴代最高回転</div>
         </div>
     </div>
 
@@ -183,6 +208,17 @@
         <a href="sao.html" class="machine-card" style="border-color: #ffca28;">
             <div><h3 class="machine-title" style="color: #ffca28;">P ソードアート・オンライン LT</h3><div class="machine-spec">大当り確率: 1/199.9<br>RUSHシステム: ST突破型<br><span style="color:#ff5252;">WoU: 40%でSWORD DRIVE発動！</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
+        <a href="nanatsu.html" class="machine-card" style="border-color: #ff9100;">
+            <div>
+                <h3 class="machine-title" style="color: #ff9100;">P 七つの大罪 319ver</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/319.7<br>
+                    RUSH継続率: 約75%<br>
+                    <span style="color:#ffca28;">最大出玉: 7500個</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始</div>
+        </a>
 
         <a href="stats.html" class="machine-card card-stats">
             <div><h3 class="machine-title">📊 総合収支シミュレーション</h3><div class="machine-spec">自動演算システム<br>ワンクリックで全機種の初当り・出玉・収支を高速検証</div></div><div class="play-btn">⚙️ データセンターへ (ENTER)</div>
@@ -200,63 +236,99 @@
             appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
             measurementId: "G-46M19VQVY2"
         };
-        firebase.initializeApp(firebaseConfig);
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
         const db = firebase.database();
 
-        const currentUser = localStorage.getItem("pachinko_current_user");
-        const authBtn = document.getElementById("auth-btn");
-
-        if (currentUser) {
-            document.getElementById("nav-username").innerText = currentUser;
-            authBtn.innerText = "ログアウト (Logout)";
-            authBtn.className = "auth-btn logout";
-        } else {
-            document.getElementById("nav-username").innerText = "ゲスト (未ログイン)";
-            document.getElementById("nav-username").style.color = "#888";
-            document.getElementById("nav-balance").innerText = "---";
-            authBtn.innerText = "ログイン / 新規登録";
-            authBtn.className = "auth-btn login";
-        }
-
+        let currentUserName = null;
         let usersData = {};
         let rankingsData = {};
+        let maxHamariData = null;
+        const authBtn = document.getElementById("auth-btn");
+
+        function getPlayerNameHtml(name, hasCompleted, isSelf) {
+            let color = isSelf ? "#00e5ff" : "#fff";
+            let display = isSelf ? `${name} (あなた)` : name;
+            if (hasCompleted) return `<span class="rainbow-text">${display}</span>`;
+            return `<span style="color:${color};">${display}</span>`;
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                db.ref('users/' + user.uid).once('value').then((snap) => {
+                    if (snap.exists()) {
+                        let userData = snap.val();
+                        currentUserName = userData.username;
+                        document.getElementById("nav-username").innerHTML = userData.has_completed 
+                            ? `<span class="rainbow-text">${currentUserName}</span>` 
+                            : currentUserName;
+                        authBtn.innerText = "ログアウト";
+                        authBtn.className = "auth-btn logout";
+                        authBtn.onclick = () => { auth.signOut().then(()=> location.reload()); };
+                    } else {
+                        auth.signOut().then(() => { window.location.reload(); });
+                    }
+                }).catch((error) => { console.error(error); });
+            } else {
+                document.getElementById("nav-username").innerText = "ゲスト (未ログイン)";
+                document.getElementById("nav-username").style.color = "#888";
+                document.getElementById("nav-balance").innerText = "---";
+                authBtn.innerText = "ログイン / 新規登録";
+                authBtn.className = "auth-btn login";
+                authBtn.onclick = () => { window.location.href = "login.html"; };
+            }
+        });
 
         db.ref('users').on('value', (snapshot) => {
             usersData = snapshot.val() || {};
-            if (currentUser && usersData[currentUser]) {
-                document.getElementById("nav-balance").innerText = Math.round(usersData[currentUser].balance).toLocaleString();
+            const user = auth.currentUser;
+            if (user && usersData[user.uid]) {
+                document.getElementById("nav-balance").innerText = Math.round(usersData[user.uid].balance).toLocaleString();
             }
             updateDashboard();
             renderRankings(usersData);
-        }, (error) => { console.error("Firebase エラー: ", error); });
+        });
 
         db.ref('machine_rankings').on('value', (snapshot) => {
             rankingsData = snapshot.val() || {};
             updateDashboard();
         });
 
+        // 🌟 史上最大ハマリの監視 🌟
+        db.ref('server_records/max_hamari').on('value', (snapshot) => {
+            maxHamariData = snapshot.val();
+            updateDashboard();
+        });
+
         function updateDashboard() {
             let todayParlorProfit = 0;
             let alltimeParlorProfit = 0;
-            let worstUser = null;
+            let worstUserHtml = null;
             let worstDailyProfit = 0; 
             const INITIAL_BALANCE = 50000; 
+            const todayStr = new Date().toDateString();
 
-            for (let key in usersData) {
-                let u = usersData[key];
+            for (let uid in usersData) {
+                let u = usersData[uid];
                 let userBalance = u.balance || 0;
                 let dailyProfit = u.daily_profit || 0; 
+                let userLastDate = u.last_date || "";
+                
+                let nameHtml = u.has_completed 
+                    ? `<span class="rainbow-text">${u.username || "Unknown"}</span>` 
+                    : `<span style="color:#ffca28;">${u.username || "Unknown"}</span>`;
 
-                // 累計：店鋪賺嘅錢 = 玩家由開戶到而家輸嘅錢
                 alltimeParlorProfit += (INITIAL_BALANCE - userBalance);
 
-                // 本日：店鋪賺嘅錢 = 玩家今日輸嘅錢 (dailyProfit 為負數時，店鋪就係正數)
-                todayParlorProfit += -(dailyProfit);
-
-                // 養分王：搵出今日 daily_profit 最低 (最負) 嗰個
-                if (dailyProfit < worstDailyProfit) {
-                    worstDailyProfit = dailyProfit;
-                    worstUser = key;
+                if (userLastDate === todayStr) {
+                    todayParlorProfit += -(dailyProfit);
+                    if (dailyProfit < worstDailyProfit) {
+                        worstDailyProfit = dailyProfit;
+                        worstUserHtml = nameHtml;
+                    }
                 }
             }
 
@@ -285,15 +357,15 @@
             }
 
             let loserEl = document.getElementById("today-loser");
-            if (worstUser && worstDailyProfit < 0) {
-                loserEl.innerHTML = `<span style="color:#ffca28;">${worstUser}</span><br><span style="font-size:0.6em; color:#ff5252;">(${Math.round(worstDailyProfit).toLocaleString()} 円)</span>`;
+            if (worstUserHtml && worstDailyProfit < 0) {
+                loserEl.innerHTML = `${worstUserHtml}<br><span style="font-size:0.6em; color:#ff5252;">(${Math.round(worstDailyProfit).toLocaleString()} 円)</span>`;
             } else {
                 loserEl.innerHTML = `<span style="color:#888;">該当者なし</span>`;
             }
 
             const today = new Date();
             const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
-            let bestHitUser = null;
+            let bestHitUserHtml = null;
             let bestHitPayout = 0;
             let bestHitMachine = "";
 
@@ -302,21 +374,44 @@
                     let rec = rankingsData[machine][recordKey];
                     if (rec.date === dateStr && rec.payout > bestHitPayout) {
                         bestHitPayout = rec.payout;
-                        bestHitUser = rec.user;
                         bestHitMachine = machine;
+                        
+                        let hitHasCompleted = false;
+                        for(let uid in usersData) {
+                            if(usersData[uid].username === rec.user) hitHasCompleted = usersData[uid].has_completed;
+                        }
+                        bestHitUserHtml = hitHasCompleted 
+                            ? `<span class="rainbow-text">${rec.user}</span>` 
+                            : `<span style="color:#ffca28;">${rec.user}</span>`;
                     }
                 }
             }
 
             let hitEl = document.getElementById("today-besthit");
-            if (bestHitUser && bestHitPayout >= 10000) {
-                hitEl.innerHTML = `<span style="color:#fff;">${bestHitPayout.toLocaleString()} 玉</span><br><span style="font-size:0.55em; color:#ffca28;">${bestHitUser} (${bestHitMachine})</span>`;
+            if (bestHitUserHtml && bestHitPayout >= 10000) {
+                hitEl.innerHTML = `<span style="color:#fff;">${bestHitPayout.toLocaleString()} 玉</span><br><span style="font-size:0.55em;">${bestHitUserHtml} (${bestHitMachine})</span>`;
             } else {
                 hitEl.innerHTML = `<span style="color:#888;">記録待ち (1万発以上)</span>`;
             }
+
+            // 🌟 史上最大ハマリ UI 描画 🌟
+            let hamariEl = document.getElementById("max-hamari");
+            if (maxHamariData && maxHamariData.spins > 0) {
+                let hamariHasCompleted = false;
+                for(let uid in usersData) {
+                    if(usersData[uid].username === maxHamariData.user) hamariHasCompleted = usersData[uid].has_completed;
+                }
+                let hamariUserHtml = hamariHasCompleted 
+                    ? `<span class="rainbow-text">${maxHamariData.user}</span>` 
+                    : `<span style="color:#ffca28;">${maxHamariData.user}</span>`;
+
+                hamariEl.innerHTML = `<span style="color:#ff9100;">${maxHamariData.spins.toLocaleString()} 回転</span><br><span style="font-size:0.55em;">${hamariUserHtml} (${maxHamariData.machine})</span>`;
+            } else {
+                hamariEl.innerHTML = `<span style="color:#888;">記録なし (更新待ち)</span>`;
+            }
         }
 
-        function renderRankings(users) {
+function renderRankings(users) {
             let rankingBody = document.getElementById("ranking-body");
             let poorRankingBody = document.getElementById("poor-ranking-body");
 
@@ -325,42 +420,51 @@
 
             let userKeys = Object.keys(users);
             if (userKeys.length === 0) {
-                rankingBody.innerHTML = `<tr><td colspan="3">データがありません</td></tr>`;
-                poorRankingBody.innerHTML = `<tr><td colspan="3">データがありません</td></tr>`;
+                rankingBody.innerHTML = `<tr><td colspan="3">データなし</td></tr>`;
+                poorRankingBody.innerHTML = `<tr><td colspan="3">データなし</td></tr>`;
                 return;
             }
 
-            let userArray = userKeys.map(name => {
-                return { name: name, balance: users[name].balance };
+            let userArray = userKeys.map(uid => {
+                let u = users[uid];
+                return { 
+                    name: u.username || "Unknown", 
+                    balance: u.balance || 0, 
+                    has_completed: u.has_completed || false,
+                    isSelf: (auth.currentUser && auth.currentUser.uid === uid)
+                };
             });
 
-            userArray.sort((a, b) => b.balance - a.balance);
-            let top10Rich = userArray.slice(0, 10);
-            top10Rich.forEach((user, index) => {
-                let tr = document.createElement("tr");
-                let rankText = (index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1);
-                let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (あなた)</span>` : user.name;
-                tr.innerHTML = `<td>${rankText}</td><td>${nameHtml}</td><td>${Math.round(user.balance).toLocaleString()}</td>`;
-                rankingBody.appendChild(tr);
-            });
+            // 🌟 富豪ランキング：所持金が「0以上 (プラス)」のプレイヤーのみ抽出 🌟
+            let richUsers = userArray.filter(u => u.balance >= 0);
+            richUsers.sort((a, b) => b.balance - a.balance);
+            let top10Rich = richUsers.slice(0, 10);
 
-            userArray.sort((a, b) => a.balance - b.balance);
-            let top10Poor = userArray.slice(0, 10);
-            top10Poor.forEach((user, index) => {
-                let tr = document.createElement("tr");
-                let rankText = (index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1);
-                let nameHtml = user.name === currentUser ? `<span style="color:#00e5ff;">${user.name} (あなた)</span>` : user.name;
-                tr.innerHTML = `<td>${rankText}</td><td>${nameHtml}</td><td style="color: #4fc3f7;">${Math.round(user.balance).toLocaleString()}</td>`;
-                poorRankingBody.appendChild(tr);
-            });
-        }
-
-        function handleAuth() {
-            if (currentUser) {
-                localStorage.removeItem("pachinko_current_user");
-                window.location.reload();
+            if (top10Rich.length === 0) {
+                rankingBody.innerHTML = `<tr><td colspan="3" style="color:#888;">該当者なし (全員が負債を抱えています💀)</td></tr>`;
             } else {
-                window.location.href = "login.html";
+                top10Rich.forEach((user, index) => {
+                    let tr = document.createElement("tr");
+                    let rankText = (index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1);
+                    tr.innerHTML = `<td>${rankText}</td><td>${getPlayerNameHtml(user.name, user.has_completed, user.isSelf)}</td><td>${Math.round(user.balance).toLocaleString()}</td>`;
+                    rankingBody.appendChild(tr);
+                });
+            }
+
+            // 🌟 貧民ランキング：所持金が「0未満 (マイナス/借金)」のプレイヤーのみ抽出 🌟
+            let poorUsers = userArray.filter(u => u.balance < 0);
+            poorUsers.sort((a, b) => a.balance - b.balance);
+            let top10Poor = poorUsers.slice(0, 10);
+            
+            if (top10Poor.length === 0) {
+                poorRankingBody.innerHTML = `<tr><td colspan="3" style="color:#888;">該当者なし (全員がプラスです🕊️)</td></tr>`;
+            } else {
+                top10Poor.forEach((user, index) => {
+                    let tr = document.createElement("tr");
+                    let rankText = (index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1);
+                    tr.innerHTML = `<td>${rankText}</td><td>${getPlayerNameHtml(user.name, user.has_completed, user.isSelf)}</td><td style="color: #4fc3f7;">${Math.round(user.balance).toLocaleString()}</td>`;
+                    poorRankingBody.appendChild(tr);
+                });
             }
         }
     </script>
