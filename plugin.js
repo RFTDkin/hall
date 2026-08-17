@@ -40,7 +40,7 @@ window.alert = function(msg) {
                .replace(/登入成功/g, "ログイン成功")
                .replace(/登出/g, "ログアウト")
                .replace(/溫馨提示/g, "お知らせ")
-               .replace(/你今日嘅 10000 轉限額已經打爆咗/g, "本日の上限(10000回転)に達しました")
+               .replace(/你今日嘅 5000 轉限額已經打爆咗/g, "本日の上限(5000回転)に達しました")
                .replace(/請獲得出玉後再分享/g, "出玉を獲得してからポストしてください");
     originalAlert(text);
 };
@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 💰 所持金<br>
                 <span id="global-wallet" style="font-size: 1.4em;">0</span> 円
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
-                <div style="font-size: 0.9em; color: #fff;">本日の回転数: <br><span id="daily-spins-ui" style="color:#ffeb3b; font-size:1.2em;">${userData.daily_spins}</span> / 10000 回転</div>
+                <div style="font-size: 0.9em; color: #fff;">本日の回転数: <br><span id="daily-spins-ui" style="color:#ffeb3b; font-size:1.2em;">${userData.daily_spins}</span> / 5000 回転</div>
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
                 <div style="font-size: 0.75em; color: #ff7b72; text-align: left; font-weight: normal; line-height: 1.4;">※免責事項：当サイトの「円」等は架空のものです。</div>
             </div>
@@ -210,14 +210,14 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        function disableMachine(msgText = "⛔ 本日 10000 回転の上限到達") {
+        function disableMachine(msgText = "⛔ 本日 5000 回転の上限到達") {
             let playBtn = document.getElementById("btn-play");
             if (playBtn) { 
                 playBtn.disabled = true; 
                 playBtn.innerText = msgText; 
             }
         }
-        setTimeout(() => { if (userData.daily_spins >= 10000) disableMachine(); }, 500);
+        setTimeout(() => { if (userData.daily_spins >= 5000) disableMachine(); }, 500);
 
         let lastUI_spins = 0;
         let lastUI_payout = 0;
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (new_payout === 0) {
                     completeTriggeredThisRush = false; 
-                    if (lastUI_payout >= 10000) {
+                    if (lastUI_payout >= 5000) {
                         const todayDate = new Date();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
@@ -277,9 +277,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 let sessionNetProfit = 0;
 
                 if (spin_diff > 0) {
-                    if (userData.daily_spins >= 10000) {
+                    if (userData.daily_spins >= 5000) {
                         disableMachine();
-                        window.alert("⚠️ お知らせ：本日の上限(10000回転)に達しました！");
+                        window.alert("⚠️ お知らせ：本日の上限(5000回転)に達しました！");
                         throw new Error("Daily spin limit reached!");
                     }
                     userData.daily_spins += spin_diff;
@@ -328,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }, 100);
                 }
 
-                if (userData.daily_spins >= 10000) disableMachine();
+                if (userData.daily_spins >= 5000) disableMachine();
             };
         }
 
@@ -344,7 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
             shareBtn.onclick = () => {
                 let payout = window.latest_payout_for_share || 0;
                 let rushCount = window.latest_rush_for_share || 0;
-                if (payout < 10000) { window.alert("一万発を達成してからポストしてください！"); return; }
+                if (payout < 5000) { window.alert("一万発を達成してからポストしてください！"); return; }
                 let compText = payout >= 95000 ? "\n🎉【コンプリート達成！】🎉" : "";
                 let text = `【一撃一万発達成！】${compText}\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター\n`;
                 let url = window.location.href; 
@@ -360,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             let sBtn = document.getElementById("btn-share-x");
                             if (!playBtn.disabled) {
                                 playBtn.innerText = "▶️ プレイ続行"; 
-                                if (window.latest_payout_for_share >= 10000 && sBtn) sBtn.style.display = "inline-block";
+                                if (window.latest_payout_for_share >= 5000 && sBtn) sBtn.style.display = "inline-block";
                             } else {
                                 if (sBtn) sBtn.style.display = "none";
                                 window.latest_payout_for_share = 0;
