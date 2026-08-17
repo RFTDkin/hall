@@ -10,15 +10,73 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
     <style>
-        body { font-family: 'Noto Sans JP', sans-serif; background-color: #050505; color: #ffffff; text-align: center; margin: 0; padding: 20px; background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%); min-height: 100vh; }
-        .top-nav { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 30px auto; background: #111; padding: 15px 30px; border-radius: 12px; border: 1px solid #333; }
-        .user-info { font-size: 1.2em; font-weight: bold; color: #00e5ff; text-align: left; }
-        .auth-btn { border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1em; transition: 0.2s; }
-        .auth-btn.logout { background: #d32f2f; color: white; border: 1px solid #b71c1c; }
-        .auth-btn.logout:hover { background: #b71c1c; }
-        .auth-btn.login { background: #00e5ff; color: #000; border: 1px solid #00b8d4; }
-        .auth-btn.login:hover { background: #00b8d4; box-shadow: 0 0 10px #00e5ff; }
-        h1 { color: #ffeb3b; font-size: 3em; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 235, 59, 0.6); }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%);
+            min-height: 100vh;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            background: #111;
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+
+        .user-info {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00e5ff;
+            text-align: left;
+        }
+
+        .auth-btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: 0.2s;
+        }
+
+        .auth-btn.logout {
+            background: #d32f2f;
+            color: white;
+            border: 1px solid #b71c1c;
+        }
+
+        .auth-btn.logout:hover {
+            background: #b71c1c;
+        }
+
+        .auth-btn.login {
+            background: #00e5ff;
+            color: #000;
+            border: 1px solid #00b8d4;
+        }
+
+        .auth-btn.login:hover {
+            background: #00b8d4;
+            box-shadow: 0 0 10px #00e5ff;
+        }
+
+        h1 {
+            color: #ffeb3b;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+        }
 
         /* コンプリート者専用：虹色アニメーション */
         .rainbow-text {
@@ -29,66 +87,354 @@
             animation: rainbow-bg 2s linear infinite;
             font-weight: 900;
         }
+
         @keyframes rainbow-bg {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 200% 50%;
+            }
         }
 
         /* 🌟 5大データ看板 (レスポンシブ配置) 🌟 */
-        .dashboard-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto 40px auto; }
-        .dash-card { background-color: #111; border: 2px solid #333; border-radius: 15px; padding: 20px 15px; box-shadow: 0 0 15px rgba(0,0,0,0.5); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
-        .dash-card.profit-today { border-color: #e040fb; box-shadow: 0 0 15px rgba(224, 64, 251, 0.2); }
-        .dash-card.profit-alltime { border-color: #9c27b0; box-shadow: 0 0 15px rgba(156, 39, 176, 0.2); background: linear-gradient(180deg, #111 0%, #1a0022 100%); }
-        .dash-card.hit { border-color: #ff5252; box-shadow: 0 0 15px rgba(255, 82, 82, 0.2); }
-        .dash-card.loser { border-color: #4fc3f7; box-shadow: 0 0 15px rgba(79, 195, 247, 0.2); }
-        .dash-card.hamari { border-color: #ff9100; box-shadow: 0 0 15px rgba(255, 145, 0, 0.2); }
-        
-        .dash-title { font-size: 1.05em; font-weight: bold; margin-bottom: 12px; letter-spacing: 1px; }
-        .profit-today .dash-title { color: #e040fb; text-shadow: 0 0 5px #e040fb; }
-        .profit-alltime .dash-title { color: #d500f9; text-shadow: 0 0 5px #9c27b0; }
-        .hit .dash-title { color: #ff5252; text-shadow: 0 0 5px #ff5252; }
-        .loser .dash-title { color: #4fc3f7; text-shadow: 0 0 5px #4fc3f7; }
-        .hamari .dash-title { color: #ff9100; text-shadow: 0 0 5px #ff9100; }
-        .dash-value { font-size: 1.5em; font-weight: 900; font-family: 'Courier New', Courier, monospace; line-height: 1.2; }
+        .dashboard-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+        }
 
-        .rankings-wrapper { display: flex; justify-content: center; gap: 20px; max-width: 1200px; margin: 0 auto 40px auto; flex-wrap: wrap; }
-        .ranking-container { flex: 1; min-width: 320px; background-color: #161b22; border: 2px solid #ffca28; border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(255, 202, 40, 0.2); }
-        .ranking-container.poor-rank { border-color: #4fc3f7; box-shadow: 0 0 15px rgba(79, 195, 247, 0.2); }
-        .poor-rank .ranking-title { color: #4fc3f7; border-bottom: 1px solid #01579b; }
-        .ranking-title { color: #ffca28; font-size: 1.5em; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        table.ranking-table { width: 100%; border-collapse: collapse; color: #fff; }
-        table.ranking-table th, table.ranking-table td { padding: 12px; text-align: center; border-bottom: 1px solid #333; }
-        table.ranking-table th { color: #888; }
+        .dash-card {
+            background-color: #111;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 20px 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dash-card.profit-today {
+            border-color: #e040fb;
+            box-shadow: 0 0 15px rgba(224, 64, 251, 0.2);
+        }
+
+        .dash-card.profit-alltime {
+            border-color: #9c27b0;
+            box-shadow: 0 0 15px rgba(156, 39, 176, 0.2);
+            background: linear-gradient(180deg, #111 0%, #1a0022 100%);
+        }
+
+        .dash-card.hit {
+            border-color: #ff5252;
+            box-shadow: 0 0 15px rgba(255, 82, 82, 0.2);
+        }
+
+        .dash-card.loser {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);
+        }
+
+        .dash-card.hamari {
+            border-color: #ff9100;
+            box-shadow: 0 0 15px rgba(255, 145, 0, 0.2);
+        }
+
+        .dash-title {
+            font-size: 1.05em;
+            font-weight: bold;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .profit-today .dash-title {
+            color: #e040fb;
+            text-shadow: 0 0 5px #e040fb;
+        }
+
+        .profit-alltime .dash-title {
+            color: #d500f9;
+            text-shadow: 0 0 5px #9c27b0;
+        }
+
+        .hit .dash-title {
+            color: #ff5252;
+            text-shadow: 0 0 5px #ff5252;
+        }
+
+        .loser .dash-title {
+            color: #4fc3f7;
+            text-shadow: 0 0 5px #4fc3f7;
+        }
+
+        .hamari .dash-title {
+            color: #ff9100;
+            text-shadow: 0 0 5px #ff9100;
+        }
+
+        .dash-value {
+            font-size: 1.5em;
+            font-weight: 900;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.2;
+        }
+
+        .rankings-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+            flex-wrap: wrap;
+        }
+
+        .ranking-container {
+            flex: 1;
+            min-width: 320px;
+            background-color: #161b22;
+            border: 2px solid #ffca28;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(255, 202, 40, 0.2);
+        }
+
+        .ranking-container.poor-rank {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);
+        }
+
+        .poor-rank .ranking-title {
+            color: #4fc3f7;
+            border-bottom: 1px solid #01579b;
+        }
+
+        .ranking-title {
+            color: #ffca28;
+            font-size: 1.5em;
+            margin-top: 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        table.ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+        }
+
+        table.ranking-table th,
+        table.ranking-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        table.ranking-table th {
+            color: #888;
+        }
+
         /* 🏆 富豪ランキング トップ3（ただしコンプリート者の虹色称号は絶対に死守する） */
-        .ranking-table.rich tr:nth-child(1) td:not(:has(.rainbow-text)), .ranking-table.rich tr:nth-child(1) td:not(:has(.rainbow-text)) span { color: #ffeb3b !important; font-weight: bold; font-size: 1.2em; }
-        .ranking-table.rich tr:nth-child(2) td:not(:has(.rainbow-text)), .ranking-table.rich tr:nth-child(2) td:not(:has(.rainbow-text)) span { color: #ff5252 !important; font-weight: bold; font-size: 1.1em; }
-        .ranking-table.rich tr:nth-child(3) td:not(:has(.rainbow-text)), .ranking-table.rich tr:nth-child(3) td:not(:has(.rainbow-text)) span { color: #cd7f32 !important; font-weight: bold; font-size: 1.05em; }
+        .ranking-table.rich tr:nth-child(1) td:not(:has(.rainbow-text)),
+        .ranking-table.rich tr:nth-child(1) td:not(:has(.rainbow-text)) span {
+            color: #ffeb3b !important;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .ranking-table.rich tr:nth-child(2) td:not(:has(.rainbow-text)),
+        .ranking-table.rich tr:nth-child(2) td:not(:has(.rainbow-text)) span {
+            color: #ff5252 !important;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .ranking-table.rich tr:nth-child(3) td:not(:has(.rainbow-text)),
+        .ranking-table.rich tr:nth-child(3) td:not(:has(.rainbow-text)) span {
+            color: #cd7f32 !important;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
 
         /* 📉 貧民ランキング ワースト3 */
-        .ranking-table.poor tr:nth-child(1) td:not(:has(.rainbow-text)), .ranking-table.poor tr:nth-child(1) td:not(:has(.rainbow-text)) span { color: #00bcd4 !important; font-weight: bold; font-size: 1.2em; }
-        .ranking-table.poor tr:nth-child(2) td:not(:has(.rainbow-text)), .ranking-table.poor tr:nth-child(2) td:not(:has(.rainbow-text)) span { color: #26c6da !important; font-weight: bold; font-size: 1.1em; }
-        .ranking-table.poor tr:nth-child(3) td:not(:has(.rainbow-text)), .ranking-table.poor tr:nth-child(3) td:not(:has(.rainbow-text)) span { color: #4dd0e1 !important; font-weight: bold; font-size: 1.05em; }
+        .ranking-table.poor tr:nth-child(1) td:not(:has(.rainbow-text)),
+        .ranking-table.poor tr:nth-child(1) td:not(:has(.rainbow-text)) span {
+            color: #00bcd4 !important;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
 
-        .hall-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
-        .machine-card { background-color: #111; border-radius: 15px; padding: 25px 20px; text-decoration: none; color: white; transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; }
-        .machine-card:hover { transform: translateY(-10px); z-index: 10; }
-        .machine-title { font-size: 1.4em; font-weight: 900; margin: 0 0 10px 0; }
-        .machine-spec { font-size: 0.9em; color: #ccc; margin-bottom: 20px; line-height: 1.6; }
-        .play-btn { background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); padding: 10px; border-radius: 8px; font-weight: bold; letter-spacing: 1px; transition: background-color 0.3s; }
-        .machine-card:hover .play-btn { background-color: rgba(255, 255, 255, 0.2); color: #fff; }
+        .ranking-table.poor tr:nth-child(2) td:not(:has(.rainbow-text)),
+        .ranking-table.poor tr:nth-child(2) td:not(:has(.rainbow-text)) span {
+            color: #26c6da !important;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
 
-        .card-bluelock { border-color: #00e5ff; } .card-bluelock .machine-title { color: #00e5ff; }
-        .card-dmdp { border-color: #e040fb; } .card-dmdp .machine-title { color: #e040fb; }
-        .card-ghoul399 { border-color: #ff1744; } .card-ghoul399 .machine-title { color: #ff1744; }
-        .card-ghoul999 { border-color: #d50000; background: linear-gradient(180deg, #111 0%, #300 100%); } .card-ghoul999 .machine-title { color: #ff5252; }
-        .card-jitsuryoku { border-color: #ffca28; } .card-jitsuryoku .machine-title { color: #ffca28; }
-        .card-monono { border-color: #f44336; } .card-monono .machine-title { color: #f44336; }
-        .card-lycoris { border-color: #ff5252; } .card-lycoris .machine-title { color: #ff5252; }
-        .card-hellsing { border-color: #b71c1c; } .card-hellsing .machine-title { color: #ff1744; }
-        .card-slime { border-color: #00bcd4; } .card-slime .machine-title { color: #00bcd4; }
-        .card-kakegurui { border-color: #d50000; } .card-kakegurui .machine-title { color: #ff5252; }
-        .card-ggo { border-color: #ff4081; } .card-ggo .machine-title { color: #ff4081; }
-        .card-stats { border-color: #4caf50; grid-column: 1 / -1; margin-top: 20px; } .card-stats .machine-title { color: #4caf50; }
+        .ranking-table.poor tr:nth-child(3) td:not(:has(.rainbow-text)),
+        .ranking-table.poor tr:nth-child(3) td:not(:has(.rainbow-text)) span {
+            color: #4dd0e1 !important;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+
+        .hall-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .machine-card {
+            background-color: #111;
+            border-radius: 15px;
+            padding: 25px 20px;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid transparent;
+        }
+
+        .machine-card:hover {
+            transform: translateY(-10px);
+            z-index: 10;
+        }
+
+        .machine-title {
+            font-size: 1.4em;
+            font-weight: 900;
+            margin: 0 0 10px 0;
+        }
+
+        .machine-spec {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .play-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: background-color 0.3s;
+        }
+
+        .machine-card:hover .play-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .card-bluelock {
+            border-color: #00e5ff;
+        }
+
+        .card-bluelock .machine-title {
+            color: #00e5ff;
+        }
+
+        .card-dmdp {
+            border-color: #e040fb;
+        }
+
+        .card-dmdp .machine-title {
+            color: #e040fb;
+        }
+
+        .card-ghoul399 {
+            border-color: #ff1744;
+        }
+
+        .card-ghoul399 .machine-title {
+            color: #ff1744;
+        }
+
+        .card-ghoul999 {
+            border-color: #d50000;
+            background: linear-gradient(180deg, #111 0%, #300 100%);
+        }
+
+        .card-ghoul999 .machine-title {
+            color: #ff5252;
+        }
+
+        .card-jitsuryoku {
+            border-color: #ffca28;
+        }
+
+        .card-jitsuryoku .machine-title {
+            color: #ffca28;
+        }
+
+        .card-monono {
+            border-color: #f44336;
+        }
+
+        .card-monono .machine-title {
+            color: #f44336;
+        }
+
+        .card-lycoris {
+            border-color: #ff5252;
+        }
+
+        .card-lycoris .machine-title {
+            color: #ff5252;
+        }
+
+        .card-hellsing {
+            border-color: #b71c1c;
+        }
+
+        .card-hellsing .machine-title {
+            color: #ff1744;
+        }
+
+        .card-slime {
+            border-color: #00bcd4;
+        }
+
+        .card-slime .machine-title {
+            color: #00bcd4;
+        }
+
+        .card-kakegurui {
+            border-color: #d50000;
+        }
+
+        .card-kakegurui .machine-title {
+            color: #ff5252;
+        }
+
+        .card-ggo {
+            border-color: #ff4081;
+        }
+
+        .card-ggo .machine-title {
+            color: #ff4081;
+        }
+
+        .card-stats {
+            border-color: #4caf50;
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .card-stats .machine-title {
+            color: #4caf50;
+        }
     </style>
 </head>
 
@@ -103,6 +449,16 @@
     </div>
 
     <h1>🎰 バーチャル パチンコホール</h1>
+    <script>
+        atOptions = {
+            'key': 'ead8f1e5fdd30faaed33da77b3333cf4',
+            'format': 'iframe',
+            'height': 50,
+            'width': 320,
+            'params': {}
+        };
+    </script>
+    <script src="https://www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js"></script>
 
     <!-- 🌟 5大データ看板 🌟 -->
     <div class="dashboard-wrapper">
@@ -142,74 +498,184 @@
         <div class="ranking-container">
             <h2 class="ranking-title">🏆 全サーバー富豪ランキング TOP 10 🏆</h2>
             <table class="ranking-table rich">
-                <thead><tr><th>順位</th><th>プレイヤー名</th><th>所持金 (円)</th></tr></thead>
-                <tbody id="ranking-body"><tr><td colspan="3">データ読込中...</td></tr></tbody>
+                <thead>
+                    <tr>
+                        <th>順位</th>
+                        <th>プレイヤー名</th>
+                        <th>所持金 (円)</th>
+                    </tr>
+                </thead>
+                <tbody id="ranking-body">
+                    <tr>
+                        <td colspan="3">データ読込中...</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
 
         <div class="ranking-container poor-rank">
             <h2 class="ranking-title">📉 貧民ランキング ワースト10 📉</h2>
             <table class="ranking-table poor">
-                <thead><tr><th>順位</th><th>プレイヤー名</th><th>所持金 (円)</th></tr></thead>
-                <tbody id="poor-ranking-body"><tr><td colspan="3">データ読込中...</td></tr></tbody>
+                <thead>
+                    <tr>
+                        <th>順位</th>
+                        <th>プレイヤー名</th>
+                        <th>所持金 (円)</th>
+                    </tr>
+                </thead>
+                <tbody id="poor-ranking-body">
+                    <tr>
+                        <td colspan="3">データ読込中...</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
 
     <div class="hall-container">
         <a href="bluelock.html" class="machine-card card-bluelock">
-            <div><h3 class="machine-title">P ブルーロック 399ver</h3><div class="machine-spec">大当り確率: 1/399.9<br>RUSH継続率: 約77%<br><span style="color:#00e5ff;">最大出玉: 9000個+α</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">P ブルーロック 399ver</h3>
+                <div class="machine-spec">大当り確率: 1/399.9<br>RUSH継続率: 約77%<br><span style="color:#00e5ff;">最大出玉:
+                        9000個+α</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="bluelock_light.html" class="machine-card" style="border-color: #00e5ff;">
-            <div><h3 class="machine-title" style="color: #00e5ff;">P ブルーロック 1/120</h3><div class="machine-spec">大当り確率: 1/120.1<br>RUSH継続率: 約72%<br><span style="color:#ffca28;">最大出玉: 2800個+α</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title" style="color: #00e5ff;">P ブルーロック 1/120</h3>
+                <div class="machine-spec">大当り確率: 1/120.1<br>RUSH継続率: 約72%<br><span style="color:#ffca28;">最大出玉:
+                        2800個+α</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="dmdp.html" class="machine-card card-dmdp">
-            <div><h3 class="machine-title">e DMDP 魂神9000</h3><div class="machine-spec">大当り確率: 1/349.9<br>魂神の一撃: 50%ループ<br><span style="color:#e040fb;">最大出玉: 10500個</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">e DMDP 魂神9000</h3>
+                <div class="machine-spec">大当り確率: 1/349.9<br>魂神の一撃: 50%ループ<br><span style="color:#e040fb;">最大出玉:
+                        10500個</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="ghoul399.html" class="machine-card card-ghoul399">
-            <div><h3 class="machine-title">P 東京喰種 399ver</h3><div class="machine-spec">図柄揃い確率: 1/399.9<br>RUSH継続率: 約75%<br><span style="color:#ff1744;">最大出玉: 6000個</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">P 東京喰種 399ver</h3>
+                <div class="machine-spec">図柄揃い確率: 1/399.9<br>RUSH継続率: 約75%<br><span style="color:#ff1744;">最大出玉:
+                        6000個</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="ghoul999.html" class="machine-card card-ghoul999">
-            <div><h3 class="machine-title">P 東京喰種 999ver</h3><div class="machine-spec">図柄揃い確率: 1/999.9<br>喰MAXループ: 50%継続<br><span style="color:#ff5252;">初当り最大: 7500個</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">P 東京喰種 999ver</h3>
+                <div class="machine-spec">図柄揃い確率: 1/999.9<br>喰MAXループ: 50%継続<br><span style="color:#ff5252;">初当り最大:
+                        7500個</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="jitsuryoku.html" class="machine-card card-jitsuryoku">
-            <div><h3 class="machine-title">eようこそ実力至上主義の教室へ</h3><div class="machine-spec">大当り確率: 1/349.9<br>LT継続率: 約87%<br><span style="color:#ffca28;">右打ちALL 3000個</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">eようこそ実力至上主義の教室へ</h3>
+                <div class="machine-spec">大当り確率: 1/349.9<br>LT継続率: 約87%<br><span style="color:#ffca28;">右打ちALL
+                        3000個</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="monono.html" class="machine-card card-monono">
-            <div><h3 class="machine-title">eフィーバーもののがたり</h3><div class="machine-spec">大当り確率: 1/149.9<br>LT継続率: 約73%<br><span style="color:#f44336;">最大出玉: 6000個</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">eフィーバーもののがたり</h3>
+                <div class="machine-spec">大当り確率: 1/149.9<br>LT継続率: 約73%<br><span style="color:#f44336;">最大出玉:
+                        6000個</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="lycoris.html" class="machine-card card-lycoris">
-            <div><h3 class="machine-title">P リコリス・リコイル</h3><div class="machine-spec">大当り確率: 1/259.7<br>LT継続率: 約75%<br><span style="color:#ff5252;">モードB最大: 6000個+α</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">P リコリス・リコイル</h3>
+                <div class="machine-spec">大当り確率: 1/259.7<br>LT継続率: 約75%<br><span style="color:#ff5252;">モードB最大:
+                        6000個+α</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="hellsing.html" class="machine-card card-hellsing">
-            <div><h3 class="machine-title">P 烈核解放 (超孤紅の恤)</h3><div class="machine-spec">CZ確率: 1/129<br>RUSH継続率: 約77%<br><span style="color:#ff1744;">最大出玉: 6000個 + 1G連</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">P 烈核解放 (超孤紅の恤)</h3>
+                <div class="machine-spec">CZ確率: 1/129<br>RUSH継続率: 約77%<br><span style="color:#ff1744;">最大出玉: 6000個 +
+                        1G連</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="slime.html" class="machine-card card-slime">
-            <div><h3 class="machine-title">P 転生したらスライムだった件</h3><div class="machine-spec">図柄揃い確率: 1/399.9<br>最高継続率: 約80%<br><span style="color:#00bcd4;">右打ちALL 3000個</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">P 転生したらスライムだった件</h3>
+                <div class="machine-spec">図柄揃い確率: 1/399.9<br>最高継続率: 約80%<br><span style="color:#00bcd4;">右打ちALL
+                        3000個</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="kakegurui.html" class="machine-card card-kakegurui">
-            <div><h3 class="machine-title">P 賭ケグルイ</h3><div class="machine-spec">大当り確率: 1/204<br>RUSH継続率: 約75%<br><span style="color:#ff1744;">一撃7500玉ループ搭載</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">P 賭ケグルイ</h3>
+                <div class="machine-spec">大当り確率: 1/204<br>RUSH継続率: 約75%<br><span
+                        style="color:#ff1744;">一撃7500玉ループ搭載</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="ggo.html" class="machine-card card-ggo">
-            <div><h3 class="machine-title">P SAO オルタナティブ GGO</h3><div class="machine-spec">大当り確率: 1/319.9<br>RUSH継続率: 約80%<br><span style="color:#ff4081;">右打ち最大出玉: 3600個</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title">P SAO オルタナティブ GGO</h3>
+                <div class="machine-spec">大当り確率: 1/319.9<br>RUSH継続率: 約80%<br><span style="color:#ff4081;">右打ち最大出玉:
+                        3600個</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="mushoku.html" class="machine-card" style="border-color: #4fc3f7;">
-            <div><h3 class="machine-title" style="color: #4fc3f7;">e無職転生</h3><div class="machine-spec">大当り確率: 1/399.6<br>RUSH継続率: 約76.5%<br><span style="color:#ffca28;">最大出玉: 6000個 (10R×4)</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title" style="color: #4fc3f7;">e無職転生</h3>
+                <div class="machine-spec">大当り確率: 1/399.6<br>RUSH継続率: 約76.5%<br><span style="color:#ffca28;">最大出玉: 6000個
+                        (10R×4)</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="nanoha.html" class="machine-card" style="border-color: #ff4081;">
-            <div><h3 class="machine-title" style="color: #ff4081;">e魔法少女リリカルなのは</h3><div class="machine-spec">大当り確率: 1/348.5<br>フルドライブST: 完走型70回転<br><span style="color:#ffca28;">ST中一撃最大出玉: 7500個</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title" style="color: #ff4081;">e魔法少女リリカルなのは</h3>
+                <div class="machine-spec">大当り確率: 1/348.5<br>フルドライブST: 完走型70回転<br><span style="color:#ffca28;">ST中一撃最大出玉:
+                        7500個</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="yusha.html" class="machine-card" style="border-color: #ff6699;">
-            <div><h3 class="machine-title" style="color: #ff6699;">P 結城友奈は勇者である</h3><div class="machine-spec">大当り確率: 1/349<br>大満開RUSH: ST135回転<br><span style="color:#ffca28;">右打ち中25%で7500個！</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title" style="color: #ff6699;">P 結城友奈は勇者である</h3>
+                <div class="machine-spec">大当り確率: 1/349<br>大満開RUSH: ST135回転<br><span
+                        style="color:#ffca28;">右打ち中25%で7500個！</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="edens.html" class="machine-card" style="border-color: #4fc3f7;">
-            <div><h3 class="machine-title" style="color: #4fc3f7;">P EDENS ZERO</h3><div class="machine-spec">大当り確率: 約1/399.9<br>RUSHシステム: 転落式 BATTLE<br><span style="color:#d500f9;">究極LT: 85%で3000個以上！</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title" style="color: #4fc3f7;">P EDENS ZERO</h3>
+                <div class="machine-spec">大当り確率: 約1/399.9<br>RUSHシステム: 転落式 BATTLE<br><span style="color:#d500f9;">究極LT:
+                        85%で3000個以上！</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="seed.html" class="machine-card" style="border-color: #29b6f6;">
-            <div><h3 class="machine-title" style="color: #29b6f6;">P ガンダムSEED LT</h3><div class="machine-spec">大当り確率: 1/399.9<br>LT直行: RUSH突入時CLIMAXスタート<br><span style="color:#ff5252;">CLIMAXループ率: 約51%で4500個！</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title" style="color: #29b6f6;">P ガンダムSEED LT</h3>
+                <div class="machine-spec">大当り確率: 1/399.9<br>LT直行: RUSH突入時CLIMAXスタート<br><span
+                        style="color:#ff5252;">CLIMAXループ率: 約51%で4500個！</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="sao.html" class="machine-card" style="border-color: #ffca28;">
-            <div><h3 class="machine-title" style="color: #ffca28;">P ソードアート・オンライン LT</h3><div class="machine-spec">大当り確率: 1/199.9<br>RUSHシステム: ST突破型<br><span style="color:#ff5252;">WoU: 40%でSWORD DRIVE発動！</span></div></div><div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+            <div>
+                <h3 class="machine-title" style="color: #ffca28;">P ソードアート・オンライン LT</h3>
+                <div class="machine-spec">大当り確率: 1/199.9<br>RUSHシステム: ST突破型<br><span style="color:#ff5252;">WoU:
+                        40%でSWORD DRIVE発動！</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
         <a href="nanatsu.html" class="machine-card" style="border-color: #ff9100;">
             <div>
@@ -224,7 +690,11 @@
         </a>
 
         <a href="stats.html" class="machine-card card-stats">
-            <div><h3 class="machine-title">📊 総合収支シミュレーション</h3><div class="machine-spec">自動演算システム<br>ワンクリックで全機種の初当り・出玉・収支を高速検証</div></div><div class="play-btn">⚙️ データセンターへ (ENTER)</div>
+            <div>
+                <h3 class="machine-title">📊 総合収支シミュレーション</h3>
+                <div class="machine-spec">自動演算システム<br>ワンクリックで全機種の初当り・出玉・収支を高速検証</div>
+            </div>
+            <div class="play-btn">⚙️ データセンターへ (ENTER)</div>
         </a>
     </div>
 
@@ -239,7 +709,7 @@
             appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
             measurementId: "G-46M19VQVY2"
         };
-        
+
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -265,12 +735,12 @@
                     if (snap.exists()) {
                         let userData = snap.val();
                         currentUserName = userData.username;
-                        document.getElementById("nav-username").innerHTML = userData.has_completed 
-                            ? `<span class="rainbow-text">${currentUserName}</span>` 
+                        document.getElementById("nav-username").innerHTML = userData.has_completed
+                            ? `<span class="rainbow-text">${currentUserName}</span>`
                             : currentUserName;
                         authBtn.innerText = "ログアウト";
                         authBtn.className = "auth-btn logout";
-                        authBtn.onclick = () => { auth.signOut().then(()=> location.reload()); };
+                        authBtn.onclick = () => { auth.signOut().then(() => location.reload()); };
                     } else {
                         auth.signOut().then(() => { window.location.reload(); });
                     }
@@ -310,18 +780,18 @@
             let todayParlorProfit = 0;
             let alltimeParlorProfit = 0;
             let worstUserHtml = null;
-            let worstDailyProfit = 0; 
-            const INITIAL_BALANCE = 50000; 
+            let worstDailyProfit = 0;
+            const INITIAL_BALANCE = 50000;
             const todayStr = new Date().toDateString();
 
             for (let uid in usersData) {
                 let u = usersData[uid];
                 let userBalance = u.balance || 0;
-                let dailyProfit = u.daily_profit || 0; 
+                let dailyProfit = u.daily_profit || 0;
                 let userLastDate = u.last_date || "";
-                
-                let nameHtml = u.has_completed 
-                    ? `<span class="rainbow-text">${u.username || "Unknown"}</span>` 
+
+                let nameHtml = u.has_completed
+                    ? `<span class="rainbow-text">${u.username || "Unknown"}</span>`
                     : `<span style="color:#ffca28;">${u.username || "Unknown"}</span>`;
 
                 alltimeParlorProfit += (INITIAL_BALANCE - userBalance);
@@ -378,13 +848,13 @@
                     if (rec.date === dateStr && rec.payout > bestHitPayout) {
                         bestHitPayout = rec.payout;
                         bestHitMachine = machine;
-                        
+
                         let hitHasCompleted = false;
-                        for(let uid in usersData) {
-                            if(usersData[uid].username === rec.user) hitHasCompleted = usersData[uid].has_completed;
+                        for (let uid in usersData) {
+                            if (usersData[uid].username === rec.user) hitHasCompleted = usersData[uid].has_completed;
                         }
-                        bestHitUserHtml = hitHasCompleted 
-                            ? `<span class="rainbow-text">${rec.user}</span>` 
+                        bestHitUserHtml = hitHasCompleted
+                            ? `<span class="rainbow-text">${rec.user}</span>`
                             : `<span style="color:#ffca28;">${rec.user}</span>`;
                     }
                 }
@@ -401,11 +871,11 @@
             let hamariEl = document.getElementById("max-hamari");
             if (maxHamariData && maxHamariData.spins > 0) {
                 let hamariHasCompleted = false;
-                for(let uid in usersData) {
-                    if(usersData[uid].username === maxHamariData.user) hamariHasCompleted = usersData[uid].has_completed;
+                for (let uid in usersData) {
+                    if (usersData[uid].username === maxHamariData.user) hamariHasCompleted = usersData[uid].has_completed;
                 }
-                let hamariUserHtml = hamariHasCompleted 
-                    ? `<span class="rainbow-text">${maxHamariData.user}</span>` 
+                let hamariUserHtml = hamariHasCompleted
+                    ? `<span class="rainbow-text">${maxHamariData.user}</span>`
                     : `<span style="color:#ffca28;">${maxHamariData.user}</span>`;
 
                 hamariEl.innerHTML = `<span style="color:#ff9100;">${maxHamariData.spins.toLocaleString()} 回転</span><br><span style="font-size:0.55em;">${hamariUserHtml} (${maxHamariData.machine})</span>`;
@@ -414,7 +884,7 @@
             }
         }
 
-function renderRankings(users) {
+        function renderRankings(users) {
             let rankingBody = document.getElementById("ranking-body");
             let poorRankingBody = document.getElementById("poor-ranking-body");
 
@@ -430,9 +900,9 @@ function renderRankings(users) {
 
             let userArray = userKeys.map(uid => {
                 let u = users[uid];
-                return { 
-                    name: u.username || "Unknown", 
-                    balance: u.balance || 0, 
+                return {
+                    name: u.username || "Unknown",
+                    balance: u.balance || 0,
                     has_completed: u.has_completed || false,
                     isSelf: (auth.currentUser && auth.currentUser.uid === uid)
                 };
@@ -458,7 +928,7 @@ function renderRankings(users) {
             let poorUsers = userArray.filter(u => u.balance < 0);
             poorUsers.sort((a, b) => a.balance - b.balance);
             let top10Poor = poorUsers.slice(0, 10);
-            
+
             if (top10Poor.length === 0) {
                 poorRankingBody.innerHTML = `<tr><td colspan="3" style="color:#888;">該当者なし (全員がプラスです🕊️)</td></tr>`;
             } else {
@@ -471,5 +941,7 @@ function renderRankings(users) {
             }
         }
     </script>
+    <script src="https://pl30889981.effectivecpmnetwork.com/98/a0/4d/98a04d1830666a6d0a70a7f326135330.js"></script>
 </body>
+
 </html>
