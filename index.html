@@ -59,12 +59,15 @@
         table.ranking-table { width: 100%; border-collapse: collapse; color: #fff; }
         table.ranking-table th, table.ranking-table td { padding: 12px; text-align: center; border-bottom: 1px solid #333; }
         table.ranking-table th { color: #888; }
-        .ranking-table.rich tr:nth-child(1) td { color: #ffeb3b; font-weight: bold; font-size: 1.2em; }
-        .ranking-table.rich tr:nth-child(2) td { color: red; font-weight: bold; font-size: 1.1em; }
-        .ranking-table.rich tr:nth-child(3) td { color: #cd7f32; font-weight: bold; font-size: 1.05em; }
-        .ranking-table.poor tr:nth-child(1) td { color: #00bcd4; font-weight: bold; font-size: 1.2em; }
-        .ranking-table.poor tr:nth-child(2) td { color: #26c6da; font-weight: bold; font-size: 1.1em; }
-        .ranking-table.poor tr:nth-child(3) td { color: #4dd0e1; font-weight: bold; font-size: 1.05em; }
+        /* 🏆 富豪ランキング トップ3（ただしコンプリート者の虹色称号は絶対に死守する） */
+        .ranking-table.rich tr:nth-child(1) td:not(:has(.rainbow-text)), .ranking-table.rich tr:nth-child(1) td:not(:has(.rainbow-text)) span { color: #ffeb3b !important; font-weight: bold; font-size: 1.2em; }
+        .ranking-table.rich tr:nth-child(2) td:not(:has(.rainbow-text)), .ranking-table.rich tr:nth-child(2) td:not(:has(.rainbow-text)) span { color: #ff5252 !important; font-weight: bold; font-size: 1.1em; }
+        .ranking-table.rich tr:nth-child(3) td:not(:has(.rainbow-text)), .ranking-table.rich tr:nth-child(3) td:not(:has(.rainbow-text)) span { color: #cd7f32 !important; font-weight: bold; font-size: 1.05em; }
+
+        /* 📉 貧民ランキング ワースト3 */
+        .ranking-table.poor tr:nth-child(1) td:not(:has(.rainbow-text)), .ranking-table.poor tr:nth-child(1) td:not(:has(.rainbow-text)) span { color: #00bcd4 !important; font-weight: bold; font-size: 1.2em; }
+        .ranking-table.poor tr:nth-child(2) td:not(:has(.rainbow-text)), .ranking-table.poor tr:nth-child(2) td:not(:has(.rainbow-text)) span { color: #26c6da !important; font-weight: bold; font-size: 1.1em; }
+        .ranking-table.poor tr:nth-child(3) td:not(:has(.rainbow-text)), .ranking-table.poor tr:nth-child(3) td:not(:has(.rainbow-text)) span { color: #4dd0e1 !important; font-weight: bold; font-size: 1.05em; }
 
         .hall-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
         .machine-card { background-color: #111; border-radius: 15px; padding: 25px 20px; text-decoration: none; color: white; transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; }
