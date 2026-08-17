@@ -1,0 +1,50 @@
+/* mobile.css - 手機版專用排版 (螢幕闊度細過 768px 時自動生效) */
+@media screen and (max-width: 768px) {
+    /* 1. 解決最底綠色廣告 Banner 遮擋問題 */
+    body {
+        padding-bottom: 110px !important; /* 你原本三個頁面都寫咗 60px，加大佢畀廣告留多啲位 */
+    }
+
+    /* 2. 解決頂部「開始踢球/任務」同「紀錄重置」按鈕排版 */
+    /* 你啲掣係包喺一個冇 class 嘅 div 入面，所以我哋直接用屬性針對佢 */
+    .left-panel > div[style*="margin-bottom: 15px;"] {
+        display: flex !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+    }
+    .left-panel > div[style*="margin-bottom: 15px;"] button {
+        flex: 1 !important;
+        margin: 0 !important;
+        padding: 12px 0 !important;
+        font-size: 1em !important;
+    }
+
+    /* 3. 解決 DATA LAMP 表格太闊導致爆版 */
+    .data-lamp-container {
+        width: 100% !important;
+        overflow-x: auto !important; /* 容許用手指左右滑動個表格 */
+        -webkit-overflow-scrolling: touch !important;
+        box-sizing: border-box !important;
+        padding: 10px !important; /* 稍微縮小原本 15px 嘅邊距[cite: 1, 2] */
+    }
+    table.data-lamp th,
+    table.data-lamp td {
+        font-size: 12px !important;
+        padding: 8px 2px !important; /* 縮小儲存格空間[cite: 1, 2] */
+    }
+
+    /* 4. 確保文字 Log 區域唔會過闊 */
+    .log-container {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 13px !important; /* 字體微調，方便手機閱讀[cite: 1, 2] */
+    }
+    
+    /* 5. 確保頂部統計板 (當前轉數/出玉/連莊) 闊度正常 */
+    .stats-board {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        padding: 10px !important; /* 縮小原本 15px 嘅邊距[cite: 1, 2] */
+    }
+}

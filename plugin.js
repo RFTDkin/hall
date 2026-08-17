@@ -1,5 +1,5 @@
 // ==========================================
-// パチンコ全能プラグイン V23 (完全日文化・初当り等の残存中文修復版)
+// パチンコ全能プラグイン V24 (完全日文化・手機版 UI 修正・強制迴避版權媒體)
 // ==========================================
 
 const firebaseConfig = {
@@ -30,6 +30,23 @@ rainbowStyle.innerHTML = `
         0% { background-position: 0% 50%; }
         100% { background-position: 200% 50%; }
     }
+
+    /* 🌟 專為 Plugin 所持金視窗而設嘅手機版響應式 CSS 🌟 */
+    @media screen and (max-width: 768px) {
+        #plugin-ui-container {
+            position: relative !important;
+            top: 0 !important;
+            right: 0 !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-bottom: 20px !important;
+            flex-direction: column !important;
+        }
+        #plugin-ui-container > div {
+            width: 90% !important;
+            max-width: none !important;
+        }
+    }
 `;
 document.head.appendChild(rainbowStyle);
 
@@ -45,7 +62,6 @@ window.alert = function(msg) {
     originalAlert(text);
 };
 
-// 🌟 徹底的な完全日文化辞書 (初当り等の残存中文を完全に排除) 🌟
 const dict = {
     "柏青哥模擬器": "パチンコシミュレーター", "返回主頁": "ホールに戻る", "當前轉數": "現在回転数",
     "現在回轉數": "現在回転数", "回轉": "回転", "本次出玉": "獲得出玉", "本次總出玉": "総獲得出玉",
@@ -136,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const pluginUI = document.createElement("div");
+        pluginUI.id = "plugin-ui-container";
         pluginUI.style.cssText = "position: fixed; top: 15px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; gap: 10px;";
         
         let displayNameHtml = userData.has_completed 
@@ -239,7 +256,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 let new_payout = parseInt(payoutEl.innerText.replace(/,/g, '')) || 0;
                 let new_rush = rushEl ? (parseInt(rushEl.innerText.replace(/,/g, '')) || 0) : 0;
 
-                // 🌟 修正：只有當前轉數『嚴格大於』資料庫紀錄，先至允許上傳覆蓋！ 🌟
                 if (new_spins > 0 && new_spins > currentMaxHamari) {
                     currentMaxHamari = new_spins;
                     const todayDate = new Date();
@@ -375,13 +391,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-const originalPlay = HTMLMediaElement.prototype.play;
-HTMLMediaElement.prototype.play = function() {
-    this.muted = true;
-    setTimeout(() => { this.dispatchEvent(new Event("ended")); }, 10);
-    return Promise.resolve();
-};
-
 if (typeof window.addLog === "function") {
     const originalAddLog = window.addLog;
     window.addLog = function(text, className = "") {
@@ -400,6 +409,14 @@ if (typeof window.addLog === "function") {
         originalAddLog(translatedText, className);
     };
 }
+
+// 🛡️ 迴避版權專用 Code：強制所有影片同聲效「靜音兼光速跳過」 🛡️
+const originalPlay = HTMLMediaElement.prototype.play;
+HTMLMediaElement.prototype.play = function() {
+    this.muted = true;
+    setTimeout(() => { this.dispatchEvent(new Event("ended")); }, 10);
+    return Promise.resolve();
+};
 
 setTimeout(() => {
     if (typeof window.playVideoPopupAndWait === "function") {
