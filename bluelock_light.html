@@ -462,7 +462,7 @@
             if (isPlaying) return;
             isPlaying = true;
             btnPlay.disabled = true;
-            btnReset.disabled = true;
+            if(btnReset) btnReset.disabled = true;
 
             // 🌟 確保音訊及影片解鎖 🌟
             if (!audioUnlocked) {
@@ -487,7 +487,7 @@
             }
 
             btnPlay.disabled = false;
-            btnReset.disabled = false;
+            if(btnReset) btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續踢球";
         }
 

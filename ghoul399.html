@@ -512,7 +512,7 @@
             if (isPlaying) return;
             isPlaying = true;
             btnPlay.disabled = true;
-            btnReset.disabled = true;
+            if(btnReset) btnReset.disabled = true;
 
             if (!audioUnlocked) {
                 // 預先載入預設影片解鎖音訊權限
@@ -537,7 +537,7 @@
             }
 
             btnPlay.disabled = false;
-            btnReset.disabled = false;
+            if(btnReset) btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續抽機";
         }
 

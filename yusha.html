@@ -340,7 +340,7 @@
             if (isPlaying) return;
             isPlaying = true;
             btnPlay.disabled = true;
-            btnReset.disabled = true;
+            if(btnReset) btnReset.disabled = true;
 
             addLog("\n=== 勇者出擊 ===", "color-hit");
 
@@ -359,7 +359,7 @@
             }
 
             btnPlay.disabled = false;
-            btnReset.disabled = false;
+            if(btnReset) btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續打玉";
         }
 

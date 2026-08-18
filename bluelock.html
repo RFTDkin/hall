@@ -625,7 +625,7 @@
             if (isPlaying) return;
             isPlaying = true;
             btnPlay.disabled = true;
-            btnReset.disabled = true;
+            if(btnReset) btnReset.disabled = true;
 
             if (!audioUnlocked) {
                 jackpotMedia.load();
@@ -652,7 +652,7 @@
             }
 
             btnPlay.disabled = false;
-            btnReset.disabled = false;
+            if(btnReset) btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續踢球";
         }
 
