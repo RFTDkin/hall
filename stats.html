@@ -73,7 +73,7 @@
     <div class="btn-group">
         <button id="btn-start-100" class="btn-start" onclick="runAllSimulations(100)">▶️ 100回 遊技開始</button>
         <button id="btn-start-1000" class="btn-start" style="background-color: #d29922;" onclick="runAllSimulations(1000)">▶️ 1,000回 遊技開始</button>
-        <button id="btn-start-10000" class="btn-start" style="background-color: #b35900;" onclick="runAllSimulations(10000)">▶️ 10,000回 遊技開始</button>
+        <button id="btn-start-10000" class="btn-start" style="background-color: #b35900;" onclick="checkAndRun10000()">🔒 10,000回 (広告解放)</button>
     </div>
 
     <div class="grid-container">
@@ -83,7 +83,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="bluelock-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="bluelock-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="bluelock-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="bluelock-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="bluelock-profit">---</span></div>
             <div class="progress-text" id="bluelock-prog">待機中...</div>
         </div>
 
@@ -92,7 +92,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="bluelock_light-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="bluelock_light-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="bluelock_light-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="bluelock_light-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="bluelock_light-profit">---</span></div>
             <div class="progress-text" id="bluelock_light-prog">待機中...</div>
         </div>
 
@@ -101,7 +101,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="dmdp-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="dmdp-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="dmdp-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="dmdp-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="dmdp-profit">---</span></div>
             <div class="progress-text" id="dmdp-prog">待機中...</div>
         </div>
 
@@ -110,7 +110,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="ghoul399-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="ghoul399-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="ghoul399-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="ghoul399-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="ghoul399-profit">---</span></div>
             <div class="progress-text" id="ghoul399-prog">待機中...</div>
         </div>
 
@@ -119,7 +119,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="ghoul999-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="ghoul999-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="ghoul999-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="ghoul999-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="ghoul999-profit">---</span></div>
             <div class="progress-text" id="ghoul999-prog">待機中...</div>
         </div>
 
@@ -128,7 +128,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="jitsuryoku-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="jitsuryoku-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="jitsuryoku-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="jitsuryoku-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="jitsuryoku-profit">---</span></div>
             <div class="progress-text" id="jitsuryoku-prog">待機中...</div>
         </div>
 
@@ -137,7 +137,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="monono-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="monono-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="monono-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="monono-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="monono-profit">---</span></div>
             <div class="progress-text" id="monono-prog">待機中...</div>
         </div>
 
@@ -146,7 +146,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="lycoris-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="lycoris-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="lycoris-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="lycoris-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="lycoris-profit">---</span></div>
             <div class="progress-text" id="lycoris-prog">待機中...</div>
         </div>
 
@@ -155,7 +155,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="hellsing-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="hellsing-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="hellsing-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="hellsing-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="hellsing-profit">---</span></div>
             <div class="progress-text" id="hellsing-prog">待機中...</div>
         </div>
 
@@ -164,7 +164,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="slime-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="slime-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="slime-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="slime-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="slime-profit">---</span></div>
             <div class="progress-text" id="slime-prog">待機中...</div>
         </div>
 
@@ -173,7 +173,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="kakegurui-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="kakegurui-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="kakegurui-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="kakegurui-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="kakegurui-profit">---</span></div>
             <div class="progress-text" id="kakegurui-prog">待機中...</div>
         </div>
 
@@ -182,7 +182,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="ggo-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="ggo-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="ggo-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="ggo-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="ggo-profit">---</span></div>
             <div class="progress-text" id="ggo-prog">待機中...</div>
         </div>
 
@@ -191,7 +191,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="mushoku-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="mushoku-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="mushoku-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="mushoku-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="mushoku-profit">---</span></div>
             <div class="progress-text" id="mushoku-prog">待機中...</div>
         </div>
 
@@ -200,7 +200,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="nanoha-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="nanoha-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="nanoha-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="nanoha-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="nanoha-profit">---</span></div>
             <div class="progress-text" id="nanoha-prog">待機中...</div>
         </div>
 
@@ -209,7 +209,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="yusha-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="yusha-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="yusha-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="yusha-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="yusha-profit">---</span></div>
             <div class="progress-text" id="yusha-prog">待機中...</div>
         </div>
 
@@ -218,7 +218,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="edens-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="edens-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="edens-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="edens-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="edens-profit">---</span></div>
             <div class="progress-text" id="edens-prog">待機中...</div>
         </div>
 
@@ -227,7 +227,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="seed-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="seed-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="seed-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="seed-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="seed-profit">---</span></div>
             <div class="progress-text" id="seed-prog">待機中...</div>
         </div>
 
@@ -236,7 +236,7 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="sao-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="sao-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="sao-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="sao-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="sao-profit">---</span></div>
             <div class="progress-text" id="sao-prog">待機中...</div>
         </div>
 
@@ -245,16 +245,53 @@
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="nanatsu-spins">---</span></div>
             <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="nanatsu-payout">---</span></div>
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="nanatsu-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">累計収支:</span><span class="stat-value val-profit" id="nanatsu-profit">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="nanatsu-profit">---</span></div>
             <div class="progress-text" id="nanatsu-prog">待機中...</div>
         </div>
 
     </div>
 
     <script>
+        // 🌟 廣告設定與解鎖狀態 🌟
+        const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63"; 
+        let is10000Unlocked = false;
+
+        function checkAndRun10000() {
+            if (is10000Unlocked) {
+                runAllSimulations(10000);
+                return;
+            }
+
+            let confirmAd = window.confirm("⚠️ 10,000回高速演算はサーバーに大きな負荷がかかります。\n\n広告を1回チェックして、このセッションの演算機能を解放しますか？");
+            if (confirmAd) {
+                // 1. 開啟廣告
+                window.open(ADSTERRA_DIRECT_LINK, '_blank');
+                
+                // 2. 鎖定全畫面按鈕並倒數
+                const btn = document.getElementById('btn-start-10000');
+                const btns = document.querySelectorAll('.btn-start');
+                btns.forEach(b => b.disabled = true); 
+                
+                let secondsLeft = 15;
+                btn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
+                
+                let countdown = setInterval(() => {
+                    secondsLeft--;
+                    if (secondsLeft > 0) {
+                        btn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
+                    } else {
+                        clearInterval(countdown);
+                        is10000Unlocked = true;
+                        btns.forEach(b => b.disabled = false);
+                        window.alert("🎉 認証成功！10,000回演算機能が解放されました！");
+                        runAllSimulations(10000); // 🌟 倒數完自動幫佢跑，慳返佢撳多下
+                    }
+                }, 1000);
+            }
+        }
+
         const yieldToMain = () => new Promise(r => setTimeout(r, 10));
 
-        // 🌟 核心修改：未滿95000時若中獎，允許把該次完整出玉加進去才結束 RUSH 🌟
         function addBonusAndCheckComplete(currentPayout, bonusAmount) {
             let newPayout = currentPayout + bonusAmount;
             let isCompleted = currentPayout >= 95000;
@@ -1103,14 +1140,14 @@
             await runMachineSim('sao', simSAO, 1000 / 20, iterations);
             await runMachineSim('nanatsu', simNanatsu, 1000 / 17, iterations);
 
+            // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);
             document.getElementById('btn-start-100').innerText = "▶️ 100回 遊技開始";
             document.getElementById('btn-start-1000').innerText = "▶️ 1,000回 遊技開始";
-            document.getElementById('btn-start-10000').innerText = "▶️ 10,000回 遊技開始";
+            document.getElementById('btn-start-10000').innerText = is10000Unlocked ? "▶️ 10,000回 (解放済)" : "🔒 10,000回 (広告解放)";
         }
     </script>
-<!-- 🌟 置底懸浮廣告區塊 🌟 -->
-    <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; text-align: center; padding: 5px 0; border-top: 1px solid #333;">
+<div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; text-align: center; padding: 5px 0; border-top: 1px solid #333;">
         <script type="text/javascript">
             atOptions = {
                 'key' : 'ead8f1e5fdd30faaed33da77b3333cf4',
