@@ -907,9 +907,23 @@
             let spins = 0, payout = 0;
             while(true) {
                 spins++;
+                // 🎯 1/399.9 図柄揃い (+ 0.1% チャージ昇格含む)
                 if (Math.random() < 1/399.9) {
-                    payout += 1500;
-                    if (payout < 95000 && Math.random() < 0.52) { runSeedRush(); }
+                    let r = Math.random();
+                    if (r < 0.516) {
+                        payout += 1500; // 51.6% RUSH
+                        if (payout < 95000) runSeedRush();
+                    } else if (r < 0.999) {
+                        payout += 1500; // 48.3% 通常
+                    } else {
+                        payout += 300; // 0.1% チャージ昇格 RUSH
+                        if (payout < 95000) runSeedRush();
+                    }
+                    break;
+                }
+                // ⚡ 1/2731.4 通常 SEED チャージ (ハズレ)
+                if (Math.random() < 1/2731.4) {
+                    payout += 300;
                     break;
                 }
             }

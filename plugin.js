@@ -1,5 +1,5 @@
 // ==========================================
-// パチンコ全能プラグイン V27 (4000制限・広告で+4000・最大ハマリ修復版)
+// パチンコ全能プラグイン V28 (RUSH中強制終了バグ完全修正版)
 // ==========================================
 
 const firebaseConfig = {
@@ -13,8 +13,8 @@ const firebaseConfig = {
     measurementId: "G-46M19VQVY2"
 };
 
-// ⚠️ 喺度填入你啱啱申請嘅 Adsterra Direct Link 網址！
-const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63"; // 👈 記得換做你嘅 Direct Link 網址
+// ⚠️ 喺度填入你申請嘅 Adsterra Direct Link 網址
+const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63";
 
 window.latest_payout_for_share = 0;
 window.latest_rush_for_share = 0;
@@ -131,16 +131,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 let currentUserName = userData.username || "Guest";
                 const todayStr = new Date().toDateString();
 
-                // 🌟 新一日自動重置邏輯：如果日期唔同，就將日常轉數歸零，最大限制設回預設 4000
                 if (userData.last_date !== todayStr) {
                     userData.daily_spins = 0;
                     userData.daily_profit = 0; 
-                    userData.max_allowed_spins = 4000; // 預設 4000 轉
+                    userData.max_allowed_spins = 4000; 
                     userData.last_date = todayStr;
                     userRef.update({ daily_spins: 0, daily_profit: 0, max_allowed_spins: 4000, last_date: todayStr });
                 }
 
-                // 防老舊帳號無 max_allowed_spins 欄位
                 if (!userData.max_allowed_spins) {
                     userData.max_allowed_spins = 4000;
                     userRef.update({ max_allowed_spins: 4000 });
@@ -240,7 +238,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // 🌟 核心：爆轉數上限後，顯示「睇廣告解鎖」按鈕
         function disableMachine(msgText = "⛔ 本日の上限に達しました") {
             let playBtn = document.getElementById("btn-play");
             if (playBtn) { 
@@ -263,10 +260,8 @@ document.addEventListener("DOMContentLoaded", () => {
             
             adBtn.onclick = () => {
                 adBtn.disabled = true;
-                // 1. 新開 Tab 打開 Direct Link 廣告，原網頁完全不會被跳轉破壞！
                 window.open(ADSTERRA_DIRECT_LINK, '_blank');
 
-                // 2. 倒數 15 秒防作弊計時器
                 let secondsLeft = 15;
                 adBtn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
                 
@@ -276,7 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         adBtn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
                     } else {
                         clearInterval(countdown);
-                        // 3. 解鎖成功：上限加 4000
                         userData.max_allowed_spins += 4000;
                         userRef.update({ max_allowed_spins: userData.max_allowed_spins });
                         
@@ -312,9 +306,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 if (!spinEl || !payoutEl) return;
 
-                let spinRawText = spinEl.innerText.replace(/,/g, '');
-                let matchSpins = spinRawText.match(/\d+/);
-                let new_spins = matchSpins ? parseInt(matchSpins[0]) : 0;
+                // 🌟 修正重點：精準判定係咪處於 RUSH 狀態 🌟
+                let isRushUI = spinEl.innerText.includes('中') || spinEl.innerText.includes('/') || spinEl.innerText.includes('残') || spinEl.innerText.includes('BATTLE') || spinEl.innerText.includes('RUSH') || spinEl.innerText.includes('ST');
+
+                let new_spins;
+                if (isRushUI) {
+                    // 🌟 如果中緊 RUSH，強制將當前轉數「凍結」喺中獎嗰一刻，唔會扣你每日轉數！
+                    new_spins = lastUI_spins; 
+                } else {
+                    let spinRawText = spinEl.innerText.replace(/,/g, '');
+                    let matchSpins = spinRawText.match(/\d+/);
+                    new_spins = matchSpins ? parseInt(matchSpins[0]) : 0;
+                }
 
                 let new_payout = parseInt(payoutEl.innerText.replace(/,/g, '')) || 0;
                 let new_rush = rushEl ? (parseInt(rushEl.innerText.replace(/,/g, '')) || 0) : 0;
@@ -349,14 +352,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 }
 
-                if (spin_diff < 0) spin_diff = new_spins;
+                // 🌟 修復盲點：如果 spin_diff 係負數 (例如重置) 變 0，大過 100 (異常) 變 1
+                if (spin_diff < 0) {
+                    spin_diff = 0;
+                } else if (spin_diff > 100) {
+                    spin_diff = 1;
+                }
+
                 if (payout_diff < 0) payout_diff = new_payout;
 
                 let needUpdateCloud = false;
                 let sessionNetProfit = 0;
 
                 if (spin_diff > 0) {
-                    // 🌟 嚴格擋截：如果超過動態上限就上鎖
                     if (userData.daily_spins >= userData.max_allowed_spins) {
                         disableMachine();
                         window.alert("⚠️ お知らせ：本日の上限に達しました！広告を見て枠を増やせます。");

@@ -137,7 +137,6 @@
 
             <div style="margin-bottom: 15px;">
                 <button id="btn-play" onclick="startPlay()">▶️ 發進 (PLAY)</button>
-                
             </div>
 
             <div class="log-container" id="log-box"></div>
@@ -175,41 +174,71 @@
                 this.history = []; 
             }
 
-            async play_normal() {
+async play_normal() {
                 this.session_spins += 1;
+                if (this.session_spins % 100 === 0) addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
 
-                if (this.session_spins % 100 === 0) {
-                    addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
-                }
-
-                // 大当り確率: 1/399.9 (省略 SEED チャージ)
+                // 🎯 1. 圖柄揃い抽選: 1/399.9
                 if (Math.random() < (1 / 399.9)) {
-                    addLog(`\n[${this.session_spins} 回轉] 🎯 FEVER 図柄揃い！ (1500玉)`, "color-hit");
-                    this.session_payout += 1500;
-                    updateUI();
-                    await sleep(1000);
-
-                    // 約52% RUSH CLIMAX 突入
-                    if (Math.random() < 0.52) {
+                    let r = Math.random();
+                    
+                    if (r < 0.516) {
+                        // 🟡 51.6% -> 10R RUSH
+                        addLog(`\n[${this.session_spins} 回轉] 🎯 FEVER 図柄揃い！ (1500玉)`, "color-hit");
+                        this.session_payout += 1500;
+                        updateUI();
+                        await sleep(1000);
                         addLog("🔥 昇格成功！ FULLBURST RUSH CLIMAX 突入！", "color-climax");
                         await sleep(1000);
-                        await this.play_rush();
-                    } else {
+                        await this.play_rush("CLIMAX");
+                        return true;
+                    } 
+                    else if (r < 0.999) {
+                        // 🔵 48.3% -> 10R 通常 (0.516 + 0.483 = 0.999)
+                        addLog(`\n[${this.session_spins} 回轉] 🎯 FEVER 図柄揃い！ (1500玉)`, "color-hit");
+                        this.session_payout += 1500;
+                        updateUI();
+                        await sleep(1000);
                         addLog("😭 昇格失敗... (通常へ戻る)", "color-normal");
                         addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
                         this.record_history();
+                        return true;
+                    } 
+                    else {
+                        // 🔴 0.1% -> 2R チャージ昇格 RUSH
+                        addLog(`\n[${this.session_spins} 回轉] ⚡ SEEDチャージ当選！ (300玉)`, "color-normal");
+                        this.session_payout += 300;
+                        updateUI();
+                        await sleep(1000);
+                        addLog("🌈 奇跡のチャージ昇格！！！ FULLBURST RUSH CLIMAX 突入！", "color-climax");
+                        await sleep(1000);
+                        await this.play_rush("CLIMAX"); 
+                        return true;
                     }
+                }
+
+                // ⚡ 2. 普通の SEED チャージ抽選 (約 1/2731.4) -> 必定通常
+                if (Math.random() < (1 / 2731.4)) {
+                    addLog(`\n[${this.session_spins} 回轉] ⚡ SEEDチャージ当選！ (300玉)`, "color-normal");
+                    this.session_payout += 300;
+                    updateUI();
+                    await sleep(1000);
+                    addLog("😭 チャージ終了... (通常へ戻る)", "color-normal");
+                    addLog(`💰 本次總出玉: ${this.session_payout} 玉`);
+                    this.record_history();
                     return true;
-                } 
+                }
+
                 return false;
             }
 
-            async play_rush() {
-                this.state = "CLIMAX"; // 突入時必定為 CLIMAX
+            async play_rush(startMode = "CLIMAX") {
+                this.state = startMode; 
                 let st_max = 130;
                 let st_remaining = st_max;
                 
-                addLog(`\n===== ⚔️ FULLBURST RUSH CLIMAX 開始 =====`, "color-climax");
+                let modeDisplayName = this.state === "CLIMAX" ? "RUSH CLIMAX" : "RUSH";
+                addLog(`\n===== ⚔️ FULLBURST ${modeDisplayName} 開始 =====`, "color-climax");
                 updateUI();
 
                 while (this.state !== "NORMAL") {
@@ -300,7 +329,6 @@
         let isPlaying = false;
         const logBox = document.getElementById("log-box");
         const btnPlay = document.getElementById("btn-play");
-        const btnReset = document.getElementById("btn-reset");
         const historyTbody = document.getElementById("history-tbody");
 
         function addLog(text, className = "") {
@@ -343,7 +371,6 @@
             if (isPlaying) return;
             isPlaying = true;
             btnPlay.disabled = true;
-            if(btnReset) btnReset.disabled = true;
 
             addLog("\n=== 出擊！ ===", "color-hit");
 
@@ -362,17 +389,7 @@
             }
 
             btnPlay.disabled = false;
-            if(btnReset) btnReset.disabled = false;
             btnPlay.innerText = "▶️ 繼續打玉";
-        }
-
-        function resetGame() {
-            game = new SeedMachine();
-            logBox.innerHTML = "";
-            renderHistoryTable([]);
-            updateUI();
-            addLog("遊戲紀錄已重置。", "color-normal");
-            btnPlay.innerText = "▶️ 發進 (PLAY)";
         }
     </script>
     
