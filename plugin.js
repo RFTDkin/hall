@@ -1,5 +1,5 @@
 // ==========================================
-// パチンコ全能プラグイン V26 (全日文・手機UI・版權迴避・全服最大ハマリ鎖定修復版)
+// パチンコ全能プラグイン V27 (4000制限・広告で+4000・最大ハマリ修復版)
 // ==========================================
 
 const firebaseConfig = {
@@ -12,6 +12,9 @@ const firebaseConfig = {
     appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
     measurementId: "G-46M19VQVY2"
 };
+
+// ⚠️ 喺度填入你啱啱申請嘅 Adsterra Direct Link 網址！
+const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63"; // 👈 記得換做你嘅 Direct Link 網址
 
 window.latest_payout_for_share = 0;
 window.latest_rush_for_share = 0;
@@ -56,7 +59,7 @@ window.alert = function(msg) {
                .replace(/登入成功/g, "ログイン成功")
                .replace(/登出/g, "ログアウト")
                .replace(/溫馨提示/g, "お知らせ")
-               .replace(/你今日嘅 5000 轉限額已經打爆咗/g, "本日の上限(5000回転)に達しました")
+               .replace(/你今日嘅 5000 轉限額已經打爆咗/g, "本日の上限に達しました")
                .replace(/請獲得出玉後再分享/g, "出玉を獲得してからポストしてください");
     originalAlert(text);
 };
@@ -86,13 +89,14 @@ function translateDOM() {
         if (text !== originalText) node.nodeValue = text;
     }
     const btnPlay = document.getElementById("btn-play");
-    if (btnPlay && btnPlay.innerText.includes("▶️")) btnPlay.innerText = "▶️ 遊技開始";
+    if (btnPlay && !btnPlay.disabled && btnPlay.innerText.includes("▶️")) btnPlay.innerText = "▶️ 遊技開始";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     const btnReset = document.getElementById("btn-reset");
     if (btnReset) btnReset.remove();
     translateDOM();
+    
 
     const scriptApp = document.createElement('script');
     scriptApp.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
@@ -127,11 +131,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 let currentUserName = userData.username || "Guest";
                 const todayStr = new Date().toDateString();
 
+                // 🌟 新一日自動重置邏輯：如果日期唔同，就將日常轉數歸零，最大限制設回預設 4000
                 if (userData.last_date !== todayStr) {
                     userData.daily_spins = 0;
                     userData.daily_profit = 0; 
+                    userData.max_allowed_spins = 4000; // 預設 4000 轉
                     userData.last_date = todayStr;
-                    userRef.update({ daily_spins: 0, daily_profit: 0, last_date: todayStr });
+                    userRef.update({ daily_spins: 0, daily_profit: 0, max_allowed_spins: 4000, last_date: todayStr });
+                }
+
+                // 防老舊帳號無 max_allowed_spins 欄位
+                if (!userData.max_allowed_spins) {
+                    userData.max_allowed_spins = 4000;
+                    userRef.update({ max_allowed_spins: 4000 });
                 }
 
                 runMachineLogic(db, auth, uid, currentUserName, userRef, userData);
@@ -143,7 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const exchangeRate = 3.57; 
         let currentWallet = userData.balance;
 
-        // 🌟 實時監聽全服最大落空數，確保 currentMaxHamari 永遠是最新的
         let currentMaxHamari = 0;
         db.ref('server_records/max_hamari').on('value', (snap) => {
             if (snap.exists()) {
@@ -166,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 💰 所持金<br>
                 <span id="global-wallet" style="font-size: 1.4em;">0</span> 円
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
-                <div style="font-size: 0.9em; color: #fff;">本日の回転数: <br><span id="daily-spins-ui" style="color:#ffeb3b; font-size:1.2em;">${userData.daily_spins}</span> / 5000 回転</div>
+                <div style="font-size: 0.9em; color: #fff;">本日の回転数: <br><span id="daily-spins-ui" style="color:#ffeb3b; font-size:1.2em;">${userData.daily_spins}</span> / <span id="max-spins-ui">${userData.max_allowed_spins}</span> 回転</div>
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
                 <div style="font-size: 0.75em; color: #ff7b72; text-align: left; font-weight: normal; line-height: 1.4;">※免責事項：当サイトの「円」等は架空のものです。</div>
             </div>
@@ -175,11 +186,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const walletEl = document.getElementById("global-wallet");
         const dailySpinsEl = document.getElementById("daily-spins-ui");
+        const maxSpinsEl = document.getElementById("max-spins-ui");
 
         function renderWallet() {
             walletEl.innerText = Math.round(currentWallet).toLocaleString();
             walletEl.style.color = currentWallet >= 0 ? "#00e676" : "#ff5252";
             dailySpinsEl.innerText = userData.daily_spins;
+            maxSpinsEl.innerText = userData.max_allowed_spins;
         }
         renderWallet();
 
@@ -227,14 +240,61 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        function disableMachine(msgText = "⛔ 本日 5000 回転の上限到達") {
+        // 🌟 核心：爆轉數上限後，顯示「睇廣告解鎖」按鈕
+        function disableMachine(msgText = "⛔ 本日の上限に達しました") {
             let playBtn = document.getElementById("btn-play");
             if (playBtn) { 
                 playBtn.disabled = true; 
                 playBtn.innerText = msgText; 
             }
+            showRewardAdButton();
         }
-        setTimeout(() => { if (userData.daily_spins >= 5000) disableMachine(); }, 500);
+
+        function showRewardAdButton() {
+            if (document.getElementById("btn-reward-ad")) return;
+            const playBtn = document.getElementById("btn-play");
+            const container = playBtn ? playBtn.parentNode : null;
+            if (!container) return;
+
+            const adBtn = document.createElement("button");
+            adBtn.id = "btn-reward-ad";
+            adBtn.innerText = "📺 広告を見て +4000回転 解鎖";
+            adBtn.style.cssText = "background-color: #ff9100; color: #fff; border: 1px solid #ffea00; box-shadow: 0 0 10px #ff9100;";
+            
+            adBtn.onclick = () => {
+                adBtn.disabled = true;
+                // 1. 新開 Tab 打開 Direct Link 廣告，原網頁完全不會被跳轉破壞！
+                window.open(ADSTERRA_DIRECT_LINK, '_blank');
+
+                // 2. 倒數 15 秒防作弊計時器
+                let secondsLeft = 15;
+                adBtn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
+                
+                let countdown = setInterval(() => {
+                    secondsLeft--;
+                    if (secondsLeft > 0) {
+                        adBtn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
+                    } else {
+                        clearInterval(countdown);
+                        // 3. 解鎖成功：上限加 4000
+                        userData.max_allowed_spins += 4000;
+                        userRef.update({ max_allowed_spins: userData.max_allowed_spins });
+                        
+                        maxSpinsEl.innerText = userData.max_allowed_spins;
+                        adBtn.remove();
+                        
+                        if (playBtn) {
+                            playBtn.disabled = false;
+                            playBtn.innerText = "▶️ プレイ続行";
+                        }
+                        window.alert("🎉 認証成功！上限が +4000回転 追加されました！");
+                    }
+                }, 1000);
+            };
+            container.appendChild(adBtn);
+        }
+
+        setTimeout(() => { if (userData.daily_spins >= userData.max_allowed_spins) disableMachine(); }, 500);
 
         let lastUI_spins = 0;
         let lastUI_payout = 0;
@@ -252,7 +312,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 if (!spinEl || !payoutEl) return;
 
-                // 🌟 升級提取邏輯：使用正則表達式，無條件精準抓出字串內的所有純數字
                 let spinRawText = spinEl.innerText.replace(/,/g, '');
                 let matchSpins = spinRawText.match(/\d+/);
                 let new_spins = matchSpins ? parseInt(matchSpins[0]) : 0;
@@ -260,7 +319,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 let new_payout = parseInt(payoutEl.innerText.replace(/,/g, '')) || 0;
                 let new_rush = rushEl ? (parseInt(rushEl.innerText.replace(/,/g, '')) || 0) : 0;
 
-                // 🌟 終極防呆鎖：當前轉數必須大於 100 轉，且「嚴格大於」雲端的現有紀錄時才上傳，徹底防止 0 轉洗掉紀錄！
                 if (new_spins > 100 && new_spins > currentMaxHamari) {
                     currentMaxHamari = new_spins;
                     const todayDate = new Date();
@@ -298,9 +356,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 let sessionNetProfit = 0;
 
                 if (spin_diff > 0) {
-                    if (userData.daily_spins >= 5000) {
+                    // 🌟 嚴格擋截：如果超過動態上限就上鎖
+                    if (userData.daily_spins >= userData.max_allowed_spins) {
                         disableMachine();
-                        window.alert("⚠️ お知らせ：本日の上限(5000回転)に達しました！");
+                        window.alert("⚠️ お知らせ：本日の上限に達しました！広告を見て枠を増やせます。");
                         throw new Error("Daily spin limit reached!");
                     }
                     userData.daily_spins += spin_diff;
@@ -349,7 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }, 100);
                 }
 
-                if (userData.daily_spins >= 5000) disableMachine();
+                if (userData.daily_spins >= userData.max_allowed_spins) disableMachine();
             };
         }
 

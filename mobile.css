@@ -1,5 +1,12 @@
+/* 全螢幕通用設定：加入自動淡入特效，保證唔會黑屏 */
 body {
     padding-bottom: 100px !important; 
+    animation: smoothFadeIn 0.6s ease-in-out forwards; /* 🌟 0.6秒自動淡入 🌟 */
+}
+
+@keyframes smoothFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }
 
 /* mobile.css - 手機版專用排版 (螢幕闊度細過 768px 時自動生效) */
