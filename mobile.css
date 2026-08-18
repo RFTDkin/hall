@@ -1,3 +1,7 @@
+body {
+    padding-bottom: 100px !important; 
+}
+
 /* mobile.css - 手機版專用排版 (螢幕闊度細過 768px 時自動生效) */
 @media screen and (max-width: 768px) {
     /* 1. 解決最底綠色廣告 Banner 遮擋問題 */

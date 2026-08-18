@@ -1,5 +1,5 @@
 // ==========================================
-// パチンコ全能プラグイン V24 (完全日文化・手機版 UI 修正・強制迴避版權媒體)
+// パチンコ全能プラグイン V26 (全日文・手機UI・版權迴避・全服最大ハマリ鎖定修復版)
 // ==========================================
 
 const firebaseConfig = {
@@ -31,7 +31,6 @@ rainbowStyle.innerHTML = `
         100% { background-position: 200% 50%; }
     }
 
-    /* 🌟 專為 Plugin 所持金視窗而設嘅手機版響應式 CSS 🌟 */
     @media screen and (max-width: 768px) {
         #plugin-ui-container {
             position: relative !important;
@@ -144,10 +143,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const exchangeRate = 3.57; 
         let currentWallet = userData.balance;
 
+        // 🌟 實時監聽全服最大落空數，確保 currentMaxHamari 永遠是最新的
         let currentMaxHamari = 0;
         db.ref('server_records/max_hamari').on('value', (snap) => {
             if (snap.exists()) {
-                currentMaxHamari = snap.val().spins || 0;
+                currentMaxHamari = parseInt(snap.val().spins) || 0;
             }
         });
 
@@ -252,11 +252,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 if (!spinEl || !payoutEl) return;
 
-                let new_spins = parseInt(spinEl.innerText.replace(/,/g, '')) || 0;
+                // 🌟 升級提取邏輯：使用正則表達式，無條件精準抓出字串內的所有純數字
+                let spinRawText = spinEl.innerText.replace(/,/g, '');
+                let matchSpins = spinRawText.match(/\d+/);
+                let new_spins = matchSpins ? parseInt(matchSpins[0]) : 0;
+
                 let new_payout = parseInt(payoutEl.innerText.replace(/,/g, '')) || 0;
                 let new_rush = rushEl ? (parseInt(rushEl.innerText.replace(/,/g, '')) || 0) : 0;
 
-                if (new_spins > 0 && new_spins > currentMaxHamari) {
+                // 🌟 終極防呆鎖：當前轉數必須大於 100 轉，且「嚴格大於」雲端的現有紀錄時才上傳，徹底防止 0 轉洗掉紀錄！
+                if (new_spins > 100 && new_spins > currentMaxHamari) {
                     currentMaxHamari = new_spins;
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
@@ -279,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (new_payout === 0) {
                     completeTriggeredThisRush = false; 
-                    if (lastUI_payout >= 5000) {
+                    if (lastUI_payout >= 10000) { 
                         const todayDate = new Date();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
@@ -360,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
             shareBtn.onclick = () => {
                 let payout = window.latest_payout_for_share || 0;
                 let rushCount = window.latest_rush_for_share || 0;
-                if (payout < 5000) { window.alert("一万発を達成してからポストしてください！"); return; }
+                if (payout < 10000) { window.alert("一万発を達成してからポストしてください！"); return; } 
                 let compText = payout >= 95000 ? "\n🎉【コンプリート達成！】🎉" : "";
                 let text = `【一撃一万発達成！】${compText}\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター\n`;
                 let url = window.location.href; 
@@ -376,7 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             let sBtn = document.getElementById("btn-share-x");
                             if (!playBtn.disabled) {
                                 playBtn.innerText = "▶️ プレイ続行"; 
-                                if (window.latest_payout_for_share >= 5000 && sBtn) sBtn.style.display = "inline-block";
+                                if (window.latest_payout_for_share >= 10000 && sBtn) sBtn.style.display = "inline-block"; 
                             } else {
                                 if (sBtn) sBtn.style.display = "none";
                                 window.latest_payout_for_share = 0;
@@ -410,7 +415,6 @@ if (typeof window.addLog === "function") {
     };
 }
 
-// 🛡️ 迴避版權專用 Code：強制所有影片同聲效「靜音兼光速跳過」 🛡️
 const originalPlay = HTMLMediaElement.prototype.play;
 HTMLMediaElement.prototype.play = function() {
     this.muted = true;
