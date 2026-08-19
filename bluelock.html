@@ -444,7 +444,7 @@
                 updateUI();
 
                 while (this.state === "RUSH") {
-                    await sleep(30);
+                    await sleep(40);
                     current_rush_spins += 1;
 
                     document.getElementById("ui-spins").innerText = `BATTLE中: ${current_rush_spins}回転`;
@@ -507,22 +507,22 @@
                             // 6000個 (5.2%)
                             else if (roll < 0.005 + 0.052) {
                                 payout = 6000;
-                                addLog(`🔥 超絶エゴい！ 6000玉獲得 !!`, "color-ultimate");
+                                addLog(`🔥 嫌だ！俺は俺のゴールで！勝ちたい！ 6000玉獲得 !!`, "color-ultimate");
                             }
                             // 4500個 (19.8%)
                             else if (roll < 0.057 + 0.198) {
                                 payout = 4500;
-                                addLog(`💥 激アツ！ 4500玉獲得 !`, "color-rush");
+                                addLog(`💥 嫌だ！俺は俺のゴールで！勝ちたい！ 4500玉獲得 !`, "color-rush");
                             }
                             // 3000個 (38.0%)
                             else if (roll < 0.255 + 0.380) {
                                 payout = 3000;
-                                addLog(`⚡ エゴイストボーナス！ 3000玉獲得`, "color-rush");
+                                addLog(`⚡ 俺はストライカーだ！ 3000玉獲得`, "color-rush");
                             }
                             // 1500個 (36.5%)
                             else {
                                 payout = 1500;
-                                addLog(`⚽ ストライカーボーナス！ 1500玉獲得`, "color-hit");
+                                addLog(`⚽ ゴールゴルゴルゴル！ 1500玉獲得`, "color-hit");
                             }
 
                             this.session_payout += payout;

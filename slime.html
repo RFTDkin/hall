@@ -326,7 +326,7 @@
                 updateUI();
 
                 for (let i = 1; i <= 100; i++) {
-                    await sleep(30);
+                    await sleep(40);
                     document.getElementById("ui-spins").innerText = `時短中: ${i}/100`;
 
                     if (Math.random() < (1 / 399.9)) {
@@ -368,7 +368,7 @@
                 let current_st = st_max;
 
                 while (this.state === "RUSH" && current_st > 0) {
-                    await sleep(30);
+                    await sleep(40);
                     let current_spin = st_max - current_st + 1;
                     document.getElementById("ui-spins").innerText = `LT中: ${current_spin}/${st_max}`;
 

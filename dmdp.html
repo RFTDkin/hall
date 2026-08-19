@@ -223,7 +223,7 @@
                     let current_rush_spins = 0; // 每次中獎後重置轉數
 
                     while (rush_active) {
-                        await sleep(30); // 模擬轉動時間，令 UI 轉數快速跳動
+                        await sleep(40); // 模擬轉動時間，令 UI 轉數快速跳動
                         current_rush_spins++;
                         document.getElementById("ui-spins").innerText = `屍RUSH: ${current_rush_spins}回転`;
 

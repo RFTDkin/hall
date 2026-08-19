@@ -342,7 +342,7 @@
                 updateUI();
 
                 while (this.state === "LT_RUSH") {
-                    await sleep(30); // 模擬轉數跳動速度
+                    await sleep(40); // 模擬轉數跳動速度
                     current_rush_spins += 1;
 
                     document.getElementById("ui-spins").innerText = `LT中: ${current_rush_spins}回転`;

@@ -217,7 +217,7 @@
                 let hit_spin = 0;
                 let hit = false;
                 for(let i = 1; i <= 65; i++) {
-                    await sleep(30); // 加入延遲模擬轉數跳動
+                    await sleep(40); // 加入延遲模擬轉數跳動
                     document.getElementById("ui-spins").innerText = `ST中: ${i}/65`;
                     
                     if (Math.random() < (1 / 94.1)) {
@@ -268,7 +268,7 @@
                     let hit_spin = 0;
                     let hit = false;
                     for(let i = 1; i <= 145; i++) {
-                        await sleep(30); // 加入延遲模擬轉數跳動
+                        await sleep(40); // 加入延遲模擬轉數跳動
                         document.getElementById("ui-spins").innerText = `LT中: ${i}/145`;
                         
                         if (Math.random() < (1 / 71.6)) {
@@ -296,7 +296,7 @@
                             addLog("⚡ 87% 継続成功！ LT継続！！", "color-lt");
                             // 繼續下一個迴圈
                         } else {
-                            addLog("😭 13% 振り分け... (3000玉獲得して通常へ転落)", "color-normal");
+                            addLog("😭 13% 振り分け...退学 (3000玉獲得して通常へ転落)", "color-normal");
                             this.end_rush();
                             break;
                         }

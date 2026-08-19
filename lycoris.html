@@ -392,7 +392,7 @@
                 updateUI();
 
                 while (this.state === "RUSH" && current_st > 0) {
-                    await sleep(30);
+                    await sleep(40);
                     let current_spin = st_max - current_st + 1;
 
                     document.getElementById("ui-spins").innerText = `RUSH中: ${current_spin}/${st_max}`;

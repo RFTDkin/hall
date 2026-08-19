@@ -232,7 +232,7 @@
                 let st_remaining = 130;
                 
                 while (this.state === "RUSH" && st_remaining > 0) {
-                    await sleep(30);
+                    await sleep(40);
                     document.getElementById("ui-spins").innerText = `RUSH残り: ${st_remaining}/130`;
 
                     // 右打ち確率: 1/90.4
