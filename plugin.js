@@ -272,16 +272,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     } else {
                         clearInterval(countdown);
                         userData.max_allowed_spins += 4000;
-                        userRef.update({ max_allowed_spins: userData.max_allowed_spins });
                         
-                        maxSpinsEl.innerText = userData.max_allowed_spins;
-                        adBtn.remove();
-                        
-                        if (playBtn) {
-                            playBtn.disabled = false;
-                            playBtn.innerText = "▶️ プレイ続行";
-                        }
-                        window.alert("🎉 認証成功！上限が +4000回転 追加されました！");
+                        // 🌟 確保 Firebase 儲存完畢後，自動 F5 刷新網頁 🌟
+                        userRef.update({ max_allowed_spins: userData.max_allowed_spins }).then(() => {
+                            window.alert("🎉 認証成功！上限が +4000回転 追加されました！\n(システムを再起動します)");
+                            window.location.reload(); // 自動刷新，完美清走卡死 Bug
+                        });
                     }
                 }, 1000);
             };
