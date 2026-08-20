@@ -10,7 +10,7 @@
     <meta name="description" content="PガンダムSEED、東京喰種、SAOなどの大当り確率を完全再現した無料パチンコシミュレーター＆総合収支アプリ。資金無限で1万回転の高速消化が可能！ホール行く前のオカルト検証に最適。">
     <meta name="keywords" content="パチンコ,シミュレーター,無料,バーチャル,ホール,ガンダムSEED,東京喰種,SAO">
     <meta name="google-site-verification" content="TGZTGIufykax-Eu0AKA4VHiaxhSR3LTUAIHUHvBtsWE" />
-    
+
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -860,7 +860,10 @@
 
             let hitEl = document.getElementById("today-besthit");
             if (bestHitUserHtml && bestHitPayout >= 10000) {
-                hitEl.innerHTML = `<span style="color:#fff;">${bestHitPayout.toLocaleString()} 玉</span><br><span style="font-size:0.55em;">${bestHitUserHtml} (${bestHitMachine})</span>`;
+                // 👇 呢行係魔法：將資料庫入面多餘嘅 SEO 字眼洗走，變返乾淨機名
+                let cleanMachineName = bestHitMachine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
+                
+                hitEl.innerHTML = `<span style="color:#fff;">${bestHitPayout.toLocaleString()} 玉</span><br><span style="font-size:0.55em;">${bestHitUserHtml} (${cleanMachineName})</span>`;
             } else {
                 hitEl.innerHTML = `<span style="color:#888;">記録待ち (1万発以上)</span>`;
             }
@@ -875,8 +878,11 @@
                 let hamariUserHtml = hamariHasCompleted
                     ? `<span class="rainbow-text">${maxHamariData.user}</span>`
                     : `<span style="color:#ffca28;">${maxHamariData.user}</span>`;
-
-                hamariEl.innerHTML = `<span style="color:#ff9100;">${maxHamariData.spins.toLocaleString()} 回転</span><br><span style="font-size:0.55em;">${hamariUserHtml} (${maxHamariData.machine})</span>`;
+                
+                // 👇 同樣加呢行魔法過濾ハマリ嘅機台名
+                let cleanHamariMachine = maxHamariData.machine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
+                
+                hamariEl.innerHTML = `<span style="color:#ff9100;">${maxHamariData.spins.toLocaleString()} 回転</span><br><span style="font-size:0.55em;">${hamariUserHtml} (${cleanHamariMachine})</span>`;
             } else {
                 hamariEl.innerHTML = `<span style="color:#888;">記録なし (更新待ち)</span>`;
             }
