@@ -2,6 +2,8 @@
 body {
     padding-bottom: 100px !important; 
     animation: smoothFadeIn 0.8s ease-in-out forwards;
+    height: auto !important;
+    overflow-y: auto !important; /* 強制開啟上下滑動 */
 }
 
 /* 網頁頭 0.5 秒強制透明 (等 JS 翻譯)，然後慢慢浮現 */
