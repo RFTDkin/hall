@@ -195,7 +195,8 @@ document.addEventListener("DOMContentLoaded", () => {
         renderWallet();
 
         let originalTitle = document.title;
-        let machineName = originalTitle.replace('柏青哥模擬器 (', '').replace(')', '').replace('パチンコシミュレーター (', '').trim() || "Unknown";
+        // 👇 終極濾水器：無論新舊標題，統統幫你洗淨變回最原始嘅機台名
+        let machineName = originalTitle.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace('パチンコシミュレーター (', '').replace(/\)/g, '').trim() || "Unknown";
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
         let pageText = originalTitle + " " + document.body.innerText;
