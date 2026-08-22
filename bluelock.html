@@ -372,10 +372,27 @@
                     addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
                 }
 
-                // 大当り確率 (約1/399.9) - 包含図柄揃い及記者会見入RUSH
-                if (Math.random() < (1 / 399.9)) {
-                    addLog(`\n[${this.session_spins} 回轉] 🎯 大當たり當選！！！`, "color-hit");
-                    await this.normal_result_zugara();
+                // 🌟 完美跟隨官方 (※1) 大当り確率: 1/349.9 (包含所有圖柄及記者會)
+                if (Math.random() < (1 / 349.9)) {
+                    
+                    let hitType = Math.random();
+
+                    // 1/349.9 裡面，有 87.5% 屬於 1/399.9 嘅圓餅圖 (包含 1500, 1050, 記者會成功)
+                    // 剩餘 12.5% 屬於 記者会見失敗 (得300玉通常)
+                    if (hitType < 0.875) {
+                        // 進入 1/399.9 嘅官方 100% 圓餅圖分配
+                        await this.normal_result_zugara();
+                    } else {
+                        // 🎤 記者会見 失敗 (佔總 1/2110 嘅 75.5%)
+                        addLog(`\n[${this.session_spins} 回轉] 🎤 記者会見 発生！`, "color-charge");
+                        addLog(`⏳ 昇格期待度 24.5%...`, "color-normal");
+                        await sleep(2000);
+                        
+                        this.session_payout += 300;
+                        addLog("💀 記者会見失敗... 2R (300玉) 獲得 (通常終了)", "color-fall");
+                        updateUI();
+                        this.record_history();
+                    }
                     return true;
                 }
 
@@ -386,43 +403,40 @@
                 let roll = Math.random();
                 let enterRush = false;
 
-                // 1500個 + RUSH (約0.1%)
+                // 🌈 1500個 + RUSH (0.1%)
                 if (roll < 0.001) {
                     this.session_payout += 1500;
                     enterRush = true;
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い當選！！！`, "color-hit");
                     addLog("🌈 奇跡の覚醒！全回転 10R (1500玉) 獲得！", "color-ultimate");
-
-                    // 🌟 彈出 0.1% 專屬全回轉影片 (不播放 Egoist)
                     addLog(`🎵 播放專屬動畫 (BL1500LT.mp4) 中... 請稍候`, "color-music");
                     await playVideoPopupAndWait(videoBL1500LT);
                 }
-                // 1050個-A + RUSH (約50%)
+                // ⚽ 1050個-A + RUSH (50%)
                 else if (roll < 0.001 + 0.500) {
                     this.session_payout += 1050;
                     enterRush = true;
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い當選！！！`, "color-hit");
                     addLog("⚽ 激アツ！ 図柄揃い 7R (1050玉) 獲得！", "color-hit");
-
-                    // 普通圖柄中獎，播 Egoist
                     addLog(`🎵 播放專屬音效 (Egoist.mp4) 中... 請稍候`, "color-music");
                     await playMediaAndWait(egoistMedia);
                 }
-                // 300個 + RUSH (約4.6%) - 記者会見入RUSH
+                // 🎤 300個 + RUSH (4.6%) - 記者会見大成功
                 else if (roll < 0.501 + 0.046) {
                     this.session_payout += 300;
                     enterRush = true;
-                    addLog("🎤 記者会見大成功！！ 2R (300玉) 獲得！", "color-ultimate");
-
-                    // 記者會入RUSH，唔播 Egoist
+                    addLog(`\n[${this.session_spins} 回轉] 🎤 記者会見 発生！`, "color-charge");
+                    addLog(`⏳ 昇格期待度 24.5%...`, "color-normal");
+                    await sleep(2000);
+                    addLog("✨ 記者会見大成功！！ 2R (300玉) 獲得！", "color-ultimate");
                 }
-                // 1050個-B 通常終了 (約45.3%)
+                // 💀 1050個-B 通常終了 (45.3%)
                 else {
                     this.session_payout += 1050;
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い當選！！！`, "color-hit");
                     addLog("⚽ 激アツ！ 図柄揃い 7R (1050玉) 獲得！", "color-hit");
-
-                    // 圖柄失敗，播 Egoist
                     addLog(`🎵 播放專屬音效 (Egoist.mp4) 中... 請稍候`, "color-music");
                     await playMediaAndWait(egoistMedia);
-
                     addLog("💀 通常終了", "color-fall");
                 }
 

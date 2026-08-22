@@ -324,11 +324,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                     
-                    db.ref('server_records/max_hamari').set({
-                        user: currentUserName,
-                        spins: new_spins,
-                        machine: machineName,
-                        date: dateStr
+                    // 🛡️ 升級做 Transaction，確保寫入前一刻同 Database 實時比對
+                    db.ref('server_records/max_hamari').transaction((currentData) => {
+                        if (currentData === null || new_spins > currentData.spins) {
+                            return {
+                                user: currentUserName,
+                                spins: new_spins,
+                                machine: machineName,
+                                date: dateStr
+                            };
+                        }
+                        return; // 如果 Database 裡面嘅數字大過你，就放棄寫入，保護大數！
                     });
                 }
 
