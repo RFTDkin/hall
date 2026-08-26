@@ -247,7 +247,7 @@
                 let ct_spins = 0;
 
                 while (this.state === "CHALLENGE" && ct_spins < 100) {
-                    await sleep(20);
+                    await sleep(40);
                     ct_spins++;
                     document.getElementById("ui-spins").innerText = `時短: ${ct_spins}/100`;
 
@@ -284,7 +284,7 @@
 
                     // 完走型：必定跑完 70 轉
                     while (st_remaining > 0) {
-                        await sleep(20); 
+                        await sleep(40); 
                         st_remaining--;
                         document.getElementById("ui-spins").innerText = `ST残り: ${st_remaining}/70`;
 
