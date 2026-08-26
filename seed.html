@@ -242,7 +242,7 @@ async play_normal() {
                 updateUI();
 
                 while (this.state !== "NORMAL") {
-                    await sleep(20);
+                    await sleep(40);
                     st_remaining--;
                     
                     let modeName = this.state === "CLIMAX" ? "CLIMAX" : "RUSH";
