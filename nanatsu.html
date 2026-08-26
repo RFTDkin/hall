@@ -253,7 +253,7 @@
                 while (this.challenge_spins < 100) {
                     await sleep(40); // 緊張感を出すためのディレイ（1回転あたり40ミリ秒）
                     this.challenge_spins += 1;
-                    this.session_spins += 1;
+                    // ❌ 已經剷走咗 this.session_spins += 1; 呢行，保證唔會再加落 DATA LAMP 度！
 
                     // UIの回転数をリアルタイムで更新
                     document.getElementById("ui-spins").innerText = `CHALLENGE: ${this.challenge_spins}/100`;
@@ -271,6 +271,8 @@
 
                 // 100回転スルーした場合
                 addLog(`💀 チャレンジ失敗 (100回転スルー)`, "color-fall");
+                // 👇 加返失敗時嘅總出玉顯示 (450玉)
+                addLog(`💰 最終出玉: ${this.session_payout} 玉`); 
                 this.state = "NORMAL";
                 this.record_history();
                 updateUI();
@@ -290,6 +292,10 @@
                     if (r < 25.0) { 
                         this.session_payout += 1500;
                         addLog(`💀 【RUSH終了】 1500玉獲得 (計 ${this.session_rush_count}連)`, "color-fall");
+                        
+                        // 👇 呢度加返 RUSH 完結時嘅總出玉顯示！
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                        
                         this.state = "NORMAL";
                         this.record_history();
                         updateUI();
@@ -320,7 +326,6 @@
                     await sleep(800); // 連続大当りの間に少し余韻を持たせる
                 }
             }
-
             record_history() {
                 this.history.unshift({
                     spins: this.session_spins,
