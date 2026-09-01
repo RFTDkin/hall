@@ -456,7 +456,11 @@
             let spins = 0, payout = 0;
             while (true) {
                 spins++;
-                if (Math.random() < 1 / 999) {
+                // 🌟 完美單次抽獎，確保每轉只消耗一次幸運值
+                let roll = Math.random(); 
+
+                // 🎯 路線 1: 図柄揃い (1/999)
+                if (roll < 1 / 999) {
                     if (Math.random() < 0.50) {
                         payout += 7500;
                         let st = 5;
@@ -469,8 +473,9 @@
                         }
                     } else payout += 3000;
                     break;
-                }
-                if (Math.random() < 1 / 538.8) {
+                } 
+                // ⚡ 路線 2: 喰種チャージ (1/538.8) - 疊加機率
+                else if (roll < (1 / 999) + (1 / 538.8)) {
                     if (Math.random() < 0.005) {
                         payout += 7500;
                         let st = 5;
