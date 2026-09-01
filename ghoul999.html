@@ -333,37 +333,61 @@
                     addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
                 }
 
-                // 1/999.9 プレミアム大当り
-                if (Math.random() < (1 / 999.9)) {
-                    addLog(`\n[${this.session_spins} 回轉] 🩸 プレミアム大当り！`, "color-hit");
-                    await this.normal_result();
-                    return true;
-                }
+                // 🌟 完美單次抽獎：確保每轉只消耗一次幸運值 🌟
+                let roll = Math.random();
 
-                // 1/538.8 喰種チャージ
-                if (Math.random() < (1 / 538.8)) {
-                    addLog(`\n[${this.session_spins} 回轉] 喰種チャージ當選！`, "color-charge");
-
-                    // 🌟 0.5% 機率突入 RUSH 機制 🌟
-                    if (Math.random() < 0.005) {
-                        this.session_payout += 7500; // 👈 直接獲得 7500 玉
-                        addLog(`🌈 奇跡！喰種チャージから 7500玉獲得 ＋ RUSH突入！`, "color-ultimate");
-
-                        // 播 Charge 專屬影片
-                        rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
+                // 🎯 路線 1: 図柄揃い (1/999) 
+                if (roll < (1 / 999)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い當選！`, "color-hit");
+                    
+                    // 図柄揃い 內部 50% 判定
+                    if (Math.random() < 0.50) {
+                        this.session_payout += 7500;
+                        addLog("🌈 超プレミアム！ 7500玉獲得 ＋ HYPER喰種RUSH突入！", "color-ultimate");
+                        
+                        rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4"; // 突入片
                         rushMedia.load();
-
-                        addLog(`🎵 播放專屬動畫 (Charge入RUSH) 中... 請稍候`, "color-music");
+                        addLog(`🎵 播放專屬動畫 中... 請稍候`, "color-music");
                         await playVideoPopupAndWait(rushMedia);
 
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         updateUI();
-
                         await sleep(1000);
                         await this.play_rush();
                     } else {
-                        this.session_payout += 300; // 👈 失敗時は300玉
-                        addLog(`💥 2R 300玉獲得 (通常終了)`);
+                        // 演出失敗 (3000個)
+                        this.session_payout += 3000;
+                        addLog("😭 演出失敗... 3000玉獲得 (通常終了)", "color-normal");
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        updateUI();
+                        this.record_history();
+                    }
+                    return true;
+                }
+                
+                // ⚡ 路線 2: 喰種チャージ (1/538.8) - 疊加機率
+                else if (roll < (1 / 999) + (1 / 538.8)) {
+                    addLog(`\n[${this.session_spins} 回轉] ⚡ 喰種CHARGE 發生！`, "color-charge");
+                    
+                    // 🌟 修正：Charge 內部 0.5% 極低機率突入 RUSH 🌟
+                    if (Math.random() < 0.005) {
+                        this.session_payout += 7500;
+                        addLog(`🌈 昇格発生！奇跡の 0.5%！ 7500玉獲得 ＋ HYPER喰種RUSH突入！`, "color-ultimate");
+
+                        rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
+                        rushMedia.load();
+                        addLog(`🎵 播放專屬動畫 中... 請稍候`, "color-music");
+                        await playVideoPopupAndWait(rushMedia);
+
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        updateUI();
+                        await sleep(1000);
+                        await this.play_rush();
+                    } else {
+                        // 昇格なし (300個) - 99.5% 機率
+                        this.session_payout += 300;
+                        addLog(`💥 昇格なし... 2R 300玉獲得 (通常終了)`, "color-fall");
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         updateUI();
                         this.record_history();
                     }
