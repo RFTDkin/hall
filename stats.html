@@ -430,23 +430,42 @@
             let spins = 0, payout = 0;
             while (true) {
                 spins++;
-                if (Math.random() < 1 / 399.9) {
+                
+                // 🌟 完美單次抽獎，確保每轉只消耗一次幸運值 🌟
+                let roll = Math.random(); 
+
+                // 🎯 路線 1: 図柄揃い (1/399.9)
+                if (roll < (1 / 399.9)) {
                     let r = Math.random();
-                    if (r < 0.50) { payout += 1500; runST130(); }
-                    else if (r < 0.51) { payout += 300; runST130(); }
-                    else { payout += 1500; }
+                    let enterRush = false;
+
+                    if (r < 0.50) {
+                        payout += 1500;
+                        enterRush = true;
+                    } else if (r < 0.51) {
+                        payout += 300;
+                        enterRush = true;
+                    } else {
+                        payout += 1500;
+                    }
+
+                    if (enterRush) {
+                        let st = 130;
+                        while (st > 0 && payout < 95000) {
+                            if (Math.random() < (1 / 95.3)) {
+                                payout += (Math.random() < 0.03) ? 6000 : 3000;
+                                st = 130; // ST 回復
+                            } else {
+                                st--;
+                            }
+                        }
+                    }
                     break;
-                }
-                if (Math.random() < 1 / 399.9) { payout += 300; break; }
-            }
-            function runST130() {
-                let st = 130;
-                while (st > 0) {
-                    if (payout >= 95000) break;
-                    if (Math.random() < 1 / 95.3) { 
-                        payout += (Math.random() < 0.03) ? 6000 : 3000; 
-                        st = 130; 
-                    } else st--;
+                } 
+                // ⚡ 路線 2: 喰種チャージ (疊加上去變成 2/399.9)
+                else if (roll < (2 / 399.9)) {
+                    payout += 300;
+                    break; // 通常終了
                 }
             }
             return { spins, payout };
