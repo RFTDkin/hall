@@ -335,15 +335,17 @@
                     addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
                 }
 
-                // 1/399.9 通常時大当り
-                if (Math.random() < (1 / 399.9)) {
+                // 🌟 完美單次抽獎：確保每轉只抽一次亂數 🌟
+                let roll = Math.random();
+
+                // 🎯 路線 1: 図柄揃い (1/399.9)
+                if (roll < (1 / 399.9)) {
                     addLog(`\n[${this.session_spins} 回轉] 🩸 図柄揃い大当り！`, "color-hit");
                     await this.normal_result();
                     return true;
                 }
-
-                // 1/399.9 喰種チャージ
-                if (Math.random() < (1 / 399.9)) {
+                // ⚡ 路線 2: 喰種チャージ (另外一個 1/399.9，機率疊加上去變成 2/399.9)
+                else if (roll < (2 / 399.9)) {
                     addLog(`\n[${this.session_spins} 回轉] 喰種チャージ當選！`, "color-charge");
                     this.session_payout += 300;
                     addLog(`💥 2R 300玉獲得 (通常終了)`);
