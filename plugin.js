@@ -347,8 +347,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 let payout_diff = new_payout - lastUI_payout;
 
                 if (new_payout === 0) {
+                    let alreadySaved = completeTriggeredThisRush;
                     completeTriggeredThisRush = false; 
-                    if (lastUI_payout >= 10000) { 
+                    
+                    // 🌟 終極判斷：如果未爆機 (未觸發過強制 Save)，先至喺歸零嗰陣上傳！
+                    if (lastUI_payout >= 10000 && !alreadySaved) { 
                         const todayDate = new Date();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
@@ -404,6 +407,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (new_payout >= 95000 && !completeTriggeredThisRush) {
                     completeTriggeredThisRush = true;
+
+                    // 🌟 新增：一達標即刻強制上傳成績，防止玩家走佬！
+                    const todayDate = new Date();
+                    const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
+                    db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: new_payout, date: dateStr });
+
                     if (!userData.has_completed) {
                         userData.has_completed = true;
                         userRef.update({ has_completed: true });

@@ -55,6 +55,7 @@
         .tag-kakegurui { border-top: 5px solid #d50000; }
         .tag-ggo { border-top: 5px solid #ff4081; }
         .tag-nanatsu { border-top: 5px solid #ff9100; }
+        .tag-eva { border-top: 5px solid #9c27b0; }
     </style>
 <link rel="stylesheet" href="mobile.css">
 </head>
@@ -74,6 +75,9 @@
         <button id="btn-start-100" class="btn-start" onclick="runAllSimulations(100)">▶️ 100回 遊技開始</button>
         <button id="btn-start-1000" class="btn-start" style="background-color: #d29922;" onclick="runAllSimulations(1000)">▶️ 1,000回 遊技開始</button>
         <button id="btn-start-10000" class="btn-start" style="background-color: #b35900;" onclick="checkAndRun10000()">🔒 10,000回 (広告解放)</button>
+        <button id="btn-100k" class="btn-start" onclick="trigger100kSim()" style="background-color: #ff9100; border-color: #ffea00; margin-bottom: 0;">
+        🔒 10万回 (広告解放)
+        </button>
     </div>
 
     <div class="grid-container">
@@ -249,12 +253,64 @@
             <div class="progress-text" id="nanatsu-prog">待機中...</div>
         </div>
 
+        <div class="machine-card tag-eva" id="card-eva">
+            <h3 class="machine-title">e新世紀エヴァンゲリオン</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="eva-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="eva-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="eva-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="eva-profit">---</span></div>
+            <div class="progress-text" id="eva-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-hokuto" id="card-hokuto">
+            <h3 class="machine-title">e北斗の拳10</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="hokuto-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="hokuto-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="hokuto-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="hokuto-profit">---</span></div>
+            <div class="progress-text" id="hokuto-prog">待機中...</div>
+        </div>
+
     </div>
 
     <script>
         // 🌟 廣告設定與解鎖狀態 🌟
         const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63"; 
-        let is10000Unlocked = false;
+        let is100kUnlocked = false;
+
+        function trigger100kSim() {
+            if (is100kUnlocked) {
+                runAllSimulations(100000);
+                return;
+            }
+
+            let confirmAd = window.confirm("⚠️ 10万回高速演算はサーバーとブラウザに極めて大きな負荷がかかります。\n\n広告を1回チェックして、このセッションの演算機能を解放しますか？");
+            if (confirmAd) {
+                window.open(ADSTERRA_DIRECT_LINK, '_blank');
+                
+                const btn100k = document.getElementById('btn-100k');
+                const btns = document.querySelectorAll('.btn-start');
+                btns.forEach(b => b.disabled = true); 
+                btn100k.disabled = true;
+                
+                let secondsLeft = 15;
+                btn100k.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
+                
+                let countdown = setInterval(() => {
+                    secondsLeft--;
+                    if (secondsLeft > 0) {
+                        btn100k.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
+                    } else {
+                        clearInterval(countdown);
+                        is100kUnlocked = true;
+                        btns.forEach(b => b.disabled = false);
+                        btn100k.disabled = false;
+                        window.alert("🎉 認証成功！10万回演算機能が解放されました！");
+                        runAllSimulations(100000); // 自動幫玩家行 10 萬次
+                    }
+                }, 1000);
+            }
+        }
 
         function checkAndRun10000() {
             if (is10000Unlocked) {
@@ -1074,6 +1130,100 @@
             return { spins, payout };
         }
 
+        function simEva() {
+            let spins = 0, payout = 0;
+            while (true) {
+                spins++;
+                let roll = Math.random();
+                
+                // 🎯 路線 1: 図柄揃い (1/399.9)
+                if (roll < 1 / 399.9) {
+                    let r = Math.random();
+                    let rush = false;
+                    
+                    if (r < 0.005) { payout += 1500; rush = true; } 
+                    else if (r < 0.505) { payout += 300; rush = true; } 
+                    else {
+                        payout += 300;
+                        // 跌入時短 100回
+                        for (let i = 0; i < 100; i++) {
+                            if (payout >= 95000) break;
+                            if (Math.random() < 1 / 399.9) {
+                                payout += (Math.random() < 0.005) ? 4800 : 2400;
+                                rush = true; break;
+                            }
+                        }
+                    }
+                    
+                    if (rush && payout < 95000) {
+                        let st = 157;
+                        while (st > 0 && payout < 95000) {
+                            if (Math.random() < 1 / 99.6) {
+                                payout += (Math.random() < 0.005) ? 4800 : 2400;
+                                st = 157;
+                            } else { st--; }
+                        }
+                    }
+                    break;
+                }
+                // ⚡ 路線 2: エヴァチャージ (疊加至合算 1/349.9)
+                else if (roll < 1 / 349.9) {
+                    payout += 300;
+                    
+                    // 🌟 只有 1% 機率突入 RUSH，99% 直接結束 (無時短)
+                    if (Math.random() < 0.01) { 
+                        if (payout < 95000) {
+                            let st = 157;
+                            while (st > 0 && payout < 95000) {
+                                if (Math.random() < 1 / 99.6) {
+                                    payout += (Math.random() < 0.005) ? 4800 : 2400;
+                                    st = 157;
+                                } else { st--; }
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simHokuto() {
+            let spins = 0, payout = 0;
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 399.8) {
+                    let r = Math.random();
+                    let rush = true;
+                    if (r < 0.05) payout += 4500;
+                    else if (r < 0.09) payout += 1800;
+                    else if (r < 0.61) payout += 1500;
+                    else { payout += 1500; rush = false; }
+
+                    if (rush && payout < 95000) {
+                        let st_remain = 14; 
+                        while (st_remain > 0 && payout < 95000) {
+                            if (Math.random() < 1 / 10.7) {
+                                let r2 = Math.random();
+                                if (st_remain > 4) {
+                                    if (r2 < 0.10) payout += 6000;
+                                    else if (r2 < 0.50) payout += 4500;
+                                    else if (r2 < 0.80) payout += 1500;
+                                } else {
+                                    if (r2 < 0.80) payout += 1500;
+                                }
+                                st_remain = 14;
+                            } else {
+                                st_remain--;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
@@ -1142,10 +1292,14 @@
 
         async function runAllSimulations(iterations) {
             const btns = document.querySelectorAll('.btn-start');
-            btns.forEach(btn => btn.disabled = true);
+            const btn100k = document.getElementById('btn-100k'); // 👈 攞埋 10 萬次按鈕
             
-            const activeBtn = document.getElementById(`btn-start-${iterations}`);
-            if (activeBtn) activeBtn.innerText = `⏳ 演算中 (${iterations}回)...`;
+            // 鎖定所有按鈕
+            btns.forEach(btn => btn.disabled = true);
+            if (btn100k) btn100k.disabled = true;
+            
+            const activeBtn = document.getElementById(`btn-start-${iterations}`) || (iterations === 100000 ? btn100k : null);
+            if (activeBtn) activeBtn.innerText = `⏳ 演算中 (${iterations.toLocaleString()}回)...`;
 
             document.querySelectorAll('.val-spins, .val-payout, .val-max, .val-profit').forEach(el => {
                 el.innerText = "---";
@@ -1158,6 +1312,7 @@
 
             await yieldToMain();
 
+            // ... 呢度保留你原本嗰堆 await runMachineSim(...) 唔使郁 ...
             await runMachineSim('bluelock', simBlueLock, 1000 / 17, iterations);
             await runMachineSim('bluelock_light', simBlueLockLight, 1000 / 17, iterations);
             await runMachineSim('dmdp', simDMDP, 1000 / 17, iterations);
@@ -1177,12 +1332,22 @@
             await runMachineSim('seed', simSeed, 1000 / 17, iterations);
             await runMachineSim('sao', simSAO, 1000 / 20, iterations);
             await runMachineSim('nanatsu', simNanatsu, 1000 / 17, iterations);
+            await runMachineSim('eva', simEva, 1000 / 17, iterations);
+            await runMachineSim('hokuto', simHokuto, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);
+            const final100kBtn = document.getElementById('btn-100k');
+            if (final100kBtn) final100kBtn.disabled = false;
+            
             document.getElementById('btn-start-100').innerText = "▶️ 100回 遊技開始";
             document.getElementById('btn-start-1000').innerText = "▶️ 1,000回 遊技開始";
             document.getElementById('btn-start-10000').innerText = is10000Unlocked ? "▶️ 10,000回 (解放済)" : "🔒 10,000回 (広告解放)";
+            
+            // 👈 強制刷新 10 萬次按鈕嘅文字
+            if (final100kBtn) {
+                final100kBtn.innerText = is100kUnlocked ? "▶️ 10万回 (解放済)" : "🔒 10万回 (広告解放)";
+            }
         }
     </script>
 <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; text-align: center; padding: 5px 0; border-top: 1px solid #333;">
