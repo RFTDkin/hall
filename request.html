@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>バグ報告と追加して欲しい機種 - 掲示板</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .home-btn {
+            background-color: #21262d;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            border: 1px solid #30363d;
+            transition: all 0.2s;
+        }
+
+        .home-btn:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+        }
+
+        h1 {
+            color: #2ea043;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(46, 160, 67, 0.5);
+        }
+
+        p.desc {
+            text-align: center;
+            color: #8b949e;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: #0d1117;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 1em;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .submit-btn {
+            background-color: #238636;
+            color: white;
+            border: 1px solid rgba(240, 246, 252, 0.1);
+            padding: 10px 25px;
+            font-size: 1em;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            float: right;
+        }
+
+        .submit-btn:hover {
+            background-color: #2ea043;
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .message-author {
+            font-weight: bold;
+            color: #ffca28;
+        }
+
+        .message-date {
+            color: #8b949e;
+        }
+
+        .message-body {
+            color: #e6edf3;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .rainbow-text {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow-bg 2s linear infinite;
+            font-weight: 900;
+        }
+
+        @keyframes rainbow-bg {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 200% 50%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="top-bar">
+            <a href="index.html" class="home-btn">🏠 ホールに戻る</a>
+        </div>
+
+        <h1>機種要望 掲示板</h1>
+        <p class="desc">追加して欲しい機種があればここに書き込んでください！</p>
+
+        <div class="input-section clearfix">
+            <div id="login-warning" style="color: #ff5252; margin-bottom: 10px; font-weight: bold; display: none;">
+                ※書き込むにはログインが必要です。</div>
+            <textarea id="msg-input" placeholder="メッセージを入力..."></textarea>
+            <button id="btn-submit" class="submit-btn" onclick="submitMessage()">送信する</button>
+        </div>
+
+        <div class="message-list" id="message-container">
+            <div style="text-align: center; color: #888;">読み込み中...</div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
+            authDomain: "p-hall.firebaseapp.com",
+            databaseURL: "https://p-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "p-hall",
+            storageBucket: "p-hall.firebasestorage.app",
+            messagingSenderId: "656958771527",
+            appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
+            measurementId: "G-46M19VQVY2"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentUserName = null;
+        let hasCompleted = false;
+
+        auth.onAuthStateChanged((user) => {
+            const btnSubmit = document.getElementById("btn-submit");
+            const inputField = document.getElementById("msg-input");
+            const warning = document.getElementById("login-warning");
+
+            if (user) {
+                db.ref('users/' + user.uid).once('value').then((snap) => {
+                    if (snap.exists()) {
+                        let userData = snap.val();
+                        currentUserName = userData.username;
+                        hasCompleted = userData.has_completed || false;
+
+                        btnSubmit.disabled = false;
+                        inputField.disabled = false;
+                        warning.style.display = "none";
+                    }
+                });
+            } else {
+                currentUserName = null;
+                btnSubmit.disabled = true;
+                btnSubmit.style.backgroundColor = "#333";
+                inputField.disabled = true;
+                inputField.placeholder = "※書き込むにはログインが必要です。";
+                warning.style.display = "block";
+            }
+        });
+
+        function submitMessage() {
+            const inputEl = document.getElementById("msg-input");
+            const text = inputEl.value.trim();
+
+            if (!currentUserName) {
+                alert("ログインしてください。");
+                return;
+            }
+            if (text === "") {
+                alert("メッセージを入力してください。");
+                return;
+            }
+
+            const btnSubmit = document.getElementById("btn-submit");
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "送信中...";
+
+            db.ref('community_requests').push({
+                uid: auth.currentUser.uid,
+                user: currentUserName,
+                has_completed: hasCompleted,
+                text: text,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                inputEl.value = "";
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "送信する";
+            }).catch(err => {
+                alert("エラーが発生しました: " + err.message);
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "送信する";
+            });
+        }
+
+        // 監聽數據庫，實時顯示留言
+        db.ref('community_requests').orderByChild('timestamp').on('value', (snapshot) => {
+            const container = document.getElementById("message-container");
+            container.innerHTML = "";
+
+            if (!snapshot.exists()) {
+                container.innerHTML = `<div style="text-align: center; color: #888;">まだメッセージはありません。最初の投稿をしてみましょう！</div>`;
+                return;
+            }
+
+            const messages = [];
+            snapshot.forEach(child => {
+                let msgData = child.val();
+                msgData.key = child.key; // 🌟 攞埋留言嘅 Firebase 專屬鎖匙，用嚟刪除
+                messages.push(msgData);
+            });
+
+            // 將最新嘅留言排喺最頂
+            messages.reverse().forEach(msg => {
+                const date = new Date(msg.timestamp);
+                const dateString = `${date.getFullYear()}/${(date.getMonth()+1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                
+                const card = document.createElement("div");
+                card.className = "message-card";
+                
+                let authorHtml = msg.has_completed 
+                    ? `<span class="rainbow-text">${escapeHtml(msg.user)}</span>` 
+                    : escapeHtml(msg.user);
+
+                // 🌟 判斷：如果係自己嘅留言，就加個「削除」按鈕 🌟
+                let deleteBtnHtml = "";
+                if (auth.currentUser && msg.uid === auth.currentUser.uid) {
+                    deleteBtnHtml = `<button onclick="deleteMsg('${msg.key}')" style="background: #d32f2f; color: white; border: 1px solid #b71c1c; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin-left: 15px; transition: 0.2s;" onmouseover="this.style.backgroundColor='#b71c1c'" onmouseout="this.style.backgroundColor='#d32f2f'">🗑️ 削除</button>`;
+                }
+
+                card.innerHTML = `
+                    <div class="message-header">
+                        <div class="message-author">👤 ${authorHtml}</div>
+                        <div class="message-date">${dateString} ${deleteBtnHtml}</div>
+                    </div>
+                    <div class="message-body">${escapeHtml(msg.text)}</div>
+                `;
+                container.appendChild(card);
+            });
+        });
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return "";
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // 🌟 執行刪除留言嘅函數
+        function deleteMsg(key) {
+            if (confirm("本当にこのメッセージを削除しますか？")) {
+                db.ref('community_requests/' + key).remove()
+                .catch(err => {
+                    alert("削除エラーが発生しました: " + err.message);
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
