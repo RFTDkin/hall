@@ -267,10 +267,17 @@
                     if (Math.random() < (1 / 10.7)) {
                         this.session_rush_count += 1;
                         let isReserve = st_remain <= 4;
-                        addLog(`\n🎉 [${isReserve ? '残保留' : 'ST'}] 當選！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
+                        
+                        // 🌟 新增：計算出當前係第幾轉
+                        let hitSpin = isReserve ? (4 - st_remain + 1) : (15 - st_remain);
+                        let phaseName = isReserve ? '残保留' : 'ST';
+                        
+                        // 🌟 將轉數加埋入 Log 顯示
+                        addLog(`\n🎉 [${phaseName} ${hitSpin}回転目] 當選！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
 
                         let r2 = Math.random();
                         let addP = 0;
+// ... 下面啲扣血/派彩邏輯照舊保留 ...
                         let resetText = "";
 
                         if (!isReserve) {
