@@ -530,19 +530,26 @@ setTimeout(() => {
             const spins = spinsEl ? parseInt(spinsEl.innerText) : 0;
             const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
 
-            // ✨ 1. 神の引き (399以上機 1回轉當選)
-            // 🌟 修正：必須包含中獎字眼，且絕對不可包含「チャージ」
-            if ((text.includes("當選") || text.includes("図柄揃い") || text.includes("BONUS")) && !text.includes("チャージ")) {
-                let isHeavyMachine = machineTitle.includes("399") || machineTitle.includes("999") || machineTitle.includes("エヴァンゲリオン") || machineTitle.includes("北斗") || machineTitle.includes("無職転生") || machineTitle.includes("EDENS") || machineTitle.includes("SEED");
+            // 統一字眼：所有現有機台的 log 都先映射成「初當」「RUSH 結束」或「通常落敗」。
+            // 不依賴單一機台的用語，新增機台時只需補充下面的明確規則。
+            const pageName = location.pathname.split('/').pop().toLowerCase();
+            const heavyMachinePages = new Set([
+                'bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html',
+                'hokuto10.html', 'mushoku.html', 'seed.html', 'slime.html'
+            ]);
+            const isHeavyMachine = heavyMachinePages.has(pageName)
+                || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム)/.test(machineTitle);
+            const isCharge = /チャージ|CHARGE/i.test(text);
+            const isMainHit = /當選|当選|図柄揃い|大当り|大当たり|BONUS|記者会見大成功/.test(text) && !isCharge;
 
-                if (spins === 1 && isHeavyMachine) {
-                    db.ref('users/' + uid).update({ title_godpull: true });
-                }
+            // ✨ 1. 神の引き (分母399以上機的第1轉初當)
+            if (isMainHit && spins === 1 && isHeavyMachine) {
+                db.ref('users/' + uid).update({ title_godpull: true });
             }
 
-            // ⚡ 2. 駆け抜け王 (RUSH突入後，沒有實質連莊結束)
-            // 🌟 修正：容許 rushCount 為 0 或 1 (兼容部分機台初當計1連)
-            if (text.includes("RUSH終了") || text.includes("IMPACT MODE終了") || text.includes("ST抜け") || text.includes("LT終了") || text.includes("決着")) {
+            // ⚡ 2. 駆け抜け王：各機台的 RUSH／ST／BATTLE 終結字眼。
+            const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(text);
+            if (isRushEnd) {
                 if (rushCount <= 1) {
                     let ref = db.ref('users/' + uid + '/runthrough_count');
                     ref.transaction(count => {
@@ -556,9 +563,10 @@ setTimeout(() => {
                 }
             }
 
-            // 💀 3. 単発地獄 (15次連續初當無 RUSH)
-            // 🌟 修正：容許 rushCount 為 0 或 1
-            if (text.includes("通常へ戻る") || text.includes("通常終了") || text.includes("チャンスタイム終了") || text.includes("敗北")) {
+            // 💀 3. 単発地獄：只計「初當後未入 RUSH」的通常落敗。
+            // RUSH 內的敗北已由 isRushEnd 處理，不能混進單発地獄。
+            const isNormalLoss = !isRushEnd && !isCharge && /通常へ戻る|通常終了|通常へ|RUSH非突入|チャレンジ失敗|CZ失敗|任務失敗|チャンスタイム終了/.test(text);
+            if (isNormalLoss) {
                 if (rushCount <= 1) {
                     let ref = db.ref('users/' + uid + '/single_hell_count');
                     ref.transaction(count => {
