@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>称号一覧 - 獲得条件とエフェクト</title>
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #050505; color: #ffffff; padding: 20px; text-align: center; background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%); min-height: 100vh; margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .top-bar { display: flex; justify-content: flex-start; margin-bottom: 20px; }
+        .home-btn { background-color: #21262d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 1px solid #30363d; }
+        h1 { color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        .desc { color: #8b949e; margin-bottom: 30px; }
+        
+        .title-card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: left; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .title-info { flex: 1; min-width: 250px; }
+        .title-name { font-size: 1.3em; font-weight: bold; margin-bottom: 5px; color: #fff; }
+        .title-cond { font-size: 0.9em; color: #aaa; background: #222; padding: 8px; border-radius: 5px; border-left: 3px solid #58a6ff; }
+        .preview-box { background: #000; border: 1px solid #444; padding: 15px 30px; border-radius: 8px; font-size: 1.2em; text-align: center; min-width: 200px; display: flex; align-items: center; justify-content: center; }
+
+        /* ================= 称号エフェクト ================= */
+        /* 🌟 修正字體：移除強制粗體與字距，還原原本清爽字體 🌟 */
+        .title-effect { position: relative; display: inline-block; white-space: nowrap; }
+
+        /* 1. コンプリート：🌟 還原經典原版高飽和度彩虹 🌟 */
+        .effect-rainbow {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow-bg 2s linear infinite;
+            font-weight: 900;
+        }
+        @keyframes rainbow-bg { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+        /* 2. サーバーの覇者：王座銘牌 */
+        .effect-supreme {
+            isolation: isolate; padding: 6px 20px; color: #fff8d8; border: 1px solid #f6d36c; border-radius: 2px;
+            background: linear-gradient(180deg, rgba(92, 55, 4, .94), rgba(30, 16, 0, .96) 48%, rgba(106, 65, 5, .92));
+            box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45);
+            text-shadow: 0 1px 0 #7a4900, 0 0 8px rgba(255, 223, 117, .7); overflow: visible; font-weight: bold;
+        }
+        .effect-supreme::before { content: ''; position: absolute; z-index: -1; top: 50%; left: -22px; right: -22px; height: 1px; transform: translateY(-50%); background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent); box-shadow: 0 -7px 10px rgba(255, 196, 45, .24), 0 7px 10px rgba(255, 196, 45, .24); }
+        .effect-supreme::after { content: ''; position: absolute; z-index: -1; inset: -9px -18px; background: radial-gradient(ellipse at center, rgba(255, 216, 106, .32), transparent 62%); filter: blur(4px); animation: sovereign-aura 3.8s ease-in-out infinite; }
+        @keyframes sovereign-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
+
+        /* 3. 破産王：燒毀帳簿的焦啡殘字 */
+        .effect-bankrupt {
+            color: #dd8a48; letter-spacing: .13em; text-shadow: 1px 1px 0 #4b1d0b, 3px 4px 0 #090604, 0 0 5px rgba(157, 54, 15, .52);
+            background: linear-gradient(100deg, #7d2c12 0%, #e89450 26%, #ffbd73 44%, #9d3717 52%, #e48743 66%, #64200e 100%); background-size: 180% 100%;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: .55px #361207; animation: bankrupt-fade 4.8s ease-in-out infinite; font-weight: 900;
+        }
+        .effect-bankrupt::after { content: ''; position: absolute; inset: -10% 1%; pointer-events: none; opacity: .96; background: linear-gradient(110deg, transparent 0 20%, #260b05 20.5% 23%, transparent 23.5% 100%), linear-gradient(72deg, transparent 0 39%, #3a1006 39.5% 42.5%, transparent 43% 100%), linear-gradient(118deg, transparent 0 58%, #260b05 58.5% 61%, transparent 61.5% 100%), linear-gradient(66deg, transparent 0 76%, #431307 76.5% 79%, transparent 79.5% 100%); filter: drop-shadow(1px 0 0 rgba(255, 194, 113, .34)); }
+        @keyframes bankrupt-fade { 0%, 100% { opacity: .82; background-position: 0% 50%; } 48% { opacity: 1; background-position: 100% 50%; } }
+
+        /* 4. 単発地獄：怨念震動 */
+        .effect-hell { color: #e3d6d8; text-shadow: 0 0 2px #fff, 2px 0 7px rgba(210, 14, 45, .78), -2px 0 7px rgba(85, 0, 12, .9); animation: hell-echo 3.2s steps(1, end) infinite; font-weight: bold; }
+        .effect-hell::before, .effect-hell::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+        .effect-hell::before { color: #ff214e; transform: translateX(-2px); animation: hell-ghost 3.2s steps(1, end) infinite; }
+        .effect-hell::after { color: #580012; transform: translateX(3px); animation: hell-ghost 3.2s steps(1, end) .08s infinite; }
+        @keyframes hell-echo { 0%, 72%, 100% { transform: translateX(0); } 74% { transform: translateX(-2px); } 76% { transform: translateX(2px); } 78% { transform: translateX(-1px); } }
+        @keyframes hell-ghost { 0%, 72%, 100% { opacity: 0; } 74%, 78% { opacity: .72; } }
+
+        /* 5. 神の引き：神聖光核 */
+        .effect-godpull { color: #f6fdff; letter-spacing: .1em; text-shadow: 0 0 2px #fff, 0 0 7px #9cefff, 0 0 18px #397cff, 0 0 30px rgba(132, 78, 255, .58); animation: god-pulse 2.8s ease-in-out infinite; font-weight: bold; }
+        .effect-godpull::before { content: ''; position: absolute; z-index: -1; inset: -8px -13px; border: 1px solid rgba(145, 226, 255, .68); border-radius: 50%; box-shadow: 0 0 11px rgba(65, 158, 255, .58), inset 0 0 12px rgba(129, 87, 255, .27); opacity: .25; animation: miracle-ring 2.8s ease-out infinite; }
+        .effect-godpull::after { content: '✦'; position: absolute; z-index: 1; right: -9px; top: -11px; color: #e9fdff; font-size: 10px; text-shadow: 0 0 7px #45c9ff, 0 0 13px #7d5cff; animation: miracle-star 2.8s ease-in-out infinite; }
+        @keyframes god-pulse { 0%, 100% { filter: brightness(1); } 48% { filter: brightness(1.48); } }
+        @keyframes miracle-ring { 0% { opacity: .78; transform: scale(.42); } 60%, 100% { opacity: 0; transform: scale(1.22); } }
+        @keyframes miracle-star { 0%, 42%, 100% { opacity: .18; transform: scale(.65) rotate(0); } 52% { opacity: 1; transform: scale(1.22) rotate(28deg); } }
+
+        /* 6. 駆け抜け王：殘光 */
+        .effect-runthrough { color: #fff0c6; text-shadow: -4px 0 0 rgba(255, 61, 19, .22), -9px 0 8px rgba(255, 61, 19, .36), 0 0 8px rgba(255, 178, 64, .75); background: linear-gradient(90deg, #ff431e, #ffbc4b 32%, #fff7d3 48%, #ff7a28 64%, #b51f14); background-size: 190% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: runthrough 1.9s ease-in-out infinite; font-weight: bold; }
+        .effect-runthrough::after { content: ''; position: absolute; right: calc(100% + 5px); top: 49%; width: 30px; height: 1px; background: linear-gradient(90deg, transparent, #ff4c24, #ffd169); box-shadow: 0 -4px 7px rgba(255, 84, 30, .7), 0 4px 7px rgba(255, 84, 30, .45); transform-origin: right center; animation: speed-trail 1.9s ease-in-out infinite; }
+        @keyframes runthrough { 0%, 100% { background-position: 0% 50%; } 48% { background-position: 100% 50%; } }
+        @keyframes speed-trail { 0%, 100% { opacity: .16; transform: scaleX(.35); } 48% { opacity: 1; transform: scaleX(1); } }
+
+        /* 全稱號：終極形態 */
+        .effect-legend { isolation: isolate; padding: 7px 21px; border-radius: 3px; border: 1px solid #ffe69a; background: linear-gradient(180deg, rgba(81, 42, 3, .95), rgba(15, 18, 40, .96), rgba(72, 28, 78, .94)); color: #fff; background-clip: padding-box; text-shadow: 0 0 3px #fff, 0 0 9px #65eaff, 0 0 19px #e975ff; box-shadow: 0 0 0 2px #211300, 0 0 0 3px rgba(255, 205, 76, .68), 0 0 25px rgba(123, 193, 255, .58), inset 0 1px 0 rgba(255,255,255,.62); overflow: visible; font-weight: bold; }
+        .effect-legend::before { content: ''; position: absolute; z-index: -1; inset: -13px -28px; border: 1px solid rgba(152, 230, 255, .62); border-radius: 50%; box-shadow: 0 0 19px rgba(112, 178, 255, .54), inset 0 0 18px rgba(241, 126, 255, .2); animation: legend-aura 3.6s ease-in-out infinite; }
+        .effect-legend::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(108deg, transparent 35%, rgba(255,255,255,.8) 50%, transparent 65%); transform: translateX(-140%); animation: legend-sweep 3.6s ease-in-out infinite; }
+        
+        /* 🌟 全稱號中的彩虹色同步還原 🌟 */
+        .legend-complete { position: relative; z-index: 1; background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); font-weight: 900; animation: rainbow-bg 2s linear infinite; }
+        
+        .legend-royal-lines { position: absolute; z-index: 1; top: 50%; left: -27px; right: -27px; height: 1px; transform: translateY(-50%); pointer-events: none; background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent); box-shadow: 0 -7px 10px rgba(255, 196, 45, .33), 0 7px 10px rgba(255, 196, 45, .33); }
+        .legend-runthrough-trail { position: absolute; z-index: 2; right: calc(100% + 10px); top: 45%; width: 48px; height: 2px; pointer-events: none; background: linear-gradient(90deg, transparent, #ff4a20 42%, #ffc35a 78%, #fff0bf); box-shadow: -10px 7px 0 -1px rgba(255, 67, 27, .8), -23px -6px 0 -1px rgba(255, 142, 44, .56), 0 0 8px rgba(255, 94, 27, .9); transform-origin: right center; animation: legend-runthrough 1.9s ease-in-out infinite; }
+        @keyframes legend-runthrough { 0%, 100% { opacity: .25; transform: scaleX(.3); } 48% { opacity: 1; transform: scaleX(1); } }
+        .legend-bankrupt-cracks { position: absolute; z-index: 2; inset: -9% 7%; pointer-events: none; opacity: .72; background: linear-gradient(111deg, transparent 0 22%, #291008 22.4% 24%, transparent 24.4% 100%), linear-gradient(70deg, transparent 0 43%, #40160a 43.4% 45%, transparent 45.4% 100%), linear-gradient(119deg, transparent 0 67%, #281008 67.4% 69%, transparent 69.4% 100%); filter: drop-shadow(1px 0 0 rgba(255, 206, 130, .34)); }
+        .legend-hell-echo { position: absolute; z-index: 0; top: 7px; left: 21px; pointer-events: none; white-space: nowrap; color: #ef1644; text-shadow: 3px 0 8px rgba(238, 12, 55, .92), -3px 0 8px rgba(89, 0, 14, .9); opacity: 0; animation: legend-hell 3.2s steps(1, end) infinite; font-weight: bold; }
+        .legend-hell-echo::before { content: attr(data-text); }
+        @keyframes legend-hell { 0%, 69%, 100% { opacity: 0; transform: translateX(0); } 72% { opacity: .72; transform: translateX(-3px); } 75% { opacity: .45; transform: translateX(3px); } 78% { opacity: .64; transform: translateX(-1px); } }
+        @keyframes legend-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.08); } }
+        @keyframes legend-sweep { 0%, 53% { transform: translateX(-140%); } 78%, 100% { transform: translateX(140%); } }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar"><a href="index.html" class="home-btn">🏠 ホールに戻る</a></div>
+        <h1>👑 称号一覧と獲得条件</h1>
+        <p class="desc">条件を満たすと、プレイヤー名に特殊なエフェクトが付与されます。<br>※すべての称号は永久に保持され、複数同時に適用される可能性があります。</p>
+
+        <div class="title-card">
+            <div class="title-info">
+                <div class="title-name">🌈 コンプリート (Complete)</div>
+                <div class="title-cond">獲得条件：任意の機種で一撃95,000玉以上を獲得する。</div>
+            </div>
+            <div class="preview-box"><span class="title-effect effect-rainbow">プレイヤー名</span></div>
+        </div>
+
+        <div class="title-card">
+            <div class="title-info">
+                <div class="title-name" style="color: #ffd700;">👑 サーバーの覇者 (至尊無上)</div>
+                <div class="title-cond">獲得条件：コンプリート達成済みであり、かつ「全サーバー富豪ランキング」の1位に君臨している時のみ発動。</div>
+            </div>
+            <div class="preview-box"><span class="title-effect effect-supreme">プレイヤー名</span></div>
+        </div>
+
+        <div class="title-card">
+            <div class="title-info">
+                <div class="title-name" style="color: #777;">💀 破産王 (Bankruptcy King)</div>
+                <div class="title-cond">獲得条件：所持金が -10,000,000円 (マイナス1000万) を突破する。</div>
+            </div>
+            <div class="preview-box"><span class="title-effect effect-bankrupt">プレイヤー名</span></div>
+        </div>
+
+        <div class="title-card">
+            <div class="title-info">
+                <div class="title-name" style="color: #ff1744;">怨 単発地獄 (Single Hell)</div>
+                <div class="title-cond">獲得条件：15回連続で初当りを引いてもRUSHに突入しない（単発のみ）。</div>
+            </div>
+            <div class="preview-box">
+                <span class="title-effect effect-hell" data-text="プレイヤー名">プレイヤー名</span>
+            </div>
+        </div>
+
+        <div class="title-card">
+            <div class="title-info">
+                <div class="title-name" style="color: #00e5ff;">✨ 神の引き (God's Pull)</div>
+                <div class="title-cond">獲得条件：1回転目で、大当り確率の分母が399以上（1/399・1/999など）の大当りを引き当てる。</div>
+            </div>
+            <div class="preview-box"><span class="title-effect effect-godpull">プレイヤー名</span></div>
+        </div>
+
+        <div class="title-card">
+            <div class="title-info">
+                <div class="title-name" style="color: #ff8a3d;">⚡ 駆け抜け王 (Rush Runner)</div>
+                <div class="title-cond">獲得条件：RUSH突入後、連続7回「駆け抜け」（出玉なしでRUSH終了）を経験する。</div>
+            </div>
+            <div class="preview-box"><span class="title-effect effect-runthrough">プレイヤー名</span></div>
+        </div>
+
+        <h2 style="margin-top: 40px; color: #ffca28; border-bottom: 1px solid #333; padding-bottom: 10px;">🔥 全称号重複時のプレビュー</h2>
+        <p style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;">理論上、すべての称号を同時に所持した場合の見た目です。すべてを重ねず、専用の最終レジェンド演出に切り替えます。</p>
+        <div class="preview-box" style="padding: 30px; margin-bottom: 50px;">
+            <span class="title-effect effect-legend"><span class="legend-royal-lines" aria-hidden="true"></span><span class="legend-runthrough-trail" aria-hidden="true"></span><span class="legend-hell-echo" data-text="伝説のプレイヤー" aria-hidden="true"></span><span class="legend-complete">伝説のプレイヤー</span></span>
+        </div>
+
+    </div>
+</body>
+</html>

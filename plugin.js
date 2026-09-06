@@ -53,14 +53,14 @@ rainbowStyle.innerHTML = `
 document.head.appendChild(rainbowStyle);
 
 const originalAlert = window.alert;
-window.alert = function(msg) {
+window.alert = function (msg) {
     let text = typeof msg === 'string' ? msg : msg;
     text = text.replace(/歡迎返嚟/g, "おかえりなさい")
-               .replace(/登入成功/g, "ログイン成功")
-               .replace(/登出/g, "ログアウト")
-               .replace(/溫馨提示/g, "お知らせ")
-               .replace(/你今日嘅 5000 轉限額已經打爆咗/g, "本日の上限に達しました")
-               .replace(/請獲得出玉後再分享/g, "出玉を獲得してからポストしてください");
+        .replace(/登入成功/g, "ログイン成功")
+        .replace(/登出/g, "ログアウト")
+        .replace(/溫馨提示/g, "お知らせ")
+        .replace(/你今日嘅 5000 轉限額已經打爆咗/g, "本日の上限に達しました")
+        .replace(/請獲得出玉後再分享/g, "出玉を獲得してからポストしてください");
     originalAlert(text);
 };
 
@@ -69,12 +69,12 @@ const dict = {
     "現在回轉數": "現在回転数", "回轉": "回転", "本次出玉": "獲得出玉", "本次總出玉": "総獲得出玉",
     "累積出玉": "累計出玉", "最終出玉": "最終出玉", "本次連莊": "連チャン数", "連莊數": "連チャン",
     "連莊数": "連チャン", "總連莊數": "総連チャン数", "前次": "前回", "當選回轉數": "初当り回転",
-    "當選回轉数": "初当り回転",  "獲得出玉": "獲得出玉", "- 無紀錄 -": "- 履歴なし -",
+    "當選回轉数": "初当り回転", "獲得出玉": "獲得出玉", "- 無紀錄 -": "- 履歴なし -",
     "DATA LAMP (最近10次)": "データランプ (直近10回)", "(最近10次)": "(直近10回)", "最近10次": "直近10回",
     "紀錄重置": "リセット", "遊戲紀錄已重置。": "プレイ履歴をリセットしました。", "繼續打玉": "プレイ続行",
     "開始魔法": "遊技開始", "開始冒險": "遊技開始", "發進 (PLAY)": "遊技開始",
     "LINK START": "遊技開始", "等待中...": "待機中...", "播放專屬音效": "専用BGM再生",
-    "請稍候": "お待ちください", "正在播放": "再生中", "開始打玉": "遊技開始", "含初當": "初当たり含む","遊戲開始": "遊技開始"
+    "請稍候": "お待ちください", "正在播放": "再生中", "開始打玉": "遊技開始", "含初當": "初当たり含む", "遊戲開始": "遊技開始"
 };
 
 function translateDOM() {
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnReset = document.getElementById("btn-reset");
     if (btnReset) btnReset.remove();
     translateDOM();
-    
+
 
     const scriptApp = document.createElement('script');
     scriptApp.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
@@ -133,8 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (userData.last_date !== todayStr) {
                     userData.daily_spins = 0;
-                    userData.daily_profit = 0; 
-                    userData.max_allowed_spins = 4000; 
+                    userData.daily_profit = 0;
+                    userData.max_allowed_spins = 4000;
                     userData.last_date = todayStr;
                     userRef.update({ daily_spins: 0, daily_profit: 0, max_allowed_spins: 4000, last_date: todayStr });
                 }
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function runMachineLogic(db, auth, uid, currentUserName, userRef, userData) {
-        const exchangeRate = 3.57; 
+        const exchangeRate = 3.57;
         let currentWallet = userData.balance;
 
         let currentMaxHamari = 0;
@@ -163,9 +163,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const pluginUI = document.createElement("div");
         pluginUI.id = "plugin-ui-container";
         pluginUI.style.cssText = "position: fixed; top: 15px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; gap: 10px;";
-        
-        let displayNameHtml = userData.has_completed 
-            ? `<span class="rainbow-text">${currentUserName}</span>` 
+
+        let displayNameHtml = userData.has_completed
+            ? `<span class="rainbow-text">${currentUserName}</span>`
             : `<span style="color:#00e5ff;">${currentUserName}</span>`;
 
         pluginUI.innerHTML = `
@@ -241,9 +241,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function disableMachine(msgText = "⛔ 本日の上限に達しました") {
             let playBtn = document.getElementById("btn-play");
-            if (playBtn) { 
-                playBtn.disabled = true; 
-                playBtn.innerText = msgText; 
+            if (playBtn) {
+                playBtn.disabled = true;
+                playBtn.innerText = msgText;
             }
             showRewardAdButton();
         }
@@ -258,14 +258,14 @@ document.addEventListener("DOMContentLoaded", () => {
             adBtn.id = "btn-reward-ad";
             adBtn.innerText = "📺 広告を見て +4000回転 解鎖";
             adBtn.style.cssText = "background-color: #ff9100; color: #fff; border: 1px solid #ffea00; box-shadow: 0 0 10px #ff9100;";
-            
+
             adBtn.onclick = () => {
                 adBtn.disabled = true;
                 window.open(ADSTERRA_DIRECT_LINK, '_blank');
 
                 let secondsLeft = 15;
                 adBtn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
-                
+
                 let countdown = setInterval(() => {
                     secondsLeft--;
                     if (secondsLeft > 0) {
@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     } else {
                         clearInterval(countdown);
                         userData.max_allowed_spins += 4000;
-                        
+
                         // 🌟 確保 Firebase 儲存完畢後，自動 F5 刷新網頁 🌟
                         userRef.update({ max_allowed_spins: userData.max_allowed_spins }).then(() => {
                             window.alert("🎉 認証成功！上限が +4000回転 追加されました！\n(システムを再起動します)");
@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 let spinEl = document.getElementById("ui-spins");
                 let payoutEl = document.getElementById("ui-payout");
                 let rushEl = document.getElementById("ui-rush");
-                
+
                 if (!spinEl || !payoutEl) return;
 
                 // 🌟 修正重點：精準判定係咪處於 RUSH 狀態 🌟
@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 let new_spins;
                 if (isRushUI) {
                     // 🌟 如果中緊 RUSH，強制將當前轉數「凍結」喺中獎嗰一刻，唔會扣你每日轉數！
-                    new_spins = lastUI_spins; 
+                    new_spins = lastUI_spins;
                 } else {
                     let spinRawText = spinEl.innerText.replace(/,/g, '');
                     let matchSpins = spinRawText.match(/\d+/);
@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     currentMaxHamari = new_spins;
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
-                    
+
                     // 🛡️ 升級做 Transaction，確保寫入前一刻同 Database 實時比對
                     db.ref('server_records/max_hamari').transaction((currentData) => {
                         if (currentData === null || new_spins > currentData.spins) {
@@ -348,10 +348,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (new_payout === 0) {
                     let alreadySaved = completeTriggeredThisRush;
-                    completeTriggeredThisRush = false; 
-                    
+                    completeTriggeredThisRush = false;
+
                     // 🌟 終極判斷：如果未爆機 (未觸發過強制 Save)，先至喺歸零嗰陣上傳！
-                    if (lastUI_payout >= 10000 && !alreadySaved) { 
+                    if (lastUI_payout >= 10000 && !alreadySaved) {
                         const todayDate = new Date();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
@@ -393,7 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (needUpdateCloud) {
                     userData.balance = currentWallet;
                     userData.daily_profit = (userData.daily_profit || 0) + sessionNetProfit;
-                    
+
                     userRef.update({
                         balance: currentWallet,
                         daily_spins: userData.daily_spins,
@@ -434,20 +434,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const playBtn = document.getElementById("btn-play");
         const btnContainer = playBtn ? playBtn.parentNode : null;
-        
+
         if (btnContainer) {
             const shareBtn = document.createElement("button");
             shareBtn.id = "btn-share-x";
             shareBtn.innerText = "𝕏 一万発達成！ポストする";
             shareBtn.style.cssText = "background-color: #000; color: #ffca28; border: 2px solid #ffca28; display: none; margin-left: 5px; box-shadow: 0 0 15px rgba(255, 202, 40, 0.6); cursor: pointer; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; font-weight: bold;";
-            
+
             shareBtn.onclick = () => {
                 let payout = window.latest_payout_for_share || 0;
                 let rushCount = window.latest_rush_for_share || 0;
-                if (payout < 10000) { window.alert("一万発を達成してからポストしてください！"); return; } 
+                if (payout < 10000) { window.alert("一万発を達成してからポストしてください！"); return; }
                 let compText = payout >= 95000 ? "\n🎉【コンプリート達成！】🎉" : "";
                 let text = `【一撃一万発達成！】${compText}\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター\n`;
-                let url = window.location.href; 
+                let url = window.location.href;
                 let shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
                 window.open(shareUrl, '_blank');
             };
@@ -459,8 +459,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (mutation.type === "attributes" && mutation.attributeName === "disabled") {
                             let sBtn = document.getElementById("btn-share-x");
                             if (!playBtn.disabled) {
-                                playBtn.innerText = "▶️ プレイ続行"; 
-                                if (window.latest_payout_for_share >= 10000 && sBtn) sBtn.style.display = "inline-block"; 
+                                playBtn.innerText = "▶️ プレイ続行";
+                                if (window.latest_payout_for_share >= 10000 && sBtn) sBtn.style.display = "inline-block";
                             } else {
                                 if (sBtn) sBtn.style.display = "none";
                                 window.latest_payout_for_share = 0;
@@ -477,9 +477,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 if (typeof window.addLog === "function") {
     const originalAddLog = window.addLog;
-    window.addLog = function(text, className = "") {
+    window.addLog = function (text, className = "") {
         if (text.includes("播放") || text.includes("再生") || text.includes("mp4") || text.includes("音效") || text.includes("請稍候")) {
-            return; 
+            return;
         }
         let translatedText = text;
         translatedText = translatedText.replace(/STOCK獲得！(\d+)玉 \(剩餘 (\d+)轉\)/g, "STOCK獲得！$1玉 (残り $2回転)");
@@ -495,7 +495,7 @@ if (typeof window.addLog === "function") {
 }
 
 const originalPlay = HTMLMediaElement.prototype.play;
-HTMLMediaElement.prototype.play = function() {
+HTMLMediaElement.prototype.play = function () {
     this.muted = true;
     setTimeout(() => { this.dispatchEvent(new Event("ended")); }, 10);
     return Promise.resolve();
@@ -503,6 +503,76 @@ HTMLMediaElement.prototype.play = function() {
 
 setTimeout(() => {
     if (typeof window.playVideoPopupAndWait === "function") {
-        window.playVideoPopupAndWait = function() { return Promise.resolve(); };
+        window.playVideoPopupAndWait = function () { return Promise.resolve(); };
     }
 }, 100);
+
+// ==========================================
+// 🏆 全自動稱號判定系統 (Log Interceptor)
+// ==========================================
+setTimeout(() => {
+    if (typeof window.addLog === "function") {
+        const originalAddLog = window.addLog;
+
+        window.addLog = function (text, className) {
+            // 先執行原本的顯示畫面邏輯
+            originalAddLog(text, className);
+
+            const user = firebase.auth().currentUser;
+            if (!user) return; // 未登入唔計算
+
+            const uid = user.uid;
+            const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
+
+            // 抓取當前 UI 上的轉數與連莊數
+            const spinsEl = document.getElementById('ui-spins');
+            const rushEl = document.getElementById('ui-rush');
+            const spins = spinsEl ? parseInt(spinsEl.innerText) : 0;
+            const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
+
+            // ✨ 1. 神の引き (399以上機 1回轉當選)
+            // 🌟 修正：必須包含中獎字眼，且絕對不可包含「チャージ」
+            if ((text.includes("當選") || text.includes("図柄揃い") || text.includes("BONUS")) && !text.includes("チャージ")) {
+                let isHeavyMachine = machineTitle.includes("399") || machineTitle.includes("999") || machineTitle.includes("エヴァンゲリオン") || machineTitle.includes("北斗") || machineTitle.includes("無職転生") || machineTitle.includes("EDENS") || machineTitle.includes("SEED");
+
+                if (spins === 1 && isHeavyMachine) {
+                    db.ref('users/' + uid).update({ title_godpull: true });
+                }
+            }
+
+            // ⚡ 2. 駆け抜け王 (RUSH突入後，沒有實質連莊結束)
+            // 🌟 修正：容許 rushCount 為 0 或 1 (兼容部分機台初當計1連)
+            if (text.includes("RUSH終了") || text.includes("IMPACT MODE終了") || text.includes("ST抜け") || text.includes("LT終了") || text.includes("決着")) {
+                if (rushCount <= 1) {
+                    let ref = db.ref('users/' + uid + '/runthrough_count');
+                    ref.transaction(count => {
+                        let newCount = (count || 0) + 1;
+                        if (newCount >= 7) db.ref('users/' + uid).update({ title_runthrough: true });
+                        return newCount;
+                    });
+                } else {
+                    // 有實質連莊就將連續駆け抜け計數器清零
+                    db.ref('users/' + uid + '/runthrough_count').set(0);
+                }
+            }
+
+            // 💀 3. 単発地獄 (15次連續初當無 RUSH)
+            // 🌟 修正：容許 rushCount 為 0 或 1
+            if (text.includes("通常へ戻る") || text.includes("通常終了") || text.includes("チャンスタイム終了") || text.includes("敗北")) {
+                if (rushCount <= 1) {
+                    let ref = db.ref('users/' + uid + '/single_hell_count');
+                    ref.transaction(count => {
+                        let newCount = (count || 0) + 1;
+                        if (newCount >= 15) db.ref('users/' + uid).update({ title_hell: true });
+                        return newCount;
+                    });
+                }
+            }
+
+            // 🌟 4. 清空単発地獄：只要成功進入 RUSH，或者產生實質連莊，就打破單發地獄！
+            if (text.includes("突入") || text.includes("継続") || text.includes("連)") || rushCount >= 2) {
+                db.ref('users/' + uid + '/single_hell_count').set(0);
+            }
+        };
+    }
+}, 2000);
