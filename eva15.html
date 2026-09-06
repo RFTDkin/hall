@@ -291,7 +291,7 @@
 
                 while (this.state === "JITAN" && jitan_remain > 0) {
                     document.getElementById("ui-spins").innerText = `時短中: ${100 - jitan_remain + 1}/100`;
-                    await sleep(20);
+                    await sleep(40);
 
                     if (Math.random() < (1 / 319.7)) {
                         addLog(`\n🎉 [時短 ${100 - jitan_remain + 1}回転目] 引き戻し成功！`, "color-hit");
@@ -329,7 +329,7 @@
 
                 while (this.state === "RUSH" && current_st > 0) {
                     document.getElementById("ui-spins").innerText = `ST中: ${st_max - current_st + 1}/${st_max}`;
-                    await sleep(20);
+                    await sleep(40);
 
                     if (Math.random() < (1 / 99.4)) {
                         this.session_rush_count += 1;
