@@ -518,68 +518,75 @@ setTimeout(() => {
             // 先執行原本的顯示畫面邏輯
             originalAddLog(text, className);
 
-            const user = firebase.auth().currentUser;
-            if (!user) return; // 未登入唔計算
+            // 稱號判定絕不能令機台的 async 遊戲流程中斷。
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) return; // 未登入唔計算
 
-            const uid = user.uid;
-            const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
+                // 這個攔截器位於 runMachineLogic 的外層，不能使用那個函式作用域內的 db。
+                const titleDb = firebase.database();
+                const uid = user.uid;
+                const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
 
-            // 抓取當前 UI 上的轉數與連莊數
-            const spinsEl = document.getElementById('ui-spins');
-            const rushEl = document.getElementById('ui-rush');
-            const spins = spinsEl ? parseInt(spinsEl.innerText) : 0;
-            const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
+                // 抓取當前 UI 上的轉數與連莊數
+                const spinsEl = document.getElementById('ui-spins');
+                const rushEl = document.getElementById('ui-rush');
+                const spins = spinsEl ? parseInt(spinsEl.innerText) : 0;
+                const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
 
-            // 統一字眼：所有現有機台的 log 都先映射成「初當」「RUSH 結束」或「通常落敗」。
-            // 不依賴單一機台的用語，新增機台時只需補充下面的明確規則。
-            const pageName = location.pathname.split('/').pop().toLowerCase();
-            const heavyMachinePages = new Set([
+                // 統一字眼：所有現有機台的 log 都先映射成「初當」「RUSH 結束」或「通常落敗」。
+                // 不依賴單一機台的用語，新增機台時只需補充下面的明確規則。
+                const pageName = location.pathname.split('/').pop().toLowerCase();
+                const heavyMachinePages = new Set([
                 'bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html',
                 'hokuto10.html', 'mushoku.html', 'seed.html', 'slime.html'
             ]);
-            const isHeavyMachine = heavyMachinePages.has(pageName)
+                const isHeavyMachine = heavyMachinePages.has(pageName)
                 || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム)/.test(machineTitle);
-            const isCharge = /チャージ|CHARGE/i.test(text);
-            const isMainHit = /當選|当選|図柄揃い|大当り|大当たり|BONUS|記者会見大成功/.test(text) && !isCharge;
+                const isCharge = /チャージ|CHARGE/i.test(text);
+                const isMainHit = /當選|当選|図柄揃い|大当り|大当たり|BONUS|記者会見大成功/.test(text) && !isCharge;
 
-            // ✨ 1. 神の引き (分母399以上機的第1轉初當)
-            if (isMainHit && spins === 1 && isHeavyMachine) {
-                db.ref('users/' + uid).update({ title_godpull: true });
-            }
+                // ✨ 1. 神の引き (分母399以上機的第1轉初當)
+                if (isMainHit && spins === 1 && isHeavyMachine) {
+                    titleDb.ref('users/' + uid).update({ title_godpull: true });
+                }
 
-            // ⚡ 2. 駆け抜け王：各機台的 RUSH／ST／BATTLE 終結字眼。
-            const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(text);
-            if (isRushEnd) {
+                // ⚡ 2. 駆け抜け王：各機台的 RUSH／ST／BATTLE 終結字眼。
+                const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(text);
+                if (isRushEnd) {
                 if (rushCount <= 1) {
-                    let ref = db.ref('users/' + uid + '/runthrough_count');
+                    let ref = titleDb.ref('users/' + uid + '/runthrough_count');
                     ref.transaction(count => {
                         let newCount = (count || 0) + 1;
-                        if (newCount >= 7) db.ref('users/' + uid).update({ title_runthrough: true });
+                        if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
                         return newCount;
                     });
                 } else {
                     // 有實質連莊就將連續駆け抜け計數器清零
-                    db.ref('users/' + uid + '/runthrough_count').set(0);
+                    titleDb.ref('users/' + uid + '/runthrough_count').set(0);
                 }
             }
 
             // 💀 3. 単発地獄：只計「初當後未入 RUSH」的通常落敗。
             // RUSH 內的敗北已由 isRushEnd 處理，不能混進單発地獄。
-            const isNormalLoss = !isRushEnd && !isCharge && /通常へ戻る|通常終了|通常へ|RUSH非突入|チャレンジ失敗|CZ失敗|任務失敗|チャンスタイム終了/.test(text);
-            if (isNormalLoss) {
+                const isNormalLoss = !isRushEnd && !isCharge && /通常へ戻る|通常終了|通常へ|RUSH非突入|チャレンジ失敗|CZ失敗|任務失敗|チャンスタイム終了/.test(text);
+                if (isNormalLoss) {
                 if (rushCount <= 1) {
-                    let ref = db.ref('users/' + uid + '/single_hell_count');
+                    let ref = titleDb.ref('users/' + uid + '/single_hell_count');
                     ref.transaction(count => {
                         let newCount = (count || 0) + 1;
-                        if (newCount >= 15) db.ref('users/' + uid).update({ title_hell: true });
+                        if (newCount >= 15) titleDb.ref('users/' + uid).update({ title_hell: true });
                         return newCount;
                     });
                 }
             }
 
             // 🌟 4. 清空単発地獄：只要成功進入 RUSH，或者產生實質連莊，就打破單發地獄！
-            if (text.includes("突入") || text.includes("継続") || text.includes("連)") || rushCount >= 2) {
-                db.ref('users/' + uid + '/single_hell_count').set(0);
+                if (text.includes("突入") || text.includes("継続") || text.includes("連)") || rushCount >= 2) {
+                    titleDb.ref('users/' + uid + '/single_hell_count').set(0);
+                }
+            } catch (error) {
+                console.error('[Title interceptor] 判定失敗：遊戲會繼續運行', error);
             }
         };
     }

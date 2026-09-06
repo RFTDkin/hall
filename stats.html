@@ -56,6 +56,7 @@
         .tag-ggo { border-top: 5px solid #ff4081; }
         .tag-nanatsu { border-top: 5px solid #ff9100; }
         .tag-eva { border-top: 5px solid #9c27b0; }
+        .tag-hokuto { border-top: 5px solid #dd2c00; }
     </style>
 <link rel="stylesheet" href="mobile.css">
 </head>
@@ -260,6 +261,15 @@
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="eva-max">---</span></div>
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="eva-profit">---</span></div>
             <div class="progress-text" id="eva-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card" id="card-eva15" style="border-top: 5px solid #00e676;">
+            <h3 class="machine-title">P新世紀エヴァンゲリオン15 未来への咆哮</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="eva15-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="eva15-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="eva15-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="eva15-profit">---</span></div>
+            <div class="progress-text" id="eva15-prog">待機中...</div>
         </div>
 
         <div class="machine-card tag-hokuto" id="card-hokuto">
@@ -1188,6 +1198,59 @@
             return { spins, payout };
         }
 
+        function simEva15() {
+            let spins = 0, payout = 0;
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 319.7) {
+                    let r = Math.random();
+                    let rush = false;
+                    
+                    if (r < 0.03) { payout += 1500; rush = true; } 
+                    else if (r < 0.59) { payout += 450; rush = true; } 
+                    else {
+                        payout += 450;
+                        // 時短100回 + 残保留4回
+                        for (let i = 0; i < 104; i++) {
+                            if (payout >= 95000) break;
+                            if (Math.random() < 1 / 319.7) {
+                                payout += 1500;
+                                rush = true; break;
+                            }
+                        }
+                    }
+                    
+                    if (rush && payout < 95000) {
+                        let st = 163;
+                        while (st > 0 && payout < 95000) {
+                            if (Math.random() < 1 / 99.4) {
+                                payout += 1500;
+                                st = 163;
+                            } else { st--; }
+                        }
+                        // 残保留4回
+                        for (let i = 0; i < 4; i++) {
+                            if (payout >= 95000) break;
+                            if (Math.random() < 1 / 99.4) {
+                                payout += 1500;
+                                st = 163;
+                                // 引き戻した場合は再度STループへ
+                                while (st > 0 && payout < 95000) {
+                                    if (Math.random() < 1 / 99.4) {
+                                        payout += 1500;
+                                        st = 163;
+                                    } else { st--; }
+                                }
+                                i = -1; // 残保留ループをリセット
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         function simHokuto() {
             let spins = 0, payout = 0;
             while (true) {
@@ -1333,6 +1396,7 @@
             await runMachineSim('sao', simSAO, 1000 / 20, iterations);
             await runMachineSim('nanatsu', simNanatsu, 1000 / 17, iterations);
             await runMachineSim('eva', simEva, 1000 / 17, iterations);
+            await runMachineSim('eva15', simEva15, 1000 / 17, iterations);
             await runMachineSim('hokuto', simHokuto, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟

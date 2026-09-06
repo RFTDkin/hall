@@ -157,6 +157,14 @@
             font-weight: 900;
         }
 
+        /* 🌟 巢狀回覆 (子留言) 專用樣式 🌟 */
+        .reply-list { margin-top: 15px; border-top: 1px dashed #30363d; padding-top: 10px; }
+        .reply-card { background: #0d1117; border-radius: 6px; padding: 10px; margin-bottom: 8px; border-left: 3px solid #388bfd; }
+        .reply-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85em; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .reply-input-area { margin-top: 10px; display: none; background: #161b22; padding: 10px; border-radius: 6px; border: 1px solid #30363d; }
+        .reply-input-area textarea { width: 100%; height: 50px; margin-bottom: 5px; font-size: 0.9em; }
+        .btn-small { padding: 5px 10px; font-size: 0.8em; }
+
         @keyframes rainbow-bg {
             0% {
                 background-position: 0% 50%;
@@ -273,7 +281,7 @@
             });
         }
 
-        // 監聽數據庫，實時顯示留言
+        // 監聽數據庫，實時顯示留言與回覆
         db.ref('community_requests').orderByChild('timestamp').on('value', (snapshot) => {
             const container = document.getElementById("message-container");
             container.innerHTML = "";
@@ -283,37 +291,88 @@
                 return;
             }
 
-            const messages = [];
+            const parents = [];
+            const replies = {};
+
+            // 🌟 1. 將所有數據分類為主留言 (parents) 同 回覆 (replies)
             snapshot.forEach(child => {
-                let msgData = child.val();
-                msgData.key = child.key; // 🌟 攞埋留言嘅 Firebase 專屬鎖匙，用嚟刪除
-                messages.push(msgData);
+                let msg = child.val();
+                msg.key = child.key;
+                if (msg.parentId) {
+                    if (!replies[msg.parentId]) replies[msg.parentId] = [];
+                    replies[msg.parentId].push(msg);
+                } else {
+                    parents.push(msg);
+                }
             });
 
-            // 將最新嘅留言排喺最頂
-            messages.reverse().forEach(msg => {
+            // 🌟 2. 顯示主留言，並將對應嘅回覆攝入去下面
+            parents.reverse().forEach(msg => {
                 const date = new Date(msg.timestamp);
                 const dateString = `${date.getFullYear()}/${(date.getMonth()+1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
                 
-                const card = document.createElement("div");
-                card.className = "message-card";
-                
-                let authorHtml = msg.has_completed 
-                    ? `<span class="rainbow-text">${escapeHtml(msg.user)}</span>` 
-                    : escapeHtml(msg.user);
+                // 判斷係咪開發者 (加入埋 ITパチンカス)
+                let adminList = ["葉永健", "イヨンケン", "Ip WingKin", "ITパチンカス"];
+                let isAdmin = adminList.includes(msg.user); 
 
-                // 🌟 判斷：如果係自己嘅留言，就加個「削除」按鈕 🌟
+                let authorHtml = msg.has_completed ? `<span class="rainbow-text">${escapeHtml(msg.user)}</span>` : escapeHtml(msg.user);
+                if (isAdmin) authorHtml += ` <span style="background: #ffca28; color: #111; font-size: 0.75em; padding: 2px 8px; border-radius: 4px; font-weight: 900; margin-left: 8px; box-shadow: 0 0 8px rgba(255, 202, 40, 0.6); border: 1px solid #ffb300;">🛠️ 開発者</span>`;
+
                 let deleteBtnHtml = "";
                 if (auth.currentUser && msg.uid === auth.currentUser.uid) {
-                    deleteBtnHtml = `<button onclick="deleteMsg('${msg.key}')" style="background: #d32f2f; color: white; border: 1px solid #b71c1c; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin-left: 15px; transition: 0.2s;" onmouseover="this.style.backgroundColor='#b71c1c'" onmouseout="this.style.backgroundColor='#d32f2f'">🗑️ 削除</button>`;
+                    deleteBtnHtml = `<button onclick="deleteMsg('${msg.key}')" style="background: #d32f2f; color: white; border: 1px solid #b71c1c; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin-left: 10px;">🗑️ 削除</button>`;
                 }
 
+                // 展開內部輸入框嘅按鈕
+                let replyBtnHtml = `<button onclick="toggleReplyBox('${msg.key}')" style="background: #1f6feb; color: white; border: 1px solid #388bfd; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin-left: 15px;">↩️ 返信</button>`;
+
+                // 組合子留言 HTML
+                let repliesHtml = "";
+                if (replies[msg.key]) {
+                    repliesHtml += `<div class="reply-list">`;
+                    replies[msg.key].forEach(rep => {
+                        const rDate = new Date(rep.timestamp);
+                        const rDateStr = `${rDate.getFullYear()}/${(rDate.getMonth()+1).toString().padStart(2, '0')}/${rDate.getDate().toString().padStart(2, '0')} ${rDate.getHours().toString().padStart(2, '0')}:${rDate.getMinutes().toString().padStart(2, '0')}`;
+                        
+                        let rIsAdmin = adminList.includes(rep.user);
+                        let rAuthorHtml = rep.has_completed ? `<span class="rainbow-text">${escapeHtml(rep.user)}</span>` : escapeHtml(rep.user);
+                        if (rIsAdmin) rAuthorHtml += ` <span style="background: #ffca28; color: #111; font-size: 0.7em; padding: 1px 6px; border-radius: 4px; font-weight: 900; margin-left: 5px;">🛠️ 開発者</span>`;
+
+                        let rDeleteHtml = "";
+                        if (auth.currentUser && rep.uid === auth.currentUser.uid) {
+                            rDeleteHtml = `<button onclick="deleteMsg('${rep.key}')" style="background: transparent; border:none; color: #d32f2f; cursor: pointer; font-size: 0.8em; margin-left: 10px;">🗑️</button>`;
+                        }
+
+                        repliesHtml += `
+                            <div class="reply-card">
+                                <div class="reply-header">
+                                    <div class="message-author">👤 ${rAuthorHtml}</div>
+                                    <div class="message-date" style="font-size: 0.9em;">${rDateStr} ${rDeleteHtml}</div>
+                                </div>
+                                <div class="message-body" style="font-size: 0.95em;">${escapeHtml(rep.text)}</div>
+                            </div>
+                        `;
+                    });
+                    repliesHtml += `</div>`;
+                }
+
+                const card = document.createElement("div");
+                card.className = "message-card";
                 card.innerHTML = `
                     <div class="message-header">
                         <div class="message-author">👤 ${authorHtml}</div>
-                        <div class="message-date">${dateString} ${deleteBtnHtml}</div>
+                        <div class="message-date">${dateString} ${replyBtnHtml} ${deleteBtnHtml}</div>
                     </div>
                     <div class="message-body">${escapeHtml(msg.text)}</div>
+                    ${repliesHtml}
+                    
+                    <!-- 隱藏嘅內聯回覆輸入框 -->
+                    <div class="reply-input-area" id="reply-box-${msg.key}">
+                        <textarea id="reply-input-${msg.key}" placeholder="返信を入力..."></textarea>
+                        <button class="submit-btn btn-small" onclick="submitReply('${msg.key}')">返信を送信</button>
+                        <button class="submit-btn btn-small" style="background: #444; margin-right: 10px;" onclick="toggleReplyBox('${msg.key}')">キャンセル</button>
+                        <div style="clear:both;"></div>
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -337,6 +396,46 @@
                     alert("削除エラーが発生しました: " + err.message);
                 });
             }
+        }
+
+        // 🌟 開關子留言輸入框
+        function toggleReplyBox(key) {
+            if (!currentUserName) {
+                alert("返信する前にログインしてください。");
+                return;
+            }
+            const box = document.getElementById('reply-box-' + key);
+            if (box.style.display === "block") {
+                box.style.display = "none";
+            } else {
+                box.style.display = "block";
+                document.getElementById('reply-input-' + key).focus();
+            }
+        }
+
+        // 🌟 發送子留言 (附帶 parentId)
+        function submitReply(parentKey) {
+            const inputEl = document.getElementById('reply-input-' + parentKey);
+            const text = inputEl.value.trim();
+            
+            if (text === "") {
+                alert("メッセージを入力してください。");
+                return;
+            }
+
+            db.ref('community_requests').push({
+                uid: auth.currentUser.uid,
+                user: currentUserName,
+                has_completed: hasCompleted,
+                text: text,
+                parentId: parentKey, // 🌟 關鍵：標記呢條係回覆緊邊個
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                inputEl.value = "";
+                toggleReplyBox(parentKey); // 成功後自動收埋個輸入框
+            }).catch(err => {
+                alert("エラーが発生しました: " + err.message);
+            });
         }
     </script>
 </body>
