@@ -501,16 +501,29 @@
         @keyframes runthrough { 0%, 100% { background-position: 0% 50%; } 48% { background-position: 100% 50%; } }
         @keyframes speed-trail { 0%, 100% { opacity: .16; transform: scaleX(.35); } 48% { opacity: 1; transform: scaleX(1); } }
 
-        /* 7. 一撃王：爆裂衝擊 */
+/* 7. 一撃王：紫電のスマッシュ (Cyberpunk Impact) */
         .effect-ichigeki {
-            color: #fff;
-            font-weight: 900;
-            text-shadow: 0 0 4px #ff1744, 0 0 10px #ff1744, 2px 2px 0px #b71c1c, -2px -2px 0px #ff9100;
-            animation: impact-pulse 1s infinite alternate;
+            position: relative; display: inline-block; white-space: nowrap; color: #ffffff;
+            font-weight: 900; letter-spacing: .08em;
+            text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff;
+            animation: ichigeki-smash 1.5s infinite;
+            isolation: isolate;
         }
-        @keyframes impact-pulse {
-            0% { transform: scale(1); text-shadow: 0 0 4px #ff1744, 2px 2px 0px #b71c1c; }
-            100% { transform: scale(1.05); text-shadow: 0 0 12px #ff1744, 0 0 20px #ff9100, 3px 3px 0px #b71c1c; }
+        .effect-ichigeki::after {
+            content: ''; position: absolute; z-index: -1; top: 50%; left: -15%; right: -15%; height: 50%;
+            transform: translateY(-50%) skewX(-45deg);
+            background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.7), #00e5ff, rgba(213, 0, 249, 0.7), transparent);
+            filter: blur(2px); animation: ichigeki-slash 1.5s infinite;
+        }
+        @keyframes ichigeki-smash {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; }
+            10% { transform: scale(1.08); text-shadow: 0 0 10px #ffffff, 0 0 20px #00e5ff, 0 0 30px #d500f9, 3px 3px 0px #311b92, -3px -3px 0px #00e5ff; }
+            25% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; }
+        }
+        @keyframes ichigeki-slash {
+            0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); }
+            10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); filter: blur(4px) brightness(1.5); }
+            25% { opacity: 0.4; transform: translateY(-50%) skewX(-45deg) scaleX(0.9); filter: blur(2px); }
         }
 
         /* 全稱號：終極形態 */
@@ -527,6 +540,20 @@
         .legend-bankrupt-cracks { position: absolute; z-index: 2; inset: -9% 7%; pointer-events: none; opacity: .72; background: linear-gradient(111deg, transparent 0 22%, #291008 22.4% 24%, transparent 24.4% 100%), linear-gradient(70deg, transparent 0 43%, #40160a 43.4% 45%, transparent 45.4% 100%), linear-gradient(119deg, transparent 0 67%, #281008 67.4% 69%, transparent 69.4% 100%); filter: drop-shadow(1px 0 0 rgba(255, 206, 130, .34)); }
         .legend-hell-echo { position: absolute; z-index: 0; top: 7px; left: 21px; pointer-events: none; white-space: nowrap; color: #ef1644; text-shadow: 3px 0 8px rgba(238, 12, 55, .92), -3px 0 8px rgba(89, 0, 14, .9); opacity: 0; animation: legend-hell 3.2s steps(1, end) infinite; font-weight: bold; }
         .legend-hell-echo::before { content: attr(data-text); }
+        
+        /* 終極預覽中的一撃王：紫電斬擊 */
+        .legend-ichigeki-burst { 
+            position: absolute; z-index: 1; top: 50%; left: -20%; right: -20%; height: 2px; pointer-events: none;
+            transform: translateY(-50%) skewX(-45deg);
+            background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.8), #00e5ff, rgba(213, 0, 249, 0.8), transparent);
+            filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8)); animation: legend-ichigeki 1.5s infinite; 
+        }
+        @keyframes legend-ichigeki { 
+            0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); } 
+            10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); height: 6px; } 
+            25% { opacity: 0.3; height: 2px; } 
+        }
+
         @keyframes legend-hell { 0%, 69%, 100% { opacity: 0; transform: translateX(0); } 72% { opacity: .72; transform: translateX(-3px); } 75% { opacity: .45; transform: translateX(3px); } 78% { opacity: .64; transform: translateX(-1px); } }
         @keyframes legend-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.08); } }
         @keyframes legend-sweep { 0%, 53% { transform: translateX(-140%); } 78%, 100% { transform: translateX(140%); } }
@@ -880,7 +907,7 @@
         let maxHamariData = null;
         const authBtn = document.getElementById("auth-btn");
 
-        function getPlayerNameHtml(userObj, isRank1, uid = null, disableClick = false) {
+        function getPlayerNameHtml(userObj, isRank1, uid = null, disableClick = false, isDashboard = false) {
             let name = userObj.name || "Unknown";
             let isComplete = userObj.has_completed;
             let isBankrupt = userObj.balance <= -10000000;
@@ -895,23 +922,30 @@
             let html = display;
 
             if (isLegend) {
-                html = `<span class="title-effect effect-legend"><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
+                html = `<span class="title-effect effect-legend"><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
             } else {
-                if (isBankrupt) html = `<span class="effect-bankrupt">${html}</span>`;
-                else if (isComplete) html = `<span class="effect-rainbow">${html}</span>`;
-                else html = `<span style="color: ${userObj.isSelf ? '#00e5ff' : '#fff'};">${html}</span>`;
+                if (isBankrupt) {
+                    html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`;
+                } else if (isComplete) {
+                    html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`;
+                } else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme) {
+                    // 無任何稱號先會顯示預設黃色/白色
+                    let baseColor = userObj.isSelf ? '#00e5ff' : (isDashboard ? '#ffca28' : '#fff');
+                    html = `<span style="color: ${baseColor};">${html}</span>`;
+                }
                 
-                if (isGod) html = `<span class="effect-godpull">${html}</span>`;
-                if (isRunthrough) html = `<span class="effect-runthrough">${html}</span>`;
-                if (isIchigeki) html = `<span class="effect-ichigeki">${html}</span>`;
-                if (isHell) html = `<span class="effect-hell" data-text="${display}">${html}</span>`;
-                if (isSupreme) html = `<span class="effect-supreme">${html}</span>`;
+                // 🌟 重點修復：為所有特效補上 inline-block 及 relative，確保 transform 動畫能正常運作 🌟
+                if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
+                if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
+                if (isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
+                if (isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
+                if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
+                
                 html = `<span class="title-effect">${html}</span>`;
             }
 
-            // 如果有傳入 UID 且未被鎖定點擊，就包裝成可點擊連結
             if (uid && !disableClick) {
-                return `<span class="clickable-name" onclick="showProfile('${uid}')">${html}</span>`;
+                return `<span class="clickable-name" onpointerdown="showProfile('${uid}')">${html}</span>`;
             }
             return html;
         }
@@ -942,24 +976,50 @@
             }
         });
 
+        let lastRenderTime = 0;
+        let renderTimeout = null;
+
         db.ref('users').on('value', (snapshot) => {
             usersData = snapshot.val() || {};
+            
+            // 自動補發「單發地獄」稱號 (門檻 10 次)
+            for (let uid in usersData) {
+                let u = usersData[uid];
+                if ((u.single_hell_count || 0) >= 10 && !u.title_hell) {
+                    db.ref(`users/${uid}`).update({ title_hell: true });
+                    usersData[uid].title_hell = true;
+                }
+            }
+
             const user = auth.currentUser;
             if (user && usersData[user.uid]) {
                 document.getElementById("nav-balance").innerText = Math.round(usersData[user.uid].balance).toLocaleString();
             }
+
+            // 🌟 節流機制：限制最多每 1.5 秒更新一次 UI，防止狂閃及無法點擊 🌟
+            const now = Date.now();
+            if (now - lastRenderTime >= 1500) {
+                executeRender();
+            } else {
+                clearTimeout(renderTimeout);
+                renderTimeout = setTimeout(executeRender, 1500 - (now - lastRenderTime));
+            }
+        });
+
+        // 將更新 UI 的邏輯獨立抽出來
+        function executeRender() {
             updateDashboard();
             renderRankings(usersData);
-
             if (currentOpenProfileUid) updateProfileModal();
-        });
+            lastRenderTime = Date.now();
+        }
 
         db.ref('machine_rankings').on('value', (snapshot) => {
             rankingsData = snapshot.val() || {};
             updateDashboard();
         });
 
-        // 🌟 史上最大ハマリの監視 🌟
+        // 史上最大ハマリの監視
         db.ref('server_records/max_hamari').on('value', (snapshot) => {
             maxHamariData = snapshot.val();
             updateDashboard();
@@ -973,15 +1033,33 @@
             const INITIAL_BALANCE = 50000;
             const todayStr = new Date().toDateString();
 
+            let topUid = null;
+            let richArr = Object.keys(usersData)
+                .map(k => ({uid: k, balance: usersData[k].balance || 0}))
+                .filter(u => u.balance >= 0)
+                .sort((a,b) => b.balance - a.balance);
+            if (richArr.length > 0) topUid = richArr[0].uid;
+
             for (let uid in usersData) {
                 let u = usersData[uid];
                 let userBalance = u.balance || 0;
                 let dailyProfit = u.daily_profit || 0;
                 let userLastDate = u.last_date || "";
 
-                let nameHtml = u.has_completed
-                    ? `<span class="rainbow-text">${u.username || "Unknown"}</span>`
-                    : `<span style="color:#ffca28;">${u.username || "Unknown"}</span>`;
+                let userObj = {
+                    uid: uid,
+                    name: u.username || "Unknown",
+                    balance: userBalance,
+                    has_completed: u.has_completed || false,
+                    title_hell: u.title_hell || false,
+                    title_godpull: u.title_godpull || false,
+                    title_runthrough: u.title_runthrough || false,
+                    title_ichigeki: u.title_ichigeki || false,
+                    isSelf: (auth.currentUser && auth.currentUser.uid === uid)
+                };
+
+                let isRank1 = (uid === topUid);
+                let nameHtml = getPlayerNameHtml(userObj, isRank1, uid, false, true);
 
                 alltimeParlorProfit += (INITIAL_BALANCE - userBalance);
 
@@ -989,7 +1067,7 @@
                     todayParlorProfit += -(dailyProfit);
                     if (dailyProfit < worstDailyProfit) {
                         worstDailyProfit = dailyProfit;
-                        worstUserHtml = nameHtml;
+                        worstUserHtml = nameHtml; 
                     }
                 }
             }
@@ -1018,16 +1096,24 @@
                 alltimeProfitEl.style.color = "#fff";
             }
 
+            // 🌟 養分王：隔離名字與數值更新，保護動畫完整播放 🌟
             let loserEl = document.getElementById("today-loser");
             if (worstUserHtml && worstDailyProfit < 0) {
-                loserEl.innerHTML = `${worstUserHtml}<br><span style="font-size:0.6em; color:#ff5252;">(${Math.round(worstDailyProfit).toLocaleString()} 円)</span>`;
+                if (!loserEl.querySelector('.dash-name')) {
+                    loserEl.innerHTML = `<span class="dash-name"></span><br><span class="dash-amt" style="font-size:0.6em; color:#ff5252;"></span>`;
+                }
+                let nEl = loserEl.querySelector('.dash-name');
+                let aEl = loserEl.querySelector('.dash-amt');
+                if (nEl.innerHTML !== worstUserHtml) nEl.innerHTML = worstUserHtml;
+                let amtStr = `(${Math.round(worstDailyProfit).toLocaleString()} 円)`;
+                if (aEl.innerText !== amtStr) aEl.innerText = amtStr;
             } else {
                 loserEl.innerHTML = `<span style="color:#888;">該当者なし</span>`;
             }
 
             const today = new Date();
             const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
-            let bestHitUserHtml = null;
+            let bestHitUserName = null;
             let bestHitPayout = 0;
             let bestHitMachine = "";
 
@@ -1037,61 +1123,95 @@
                     if (rec.date === dateStr && rec.payout > bestHitPayout) {
                         bestHitPayout = rec.payout;
                         bestHitMachine = machine;
-
-                        let hitHasCompleted = false;
-                        for (let uid in usersData) {
-                            if (usersData[uid].username === rec.user) hitHasCompleted = usersData[uid].has_completed;
-                        }
-                        bestHitUserHtml = hitHasCompleted
-                            ? `<span class="rainbow-text">${rec.user}</span>`
-                            : `<span style="color:#ffca28;">${rec.user}</span>`;
+                        bestHitUserName = rec.user;
                     }
                 }
             }
 
+            // 🌟 一擊王：隔離名字與數值更新 🌟
             let hitEl = document.getElementById("today-besthit");
-            if (bestHitUserHtml && bestHitPayout >= 10000) {
-                // 👇 呢行係魔法：將資料庫入面多餘嘅 SEO 字眼洗走，變返乾淨機名
+            if (bestHitUserName && bestHitPayout >= 10000) {
+                let hitUid = null;
+                let hitUserObj = { name: bestHitUserName, has_completed: false };
+                for (let uid in usersData) {
+                    if (usersData[uid].username === bestHitUserName) {
+                        hitUid = uid;
+                        hitUserObj = {
+                            uid: uid,
+                            name: usersData[uid].username,
+                            balance: usersData[uid].balance || 0,
+                            has_completed: usersData[uid].has_completed || false,
+                            title_hell: usersData[uid].title_hell || false,
+                            title_godpull: usersData[uid].title_godpull || false,
+                            title_runthrough: usersData[uid].title_runthrough || false,
+                            title_ichigeki: usersData[uid].title_ichigeki || false,
+                            isSelf: (auth.currentUser && auth.currentUser.uid === uid)
+                        };
+                        break;
+                    }
+                }
+                
+                let bestHitUserHtml = getPlayerNameHtml(hitUserObj, hitUid === topUid, hitUid, false, true);
                 let cleanMachineName = bestHitMachine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
                 
-                hitEl.innerHTML = `<span style="color:#fff;">${bestHitPayout.toLocaleString()} 玉</span><br><span style="font-size:0.55em;">${bestHitUserHtml} (${cleanMachineName})</span>`;
+                if (!hitEl.querySelector('.dash-amt')) {
+                    hitEl.innerHTML = `<span class="dash-amt" style="color:#fff;"></span><br><span class="dash-name" style="font-size:0.55em;"></span>`;
+                }
+                let aEl = hitEl.querySelector('.dash-amt');
+                let nEl = hitEl.querySelector('.dash-name');
+                let amtStr = `${bestHitPayout.toLocaleString()} 玉`;
+                let nameStr = `${bestHitUserHtml} (${cleanMachineName})`;
+                
+                if (aEl.innerText !== amtStr) aEl.innerText = amtStr;
+                if (nEl.innerHTML !== nameStr) nEl.innerHTML = nameStr;
             } else {
                 hitEl.innerHTML = `<span style="color:#888;">記録待ち (1万発以上)</span>`;
             }
 
-            // 🌟 史上最大ハマリ UI 描画 🌟
+            // 🌟 史上最大ハマリ：隔離名字與數值更新 🌟
             let hamariEl = document.getElementById("max-hamari");
             if (maxHamariData && maxHamariData.spins > 0) {
-                let hamariHasCompleted = false;
+                let hamariUid = null;
+                let hamariUserObj = { name: maxHamariData.user, has_completed: false };
                 for (let uid in usersData) {
-                    if (usersData[uid].username === maxHamariData.user) hamariHasCompleted = usersData[uid].has_completed;
+                    if (usersData[uid].username === maxHamariData.user) {
+                        hamariUid = uid;
+                        hamariUserObj = {
+                            uid: uid,
+                            name: usersData[uid].username,
+                            balance: usersData[uid].balance || 0,
+                            has_completed: usersData[uid].has_completed || false,
+                            title_hell: usersData[uid].title_hell || false,
+                            title_godpull: usersData[uid].title_godpull || false,
+                            title_runthrough: usersData[uid].title_runthrough || false,
+                            title_ichigeki: usersData[uid].title_ichigeki || false,
+                            isSelf: (auth.currentUser && auth.currentUser.uid === uid)
+                        };
+                        break;
+                    }
                 }
-                let hamariUserHtml = hamariHasCompleted
-                    ? `<span class="rainbow-text">${maxHamariData.user}</span>`
-                    : `<span style="color:#ffca28;">${maxHamariData.user}</span>`;
                 
-                // 👇 同樣加呢行魔法過濾ハマリ嘅機台名
+                let hamariUserHtml = getPlayerNameHtml(hamariUserObj, hamariUid === topUid, hamariUid, false, true);
                 let cleanHamariMachine = maxHamariData.machine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
                 
-                hamariEl.innerHTML = `<span style="color:#ff9100;">${maxHamariData.spins.toLocaleString()} 回転</span><br><span style="font-size:0.55em;">${hamariUserHtml} (${cleanHamariMachine})</span>`;
+                if (!hamariEl.querySelector('.dash-amt')) {
+                    hamariEl.innerHTML = `<span class="dash-amt" style="color:#ff9100;"></span><br><span class="dash-name" style="font-size:0.55em;"></span>`;
+                }
+                let aEl = hamariEl.querySelector('.dash-amt');
+                let nEl = hamariEl.querySelector('.dash-name');
+                let amtStr = `${maxHamariData.spins.toLocaleString()} 回転`;
+                let nameStr = `${hamariUserHtml} (${cleanHamariMachine})`;
+                
+                if (aEl.innerText !== amtStr) aEl.innerText = amtStr;
+                if (nEl.innerHTML !== nameStr) nEl.innerHTML = nameStr;
             } else {
                 hamariEl.innerHTML = `<span style="color:#888;">記録なし (更新待ち)</span>`;
             }
         }
 
         function renderRankings(users) {
-            let rankingBody = document.getElementById("ranking-body");
-            let poorRankingBody = document.getElementById("poor-ranking-body");
-
-            rankingBody.innerHTML = "";
-            poorRankingBody.innerHTML = "";
-
             let userKeys = Object.keys(users);
-            if (userKeys.length === 0) {
-                rankingBody.innerHTML = `<tr><td colspan="3">データなし</td></tr>`;
-                poorRankingBody.innerHTML = `<tr><td colspan="3">データなし</td></tr>`;
-                return;
-            }
+            if (userKeys.length === 0) return;
 
             let userArray = userKeys.map(uid => {
                 let u = users[uid];
@@ -1100,41 +1220,61 @@
                     name: u.username || "Unknown",
                     balance: u.balance || 0,
                     has_completed: u.has_completed || false,
+                    title_hell: u.title_hell || false,
+                    title_godpull: u.title_godpull || false,
+                    title_runthrough: u.title_runthrough || false,
+                    title_ichigeki: u.title_ichigeki || false,
                     isSelf: (auth.currentUser && auth.currentUser.uid === uid)
                 };
             });
 
-            // 🌟 富豪ランキング：所持金が「0以上 (プラス)」のプレイヤーのみ抽出 🌟
-            let richUsers = userArray.filter(u => u.balance >= 0);
-            richUsers.sort((a, b) => b.balance - a.balance);
-            let top10Rich = richUsers.slice(0, 10);
+            let richUsers = userArray.filter(u => u.balance >= 0).sort((a, b) => b.balance - a.balance).slice(0, 10);
+            updateTable('ranking-body', richUsers, true);
 
-            if (top10Rich.length === 0) {
-                rankingBody.innerHTML = `<tr><td colspan="3" style="color:#888;">該当者なし (全員が負債を抱えています💀)</td></tr>`;
-            } else {
-                top10Rich.forEach((user, index) => {
-                    let tr = document.createElement("tr");
-                    let rankText = (index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1);
-                    tr.innerHTML = `<td>${rankText}</td><td>${getPlayerNameHtml(user, index === 0, user.uid)}</td><td>${Math.round(user.balance).toLocaleString()}</td>`;
-                    rankingBody.appendChild(tr);
-                });
+            let poorUsers = userArray.filter(u => u.balance < 0).sort((a, b) => a.balance - b.balance).slice(0, 10);
+            updateTable('poor-ranking-body', poorUsers, false);
+        }
+
+        // 🌟 新增的動態差異更新機制：只有金額改變時更新儲存格，名字不重置 🌟
+        function updateTable(tbodyId, userList, isRich) {
+            let tbody = document.getElementById(tbodyId);
+            let rows = tbody.children;
+
+            if (rows.length !== userList.length || rows.length === 0 || rows[0].children.length === 1) {
+                let html = '';
+                if (userList.length === 0) {
+                    html = `<tr><td colspan="3" style="color:#888;">該当者なし</td></tr>`;
+                } else {
+                    userList.forEach((user, index) => {
+                        let rankText = isRich
+                            ? ((index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1))
+                            : ((index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1));
+                        let nameHtml = getPlayerNameHtml(user, index === 0 && isRich, user.uid);
+                        let bal = Math.round(user.balance).toLocaleString();
+                        let balColor = isRich ? "" : "color: #4fc3f7;";
+                        html += `<tr><td>${rankText}</td><td>${nameHtml}</td><td style="${balColor}">${bal}</td></tr>`;
+                    });
+                }
+                tbody.innerHTML = html;
+                return;
             }
 
-            // 🌟 貧民ランキング：所持金が「0未満 (マイナス/借金)」のプレイヤーのみ抽出 🌟
-            let poorUsers = userArray.filter(u => u.balance < 0);
-            poorUsers.sort((a, b) => a.balance - b.balance);
-            let top10Poor = poorUsers.slice(0, 10);
-
-            if (top10Poor.length === 0) {
-                poorRankingBody.innerHTML = `<tr><td colspan="3" style="color:#888;">該当者なし (全員がプラスです🕊️)</td></tr>`;
-            } else {
-                top10Poor.forEach((user, index) => {
-                    let tr = document.createElement("tr");
-                    let rankText = (index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1);
-                    tr.innerHTML = `<td>${rankText}</td><td>${getPlayerNameHtml(user, false, user.uid)}</td><td style="color: #4fc3f7;">${Math.round(user.balance).toLocaleString()}</td>`;
-                    poorRankingBody.appendChild(tr);
-                });
-            }
+            userList.forEach((user, index) => {
+                let row = rows[index];
+                let rankText = isRich
+                            ? ((index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1))
+                            : ((index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1));
+                
+                let nameHtml = getPlayerNameHtml(user, index === 0 && isRich, user.uid);
+                // 只有名字真的有變動時（例如有人爬頭換位）才重寫 HTML
+                if (row.cells[1].innerHTML !== nameHtml) row.cells[1].innerHTML = nameHtml;
+                
+                let bal = Math.round(user.balance).toLocaleString();
+                // 金額隨時跳動，但只改動數值的 text，不會干擾隔壁格的名字動畫
+                if (row.cells[2].innerText !== bal) row.cells[2].innerText = bal;
+                
+                if (row.cells[0].innerText !== rankText) row.cells[0].innerText = rankText;
+            });
         }
 
         let currentOpenProfileUid = null;
@@ -1157,7 +1297,17 @@
             
             
             // 產生無點擊事件嘅純名字 HTML
-            let mockUserObj = { name: u.username, balance: u.balance, has_completed: u.has_completed, title_hell: u.title_hell, title_godpull: u.title_godpull, title_runthrough: u.title_runthrough, isSelf: auth.currentUser && auth.currentUser.uid === currentOpenProfileUid };
+            // 加入 title_ichigeki 落 mockUserObj
+            let mockUserObj = { 
+                name: u.username, 
+                balance: u.balance, 
+                has_completed: u.has_completed, 
+                title_hell: u.title_hell, 
+                title_godpull: u.title_godpull, 
+                title_runthrough: u.title_runthrough,
+                title_ichigeki: u.title_ichigeki, // 👈 補番呢度
+                isSelf: auth.currentUser && auth.currentUser.uid === currentOpenProfileUid 
+            };
             // 判斷係咪富豪榜第一名 (用嚟顯示至尊無上)
             let isRank1 = false;
             let richUsers = Object.values(usersData).filter(x => (x.balance || 0) >= 0).sort((a,b) => (b.balance || 0) - (a.balance || 0));
