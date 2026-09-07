@@ -1295,9 +1295,6 @@
             let u = usersData[currentOpenProfileUid];
             let iC = u.ichigeki_count || 0;
             
-            
-            // 產生無點擊事件嘅純名字 HTML
-            // 加入 title_ichigeki 落 mockUserObj
             let mockUserObj = { 
                 name: u.username, 
                 balance: u.balance, 
@@ -1305,28 +1302,50 @@
                 title_hell: u.title_hell, 
                 title_godpull: u.title_godpull, 
                 title_runthrough: u.title_runthrough,
-                title_ichigeki: u.title_ichigeki, // 👈 補番呢度
+                title_ichigeki: u.title_ichigeki, 
                 isSelf: auth.currentUser && auth.currentUser.uid === currentOpenProfileUid 
             };
-            // 判斷係咪富豪榜第一名 (用嚟顯示至尊無上)
+
             let isRank1 = false;
             let richUsers = Object.values(usersData).filter(x => (x.balance || 0) >= 0).sort((a,b) => (b.balance || 0) - (a.balance || 0));
             if(richUsers.length > 0 && richUsers[0].username === u.username) isRank1 = true;
 
-            document.getElementById('modal-name').innerHTML = getPlayerNameHtml(mockUserObj, isRank1, null, true);
-            document.getElementById('modal-balance').innerText = Math.round(u.balance || 0).toLocaleString();
+            // 🌟 核心修復：只在內容不同時才更新，保護動畫完整播放
+            let nameHtml = getPlayerNameHtml(mockUserObj, isRank1, null, true);
+            let nameEl = document.getElementById('modal-name');
+            if (nameEl.innerHTML !== nameHtml) nameEl.innerHTML = nameHtml;
+
+            let balText = Math.round(u.balance || 0).toLocaleString();
+            let balEl = document.getElementById('modal-balance');
+            if (balEl.innerText !== balText) balEl.innerText = balText;
             
             let hellCount = u.single_hell_count || 0;
             let runCount = u.runthrough_count || 0;
 
-            document.getElementById('modal-hell-text').innerText = `${hellCount} / 10`;
-            document.getElementById('modal-hell-fill').style.width = `${Math.min((hellCount / 10) * 100, 100)}%`;
+            let hText = `${hellCount} / 10`;
+            let hTextEl = document.getElementById('modal-hell-text');
+            if (hTextEl.innerText !== hText) hTextEl.innerText = hText;
 
-            document.getElementById('modal-run-text').innerText = `${runCount} / 7`;
-            document.getElementById('modal-run-fill').style.width = `${Math.min((runCount / 7) * 100, 100)}%`;
+            let hFill = `${Math.min((hellCount / 10) * 100, 100)}%`;
+            let hFillEl = document.getElementById('modal-hell-fill');
+            if (hFillEl.style.width !== hFill) hFillEl.style.width = hFill;
 
-            document.getElementById('modal-ichi-text').innerText = `${iC} / 10`;
-            document.getElementById('modal-ichi-fill').style.width = `${Math.min((iC / 10) * 100, 100)}%`;
+            let rText = `${runCount} / 7`;
+            let rTextEl = document.getElementById('modal-run-text');
+            if (rTextEl.innerText !== rText) rTextEl.innerText = rText;
+
+            let rFill = `${Math.min((runCount / 7) * 100, 100)}%`;
+            let rFillEl = document.getElementById('modal-run-fill');
+            if (rFillEl.style.width !== rFill) rFillEl.style.width = rFill;
+
+            let iText = `${iC} / 10`;
+            let iTextEl = document.getElementById('modal-ichi-text');
+            if (iTextEl.innerText !== iText) iTextEl.innerText = iText;
+
+            let iFill = `${Math.min((iC / 10) * 100, 100)}%`;
+            let iFillEl = document.getElementById('modal-ichi-fill');
+            if (iFillEl.style.width !== iFill) iFillEl.style.width = iFill;
+
             let badgesHtml = '';
             badgesHtml += `<div class="badge ${u.has_completed ? 'active' : ''}">🌈 コンプリート</div>`;
             badgesHtml += `<div class="badge ${u.balance <= -10000000 ? 'active' : ''}">💀 破産王</div>`;
@@ -1334,7 +1353,9 @@
             badgesHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
             badgesHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
             badgesHtml += `<div class="badge ${u.title_ichigeki ? 'active' : ''}">💥 一撃王</div>`;
-            document.getElementById('modal-badges').innerHTML = badgesHtml;
+            
+            let badgesEl = document.getElementById('modal-badges');
+            if (badgesEl.innerHTML !== badgesHtml) badgesEl.innerHTML = badgesHtml;
         }
 
     // 🌟 自動結算「本日の一撃王」並派發稱號

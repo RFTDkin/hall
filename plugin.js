@@ -1,5 +1,5 @@
 // ==========================================
-// パチンコ全能プラグイン V28 (RUSH中強制終了バグ完全修正版)
+// パチンコ全能プラグイン V29 (ランキング称号・プロフィール完全対応版)
 // ==========================================
 
 const firebaseConfig = {
@@ -13,44 +13,219 @@ const firebaseConfig = {
     measurementId: "G-46M19VQVY2"
 };
 
-// ⚠️ 喺度填入你申請嘅 Adsterra Direct Link 網址
 const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63";
 
 window.latest_payout_for_share = 0;
 window.latest_rush_for_share = 0;
+window.globalUsersData = {};
+window.currentOpenProfileUid = null;
 
-const rainbowStyle = document.createElement('style');
-rainbowStyle.innerHTML = `
-    .rainbow-text {
-        background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
-        background-size: 200% 100%;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: rainbow-bg 2s linear infinite;
-        font-weight: 900;
-    }
-    @keyframes rainbow-bg {
-        0% { background-position: 0% 50%; }
-        100% { background-position: 200% 50%; }
-    }
+// 🌟 將所有稱號特效及 Modal CSS 注入到機台頁面 🌟
+const globalPluginStyle = document.createElement('style');
+globalPluginStyle.innerHTML = `
+    /* 稱號共用 */
+    .title-effect { position: relative; display: inline-block; white-space: nowrap; }
+    
+    /* 虹色コンプリート */
+    .effect-rainbow { background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow-bg 2s linear infinite; font-weight: 900; }
+    @keyframes rainbow-bg { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 
+    /* サーバーの覇者 */
+    .effect-supreme { isolation: isolate; padding: 6px 20px; color: #fff8d8; border: 1px solid #f6d36c; border-radius: 2px; background: linear-gradient(180deg, rgba(92, 55, 4, .94), rgba(30, 16, 0, .96) 48%, rgba(106, 65, 5, .92)); box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45); text-shadow: 0 1px 0 #7a4900, 0 0 8px rgba(255, 223, 117, .7); overflow: visible; font-weight: bold; }
+    .effect-supreme::before { content: ''; position: absolute; z-index: -1; top: 50%; left: -22px; right: -22px; height: 1px; transform: translateY(-50%); background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent); box-shadow: 0 -7px 10px rgba(255, 196, 45, .24), 0 7px 10px rgba(255, 196, 45, .24); }
+    .effect-supreme::after { content: ''; position: absolute; z-index: -1; inset: -9px -18px; background: radial-gradient(ellipse at center, rgba(255, 216, 106, .32), transparent 62%); filter: blur(4px); animation: sovereign-aura 3.8s ease-in-out infinite; }
+    @keyframes sovereign-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
+
+    /* 破産王 */
+    .effect-bankrupt { color: #dd8a48; letter-spacing: .13em; text-shadow: 1px 1px 0 #4b1d0b, 3px 4px 0 #090604, 0 0 5px rgba(157, 54, 15, .52); background: linear-gradient(100deg, #7d2c12 0%, #e89450 26%, #ffbd73 44%, #9d3717 52%, #e48743 66%, #64200e 100%); background-size: 180% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: .55px #361207; animation: bankrupt-fade 4.8s ease-in-out infinite; font-weight: 900; }
+    .effect-bankrupt::after { content: ''; position: absolute; inset: -10% 1%; pointer-events: none; opacity: .96; background: linear-gradient(110deg, transparent 0 20%, #260b05 20.5% 23%, transparent 23.5% 100%), linear-gradient(72deg, transparent 0 39%, #3a1006 39.5% 42.5%, transparent 43% 100%), linear-gradient(118deg, transparent 0 58%, #260b05 58.5% 61%, transparent 61.5% 100%), linear-gradient(66deg, transparent 0 76%, #431307 76.5% 79%, transparent 79.5% 100%); filter: drop-shadow(1px 0 0 rgba(255, 194, 113, .34)); }
+    @keyframes bankrupt-fade { 0%, 100% { opacity: .82; background-position: 0% 50%; } 48% { opacity: 1; background-position: 100% 50%; } }
+
+    /* 単発地獄 */
+    .effect-hell { color: #e3d6d8; text-shadow: 0 0 2px #fff, 2px 0 7px rgba(210, 14, 45, .78), -2px 0 7px rgba(85, 0, 12, .9); animation: hell-echo 3.2s steps(1, end) infinite; font-weight: bold; }
+    .effect-hell::before, .effect-hell::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+    .effect-hell::before { color: #ff214e; transform: translateX(-2px); animation: hell-ghost 3.2s steps(1, end) infinite; }
+    .effect-hell::after { color: #580012; transform: translateX(3px); animation: hell-ghost 3.2s steps(1, end) .08s infinite; }
+    @keyframes hell-echo { 0%, 72%, 100% { transform: translateX(0); } 74% { transform: translateX(-2px); } 76% { transform: translateX(2px); } 78% { transform: translateX(-1px); } }
+    @keyframes hell-ghost { 0%, 72%, 100% { opacity: 0; } 74%, 78% { opacity: .72; } }
+
+    /* 神の引き */
+    .effect-godpull { color: #f6fdff; letter-spacing: .1em; text-shadow: 0 0 2px #fff, 0 0 7px #9cefff, 0 0 18px #397cff, 0 0 30px rgba(132, 78, 255, .58); animation: god-pulse 2.8s ease-in-out infinite; font-weight: bold; }
+    .effect-godpull::before { content: ''; position: absolute; z-index: -1; inset: -8px -13px; border: 1px solid rgba(145, 226, 255, .68); border-radius: 50%; box-shadow: 0 0 11px rgba(65, 158, 255, .58), inset 0 0 12px rgba(129, 87, 255, .27); opacity: .25; animation: miracle-ring 2.8s ease-out infinite; }
+    .effect-godpull::after { content: '✦'; position: absolute; z-index: 1; right: -9px; top: -11px; color: #e9fdff; font-size: 10px; text-shadow: 0 0 7px #45c9ff, 0 0 13px #7d5cff; animation: miracle-star 2.8s ease-in-out infinite; }
+    @keyframes god-pulse { 0%, 100% { filter: brightness(1); } 48% { filter: brightness(1.48); } }
+    @keyframes miracle-ring { 0% { opacity: .78; transform: scale(.42); } 60%, 100% { opacity: 0; transform: scale(1.22); } }
+    @keyframes miracle-star { 0%, 42%, 100% { opacity: .18; transform: scale(.65) rotate(0); } 52% { opacity: 1; transform: scale(1.22) rotate(28deg); } }
+
+    /* 駆け抜け王 */
+    .effect-runthrough { color: #fff0c6; text-shadow: -4px 0 0 rgba(255, 61, 19, .22), -9px 0 8px rgba(255, 61, 19, .36), 0 0 8px rgba(255, 178, 64, .75); background: linear-gradient(90deg, #ff431e, #ffbc4b 32%, #fff7d3 48%, #ff7a28 64%, #b51f14); background-size: 190% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: runthrough 1.9s ease-in-out infinite; font-weight: bold; }
+    .effect-runthrough::after { content: ''; position: absolute; right: calc(100% + 5px); top: 49%; width: 30px; height: 1px; background: linear-gradient(90deg, transparent, #ff4c24, #ffd169); box-shadow: 0 -4px 7px rgba(255, 84, 30, .7), 0 4px 7px rgba(255, 84, 30, .45); transform-origin: right center; animation: speed-trail 1.9s ease-in-out infinite; }
+    @keyframes runthrough { 0%, 100% { background-position: 0% 50%; } 48% { background-position: 100% 50%; } }
+    @keyframes speed-trail { 0%, 100% { opacity: .16; transform: scaleX(.35); } 48% { opacity: 1; transform: scaleX(1); } }
+
+    /* 一撃王 (Cyberpunk) */
+    .effect-ichigeki { position: relative; display: inline-block; white-space: nowrap; color: #ffffff; font-weight: 900; letter-spacing: .08em; text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; animation: ichigeki-smash 1.5s infinite; isolation: isolate; }
+    .effect-ichigeki::after { content: ''; position: absolute; z-index: -1; top: 50%; left: -15%; right: -15%; height: 50%; transform: translateY(-50%) skewX(-45deg); background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.7), #00e5ff, rgba(213, 0, 249, 0.7), transparent); filter: blur(2px); animation: ichigeki-slash 1.5s infinite; }
+    @keyframes ichigeki-smash { 0%, 100% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; } 10% { transform: scale(1.08); text-shadow: 0 0 10px #ffffff, 0 0 20px #00e5ff, 0 0 30px #d500f9, 3px 3px 0px #311b92, -3px -3px 0px #00e5ff; } 25% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; } }
+    @keyframes ichigeki-slash { 0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); } 10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); filter: blur(4px) brightness(1.5); } 25% { opacity: 0.4; transform: translateY(-50%) skewX(-45deg) scaleX(0.9); filter: blur(2px); } }
+
+    /* 全稱號 */
+    .effect-legend { isolation: isolate; padding: 7px 21px; border-radius: 3px; border: 1px solid #ffe69a; background: linear-gradient(180deg, rgba(81, 42, 3, .95), rgba(15, 18, 40, .96), rgba(72, 28, 78, .94)); color: #fff; background-clip: padding-box; text-shadow: 0 0 3px #fff, 0 0 9px #65eaff, 0 0 19px #e975ff; box-shadow: 0 0 0 2px #211300, 0 0 0 3px rgba(255, 205, 76, .68), 0 0 25px rgba(123, 193, 255, .58), inset 0 1px 0 rgba(255,255,255,.62); overflow: visible; font-weight: bold; }
+    .effect-legend::before { content: ''; position: absolute; z-index: -1; inset: -13px -28px; border: 1px solid rgba(152, 230, 255, .62); border-radius: 50%; box-shadow: 0 0 19px rgba(112, 178, 255, .54), inset 0 0 18px rgba(241, 126, 255, .2); animation: legend-aura 3.6s ease-in-out infinite; }
+    .effect-legend::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(108deg, transparent 35%, rgba(255,255,255,.8) 50%, transparent 65%); transform: translateX(-140%); animation: legend-sweep 3.6s ease-in-out infinite; }
+    .legend-complete { position: relative; z-index: 1; background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); font-weight: 900; animation: rainbow-bg 2s linear infinite; }
+    .legend-royal-lines { position: absolute; z-index: 1; top: 50%; left: -27px; right: -27px; height: 1px; transform: translateY(-50%); pointer-events: none; background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent); box-shadow: 0 -7px 10px rgba(255, 196, 45, .33), 0 7px 10px rgba(255, 196, 45, .33); }
+    .legend-runthrough-trail { position: absolute; z-index: 2; right: calc(100% + 10px); top: 45%; width: 48px; height: 2px; pointer-events: none; background: linear-gradient(90deg, transparent, #ff4a20 42%, #ffc35a 78%, #fff0bf); box-shadow: -10px 7px 0 -1px rgba(255, 67, 27, .8), -23px -6px 0 -1px rgba(255, 142, 44, .56), 0 0 8px rgba(255, 94, 27, .9); transform-origin: right center; animation: legend-runthrough 1.9s ease-in-out infinite; }
+    .legend-bankrupt-cracks { position: absolute; z-index: 2; inset: -9% 7%; pointer-events: none; opacity: .72; background: linear-gradient(111deg, transparent 0 22%, #291008 22.4% 24%, transparent 24.4% 100%), linear-gradient(70deg, transparent 0 43%, #40160a 43.4% 45%, transparent 45.4% 100%), linear-gradient(119deg, transparent 0 67%, #281008 67.4% 69%, transparent 69.4% 100%); filter: drop-shadow(1px 0 0 rgba(255, 206, 130, .34)); }
+    .legend-hell-echo { position: absolute; z-index: 0; top: 7px; left: 21px; pointer-events: none; white-space: nowrap; color: #ef1644; text-shadow: 3px 0 8px rgba(238, 12, 55, .92), -3px 0 8px rgba(89, 0, 14, .9); opacity: 0; animation: legend-hell 3.2s steps(1, end) infinite; font-weight: bold; }
+    .legend-hell-echo::before { content: attr(data-text); }
+    .legend-ichigeki-burst { position: absolute; z-index: 1; top: 50%; left: -20%; right: -20%; height: 2px; pointer-events: none; transform: translateY(-50%) skewX(-45deg); background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.8), #00e5ff, rgba(213, 0, 249, 0.8), transparent); filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8)); animation: legend-ichigeki 1.5s infinite; }
+    @keyframes legend-ichigeki { 0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); } 10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); height: 6px; } 25% { opacity: 0.3; height: 2px; } }
+    @keyframes legend-hell { 0%, 69%, 100% { opacity: 0; transform: translateX(0); } 72% { opacity: .72; transform: translateX(-3px); } 75% { opacity: .45; transform: translateX(3px); } 78% { opacity: .64; transform: translateX(-1px); } }
+    @keyframes legend-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.08); } }
+    @keyframes legend-sweep { 0%, 53% { transform: translateX(-140%); } 78%, 100% { transform: translateX(140%); } }
+
+    /* Modal & UI */
     @media screen and (max-width: 768px) {
-        #plugin-ui-container {
-            position: relative !important;
-            top: 0 !important;
-            right: 0 !important;
-            align-items: center !important;
-            width: 100% !important;
-            margin-bottom: 20px !important;
-            flex-direction: column !important;
-        }
-        #plugin-ui-container > div {
-            width: 90% !important;
-            max-width: none !important;
-        }
+        #plugin-ui-container { position: relative !important; top: 0 !important; right: 0 !important; align-items: center !important; width: 100% !important; margin-bottom: 20px !important; flex-direction: column !important; }
+        #plugin-ui-container > div { width: 90% !important; max-width: none !important; }
     }
+    .profile-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; animation: fadeIn 0.2s; }
+    .profile-card { background: #111; border: 2px solid #444; border-radius: 12px; padding: 25px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.8); border-top: 5px solid #ff1744; }
+    .profile-card h3 { margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; color: #ccc; font-size: 1em; }
+    .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; color: #888; background: none; border: none; font-size: 1.2em; font-weight: bold; }
+    .prog-container { margin-top: 15px; text-align: left; }
+    .prog-label { font-size: 0.85em; color: #aaa; display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .prog-bar-bg { background: #222; border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid #333; }
+    .prog-bar-fill { height: 100%; transition: width 0.3s ease-out; }
+    .fill-hell { background: #ff1744; box-shadow: 0 0 5px #ff1744; }
+    .fill-run { background: #ff9100; box-shadow: 0 0 5px #ff9100; }
+    .fill-ichi { background: #ffea00; box-shadow: 0 0 5px #ffea00; }
+    .badge-container { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 20px; }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; border: 1px solid #444; background: #222; color: #666; }
+    .badge.active { background: #1a1a1a; border-color: #ffd700; color: #ffd700; box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+    .clickable-name { cursor: pointer; border-bottom: 1px dashed #555; padding-bottom: 2px; transition: 0.2s; }
+    .clickable-name:hover { filter: brightness(1.3); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    #p-modal-name { word-wrap: break-word; word-break: break-all; white-space: normal; line-height: 1.3; padding: 0 10px; }
+    #p-modal-name .title-effect { white-space: normal !important; }
 `;
-document.head.appendChild(rainbowStyle);
+document.head.appendChild(globalPluginStyle);
+
+// 🌟 全局獲取玩家名稱與稱號 HTML (包含點擊事件)
+window.getPluginPlayerNameHtml = function(userObj, isRank1, uid = null, disableClick = false) {
+    let name = userObj.name || "Unknown";
+    let isComplete = userObj.has_completed;
+    let isBankrupt = userObj.balance <= -10000000;
+    let isHell = userObj.title_hell;
+    let isGod = userObj.title_godpull;
+    let isRunthrough = userObj.title_runthrough;
+    let isIchigeki = userObj.title_ichigeki;
+    let isSupreme = isComplete && isRank1;
+    let isLegend = isSupreme && isBankrupt && isHell && isGod && isRunthrough && isIchigeki;
+
+    let display = userObj.isSelf ? `${name} (あなた)` : name;
+    let html = display;
+
+    if (isLegend) {
+        html = `<span class="title-effect effect-legend"><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
+    } else {
+        if (isBankrupt) {
+            html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`;
+        } else if (isComplete) {
+            html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`;
+        } else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme) {
+            // 🌟 修正：只要係自己 (isSelf)，就強制用返原本嘅藍色 #00e5ff 🌟
+            let baseColor = userObj.isSelf ? '#00e5ff' : '#fff';
+            html = `<span style="color: ${baseColor};">${html}</span>`;
+        }
+        
+        if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
+        if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
+        if (isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
+        if (isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
+        if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
+        
+        html = `<span class="title-effect">${html}</span>`;
+    }
+
+    if (uid && !disableClick) {
+        return `<span class="clickable-name" onpointerdown="window.showPluginProfile('${uid}')">${html}</span>`;
+    }
+    return html;
+};
+
+// 🌟 全局打開玩家 Profile Modal (加入防打斷更新機制)
+window.showPluginProfile = function(uid) {
+    window.currentOpenProfileUid = uid;
+    if (!window.globalUsersData || !window.globalUsersData[uid]) return;
+    
+    let u = window.globalUsersData[uid];
+    let topUid = null;
+    let richArr = Object.keys(window.globalUsersData)
+        .map(k => ({uid: k, balance: window.globalUsersData[k].balance || 0}))
+        .filter(u => u.balance >= 0)
+        .sort((a,b) => b.balance - a.balance);
+    if (richArr.length > 0) topUid = richArr[0].uid;
+
+    let mockUserObj = {
+        name: u.username,
+        balance: u.balance,
+        has_completed: u.has_completed,
+        title_hell: u.title_hell,
+        title_godpull: u.title_godpull,
+        title_runthrough: u.title_runthrough,
+        title_ichigeki: u.title_ichigeki,
+        isSelf: firebase.auth().currentUser && firebase.auth().currentUser.uid === uid
+    };
+
+    // 🌟 核心修復：只在內容不同時才更新 DOM，保護 CSS 動畫不被重置
+    let nameHtml = window.getPluginPlayerNameHtml(mockUserObj, topUid === uid, null, true);
+    let nameEl = document.getElementById('p-modal-name');
+    if (nameEl.innerHTML !== nameHtml) nameEl.innerHTML = nameHtml;
+
+    let balText = Math.round(u.balance || 0).toLocaleString();
+    let balEl = document.getElementById('p-modal-balance');
+    if (balEl.innerText !== balText) balEl.innerText = balText;
+    
+    let hC = u.single_hell_count || 0;
+    let rC = u.runthrough_count || 0;
+    let iC = u.ichigeki_count || 0;
+
+    let hText = `${hC} / 10`;
+    let hTextEl = document.getElementById('p-modal-hell-text');
+    if (hTextEl.innerText !== hText) hTextEl.innerText = hText;
+    let hFill = `${Math.min((hC/10)*100, 100)}%`;
+    let hFillEl = document.getElementById('p-modal-hell-fill');
+    if (hFillEl.style.width !== hFill) hFillEl.style.width = hFill;
+
+    let rText = `${rC} / 7`;
+    let rTextEl = document.getElementById('p-modal-run-text');
+    if (rTextEl.innerText !== rText) rTextEl.innerText = rText;
+    let rFill = `${Math.min((rC/7)*100, 100)}%`;
+    let rFillEl = document.getElementById('p-modal-run-fill');
+    if (rFillEl.style.width !== rFill) rFillEl.style.width = rFill;
+
+    let iText = `${iC} / 10`;
+    let iTextEl = document.getElementById('p-modal-ichi-text');
+    if (iTextEl.innerText !== iText) iTextEl.innerText = iText;
+    let iFill = `${Math.min((iC/10)*100, 100)}%`;
+    let iFillEl = document.getElementById('p-modal-ichi-fill');
+    if (iFillEl.style.width !== iFill) iFillEl.style.width = iFill;
+
+    let bHtml = '';
+    bHtml += `<div class="badge ${u.has_completed ? 'active' : ''}">🌈 コンプリート</div>`;
+    bHtml += `<div class="badge ${u.balance <= -10000000 ? 'active' : ''}">💀 破産王</div>`;
+    bHtml += `<div class="badge ${u.title_godpull ? 'active' : ''}">✨ 神の引き</div>`;
+    bHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
+    bHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
+    bHtml += `<div class="badge ${u.title_ichigeki ? 'active' : ''}">💥 一撃王</div>`;
+    
+    let badgesEl = document.getElementById('p-modal-badges');
+    if (badgesEl.innerHTML !== bHtml) badgesEl.innerHTML = bHtml;
+
+    document.getElementById('plugin-profile-modal').style.display = 'flex';
+};
 
 const originalAlert = window.alert;
 window.alert = function (msg) {
@@ -96,7 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnReset = document.getElementById("btn-reset");
     if (btnReset) btnReset.remove();
     translateDOM();
-
 
     const scriptApp = document.createElement('script');
     scriptApp.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
@@ -160,48 +334,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        const modalStyle = document.createElement('style');
-        modalStyle.innerHTML = `
-            .profile-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; animation: fadeIn 0.2s; }
-            .profile-card { background: #111; border: 2px solid #444; border-radius: 12px; padding: 25px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.8); border-top: 5px solid #ff1744; }
-            .profile-card h3 { margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; color: #ccc; font-size: 1em; }
-            .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; color: #888; background: none; border: none; font-size: 1.2em; font-weight: bold; }
-            .prog-container { margin-top: 15px; text-align: left; }
-            .prog-label { font-size: 0.85em; color: #aaa; display: flex; justify-content: space-between; margin-bottom: 5px; }
-            .prog-bar-bg { background: #222; border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid #333; }
-            .prog-bar-fill { height: 100%; transition: width 0.3s ease-out; }
-            .fill-hell { background: #ff1744; box-shadow: 0 0 5px #ff1744; }
-            .fill-run { background: #ff9100; box-shadow: 0 0 5px #ff9100; }
-            .fill-ichi { background: #ffea00; box-shadow: 0 0 5px #ffea00; }
-            .badge-container { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 20px; }
-            .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; border: 1px solid #444; background: #222; color: #666; }
-            .badge.active { background: #1a1a1a; border-color: #ffd700; color: #ffd700; box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
-            .clickable-name { cursor: pointer; border-bottom: 1px dashed #555; padding-bottom: 2px; transition: 0.2s; }
-            .clickable-name:hover { filter: brightness(1.3); }
-            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            /* 修復 Modal 內長名字出界問題 */
-            #p-modal-name {
-                word-wrap: break-word;
-                word-break: break-all;
-                white-space: normal;
-                line-height: 1.3;
-                padding: 0 10px;
-            }
-            #p-modal-name .title-effect {
-                white-space: normal !important;
-            }
-        `;
-        document.head.appendChild(modalStyle);
-
+        // 注入 Profile Modal HTML
         const modalHtml = document.createElement('div');
         modalHtml.id = 'plugin-profile-modal';
         modalHtml.className = 'profile-modal-overlay';
-        modalHtml.onclick = function(e) { if(e.target===this) this.style.display='none'; };
+        modalHtml.onclick = function(e) { if(e.target===this) { this.style.display='none'; window.currentOpenProfileUid=null; } };
         modalHtml.innerHTML = `
             <div class="profile-card">
-                <button class="close-btn" onclick="document.getElementById('plugin-profile-modal').style.display='none'">✖</button>
-                <h3>あなたの進捗</h3>
+                <button class="close-btn" onclick="document.getElementById('plugin-profile-modal').style.display='none'; window.currentOpenProfileUid=null;">✖</button>
+                <h3>プレイヤー情報</h3>
                 <div id="p-modal-name" style="font-size: 1.5em; margin: 15px 0; color: #fff;">名前</div>
+                <div style="font-size: 1.2em; color: #00e5ff; font-weight: bold; margin-bottom: 10px;"><span id="p-modal-balance">0</span> 円</div>
                 <div class="prog-container"><div class="prog-label"><span>💀 単発地獄 (10回連続)</span><span id="p-modal-hell-text">0 / 10</span></div><div class="prog-bar-bg"><div id="p-modal-hell-fill" class="prog-bar-fill fill-hell" style="width: 0%;"></div></div></div>
                 <div class="prog-container"><div class="prog-label"><span>⚡ 駆け抜け王 (7回連続)</span><span id="p-modal-run-text">0 / 7</span></div><div class="prog-bar-bg"><div id="p-modal-run-fill" class="prog-bar-fill fill-run" style="width: 0%;"></div></div></div>
                 <div class="prog-container"><div class="prog-label"><span>💥 一撃王 (本日の一撃王 10回)</span><span id="p-modal-ichi-text">0 / 10</span></div><div class="prog-bar-bg"><div id="p-modal-ichi-fill" class="prog-bar-fill fill-ichi" style="width: 0%;"></div></div></div>
@@ -210,41 +353,14 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         document.body.appendChild(modalHtml);
 
-        // 監聽並實時更新資料
-        userRef.on('value', (snap) => {
-            let u = snap.val();
-            if(!u) return;
-            document.getElementById('p-modal-name').innerHTML = u.has_completed ? `<span class="rainbow-text">${u.username}</span>` : u.username;
-            let hC = u.single_hell_count || 0; let rC = u.runthrough_count || 0; let iC = u.ichigeki_count || 0;
-            document.getElementById('p-modal-hell-text').innerText = `${hC} / 10`;
-            document.getElementById('p-modal-hell-fill').style.width = `${Math.min((hC/10)*100, 100)}%`;
-            document.getElementById('p-modal-run-text').innerText = `${rC} / 7`;
-            document.getElementById('p-modal-run-fill').style.width = `${Math.min((rC/7)*100, 100)}%`;
-            document.getElementById('p-modal-ichi-text').innerText = `${iC} / 10`;
-            document.getElementById('p-modal-ichi-fill').style.width = `${Math.min((iC/10)*100, 100)}%`;
-
-            let bHtml = '';
-            bHtml += `<div class="badge ${u.has_completed ? 'active' : ''}">🌈 コンプリート</div>`;
-            bHtml += `<div class="badge ${u.balance <= -10000000 ? 'active' : ''}">💀 破産王</div>`;
-            bHtml += `<div class="badge ${u.title_godpull ? 'active' : ''}">✨ 神の引き</div>`;
-            bHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
-            bHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
-            bHtml += `<div class="badge ${u.title_ichigeki ? 'active' : ''}">💥 一撃王</div>`;
-            document.getElementById('p-modal-badges').innerHTML = bHtml;
-        });
-
         const pluginUI = document.createElement("div");
         pluginUI.id = "plugin-ui-container";
         pluginUI.style.cssText = "position: fixed; top: 15px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; gap: 10px;";
 
-        let displayNameHtml = userData.has_completed
-            ? `<span class="rainbow-text">${currentUserName}</span>`
-            : `<span style="color:#00e5ff;">${currentUserName}</span>`;
-
         pluginUI.innerHTML = `
             <a href="index.html" style="background-color: #222; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 1px solid #777; box-shadow: 0 0 10px rgba(0,0,0,0.5);">🏠 ホールに戻る</a>
             <div style="background: #111; border: 2px solid #ffca28; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 0 15px rgba(255, 202, 40, 0.4); text-align: center; min-width: 160px; max-width: 250px;">
-                👤 <span id="ui-username" class="clickable-name" onclick="document.getElementById('plugin-profile-modal').style.display='flex'">${displayNameHtml}</span><br>
+                👤 <span id="ui-username" class="clickable-name" onpointerdown="window.showPluginProfile('${uid}')">読込中...</span><br>
                 💰 所持金<br>
                 <span id="global-wallet" style="font-size: 1.4em;">0</span> 円
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
@@ -268,7 +384,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderWallet();
 
         let originalTitle = document.title;
-        // 👇 終極濾水器：無論新舊標題，統統幫你洗淨變回最原始嘅機台名
         let machineName = originalTitle.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace('パチンコシミュレーター (', '').replace(/\)/g, '').trim() || "Unknown";
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
@@ -277,6 +392,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 25;
 
+        // 🌟 生成排行榜與實時數據同步 🌟
+        let currentMachineRankings = [];
         let rightPanel = document.querySelector(".right-panel");
         if (rightPanel) {
             const rankingUI = document.createElement("div");
@@ -290,27 +407,148 @@ document.addEventListener("DOMContentLoaded", () => {
                 </table>
             `;
             rightPanel.appendChild(rankingUI);
+        }
 
-            db.ref('machine_rankings/' + machineName).on('value', (snapshot) => {
-                const tbody = document.getElementById("machine-ranking-body");
-                tbody.innerHTML = "";
-                if (!snapshot.exists()) {
+        function renderMachineRankings() {
+            const tbody = document.getElementById("machine-ranking-body");
+            if (!tbody) return;
+
+            if (currentMachineRankings.length === 0) {
+                if (tbody.innerHTML !== `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`) {
                     tbody.innerHTML = `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`;
-                    return;
                 }
-                let records = [];
-                snapshot.forEach(child => { records.push(child.val()); });
-                records.sort((a, b) => b.payout - a.payout);
+                return;
+            }
 
-                records.slice(0, 10).forEach((rec, idx) => {
-                    let rankText = (idx === 0) ? "🥇" : (idx === 1) ? "🥈" : (idx === 2) ? "🥉" : (idx + 1);
-                    let userColor = rec.user === currentUserName ? "#00e5ff" : "#ccc";
-                    let tr = document.createElement("tr");
-                    tr.innerHTML = `<td>${rankText}</td><td style="color:${userColor}; font-weight:bold;">${rec.user}</td><td style="color:#ff5252; font-weight:bold;">${rec.payout.toLocaleString()}</td><td style="font-size:0.8em; color:#888;">${rec.date}</td>`;
-                    tbody.appendChild(tr);
+            let topUid = null;
+            let richArr = Object.keys(window.globalUsersData)
+                .map(k => ({uid: k, balance: window.globalUsersData[k].balance || 0}))
+                .filter(u => u.balance >= 0)
+                .sort((a,b) => b.balance - a.balance);
+            if (richArr.length > 0) topUid = richArr[0].uid;
+
+            // 🌟 智能更新右上角自己的稱號顯示 (保護動畫)
+            let currentUserObj = window.globalUsersData[uid];
+            if (currentUserObj) {
+                let mockSelf = {
+                    name: currentUserObj.username, balance: currentUserObj.balance,
+                    has_completed: currentUserObj.has_completed, title_hell: currentUserObj.title_hell,
+                    title_godpull: currentUserObj.title_godpull, title_runthrough: currentUserObj.title_runthrough,
+                    title_ichigeki: currentUserObj.title_ichigeki, isSelf: false 
+                };
+                let selfHtml = window.getPluginPlayerNameHtml(mockSelf, topUid === uid, uid, false);
+                let uiUserEl = document.getElementById("ui-username");
+                if (uiUserEl && uiUserEl.innerHTML !== selfHtml) {
+                    uiUserEl.innerHTML = selfHtml;
+                }
+            }
+
+            // 🌟 核心修復：比較行數，如果不對才重建表格框架
+            let rows = tbody.children;
+            if (rows.length !== currentMachineRankings.length || (rows.length > 0 && rows[0].cells.length === 1)) {
+                let html = "";
+                currentMachineRankings.forEach(() => {
+                    html += `<tr><td></td><td></td><td></td><td></td></tr>`;
                 });
+                tbody.innerHTML = html;
+                rows = tbody.children;
+            }
+
+            // 🌟 進行差異更新，只改動有變化的格子，絕不重置正在播放動畫的名字！
+            currentMachineRankings.forEach((rec, idx) => {
+                let rankText = (idx === 0) ? "🥇" : (idx === 1) ? "🥈" : (idx === 2) ? "🥉" : (idx + 1);
+
+                let hitUid = null;
+                let hitUserObj = { name: rec.user, has_completed: false };
+                for (let u in window.globalUsersData) {
+                    if (window.globalUsersData[u].username === rec.user) {
+                        hitUid = u;
+                        let data = window.globalUsersData[u];
+                        hitUserObj = {
+                            uid: u, name: data.username, balance: data.balance || 0,
+                            has_completed: data.has_completed || false, title_hell: data.title_hell || false,
+                            title_godpull: data.title_godpull || false, title_runthrough: data.title_runthrough || false,
+                            title_ichigeki: data.title_ichigeki || false, isSelf: (auth.currentUser && auth.currentUser.uid === u)
+                        };
+                        break;
+                    }
+                }
+
+                let nameHtml = window.getPluginPlayerNameHtml(hitUserObj, hitUid === topUid, hitUid, false);
+                let row = rows[idx];
+
+                if (row.cells[0].innerText !== rankText.toString()) row.cells[0].innerText = rankText;
+                
+                // 只有名字不同時才更新，保護 CSS 特效不被截斷
+                if (row.cells[1].innerHTML !== nameHtml) {
+                    row.cells[1].innerHTML = nameHtml;
+                    row.cells[1].style.fontWeight = "bold";
+                }
+                
+                let payoutText = rec.payout.toLocaleString();
+                if (row.cells[2].innerText !== payoutText) {
+                    row.cells[2].innerText = payoutText;
+                    row.cells[2].style.color = "#ff5252";
+                    row.cells[2].style.fontWeight = "bold";
+                }
+                
+                if (row.cells[3].innerText !== rec.date) {
+                    row.cells[3].innerText = rec.date;
+                    row.cells[3].style.fontSize = "0.8em";
+                    row.cells[3].style.color = "#888";
+                }
             });
         }
+
+// 監聽全局玩家數據，一旦變動就重繪排行榜與 Modal
+        db.ref('users').on('value', snap => {
+            let users = snap.val() || {};
+            
+            // 🌟 自動補發遺漏稱號邏輯 (確保各機台頁面也能自動修復舊數據) 🌟
+            for (let uid in users) {
+                let u = users[uid];
+                let needsUpdate = false;
+                let updates = {};
+
+                // 檢查單發地獄 (10次)
+                if ((u.single_hell_count || 0) >= 10 && !u.title_hell) {
+                    updates.title_hell = true;
+                    u.title_hell = true; // 即時更新本地數據顯示
+                    needsUpdate = true;
+                }
+                // 檢查駆け抜け王 (7次)
+                if ((u.runthrough_count || 0) >= 7 && !u.title_runthrough) {
+                    updates.title_runthrough = true;
+                    u.title_runthrough = true;
+                    needsUpdate = true;
+                }
+                // 檢查一擊王 (10次)
+                if ((u.ichigeki_count || 0) >= 10 && !u.title_ichigeki) {
+                    updates.title_ichigeki = true;
+                    u.title_ichigeki = true;
+                    needsUpdate = true;
+                }
+
+                // 如果有發現達標但未有稱號，即時寫入 Firebase
+                if (needsUpdate) {
+                    db.ref(`users/${uid}`).update(updates);
+                }
+            }
+
+            window.globalUsersData = users;
+            renderMachineRankings();
+            if (window.currentOpenProfileUid) window.showPluginProfile(window.currentOpenProfileUid);
+        });
+
+        db.ref('machine_rankings/' + machineName).on('value', (snapshot) => {
+            currentMachineRankings = [];
+            if (snapshot.exists()) {
+                snapshot.forEach(child => { currentMachineRankings.push(child.val()); });
+                currentMachineRankings.sort((a, b) => b.payout - a.payout);
+                currentMachineRankings = currentMachineRankings.slice(0, 10);
+            }
+            renderMachineRankings();
+        });
 
         function disableMachine(msgText = "⛔ 本日の上限に達しました") {
             let playBtn = document.getElementById("btn-play");
@@ -346,11 +584,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     } else {
                         clearInterval(countdown);
                         userData.max_allowed_spins += 4000;
-
-                        // 🌟 確保 Firebase 儲存完畢後，自動 F5 刷新網頁 🌟
                         userRef.update({ max_allowed_spins: userData.max_allowed_spins }).then(() => {
                             window.alert("🎉 認証成功！上限が +4000回転 追加されました！\n(システムを再起動します)");
-                            window.location.reload(); // 自動刷新，完美清走卡死 Bug
+                            window.location.reload(); 
                         });
                     }
                 }, 1000);
@@ -376,12 +612,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!spinEl || !payoutEl) return;
 
-                // 🌟 修正重點：精準判定係咪處於 RUSH 狀態 🌟
                 let isRushUI = spinEl.innerText.includes('中') || spinEl.innerText.includes('/') || spinEl.innerText.includes('残') || spinEl.innerText.includes('BATTLE') || spinEl.innerText.includes('RUSH') || spinEl.innerText.includes('ST');
 
                 let new_spins;
                 if (isRushUI) {
-                    // 🌟 如果中緊 RUSH，強制將當前轉數「凍結」喺中獎嗰一刻，唔會扣你每日轉數！
                     new_spins = lastUI_spins;
                 } else {
                     let spinRawText = spinEl.innerText.replace(/,/g, '');
@@ -397,17 +631,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
 
-                    // 🛡️ 升級做 Transaction，確保寫入前一刻同 Database 實時比對
                     db.ref('server_records/max_hamari').transaction((currentData) => {
                         if (currentData === null || new_spins > currentData.spins) {
-                            return {
-                                user: currentUserName,
-                                spins: new_spins,
-                                machine: machineName,
-                                date: dateStr
-                            };
+                            return { user: currentUserName, spins: new_spins, machine: machineName, date: dateStr };
                         }
-                        return; // 如果 Database 裡面嘅數字大過你，就放棄寫入，保護大數！
+                        return; 
                     });
                 }
 
@@ -423,29 +651,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     let alreadySaved = completeTriggeredThisRush;
                     completeTriggeredThisRush = false;
 
-                    // 🌟 終極判斷：如果未爆機 (未觸發過強制 Save)，先至喺歸零嗰陣上傳！
                     if (lastUI_payout >= 10000 && !alreadySaved) {
                         const todayDate = new Date();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
-                        // 🌟 競爭「本日の一撃王」
                         db.ref('server_records/daily_best').transaction((curr) => {
-                        // 如果今日仲未有人破紀錄，或者你嘅分數高過現有紀錄，就覆寫佢！
-                        if (!curr || curr.date !== dateStr || new_payout > curr.payout) {
-                            return { uid: uid, user: currentUserName, payout: new_payout, date: dateStr, processed: false };
+                        if (!curr || curr.date !== dateStr || lastUI_payout > curr.payout) {
+                            return { uid: uid, user: currentUserName, payout: lastUI_payout, date: dateStr, processed: false };
                         }
-                        return; // 已經有人高過你，中止寫入
+                        return;
                         });
                     }
                 }
 
-                // 🌟 修復盲點：如果 spin_diff 係負數 (例如重置) 變 0，大過 100 (異常) 變 1
-                if (spin_diff < 0) {
-                    spin_diff = 0;
-                } else if (spin_diff > 100) {
-                    spin_diff = 1;
-                }
-
+                if (spin_diff < 0) spin_diff = 0;
+                else if (spin_diff > 100) spin_diff = 1;
                 if (payout_diff < 0) payout_diff = new_payout;
 
                 let needUpdateCloud = false;
@@ -474,12 +694,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (needUpdateCloud) {
                     userData.balance = currentWallet;
                     userData.daily_profit = (userData.daily_profit || 0) + sessionNetProfit;
-
-                    userRef.update({
-                        balance: currentWallet,
-                        daily_spins: userData.daily_spins,
-                        daily_profit: userData.daily_profit
-                    });
+                    userRef.update({ balance: currentWallet, daily_spins: userData.daily_spins, daily_profit: userData.daily_profit });
                 }
 
                 renderWallet();
@@ -488,24 +703,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (new_payout >= 95000 && !completeTriggeredThisRush) {
                     completeTriggeredThisRush = true;
-
-                    // 🌟 新增：一達標即刻強制上傳成績，防止玩家走佬！
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                     db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: new_payout, date: dateStr });
-                    // 🌟 競爭「本日の一撃王」
                     db.ref('server_records/daily_best').transaction((curr) => {
-                        // 如果今日仲未有人破紀錄，或者你嘅分數高過現有紀錄，就覆寫佢！
                         if (!curr || curr.date !== dateStr || new_payout > curr.payout) {
                             return { uid: uid, user: currentUserName, payout: new_payout, date: dateStr, processed: false };
                         }
-                        return; // 已經有人高過你，中止寫入
+                        return; 
                     });
 
                     if (!userData.has_completed) {
                         userData.has_completed = true;
                         userRef.update({ has_completed: true });
-                        document.getElementById("ui-username").innerHTML = `<span class="rainbow-text">${currentUserName}</span>`;
                         window.alert("🎉【コンプリート機能 発動】🎉\n95,000発達成おめでとうございます！\n名誉の証として、プレイヤー名が虹色に輝くようになりました！\n\n※コンプリート機能により、現在のRUSHは強制終了となります。");
                     } else {
                         window.alert("🎉【コンプリート機能 発動】🎉\n95,000発到達！\n\n※コンプリート機能により、現在のRUSHは強制終了となります。");
@@ -604,47 +814,42 @@ setTimeout(() => {
         const originalAddLog = window.addLog;
 
         window.addLog = function (text, className) {
-            // 先執行原本的顯示畫面邏輯
             originalAddLog(text, className);
-
-            // 稱號判定絕不能令機台的 async 遊戲流程中斷。
             try {
                 const user = firebase.auth().currentUser;
-                if (!user) return; // 未登入唔計算
+                if (!user) return; 
 
-                // 這個攔截器位於 runMachineLogic 的外層，不能使用那個函式作用域內的 db。
                 const titleDb = firebase.database();
                 const uid = user.uid;
                 const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
 
-                // 抓取當前 UI 上的轉數與連莊數
                 const spinsEl = document.getElementById('ui-spins');
                 const rushEl = document.getElementById('ui-rush');
                 const spins = spinsEl ? parseInt(spinsEl.innerText) : 0;
                 const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
 
-                // 統一字眼：所有現有機台的 log 都先映射成「初當」「RUSH 結束」或「通常落敗」。
-                // 不依賴單一機台的用語，新增機台時只需補充下面的明確規則。
                 const pageName = location.pathname.split('/').pop().toLowerCase();
                 const heavyMachinePages = new Set([
-                'bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html',
-                'hokuto10.html', 'mushoku.html', 'seed.html', 'slime.html'
-            ]);
+                    'bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html',
+                    'hokuto10.html', 'mushoku.html', 'seed.html', 'slime.html'
+                ]);
                 const isHeavyMachine = heavyMachinePages.has(pageName)
-                || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム)/.test(machineTitle);
+                    || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム)/.test(machineTitle);
+                
                 const isCharge = /チャージ|CHARGE/i.test(text);
                 const isMainHit = /當選|当選|図柄揃い|大当り|大当たり|BONUS|記者会見大成功/.test(text) && !isCharge;
 
-                // ✨ 1. 神の引き (分母399以上機的第1轉初當)
+                // ✨ 1. 神の引き
                 if (isMainHit && spins === 1 && isHeavyMachine) {
                     titleDb.ref('users/' + uid).update({ title_godpull: true });
                 }
 
-                // ⚡ 2. 駆け抜け王：各機台的 RUSH／ST／BATTLE 終結字眼。
+                // ⚡ 2. 駆け抜け王 (Rush Runner) 
                 const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(text);
-                if (isRushEnd) {
-                    // 👈 嚴格判定：連莊數必須是 0 先算駆け抜け！
-                    if (rushCount === 0) { 
+                const isRunthroughExplicit = /駆け抜け|スルー/.test(text);
+                
+                if (isRushEnd || isRunthroughExplicit) {
+                    if (isRunthroughExplicit || rushCount === 0) { 
                         let ref = titleDb.ref('users/' + uid + '/runthrough_count');
                         ref.transaction(count => {
                             let newCount = (count || 0) + 1;
@@ -652,29 +857,29 @@ setTimeout(() => {
                             return newCount;
                         });
                     } else {
-                        // 只要喺 RUSH 入面中過 1 次或以上，即刻將連續駆け抜け計數器清零
                         titleDb.ref('users/' + uid + '/runthrough_count').set(0);
                     }
                 }
 
-            // 💀 3. 単発地獄：只計「初當後未入 RUSH」的通常落敗。
-            // RUSH 內的敗北已由 isRushEnd 處理，不能混進單発地獄。
+                // 💀 3. 単発地獄 (Single Hell)
                 const isNormalLoss = !isRushEnd && !isCharge && /通常へ戻る|通常終了|通常へ|RUSH非突入|チャレンジ失敗|CZ失敗|任務失敗|チャンスタイム終了/.test(text);
                 if (isNormalLoss) {
-                if (rushCount <= 1) {
-                    let ref = titleDb.ref('users/' + uid + '/single_hell_count');
-                    ref.transaction(count => {
-                        let newCount = (count || 0) + 1;
-                        if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
-                        return newCount;
-                    });
+                    if (rushCount <= 1) {
+                        let ref = titleDb.ref('users/' + uid + '/single_hell_count');
+                        ref.transaction(count => {
+                            let newCount = (count || 0) + 1;
+                            if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
+                            return newCount;
+                        });
+                    }
                 }
-            }
 
-            // 🌟 4. 清空単発地獄：只要成功進入 RUSH，或者產生實質連莊，就打破單發地獄！
-                if (text.includes("突入") || text.includes("継続") || text.includes("連)") || rushCount >= 2) {
+                // 🌟 4. 清空単発地獄
+                const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(text) && !/チャレンジ|JUDGE|CZ/.test(text);
+                if (isRealRushEnter || text.includes("継続") || text.includes("連)") || rushCount >= 2) {
                     titleDb.ref('users/' + uid + '/single_hell_count').set(0);
                 }
+
             } catch (error) {
                 console.error('[Title interceptor] 判定失敗：遊戲會繼續運行', error);
             }

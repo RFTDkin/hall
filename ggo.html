@@ -253,13 +253,14 @@
                 return false;
             }
 
-            // ST 160回転 LTモード (継続率 約80%)
+// ST 160回転 LTモード (継続率 約80%)
             async play_sj_rush() {
                 addLog(`\n===== 💖 SJ RUSH (LT 160回転) 開始 =====`, "color-ultimate");
                 this.state = "SJ_RUSH";
                 updateUI();
 
                 let st_remaining = 160;
+                let lt_hits = 0; // 🌟 新增：追蹤 LT 入面中過幾多次 🌟
                 
                 while (this.state === "SJ_RUSH" && st_remaining > 0) {
                     await sleep(40);
@@ -267,6 +268,7 @@
 
                     // 右打ち確率: 1/99.9
                     if (Math.random() < (1 / 99.9)) {
+                        lt_hits++; // 🌟 命中即加 🌟
                         this.session_rush_count += 1;
                         let used_spin = 160 - st_remaining + 1;
                         addLog(`\n🎉 RUSH 當選！ (ST ${used_spin}回転目)`, "color-hit");
@@ -309,7 +311,14 @@
 
                 if (st_remaining === 0) {
                     document.getElementById("ui-spins").innerText = `RUSH残り: 0/160`;
-                    addLog("\n💀 RUSH終了... (160回転駆け抜け)", "color-fall");
+                    
+                    // 🌟 根據 LT 命中次數決定印咩字眼 🌟
+                    if (lt_hits === 0) {
+                        addLog("\n💀 RUSH終了... (160回転駆け抜け)", "color-fall");
+                    } else {
+                        addLog("\n💀 RUSH終了...", "color-fall");
+                    }
+                    
                     addLog(`📈 總連莊數: ${this.session_rush_count}連 (含初當)`);
                     addLog(`💰 最終出玉: ${this.session_payout} 玉`);
 
