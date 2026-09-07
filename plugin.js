@@ -575,7 +575,7 @@ setTimeout(() => {
                     let ref = titleDb.ref('users/' + uid + '/single_hell_count');
                     ref.transaction(count => {
                         let newCount = (count || 0) + 1;
-                        if (newCount >= 15) titleDb.ref('users/' + uid).update({ title_hell: true });
+                        if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
                         return newCount;
                     });
                 }
