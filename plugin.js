@@ -179,6 +179,17 @@ document.addEventListener("DOMContentLoaded", () => {
             .clickable-name { cursor: pointer; border-bottom: 1px dashed #555; padding-bottom: 2px; transition: 0.2s; }
             .clickable-name:hover { filter: brightness(1.3); }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            /* 修復 Modal 內長名字出界問題 */
+            #p-modal-name {
+                word-wrap: break-word;
+                word-break: break-all;
+                white-space: normal;
+                line-height: 1.3;
+                padding: 0 10px;
+            }
+            #p-modal-name .title-effect {
+                white-space: normal !important;
+            }
         `;
         document.head.appendChild(modalStyle);
 
