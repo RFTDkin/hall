@@ -501,6 +501,18 @@
         @keyframes runthrough { 0%, 100% { background-position: 0% 50%; } 48% { background-position: 100% 50%; } }
         @keyframes speed-trail { 0%, 100% { opacity: .16; transform: scaleX(.35); } 48% { opacity: 1; transform: scaleX(1); } }
 
+        /* 7. 一撃王：爆裂衝擊 */
+        .effect-ichigeki {
+            color: #fff;
+            font-weight: 900;
+            text-shadow: 0 0 4px #ff1744, 0 0 10px #ff1744, 2px 2px 0px #b71c1c, -2px -2px 0px #ff9100;
+            animation: impact-pulse 1s infinite alternate;
+        }
+        @keyframes impact-pulse {
+            0% { transform: scale(1); text-shadow: 0 0 4px #ff1744, 2px 2px 0px #b71c1c; }
+            100% { transform: scale(1.05); text-shadow: 0 0 12px #ff1744, 0 0 20px #ff9100, 3px 3px 0px #b71c1c; }
+        }
+
         /* 全稱號：終極形態 */
         .effect-legend { isolation: isolate; padding: 7px 21px; border-radius: 3px; border: 1px solid #ffe69a; background: linear-gradient(180deg, rgba(81, 42, 3, .95), rgba(15, 18, 40, .96), rgba(72, 28, 78, .94)); color: #fff; background-clip: padding-box; text-shadow: 0 0 3px #fff, 0 0 9px #65eaff, 0 0 19px #e975ff; box-shadow: 0 0 0 2px #211300, 0 0 0 3px rgba(255, 205, 76, .68), 0 0 25px rgba(123, 193, 255, .58), inset 0 1px 0 rgba(255,255,255,.62); overflow: visible; font-weight: bold; }
         .effect-legend::before { content: ''; position: absolute; z-index: -1; inset: -13px -28px; border: 1px solid rgba(152, 230, 255, .62); border-radius: 50%; box-shadow: 0 0 19px rgba(112, 178, 255, .54), inset 0 0 18px rgba(241, 126, 255, .2); animation: legend-aura 3.6s ease-in-out infinite; }
@@ -518,6 +530,26 @@
         @keyframes legend-hell { 0%, 69%, 100% { opacity: 0; transform: translateX(0); } 72% { opacity: .72; transform: translateX(-3px); } 75% { opacity: .45; transform: translateX(3px); } 78% { opacity: .64; transform: translateX(-1px); } }
         @keyframes legend-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.08); } }
         @keyframes legend-sweep { 0%, 53% { transform: translateX(-140%); } 78%, 100% { transform: translateX(140%); } }
+
+        /* ================= プレイヤープロフィール (Modal) ================= */
+        .profile-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; animation: fadeIn 0.2s; }
+        .profile-card { background: #111; border: 2px solid #444; border-radius: 12px; padding: 25px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.8); border-top: 5px solid #00e5ff; }
+        .profile-card h3 { margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; color: #ccc; font-size: 1em; }
+        .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; color: #888; background: none; border: none; font-size: 1.2em; font-weight: bold; }
+        .close-btn:hover { color: #fff; }
+        .prog-container { margin-top: 20px; text-align: left; }
+        .prog-label { font-size: 0.85em; color: #aaa; display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .prog-bar-bg { background: #222; border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid #333; }
+        .prog-bar-fill { height: 100%; transition: width 0.3s ease-out; }
+        .fill-hell { background: #ff1744; box-shadow: 0 0 5px #ff1744; }
+        .fill-run { background: #ff9100; box-shadow: 0 0 5px #ff9100; }
+        .fill-ichi { background: #ffea00; box-shadow: 0 0 5px #ffea00; }
+        .badge-container { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 20px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; border: 1px solid #444; background: #222; color: #666; }
+        .badge.active { background: #1a1a1a; border-color: #ffd700; color: #ffd700; box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+        .clickable-name { cursor: pointer; border-bottom: 1px dashed #555; padding-bottom: 2px; transition: 0.2s; }
+        .clickable-name:hover { filter: brightness(1.3); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 <link rel="stylesheet" href="mobile.css">
 </head>
@@ -526,7 +558,7 @@
 
     <div class="top-nav">
         <div class="user-info">
-            👤 <span id="nav-username">読込中...</span> <br>
+            👤 <span id="nav-username" style="cursor: pointer; border-bottom: 1px dashed #555;" onclick="if(auth.currentUser) showProfile(auth.currentUser.uid)">読込中...</span> <br>
             💰 <span id="nav-balance" style="color: #00e676;">---</span> 円
         </div>
         <!-- 🌟 將右邊嘅按鈕用 flex 裝埋一齊，加個 gap 隔開 🌟 -->
@@ -836,41 +868,40 @@
         let maxHamariData = null;
         const authBtn = document.getElementById("auth-btn");
 
-        function getPlayerNameHtml(userObj, isRank1) {
+        function getPlayerNameHtml(userObj, isRank1, uid = null, disableClick = false) {
             let name = userObj.name || "Unknown";
             let isComplete = userObj.has_completed;
             let isBankrupt = userObj.balance <= -10000000;
             let isHell = userObj.title_hell;
             let isGod = userObj.title_godpull;
             let isRunthrough = userObj.title_runthrough;
+            let isIchigeki = userObj.title_ichigeki;
             let isSupreme = isComplete && isRank1;
-            let isLegend = isSupreme && isBankrupt && isHell && isGod && isRunthrough;
+            let isLegend = isSupreme && isBankrupt && isHell && isGod && isRunthrough && isIchigeki;
 
             let display = userObj.isSelf ? `${name} (あなた)` : name;
-
-            // 全稱號傳說形態
-            if (isLegend) {
-                return `<span class="title-effect effect-legend"><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-bankrupt-cracks"></span><span class="legend-complete">${display}</span></span>`;
-            }
-
             let html = display;
-            
-            // 顏色基底 (破產王優先級高於彩色)
-            if (isBankrupt) {
-                html = `<span class="effect-bankrupt">${html}</span>`;
-            } else if (isComplete) {
-                html = `<span class="effect-rainbow">${html}</span>`;
-            } else {
-                html = `<span style="color: ${userObj.isSelf ? '#00e5ff' : '#fff'};">${html}</span>`;
-            }
-            
-            // 疊加特效
-            if (isGod) html = `<span class="effect-godpull">${html}</span>`;
-            if (isRunthrough) html = `<span class="effect-runthrough">${html}</span>`;
-            if (isHell) html = `<span class="effect-hell" data-text="${display}">${html}</span>`;
-            if (isSupreme) html = `<span class="effect-supreme">${html}</span>`;
 
-            return `<span class="title-effect">${html}</span>`;
+            if (isLegend) {
+                html = `<span class="title-effect effect-legend"><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
+            } else {
+                if (isBankrupt) html = `<span class="effect-bankrupt">${html}</span>`;
+                else if (isComplete) html = `<span class="effect-rainbow">${html}</span>`;
+                else html = `<span style="color: ${userObj.isSelf ? '#00e5ff' : '#fff'};">${html}</span>`;
+                
+                if (isGod) html = `<span class="effect-godpull">${html}</span>`;
+                if (isRunthrough) html = `<span class="effect-runthrough">${html}</span>`;
+                if (isIchigeki) html = `<span class="effect-ichigeki">${html}</span>`;
+                if (isHell) html = `<span class="effect-hell" data-text="${display}">${html}</span>`;
+                if (isSupreme) html = `<span class="effect-supreme">${html}</span>`;
+                html = `<span class="title-effect">${html}</span>`;
+            }
+
+            // 如果有傳入 UID 且未被鎖定點擊，就包裝成可點擊連結
+            if (uid && !disableClick) {
+                return `<span class="clickable-name" onclick="showProfile('${uid}')">${html}</span>`;
+            }
+            return html;
         }
 
         auth.onAuthStateChanged((user) => {
@@ -907,6 +938,8 @@
             }
             updateDashboard();
             renderRankings(usersData);
+
+            if (currentOpenProfileUid) updateProfileModal();
         });
 
         db.ref('machine_rankings').on('value', (snapshot) => {
@@ -1051,6 +1084,7 @@
             let userArray = userKeys.map(uid => {
                 let u = users[uid];
                 return {
+                    uid: uid,
                     name: u.username || "Unknown",
                     balance: u.balance || 0,
                     has_completed: u.has_completed || false,
@@ -1069,7 +1103,7 @@
                 top10Rich.forEach((user, index) => {
                     let tr = document.createElement("tr");
                     let rankText = (index === 0) ? "🥇 1" : (index === 1) ? "🥈 2" : (index === 2) ? "🥉 3" : (index + 1);
-                    tr.innerHTML = `<td>${rankText}</td><td>${getPlayerNameHtml(user, index === 0)}</td><td>${Math.round(user.balance).toLocaleString()}</td>`;
+                    tr.innerHTML = `<td>${rankText}</td><td>${getPlayerNameHtml(user, index === 0, user.uid)}</td><td>${Math.round(user.balance).toLocaleString()}</td>`;
                     rankingBody.appendChild(tr);
                 });
             }
@@ -1085,12 +1119,90 @@
                 top10Poor.forEach((user, index) => {
                     let tr = document.createElement("tr");
                     let rankText = (index === 0) ? "😭 1" : (index === 1) ? "📉 2" : (index === 2) ? "📉 3" : (index + 1);
-                    tr.innerHTML = `<td>${rankText}</td><td>${getPlayerNameHtml(user, false)}</td><td style="color: #4fc3f7;">${Math.round(user.balance).toLocaleString()}</td>`;
+                    tr.innerHTML = `<td>${rankText}</td><td>${getPlayerNameHtml(user, false, user.uid)}</td><td style="color: #4fc3f7;">${Math.round(user.balance).toLocaleString()}</td>`;
                     poorRankingBody.appendChild(tr);
                 });
             }
         }
+
+        let currentOpenProfileUid = null;
+
+        function showProfile(uid) {
+            currentOpenProfileUid = uid;
+            updateProfileModal();
+            document.getElementById('profile-modal').style.display = 'flex';
+        }
+
+        function closeProfile() {
+            currentOpenProfileUid = null;
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+
+        function updateProfileModal() {
+            if (!currentOpenProfileUid || !usersData[currentOpenProfileUid]) return;
+            let u = usersData[currentOpenProfileUid];
+            let iC = u.ichigeki_count || 0;
+            
+            
+            // 產生無點擊事件嘅純名字 HTML
+            let mockUserObj = { name: u.username, balance: u.balance, has_completed: u.has_completed, title_hell: u.title_hell, title_godpull: u.title_godpull, title_runthrough: u.title_runthrough, isSelf: auth.currentUser && auth.currentUser.uid === currentOpenProfileUid };
+            // 判斷係咪富豪榜第一名 (用嚟顯示至尊無上)
+            let isRank1 = false;
+            let richUsers = Object.values(usersData).filter(x => (x.balance || 0) >= 0).sort((a,b) => (b.balance || 0) - (a.balance || 0));
+            if(richUsers.length > 0 && richUsers[0].username === u.username) isRank1 = true;
+
+            document.getElementById('modal-name').innerHTML = getPlayerNameHtml(mockUserObj, isRank1, null, true);
+            document.getElementById('modal-balance').innerText = Math.round(u.balance || 0).toLocaleString();
+            
+            let hellCount = u.single_hell_count || 0;
+            let runCount = u.runthrough_count || 0;
+
+            document.getElementById('modal-hell-text').innerText = `${hellCount} / 10`;
+            document.getElementById('modal-hell-fill').style.width = `${Math.min((hellCount / 10) * 100, 100)}%`;
+
+            document.getElementById('modal-run-text').innerText = `${runCount} / 7`;
+            document.getElementById('modal-run-fill').style.width = `${Math.min((runCount / 7) * 100, 100)}%`;
+
+            document.getElementById('modal-ichi-text').innerText = `${iC} / 10`;
+            document.getElementById('modal-ichi-fill').style.width = `${Math.min((iC / 10) * 100, 100)}%`;
+            let badgesHtml = '';
+            badgesHtml += `<div class="badge ${u.has_completed ? 'active' : ''}">🌈 コンプリート</div>`;
+            badgesHtml += `<div class="badge ${u.balance <= -10000000 ? 'active' : ''}">💀 破産王</div>`;
+            badgesHtml += `<div class="badge ${u.title_godpull ? 'active' : ''}">✨ 神の引き</div>`;
+            badgesHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
+            badgesHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
+            badgesHtml += `<div class="badge ${u.title_ichigeki ? 'active' : ''}">💥 一撃王</div>`;
+            document.getElementById('modal-badges').innerHTML = badgesHtml;
+        }
+
+    // 🌟 自動結算「本日の一撃王」並派發稱號
+    db.ref('server_records/daily_best').once('value').then(snap => {
+        let data = snap.val();
+        const todayStr = new Date().toDateString();
+        // 如果發現有一筆舊紀錄未結算（尋日或更早之前）
+        if (data && data.date !== todayStr && data.processed === false) {
+            db.ref('server_records/daily_best').transaction(curr => {
+                // Firebase 防衝撞機制：搶先標記為已結算
+                if (curr && !curr.processed && curr.date === data.date) {
+                    curr.processed = true; 
+                    return curr;
+                }
+                return; // 已經被其他人快一步結算咗
+            }, (error, committed, snapshot) => {
+                if (committed) {
+                    let winnerUid = snapshot.val().uid;
+                    // 幫昨日贏家加 1 次數
+                    db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => {
+                        let newC = (c || 0) + 1;
+                        if (newC >= 10) db.ref(`users/${winnerUid}`).update({ title_ichigeki: true });
+                        return newC;
+                    });
+                }
+            });
+        }
+    });
     </script>
+    
 <!-- 🌟 置底懸浮廣告區塊 🌟 -->
     <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; text-align: center; padding: 5px 0; border-top: 1px solid #333;">
         <script type="text/javascript">
@@ -1101,7 +1213,35 @@
                 'width' : 320,
                 'params' : {}
             };
+    
         </script>
+        <!-- 🌟 玩家 Profile 彈出視窗 🌟 -->
+    <div id="profile-modal" class="profile-modal-overlay" onclick="if(event.target===this) closeProfile()">
+        <div class="profile-card">
+            <button class="close-btn" onclick="closeProfile()">✖</button>
+            <h3>プレイヤー情報</h3>
+            <div id="modal-name" style="font-size: 1.5em; margin: 15px 0;">名前</div>
+            <div style="font-size: 1.2em; color: #00e5ff; font-weight: bold; margin-bottom: 10px;"><span id="modal-balance">0</span> 円</div>
+            
+            <div class="prog-container">
+                <div class="prog-label"><span>💀 単発地獄 (10回連続)</span><span id="modal-hell-text">0 / 10</span></div>
+                <div class="prog-bar-bg"><div id="modal-hell-fill" class="prog-bar-fill fill-hell" style="width: 0%;"></div></div>
+            </div>
+            
+            <div class="prog-container">
+                <div class="prog-label"><span>⚡ 駆け抜け王 (7回連続)</span><span id="modal-run-text">0 / 7</span></div>
+                <div class="prog-bar-bg"><div id="modal-run-fill" class="prog-bar-fill fill-run" style="width: 0%;"></div></div>
+            </div>
+
+            <div class="prog-container">
+                <div class="prog-label"><span>💥 一撃王 (本日の一撃王 10回)</span><span id="modal-ichi-text">0 / 10</span></div>
+                <div class="prog-bar-bg"><div id="modal-ichi-fill" class="prog-bar-fill fill-ichi" style="width: 0%;"></div></div>
+            </div>
+
+            <div class="badge-container" id="modal-badges"></div>
+        </div>
+    </div>
+    
         <script type="text/javascript" src="//www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js"></script>
     </div>
 </body>

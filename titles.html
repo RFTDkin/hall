@@ -93,6 +93,43 @@
         @keyframes legend-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.08); } }
         @keyframes legend-sweep { 0%, 53% { transform: translateX(-140%); } 78%, 100% { transform: translateX(140%); } }
 
+        /* 7. 一撃王：紫電のスマッシュ (Cyberpunk Impact) */
+        .effect-ichigeki {
+            position: relative; display: inline-block; white-space: nowrap; color: #ffffff;
+            font-weight: 900; letter-spacing: .08em;
+            text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff;
+            animation: ichigeki-smash 1.5s infinite;
+            isolation: isolate;
+        }
+        .effect-ichigeki::after {
+            content: ''; position: absolute; z-index: -1; top: 50%; left: -15%; right: -15%; height: 50%;
+            transform: translateY(-50%) skewX(-45deg);
+            background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.7), #00e5ff, rgba(213, 0, 249, 0.7), transparent);
+            filter: blur(2px); animation: ichigeki-slash 1.5s infinite;
+        }
+        @keyframes ichigeki-smash {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; }
+            10% { transform: scale(1.08); text-shadow: 0 0 10px #ffffff, 0 0 20px #00e5ff, 0 0 30px #d500f9, 3px 3px 0px #311b92, -3px -3px 0px #00e5ff; }
+            25% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; }
+        }
+        @keyframes ichigeki-slash {
+            0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); }
+            10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); filter: blur(4px) brightness(1.5); }
+            25% { opacity: 0.4; transform: translateY(-50%) skewX(-45deg) scaleX(0.9); filter: blur(2px); }
+        }
+
+        /* 終極預覽中的一撃王：紫電斬擊核心藏在名字背後 */
+        .legend-ichigeki-burst { 
+            position: absolute; z-index: 1; top: 50%; left: -20%; right: -20%; height: 2px; pointer-events: none;
+            transform: translateY(-50%) skewX(-45deg);
+            background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.8), #00e5ff, rgba(213, 0, 249, 0.8), transparent);
+            filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8)); animation: legend-ichigeki 1.5s infinite; 
+        }
+        @keyframes legend-ichigeki { 
+            0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); } 
+            10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); height: 6px; } 
+            25% { opacity: 0.3; height: 2px; } 
+        }
     </style>
 </head>
 <body>
@@ -151,10 +188,24 @@
             <div class="preview-box"><span class="title-effect effect-runthrough">プレイヤー名</span></div>
         </div>
 
+        <div class="title-card">
+            <div class="title-info">
+                <div class="title-name" style="color: #d500f9;">💥 一撃王 (Strike King)</div>
+                <div class="title-cond">獲得条件：「本日の一撃王」(その日の全サーバー最高出玉) を累計10回獲得する。</div>
+            </div>
+            <div class="preview-box"><span class="title-effect effect-ichigeki">プレイヤー名</span></div>
+        </div>
+
         <h2 style="margin-top: 40px; color: #ffca28; border-bottom: 1px solid #333; padding-bottom: 10px;">🔥 全称号重複時のプレビュー</h2>
         <p style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;">理論上、すべての称号を同時に所持した場合の見た目です。すべてを重ねず、専用の最終レジェンド演出に切り替えます。</p>
         <div class="preview-box" style="padding: 30px; margin-bottom: 50px;">
-            <span class="title-effect effect-legend"><span class="legend-royal-lines" aria-hidden="true"></span><span class="legend-runthrough-trail" aria-hidden="true"></span><span class="legend-hell-echo" data-text="伝説のプレイヤー" aria-hidden="true"></span><span class="legend-complete">伝説のプレイヤー</span></span>
+            <span class="title-effect effect-legend">
+                <span class="legend-royal-lines" aria-hidden="true"></span>
+                <span class="legend-runthrough-trail" aria-hidden="true"></span>
+                <span class="legend-ichigeki-burst" aria-hidden="true"></span>
+                <span class="legend-hell-echo" data-text="伝説のプレイヤー" aria-hidden="true"></span>
+                <span class="legend-complete">伝説のプレイヤー</span>
+            </span>
         </div>
 
     </div>

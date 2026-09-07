@@ -160,6 +160,68 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        const modalStyle = document.createElement('style');
+        modalStyle.innerHTML = `
+            .profile-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; animation: fadeIn 0.2s; }
+            .profile-card { background: #111; border: 2px solid #444; border-radius: 12px; padding: 25px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.8); border-top: 5px solid #ff1744; }
+            .profile-card h3 { margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; color: #ccc; font-size: 1em; }
+            .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; color: #888; background: none; border: none; font-size: 1.2em; font-weight: bold; }
+            .prog-container { margin-top: 15px; text-align: left; }
+            .prog-label { font-size: 0.85em; color: #aaa; display: flex; justify-content: space-between; margin-bottom: 5px; }
+            .prog-bar-bg { background: #222; border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid #333; }
+            .prog-bar-fill { height: 100%; transition: width 0.3s ease-out; }
+            .fill-hell { background: #ff1744; box-shadow: 0 0 5px #ff1744; }
+            .fill-run { background: #ff9100; box-shadow: 0 0 5px #ff9100; }
+            .fill-ichi { background: #ffea00; box-shadow: 0 0 5px #ffea00; }
+            .badge-container { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 20px; }
+            .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; border: 1px solid #444; background: #222; color: #666; }
+            .badge.active { background: #1a1a1a; border-color: #ffd700; color: #ffd700; box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+            .clickable-name { cursor: pointer; border-bottom: 1px dashed #555; padding-bottom: 2px; transition: 0.2s; }
+            .clickable-name:hover { filter: brightness(1.3); }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        `;
+        document.head.appendChild(modalStyle);
+
+        const modalHtml = document.createElement('div');
+        modalHtml.id = 'plugin-profile-modal';
+        modalHtml.className = 'profile-modal-overlay';
+        modalHtml.onclick = function(e) { if(e.target===this) this.style.display='none'; };
+        modalHtml.innerHTML = `
+            <div class="profile-card">
+                <button class="close-btn" onclick="document.getElementById('plugin-profile-modal').style.display='none'">✖</button>
+                <h3>あなたの進捗</h3>
+                <div id="p-modal-name" style="font-size: 1.5em; margin: 15px 0; color: #fff;">名前</div>
+                <div class="prog-container"><div class="prog-label"><span>💀 単発地獄 (10回連続)</span><span id="p-modal-hell-text">0 / 10</span></div><div class="prog-bar-bg"><div id="p-modal-hell-fill" class="prog-bar-fill fill-hell" style="width: 0%;"></div></div></div>
+                <div class="prog-container"><div class="prog-label"><span>⚡ 駆け抜け王 (7回連続)</span><span id="p-modal-run-text">0 / 7</span></div><div class="prog-bar-bg"><div id="p-modal-run-fill" class="prog-bar-fill fill-run" style="width: 0%;"></div></div></div>
+                <div class="prog-container"><div class="prog-label"><span>💥 一撃王 (本日の一撃王 10回)</span><span id="p-modal-ichi-text">0 / 10</span></div><div class="prog-bar-bg"><div id="p-modal-ichi-fill" class="prog-bar-fill fill-ichi" style="width: 0%;"></div></div></div>
+                <div class="badge-container" id="p-modal-badges"></div>
+            </div>
+        `;
+        document.body.appendChild(modalHtml);
+
+        // 監聽並實時更新資料
+        userRef.on('value', (snap) => {
+            let u = snap.val();
+            if(!u) return;
+            document.getElementById('p-modal-name').innerHTML = u.has_completed ? `<span class="rainbow-text">${u.username}</span>` : u.username;
+            let hC = u.single_hell_count || 0; let rC = u.runthrough_count || 0; let iC = u.ichigeki_count || 0;
+            document.getElementById('p-modal-hell-text').innerText = `${hC} / 10`;
+            document.getElementById('p-modal-hell-fill').style.width = `${Math.min((hC/10)*100, 100)}%`;
+            document.getElementById('p-modal-run-text').innerText = `${rC} / 7`;
+            document.getElementById('p-modal-run-fill').style.width = `${Math.min((rC/7)*100, 100)}%`;
+            document.getElementById('p-modal-ichi-text').innerText = `${iC} / 10`;
+            document.getElementById('p-modal-ichi-fill').style.width = `${Math.min((iC/10)*100, 100)}%`;
+
+            let bHtml = '';
+            bHtml += `<div class="badge ${u.has_completed ? 'active' : ''}">🌈 コンプリート</div>`;
+            bHtml += `<div class="badge ${u.balance <= -10000000 ? 'active' : ''}">💀 破産王</div>`;
+            bHtml += `<div class="badge ${u.title_godpull ? 'active' : ''}">✨ 神の引き</div>`;
+            bHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
+            bHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
+            bHtml += `<div class="badge ${u.title_ichigeki ? 'active' : ''}">💥 一撃王</div>`;
+            document.getElementById('p-modal-badges').innerHTML = bHtml;
+        });
+
         const pluginUI = document.createElement("div");
         pluginUI.id = "plugin-ui-container";
         pluginUI.style.cssText = "position: fixed; top: 15px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 9999; gap: 10px;";
@@ -171,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pluginUI.innerHTML = `
             <a href="index.html" style="background-color: #222; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 1px solid #777; box-shadow: 0 0 10px rgba(0,0,0,0.5);">🏠 ホールに戻る</a>
             <div style="background: #111; border: 2px solid #ffca28; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 0 15px rgba(255, 202, 40, 0.4); text-align: center; min-width: 160px; max-width: 250px;">
-                👤 <span id="ui-username">${displayNameHtml}</span><br>
+                👤 <span id="ui-username" class="clickable-name" onclick="document.getElementById('plugin-profile-modal').style.display='flex'">${displayNameHtml}</span><br>
                 💰 所持金<br>
                 <span id="global-wallet" style="font-size: 1.4em;">0</span> 円
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
@@ -355,6 +417,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         const todayDate = new Date();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
+                        // 🌟 競爭「本日の一撃王」
+                        db.ref('server_records/daily_best').transaction((curr) => {
+                        // 如果今日仲未有人破紀錄，或者你嘅分數高過現有紀錄，就覆寫佢！
+                        if (!curr || curr.date !== dateStr || new_payout > curr.payout) {
+                            return { uid: uid, user: currentUserName, payout: new_payout, date: dateStr, processed: false };
+                        }
+                        return; // 已經有人高過你，中止寫入
+                        });
                     }
                 }
 
@@ -412,6 +482,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                     db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: new_payout, date: dateStr });
+                    // 🌟 競爭「本日の一撃王」
+                    db.ref('server_records/daily_best').transaction((curr) => {
+                        // 如果今日仲未有人破紀錄，或者你嘅分數高過現有紀錄，就覆寫佢！
+                        if (!curr || curr.date !== dateStr || new_payout > curr.payout) {
+                            return { uid: uid, user: currentUserName, payout: new_payout, date: dateStr, processed: false };
+                        }
+                        return; // 已經有人高過你，中止寫入
+                    });
 
                     if (!userData.has_completed) {
                         userData.has_completed = true;
@@ -554,18 +632,19 @@ setTimeout(() => {
                 // ⚡ 2. 駆け抜け王：各機台的 RUSH／ST／BATTLE 終結字眼。
                 const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(text);
                 if (isRushEnd) {
-                if (rushCount <= 1) {
-                    let ref = titleDb.ref('users/' + uid + '/runthrough_count');
-                    ref.transaction(count => {
-                        let newCount = (count || 0) + 1;
-                        if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
-                        return newCount;
-                    });
-                } else {
-                    // 有實質連莊就將連續駆け抜け計數器清零
-                    titleDb.ref('users/' + uid + '/runthrough_count').set(0);
+                    // 👈 嚴格判定：連莊數必須是 0 先算駆け抜け！
+                    if (rushCount === 0) { 
+                        let ref = titleDb.ref('users/' + uid + '/runthrough_count');
+                        ref.transaction(count => {
+                            let newCount = (count || 0) + 1;
+                            if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
+                            return newCount;
+                        });
+                    } else {
+                        // 只要喺 RUSH 入面中過 1 次或以上，即刻將連續駆け抜け計數器清零
+                        titleDb.ref('users/' + uid + '/runthrough_count').set(0);
+                    }
                 }
-            }
 
             // 💀 3. 単発地獄：只計「初當後未入 RUSH」的通常落敗。
             // RUSH 內的敗北已由 isRushEnd 處理，不能混進單発地獄。
