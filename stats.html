@@ -250,6 +250,10 @@
         .tag-majo {
             border-top: 5px solid #d50000;
         }
+
+        .tag-unicorn2 {
+            border-top: 5px solid #e91e63;
+        }
     </style>
     <link rel="stylesheet" href="mobile.css">
 </head>
@@ -589,6 +593,19 @@
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit"
                     id="majo-profit">---</span></div>
             <div class="progress-text" id="majo-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-unicorn2" id="card-unicorn2">
+            <h3 class="machine-title">e機動戦士ガンダムユニコーン2</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins"
+                    id="unicorn2-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout"
+                    id="unicorn2-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max"
+                    id="unicorn2-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit"
+                    id="unicorn2-profit">---</span></div>
+            <div class="progress-text" id="unicorn2-prog">待機中...</div>
         </div>
 
     </div>
@@ -1689,6 +1706,47 @@
             return { spins, payout };
         }
 
+        function simUnicorn2() {
+            let spins = 0, payout = 0;
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 349.9) {
+                    let r = Math.random();
+                    if (r < 0.005) { payout += 1500; runUnicornRush(true); }
+                    else if (r < 0.505) { payout += 300; runUnicornRush(false); }
+                    else { payout += 300; }
+                    break;
+                }
+            }
+
+            function runUnicornRush(isLT) {
+                let active = true;
+                while (active && payout < 95000) {
+                    let hitRate = 1 / 44.952;
+                    let fallRate = isLT ? (1 / 229.286) : (1 / 100.182);
+
+                    // 根據機率比例決定中大獎定係中轉落
+                    if (Math.random() < (hitRate / (hitRate + fallRate))) {
+                        payout += 1500;
+                        if (!isLT && Math.random() < 0.25) isLT = true;
+                    } else {
+                        // 轉落，結算剩餘 4 保留
+                        let reserveHit = false;
+                        for (let i = 0; i < 4; i++) {
+                            if (Math.random() < 1 / 44.952) { reserveHit = true; break; }
+                        }
+                        if (reserveHit) {
+                            payout += 1500;
+                            if (!isLT && Math.random() < 0.25) isLT = true;
+                        } else {
+                            active = false;
+                        }
+                    }
+                }
+            }
+            return { spins, payout };
+        }
+
 
 
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
@@ -1803,7 +1861,8 @@
             await runMachineSim('eva15', simEva15, 1000 / 17, iterations);
             await runMachineSim('hokuto', simHokuto, 1000 / 17, iterations);
             await runMachineSim('takt', simTakt, 1000 / 41, iterations);
-            await runMachineSim('majo', simMajo, 1000 / 17, iterations);
+            await runMachineSim('majo', simMajo, 1000 / 28, iterations);
+            await runMachineSim('unicorn2', simUnicorn2, 1000 / 30, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);

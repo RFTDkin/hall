@@ -133,6 +133,20 @@ globalPluginStyle.innerHTML = `
         filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9));
         animation: supreme-glitter-text 2s linear infinite; z-index: 10;
     }
+    
+    @keyframes legend-sweep { 0%, 53% { transform: translateX(-140%); } 78%, 100% { transform: translateX(140%); } }
+
+    /* 🌟 新增：解決機台內歷代排行榜長名字出界問題 🌟 */
+    table.data-lamp td:nth-child(2) { 
+        max-width: 140px; 
+        word-wrap: break-word; 
+        word-break: break-all; 
+        white-space: normal !important; 
+        line-height: 1.4;
+    }
+    table.data-lamp td:nth-child(2) .title-effect {
+        white-space: normal !important;
+    }
     /* Modal & UI */
     @media screen and (max-width: 768px) {
         #plugin-ui-container { position: relative !important; top: 0 !important; right: 0 !important; align-items: center !important; width: 100% !important; margin-bottom: 20px !important; flex-direction: column !important; }
