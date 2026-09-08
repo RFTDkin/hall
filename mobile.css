@@ -129,4 +129,10 @@ body {
         grid-template-columns: 1fr !important;
         padding: 0 10px !important;
     }
+    /* 10. 修復首頁數據看板數字出界問題 */
+    .dash-value {
+        font-size: 1.2em !important;
+        word-wrap: break-word !important;
+        word-break: break-all !important;
+    }
 }
