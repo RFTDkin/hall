@@ -30,12 +30,54 @@ globalPluginStyle.innerHTML = `
     .effect-rainbow { background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow-bg 2s linear infinite; font-weight: 900; }
     @keyframes rainbow-bg { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 
-    /* サーバーの覇者 */
-    .effect-supreme { isolation: isolate; padding: 6px 20px; color: #fff8d8; border: 1px solid #f6d36c; border-radius: 2px; background: linear-gradient(180deg, rgba(92, 55, 4, .94), rgba(30, 16, 0, .96) 48%, rgba(106, 65, 5, .92)); box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45); text-shadow: 0 1px 0 #7a4900, 0 0 8px rgba(255, 223, 117, .7); overflow: visible; font-weight: bold; }
-    .effect-supreme::before { content: ''; position: absolute; z-index: -1; top: 50%; left: -22px; right: -22px; height: 1px; transform: translateY(-50%); background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent); box-shadow: 0 -7px 10px rgba(255, 196, 45, .24), 0 7px 10px rgba(255, 196, 45, .24); }
-    .effect-supreme::after { content: ''; position: absolute; z-index: -1; inset: -9px -18px; background: radial-gradient(ellipse at center, rgba(255, 216, 106, .32), transparent 62%); filter: blur(4px); animation: sovereign-aura 3.8s ease-in-out infinite; }
-    @keyframes sovereign-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
+/* 2. サーバーの覇者：天上天下 終極霸氣銘牌 */
+    .effect-supreme {
+        position: relative; isolation: isolate; padding: 6px 20px; color: #fff8d8; border: 1px solid #f6d36c; border-radius: 2px;
+        background: linear-gradient(180deg, rgba(92, 55, 4, .94), rgba(30, 16, 0, .96) 48%, rgba(106, 65, 5, .92));
+        box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45);
+        overflow: visible; font-weight: bold;
+        margin-top: 18px; 
+        animation: sovereign-main-aura 3.8s ease-in-out infinite;
+    }
 
+    .effect-supreme::before {
+        content: ''; position: absolute; z-index: -1; top: 50%; left: -22px; right: -22px; height: 1px; transform: translateY(-50%);
+        background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent);
+        box-shadow: 0 -7px 10px rgba(255, 196, 45, .24), 0 7px 10px rgba(255, 196, 45, .24);
+    }
+
+    .effect-supreme::after {
+        content: '天上天下';
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-family: "Noto Serif JP", "Yu Mincho", "MS PMincho", "Hiragino Mincho Pro", serif; 
+        font-size: 14px;
+        font-weight: 900;
+        letter-spacing: 5px;
+        text-indent: 5px;
+        background: linear-gradient(110deg, #ffd700 0%, #ffea00 15%, #ffffff 25%, #ffb300 35%, #ffd700 50%, #ffea00 65%, #ffffff 75%, #ffb300 85%, #ffd700 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 4px #fff, 0 0 10px #ffea00, 0 0 18px #ff9100;
+        filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9));
+        animation: supreme-glitter-text 2s linear infinite;
+        z-index: 10;
+    }
+
+    @keyframes supreme-glitter-text {
+        0% { background-position: 0% 50%; filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,234,0,0.3)); }
+        50% { filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 12px rgba(255,255,255,0.9)) drop-shadow(0 0 25px rgba(255,215,0,0.8)); }
+        100% { background-position: -200% 50%; filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,234,0,0.3)); }
+    }
+
+    @keyframes sovereign-main-aura {
+        0%, 100% { box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45); }
+        50% { box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .9), 0 0 35px rgba(255, 23, 68, .8), inset 0 1px 0 rgba(255,255,255,.7), inset 0 -10px 16px rgba(0,0,0,.6); transform: scale(1.02); }
+    }
     /* 破産王 */
     .effect-bankrupt { color: #dd8a48; letter-spacing: .13em; text-shadow: 1px 1px 0 #4b1d0b, 3px 4px 0 #090604, 0 0 5px rgba(157, 54, 15, .52); background: linear-gradient(100deg, #7d2c12 0%, #e89450 26%, #ffbd73 44%, #9d3717 52%, #e48743 66%, #64200e 100%); background-size: 180% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: .55px #361207; animation: bankrupt-fade 4.8s ease-in-out infinite; font-weight: 900; }
     .effect-bankrupt::after { content: ''; position: absolute; inset: -10% 1%; pointer-events: none; opacity: .96; background: linear-gradient(110deg, transparent 0 20%, #260b05 20.5% 23%, transparent 23.5% 100%), linear-gradient(72deg, transparent 0 39%, #3a1006 39.5% 42.5%, transparent 43% 100%), linear-gradient(118deg, transparent 0 58%, #260b05 58.5% 61%, transparent 61.5% 100%), linear-gradient(66deg, transparent 0 76%, #431307 76.5% 79%, transparent 79.5% 100%); filter: drop-shadow(1px 0 0 rgba(255, 194, 113, .34)); }
@@ -69,22 +111,28 @@ globalPluginStyle.innerHTML = `
     @keyframes ichigeki-smash { 0%, 100% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; } 10% { transform: scale(1.08); text-shadow: 0 0 10px #ffffff, 0 0 20px #00e5ff, 0 0 30px #d500f9, 3px 3px 0px #311b92, -3px -3px 0px #00e5ff; } 25% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; } }
     @keyframes ichigeki-slash { 0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); } 10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); filter: blur(4px) brightness(1.5); } 25% { opacity: 0.4; transform: translateY(-50%) skewX(-45deg) scaleX(0.9); filter: blur(2px); } }
 
-    /* 全稱號 */
-    .effect-legend { isolation: isolate; padding: 7px 21px; border-radius: 3px; border: 1px solid #ffe69a; background: linear-gradient(180deg, rgba(81, 42, 3, .95), rgba(15, 18, 40, .96), rgba(72, 28, 78, .94)); color: #fff; background-clip: padding-box; text-shadow: 0 0 3px #fff, 0 0 9px #65eaff, 0 0 19px #e975ff; box-shadow: 0 0 0 2px #211300, 0 0 0 3px rgba(255, 205, 76, .68), 0 0 25px rgba(123, 193, 255, .58), inset 0 1px 0 rgba(255,255,255,.62); overflow: visible; font-weight: bold; }
+/* 全稱號：終極形態 */
+    .effect-legend { 
+        isolation: isolate; padding: 7px 21px; border-radius: 3px; border: 1px solid #ffe69a; 
+        background: linear-gradient(180deg, rgba(81, 42, 3, .95), rgba(15, 18, 40, .96), rgba(72, 28, 78, .94)); 
+        color: #fff; background-clip: padding-box; text-shadow: 0 0 3px #fff, 0 0 9px #65eaff, 0 0 19px #e975ff; 
+        box-shadow: 0 0 0 2px #211300, 0 0 0 3px rgba(255, 205, 76, .68), 0 0 25px rgba(123, 193, 255, .58), inset 0 1px 0 rgba(255,255,255,.62); 
+        overflow: visible; font-weight: bold; margin-top: 18px; 
+    }
     .effect-legend::before { content: ''; position: absolute; z-index: -1; inset: -13px -28px; border: 1px solid rgba(152, 230, 255, .62); border-radius: 50%; box-shadow: 0 0 19px rgba(112, 178, 255, .54), inset 0 0 18px rgba(241, 126, 255, .2); animation: legend-aura 3.6s ease-in-out infinite; }
     .effect-legend::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(108deg, transparent 35%, rgba(255,255,255,.8) 50%, transparent 65%); transform: translateX(-140%); animation: legend-sweep 3.6s ease-in-out infinite; }
-    .legend-complete { position: relative; z-index: 1; background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); font-weight: 900; animation: rainbow-bg 2s linear infinite; }
-    .legend-royal-lines { position: absolute; z-index: 1; top: 50%; left: -27px; right: -27px; height: 1px; transform: translateY(-50%); pointer-events: none; background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent); box-shadow: 0 -7px 10px rgba(255, 196, 45, .33), 0 7px 10px rgba(255, 196, 45, .33); }
-    .legend-runthrough-trail { position: absolute; z-index: 2; right: calc(100% + 10px); top: 45%; width: 48px; height: 2px; pointer-events: none; background: linear-gradient(90deg, transparent, #ff4a20 42%, #ffc35a 78%, #fff0bf); box-shadow: -10px 7px 0 -1px rgba(255, 67, 27, .8), -23px -6px 0 -1px rgba(255, 142, 44, .56), 0 0 8px rgba(255, 94, 27, .9); transform-origin: right center; animation: legend-runthrough 1.9s ease-in-out infinite; }
-    .legend-bankrupt-cracks { position: absolute; z-index: 2; inset: -9% 7%; pointer-events: none; opacity: .72; background: linear-gradient(111deg, transparent 0 22%, #291008 22.4% 24%, transparent 24.4% 100%), linear-gradient(70deg, transparent 0 43%, #40160a 43.4% 45%, transparent 45.4% 100%), linear-gradient(119deg, transparent 0 67%, #281008 67.4% 69%, transparent 69.4% 100%); filter: drop-shadow(1px 0 0 rgba(255, 206, 130, .34)); }
-    .legend-hell-echo { position: absolute; z-index: 0; top: 7px; left: 21px; pointer-events: none; white-space: nowrap; color: #ef1644; text-shadow: 3px 0 8px rgba(238, 12, 55, .92), -3px 0 8px rgba(89, 0, 14, .9); opacity: 0; animation: legend-hell 3.2s steps(1, end) infinite; font-weight: bold; }
-    .legend-hell-echo::before { content: attr(data-text); }
-    .legend-ichigeki-burst { position: absolute; z-index: 1; top: 50%; left: -20%; right: -20%; height: 2px; pointer-events: none; transform: translateY(-50%) skewX(-45deg); background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.8), #00e5ff, rgba(213, 0, 249, 0.8), transparent); filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8)); animation: legend-ichigeki 1.5s infinite; }
-    @keyframes legend-ichigeki { 0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); } 10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); height: 6px; } 25% { opacity: 0.3; height: 2px; } }
-    @keyframes legend-hell { 0%, 69%, 100% { opacity: 0; transform: translateX(0); } 72% { opacity: .72; transform: translateX(-3px); } 75% { opacity: .45; transform: translateX(3px); } 78% { opacity: .64; transform: translateX(-1px); } }
-    @keyframes legend-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.08); } }
-    @keyframes legend-sweep { 0%, 53% { transform: translateX(-140%); } 78%, 100% { transform: translateX(140%); } }
 
+    /* 🌟 終極形態專屬的「天上天下」文字 🌟 */
+    .legend-supreme-text {
+        position: absolute; top: -18px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+        font-family: "Noto Serif JP", "Yu Mincho", "MS PMincho", "Hiragino Mincho Pro", serif; 
+        font-size: 14px; font-weight: 900; letter-spacing: 5px; text-indent: 5px;
+        background: linear-gradient(110deg, #ffd700 0%, #ffea00 15%, #ffffff 25%, #ffb300 35%, #ffd700 50%, #ffea00 65%, #ffffff 75%, #ffb300 85%, #ffd700 100%);
+        background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 4px #fff, 0 0 10px #ffea00, 0 0 18px #ff9100;
+        filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9));
+        animation: supreme-glitter-text 2s linear infinite; z-index: 10;
+    }
     /* Modal & UI */
     @media screen and (max-width: 768px) {
         #plugin-ui-container { position: relative !important; top: 0 !important; right: 0 !important; align-items: center !important; width: 100% !important; margin-bottom: 20px !important; flex-direction: column !important; }
@@ -107,8 +155,8 @@ globalPluginStyle.innerHTML = `
     .clickable-name { cursor: pointer; border-bottom: 1px dashed #555; padding-bottom: 2px; transition: 0.2s; }
     .clickable-name:hover { filter: brightness(1.3); }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    #p-modal-name { word-wrap: break-word; word-break: break-all; white-space: normal; line-height: 1.3; padding: 0 10px; }
-    #p-modal-name .title-effect { white-space: normal !important; }
+    #p-modal-name, #ui-username { word-wrap: break-word; word-break: break-all; white-space: normal; line-height: 1.3; }
+    #p-modal-name .title-effect, #ui-username .title-effect { white-space: normal !important; }
 `;
 document.head.appendChild(globalPluginStyle);
 
@@ -124,11 +172,12 @@ window.getPluginPlayerNameHtml = function(userObj, isRank1, uid = null, disableC
     let isSupreme = isComplete && isRank1;
     let isLegend = isSupreme && isBankrupt && isHell && isGod && isRunthrough && isIchigeki;
 
-    let display = userObj.isSelf ? `${name} (あなた)` : name;
+    // 🌟 直接顯示名，徹底移除 (あなた)
+    let display = name; 
     let html = display;
 
     if (isLegend) {
-        html = `<span class="title-effect effect-legend"><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
+        html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
     } else {
         if (isBankrupt) {
             html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`;
@@ -297,7 +346,29 @@ document.addEventListener("DOMContentLoaded", () => {
         auth.onAuthStateChanged((user) => {
             if (!user) { window.location.href = "login.html"; return; }
             const uid = user.uid;
+
+            // 🌟 補上機台頁面的自動結算防護，防止舊紀錄被直接覆蓋 🌟
+            db.ref('server_records/daily_best').once('value').then(snap => {
+                let data = snap.val();
+                const today = new Date();
+                const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
+                if (data && data.date !== todayStr && data.processed === false) {
+                    db.ref('server_records/daily_best').transaction(curr => {
+                        if (curr && !curr.processed && curr.date === data.date) {
+                            curr.processed = true; return curr;
+                        }
+                        return; 
+                    }, (error, committed, snapshot) => {
+                        if (committed && snapshot && snapshot.val()) {
+                            let winnerUid = snapshot.val().uid;
+                            db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => (c || 0) + 1);
+                        }
+                    });
+                }
+            });
+
             const userRef = db.ref('users/' + uid);
+            // ... 下面維持原本的 userRef.get() 邏輯 ...
 
             userRef.get().then((snapshot) => {
                 if (!snapshot.exists()) { auth.signOut(); window.location.href = "login.html"; return; }
@@ -413,13 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const tbody = document.getElementById("machine-ranking-body");
             if (!tbody) return;
 
-            if (currentMachineRankings.length === 0) {
-                if (tbody.innerHTML !== `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`;
-                }
-                return;
-            }
-
+            // 🌟 1. 先計算富豪第一名 (為了判斷是否有天上天下稱號)
             let topUid = null;
             let richArr = Object.keys(window.globalUsersData)
                 .map(k => ({uid: k, balance: window.globalUsersData[k].balance || 0}))
@@ -427,7 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .sort((a,b) => b.balance - a.balance);
             if (richArr.length > 0) topUid = richArr[0].uid;
 
-            // 🌟 智能更新右上角自己的稱號顯示 (保護動畫)
+            // 🌟 2. 搬到這裡！優先更新右上角自己的稱號顯示 (保護動畫，不受排行榜為空影響)
             let currentUserObj = window.globalUsersData[uid];
             if (currentUserObj) {
                 let mockSelf = {
@@ -443,7 +508,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // 🌟 核心修復：比較行數，如果不對才重建表格框架
+            // 🌟 3. 現在才判斷排行榜是否為空，如果是空就 return
+            if (currentMachineRankings.length === 0) {
+                if (tbody.innerHTML !== `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`;
+                }
+                return;
+            }
+
+            // 🌟 4. 核心修復：比較行數，如果不對才重建表格框架
             let rows = tbody.children;
             if (rows.length !== currentMachineRankings.length || (rows.length > 0 && rows[0].cells.length === 1)) {
                 let html = "";
@@ -454,7 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 rows = tbody.children;
             }
 
-            // 🌟 進行差異更新，只改動有變化的格子，絕不重置正在播放動畫的名字！
+            // 🌟 5. 進行差異更新，只改動有變化的格子
             currentMachineRankings.forEach((rec, idx) => {
                 let rankText = (idx === 0) ? "🥇" : (idx === 1) ? "🥈" : (idx === 2) ? "🥉" : (idx + 1);
 
@@ -479,7 +552,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (row.cells[0].innerText !== rankText.toString()) row.cells[0].innerText = rankText;
                 
-                // 只有名字不同時才更新，保護 CSS 特效不被截斷
                 if (row.cells[1].innerHTML !== nameHtml) {
                     row.cells[1].innerHTML = nameHtml;
                     row.cells[1].style.fontWeight = "bold";
@@ -809,6 +881,8 @@ setTimeout(() => {
 // ==========================================
 // 🏆 全自動稱號判定系統 (Log Interceptor)
 // ==========================================
+window._lastLoggedSpins = 0; // 🌟 建立獨立記憶體，死記最新轉數
+
 setTimeout(() => {
     if (typeof window.addLog === "function") {
         const originalAddLog = window.addLog;
@@ -823,25 +897,32 @@ setTimeout(() => {
                 const uid = user.uid;
                 const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
 
-                const spinsEl = document.getElementById('ui-spins');
                 const rushEl = document.getElementById('ui-rush');
-                const spins = spinsEl ? parseInt(spinsEl.innerText) : 0;
                 const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
 
+                // 🌟 終極修正：直接從 Log 擷取普通轉數並暫存，徹底解決 UI 延遲造成的「錯位」誤判
+                let spinMatch = text.match(/\[\s*(\d+)\s*(?:回轉|回転)/);
+                if (spinMatch && !text.includes("ST") && !text.includes("残保留") && !text.includes("電サポ")) {
+                    window._lastLoggedSpins = parseInt(spinMatch[1]);
+                }
+                let actualSpins = window._lastLoggedSpins || 0;
+
                 const pageName = location.pathname.split('/').pop().toLowerCase();
+                
                 const heavyMachinePages = new Set([
                     'bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html',
-                    'hokuto10.html', 'mushoku.html', 'seed.html', 'slime.html'
+                    'hokuto10.html', 'hokuto11.html', 'mushoku.html', 'seed.html', 'slime.html', 'takt.html', 'majo.html'
                 ]);
                 const isHeavyMachine = heavyMachinePages.has(pageName)
-                    || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム)/.test(machineTitle);
+                    || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣)/i.test(machineTitle);
                 
                 const isCharge = /チャージ|CHARGE/i.test(text);
-                const isMainHit = /當選|当選|図柄揃い|大当り|大当たり|BONUS|記者会見大成功/.test(text) && !isCharge;
+                const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(text) && !/チャレンジ|JUDGE|CZ/.test(text);
 
-                // ✨ 1. 神の引き
-                if (isMainHit && spins === 1 && isHeavyMachine) {
+                // ✨ 1. 神の引き (只有真正的 1 轉 + 成功突入 RUSH 才會發放)
+                if (isRealRushEnter && actualSpins === 1 && isHeavyMachine) {
                     titleDb.ref('users/' + uid).update({ title_godpull: true });
+                    window._lastLoggedSpins = 0; // 發放後歸零，防止異常連發
                 }
 
                 // ⚡ 2. 駆け抜け王 (Rush Runner) 
@@ -875,7 +956,6 @@ setTimeout(() => {
                 }
 
                 // 🌟 4. 清空単発地獄
-                const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(text) && !/チャレンジ|JUDGE|CZ/.test(text);
                 if (isRealRushEnter || text.includes("継続") || text.includes("連)") || rushCount >= 2) {
                     titleDb.ref('users/' + uid + '/single_hell_count').set(0);
                 }

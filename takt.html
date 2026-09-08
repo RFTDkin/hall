@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【無料】e北斗の拳10 | パチンコシミュレーター</title>
+    <title>【無料】eタクトオーパス デスティニー | パチンコシミュレーター</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0a0000;
+            background-color: #0a001a;
             color: #eeeeee;
             text-align: center;
             padding-bottom: 60px;
@@ -17,8 +17,8 @@
         }
 
         h1 {
-            color: #ff3d00;
-            text-shadow: 0 0 15px rgba(255, 61, 0, 0.7);
+            color: #e040fb;
+            text-shadow: 0 0 15px rgba(224, 64, 251, 0.7);
             font-weight: 900;
             letter-spacing: 2px;
         }
@@ -41,29 +41,29 @@
         .right-panel { max-width: 400px; }
 
         .stats-board {
-            background-color: #1a0500;
-            border: 2px solid #ff3d00;
+            background-color: #120024;
+            border: 2px solid #e040fb;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-around;
             font-size: 1.1em;
-            box-shadow: inset 0 0 15px rgba(255, 61, 0, 0.5);
+            box-shadow: inset 0 0 15px rgba(224, 64, 251, 0.5);
         }
 
         .stat-item span {
             display: block;
             font-weight: bold;
-            color: #ff9100;
+            color: #ffca28;
             font-size: 1.3em;
             margin-top: 5px;
         }
 
         button {
-            background: linear-gradient(180deg, #dd2c00 0%, #bf360c 100%);
+            background: linear-gradient(180deg, #aa00ff 0%, #4a148c 100%);
             color: white;
-            border: 1px solid #ff3d00;
+            border: 1px solid #e040fb;
             padding: 12px 25px;
             font-size: 1.1em;
             border-radius: 5px;
@@ -75,11 +75,11 @@
 
         button:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 15px #ff3d00;
+            box-shadow: 0 0 15px #e040fb;
         }
 
         button:disabled {
-            background: #3e1700;
+            background: #23003a;
             border-color: #444;
             color: #777;
             cursor: not-allowed;
@@ -89,7 +89,7 @@
 
         .log-container {
             background-color: #000000;
-            border: 1px solid #dd2c00;
+            border: 1px solid #7b1fa2;
             border-radius: 5px;
             height: 400px;
             overflow-y: auto;
@@ -100,27 +100,28 @@
         }
 
         .log-entry { margin: 5px 0; }
-        .color-rush { color: #ff9100; font-weight: bold; text-shadow: 0 0 5px #ff9100; }
-        .color-hit { color: #ff3d00; font-weight: bold; text-shadow: 0 0 5px #ff3d00; }
+        .color-rush { color: #e040fb; font-weight: bold; text-shadow: 0 0 5px #e040fb; }
+        .color-hit { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff5252; }
         .color-normal { color: #bdbdbd; }
+        .color-charge { color: #4fc3f7; }
         .color-ultimate { color: #ffea00; font-weight: 900; text-shadow: 0 0 15px #ffea00; font-size: 1.1em; }
         .color-fall { color: #757575; font-weight: bold; }
 
         .data-lamp-container {
-            background-color: #1a0500;
-            border: 3px solid #dd2c00;
+            background-color: #120024;
+            border: 3px solid #7b1fa2;
             border-radius: 8px;
             padding: 15px;
-            box-shadow: 0 0 15px rgba(221, 44, 0, 0.5);
+            box-shadow: 0 0 15px rgba(123, 31, 162, 0.5);
         }
 
         .data-lamp-title {
-            color: #ff9100;
+            color: #e040fb;
             margin-top: 0;
             margin-bottom: 15px;
             text-align: center;
             font-family: 'Courier New', Courier, monospace;
-            text-shadow: 0 0 5px #ff9100;
+            text-shadow: 0 0 5px #e040fb;
             letter-spacing: 2px;
         }
 
@@ -133,21 +134,21 @@
 
         table.data-lamp th,
         table.data-lamp td {
-            border: 1px solid #bf360c;
+            border: 1px solid #4a148c;
             padding: 10px 5px;
             text-align: center;
         }
 
         table.data-lamp th {
-            background-color: #3e1700;
-            color: #ff9100;
+            background-color: #31004a;
+            color: #ffca28;
             font-size: 0.9em;
         }
 
-        table.data-lamp tr:nth-child(even) { background-color: #2e1000; }
+        table.data-lamp tr:nth-child(even) { background-color: #1f0030; }
         table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
         table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
-        table.data-lamp td.hit-payout { color: #ff3d00; }
+        table.data-lamp td.hit-payout { color: #ff5252; }
         .empty-row { color: #444 !important; }
     </style>
     <link rel="stylesheet" href="mobile.css">
@@ -155,8 +156,7 @@
 
 <body>
 
-    <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">e北斗の拳10</span></h1>
-
+    <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">eタクトオーパス デスティニー</span></h1>
     <div class="main-container">
         <div class="left-panel">
             <div class="stats-board">
@@ -197,7 +197,7 @@
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-        class Hokuto10 {
+        class TaktOp {
             constructor() {
                 this.state = "NORMAL";
                 this.session_spins = 0;
@@ -213,91 +213,106 @@
                     addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
                 }
 
-                if (Math.random() < (1 / 399.8)) {
-                    addLog(`\n[${this.session_spins} 回轉] 💥 大当り當選！`, "color-hit");
+                let r = Math.random();
+                let probSymbol = 1 / 1394.38;
+                let probCharge = 1 / 464.79;
 
-                    let r = Math.random();
-                    let enterRush = true;
-                    
-                    if (r < 0.05) {
-                        this.session_payout += 4500;
-                        addLog("🌈 TRIPLE HYPER BONUS！ 4500玉獲得 ＋ 拳王RUSH突入！", "color-ultimate");
-                    } else if (r < 0.09) {
-                        this.session_payout += 1800;
-                        addLog("🔥 拳王覚醒チャンス成功！ 1800玉獲得 ＋ 拳王RUSH突入！", "color-rush");
-                    } else if (r < 0.61) {
-                        this.session_payout += 1500;
-                        addLog("✨ BATTLE BONUS 勝利！ 1500玉獲得 ＋ 拳王RUSH突入！", "color-rush");
+                // 1. 図柄揃い抽選
+                if (r < probSymbol) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い大当り當選！`, "color-hit");
+
+                    // RUSH突入率 50%
+                    let isRush = Math.random() < 0.50;
+                    this.session_payout += 1500;
+
+                    if (isRush) {
+                        addLog("✨ 歓喜の歌classic BONUS EXTRA (1500玉獲得)", "color-ultimate");
+                        addLog("🚀 DESTINY CHALLENGE 直行！！", "color-rush");
+                        this.session_rush_count = 1;
+                        updateUI();
+                        await sleep(1000);
+                        
+                        // RUSH前に必ず連チャン
+                        await this.play_dc();
                     } else {
-                        this.session_payout += 1500;
-                        enterRush = false;
-                        addLog("💀 BATTLE BONUS 敗北... 1500玉獲得 (通常終了)", "color-normal");
-                    }
-
-                    updateUI();
-                    await sleep(1000);
-
-                    if (enterRush) {
-                        await this.play_rush();
-                    } else {
+                        addLog("💥 開演BONUS (1500玉獲得)", "color-hit");
+                        addLog("💀 昇格失敗... 通常へ戻る", "color-normal");
+                        updateUI();
                         this.record_history();
                     }
                     return true;
+                } 
+                // 2. チャージ抽選
+                else if (r < probSymbol + probCharge) {
+                    addLog(`\n[${this.session_spins} 回轉] 🔮 運命CHARGE (アイコン停止)`, "color-charge");
+                    this.session_payout += 300;
+                    addLog("300玉獲得 (通常へ戻る)", "color-normal");
+                    updateUI();
+                    this.record_history();
+                    return true;
                 }
+                
                 return false;
             }
 
+            // DESTINY CHALLENGE (RUSH突入前の濃厚大当り)
+            async play_dc() {
+                addLog(`\n===== 🌟 DESTINY CHALLENGE =====`, "color-ultimate");
+                await sleep(800);
+                
+                this.session_rush_count += 1;
+                let payout = this.get_right_payout();
+                this.session_payout += payout;
+                
+                let isPremium = payout > 1500;
+                let bonusName = isPremium ? "PREMIUM 交響曲BONUS" : "運命BONUS1500";
+                
+                addLog(`🎉 突破濃厚！ ${bonusName} (${payout}玉獲得)`, isPremium ? "color-ultimate" : "color-rush");
+                addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                updateUI();
+                await sleep(1000);
+
+                await this.play_rush();
+            }
+
+            // 右打ち中の振り分け計算
+            get_right_payout() {
+                let r = Math.random() * 100;
+                if (r < 25.9) return 1500;
+                if (r < 25.9 + 40.2) return 2700;
+                if (r < 66.1 + 24.9) return 3900;
+                if (r < 91.0 + 7.7) return 5100;
+                if (r < 98.7 + 1.2) return 6300;
+                return 7500;
+            }
+
+// DESTINY RUSH (ST144回転)
             async play_rush() {
-                addLog(`\n===== 👊 拳王RUSH (ST10回+4回) 開始 =====`, "color-ultimate");
+                addLog(`\n===== ⚔️ DESTINY RUSH (ST 144回転) 開始 =====`, "color-ultimate");
                 this.state = "RUSH";
-                let st_remain = 14; 
+                let st_remain = 144; 
+                let initial_rush_count = this.session_rush_count; // 🌟 記低入 ST 前嘅連莊數
                 updateUI();
 
                 while (this.state === "RUSH" && st_remain > 0) {
-                    await sleep(400); // 1回転の緊張感を出すためのディレイ
-                    let current_spin = 15 - st_remain;
-                    
-                    if (st_remain > 4) {
-                        document.getElementById("ui-spins").innerText = `電サポ中: ${current_spin}/10`;
-                    } else {
-                        document.getElementById("ui-spins").innerText = `残保留: ${4 - st_remain + 1}/4`;
-                        addLog(`⏳ 残保留 ${4 - st_remain + 1}回転目...`, "color-normal");
-                    }
+                    await sleep(40); // 高速消化
+                    document.getElementById("ui-spins").innerText = `ST残り: ${st_remain}/144`;
 
-                    if (Math.random() < (1 / 10.7)) {
+                    if (Math.random() < (1 / 99.9)) {
                         this.session_rush_count += 1;
-                        let isReserve = st_remain <= 4;
+                        let hitSpin = 144 - st_remain + 1;
+                        addLog(`\n🎉 [ST ${hitSpin}回転目] 當選！ (總 ${this.session_rush_count}連)`, "color-hit");
+
+                        let payout = this.get_right_payout();
+                        this.session_payout += payout;
                         
-                        // 🌟 新增：計算出當前係第幾轉
-                        let hitSpin = isReserve ? (4 - st_remain + 1) : (15 - st_remain);
-                        let phaseName = isReserve ? '残保留' : 'ST';
+                        let isPremium = payout > 1500;
+                        let bonusName = isPremium ? "PREMIUM 交響曲BONUS" : "運命BONUS1500";
                         
-                        // 🌟 將轉數加埋入 Log 顯示
-                        addLog(`\n🎉 [${phaseName} ${hitSpin}回転目] 當選！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
-
-                        let r2 = Math.random();
-                        let addP = 0;
-// ... 下面啲扣血/派彩邏輯照舊保留 ...
-                        let resetText = "";
-
-                        if (!isReserve) {
-                            // 電サポ中の振り分け
-                            if (r2 < 0.10) { addP = 6000; resetText = "🌈 極闘 EXTREME BATTLE！ 6000玉獲得！"; }
-                            else if (r2 < 0.50) { addP = 4500; resetText = "👑 TRIPLE HYPER BONUS！ 4500玉獲得！"; }
-                            else if (r2 < 0.80) { addP = 1500; resetText = "💥 HYPER BONUS！ 1500玉獲得！"; }
-                            else { addP = 0; resetText = "🔄 STリセット當選！ (出玉なし)"; }
-                        } else {
-                            // 残保留の振り分け
-                            if (r2 < 0.80) { addP = 1500; resetText = "💥 FINAL BATTLE 勝利！ 1500玉獲得！"; }
-                            else { addP = 0; resetText = "🔄 STリセット當選！ (出玉なし)"; }
-                        }
-
-                        this.session_payout += addP;
-                        addLog(resetText, addP >= 4500 ? "color-ultimate" : "color-hit");
+                        addLog(`👑 ${bonusName}！ ${payout}玉獲得！`, isPremium ? "color-ultimate" : "color-rush");
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-                        addLog("⚡ 拳王RUSH 継続!!", "color-rush");
 
-                        st_remain = 14; // ST 10 + 残保留 4 回復
+                        st_remain = 144; // STリセット
                         updateUI();
                         await sleep(800);
                     } else {
@@ -307,8 +322,15 @@
 
                 if (st_remain === 0) {
                     document.getElementById("ui-spins").innerText = `終了`;
-                    addLog("\n💀 決着... RUSH終了", "color-fall");
-                    addLog(`📈 總連莊數: ${this.session_rush_count + 1}連 (含初當)`);
+                    
+                    // 🌟 判斷 ST 入面有無中過獎，無中過先至加上「駆け抜け」字眼
+                    if (this.session_rush_count === initial_rush_count) {
+                        addLog("\n💀 RUSH終了... (144回転駆け抜け)", "color-fall");
+                    } else {
+                        addLog("\n💀 RUSH終了...", "color-fall");
+                    }
+                    
+                    addLog(`📈 總連莊數: ${this.session_rush_count}連 (含初當)`);
                     addLog(`💰 最終出玉: ${this.session_payout} 玉`);
                     this.state = "NORMAL";
                     this.record_history();
@@ -319,7 +341,7 @@
             record_history() {
                 this.history.unshift({
                     spins: this.session_spins,
-                    rush: this.session_rush_count > 0 ? this.session_rush_count + 1 : 1,
+                    rush: this.session_rush_count,
                     payout: this.session_payout
                 });
 
@@ -332,7 +354,7 @@
             }
         }
 
-        let game = new Hokuto10();
+        let game = new TaktOp();
         let isPlaying = false;
         const logBox = document.getElementById("log-box");
         const btnPlay = document.getElementById("btn-play");
@@ -379,7 +401,7 @@
             isPlaying = true;
             btnPlay.disabled = true;
 
-            addLog("\n=== 我が生涯に一片の悔いなし！ ===", "color-hit");
+            addLog("\n=== コンダクター、指示を！ ===", "color-hit");
 
             while (isPlaying) {
                 let ended = await game.play_normal();

@@ -33,17 +33,75 @@
         }
         @keyframes rainbow-bg { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 
-        /* 2. サーバーの覇者：王座銘牌 */
-        .effect-supreme {
-            isolation: isolate; padding: 6px 20px; color: #fff8d8; border: 1px solid #f6d36c; border-radius: 2px;
-            background: linear-gradient(180deg, rgba(92, 55, 4, .94), rgba(30, 16, 0, .96) 48%, rgba(106, 65, 5, .92));
-            box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45);
-            text-shadow: 0 1px 0 #7a4900, 0 0 8px rgba(255, 223, 117, .7); overflow: visible; font-weight: bold;
-        }
-        .effect-supreme::before { content: ''; position: absolute; z-index: -1; top: 50%; left: -22px; right: -22px; height: 1px; transform: translateY(-50%); background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent); box-shadow: 0 -7px 10px rgba(255, 196, 45, .24), 0 7px 10px rgba(255, 196, 45, .24); }
-        .effect-supreme::after { content: ''; position: absolute; z-index: -1; inset: -9px -18px; background: radial-gradient(ellipse at center, rgba(255, 216, 106, .32), transparent 62%); filter: blur(4px); animation: sovereign-aura 3.8s ease-in-out infinite; }
-        @keyframes sovereign-aura { 0%, 100% { opacity: .42; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
+/* 2. サーバーの覇者：天上天下 終極霸氣銘牌 */
+    .effect-supreme {
+        position: relative; isolation: isolate; padding: 6px 20px; color: #fff8d8; border: 1px solid #f6d36c; border-radius: 2px;
+        background: linear-gradient(180deg, rgba(92, 55, 4, .94), rgba(30, 16, 0, .96) 48%, rgba(106, 65, 5, .92));
+        box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45);
+        overflow: visible; font-weight: bold;
+        margin-top: 18px; /* 給頂部的「天上天下」預留立體空間 */
+        animation: sovereign-main-aura 3.8s ease-in-out infinite;
+    }
 
+    /* 🌟 還原：你原本左右兩邊斷開嘅橫線 🌟 */
+    .effect-supreme::before {
+        content: ''; position: absolute; z-index: -1; top: 50%; left: -22px; right: -22px; height: 1px; transform: translateY(-50%);
+        background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent);
+        box-shadow: 0 -7px 10px rgba(255, 196, 45, .24), 0 7px 10px rgba(255, 196, 45, .24);
+    }
+
+/* 🌟 單一稱號：天上天下 霸氣明朝體 + 3D閃粉流光 + 極致強光 🌟 */
+    .effect-supreme::after {
+        content: '天上天下';
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-family: "Noto Serif JP", "Yu Mincho", "MS PMincho", "Hiragino Mincho Pro", serif; 
+        font-size: 14px;
+        font-weight: 900;
+        letter-spacing: 5px;
+        text-indent: 5px;
+        
+        /* 閃粉流光背景 */
+        background: linear-gradient(110deg, #ffd700 0%, #ffea00 15%, #ffffff 25%, #ffb300 35%, #ffd700 50%, #ffea00 65%, #ffffff 75%, #ffb300 85%, #ffd700 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        
+        /* 3D 浮雕底座 + 強制疊加極高亮度白金發光 */
+        text-shadow: 0 0 4px #fff, 0 0 10px #ffea00, 0 0 18px #ff9100;
+        filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9));
+        animation: supreme-glitter-text 2s linear infinite;
+        z-index: 10;
+    }
+
+    /* 閃粉流光動畫 */
+    @keyframes supreme-glitter-text {
+        0% {
+            background-position: 0% 50%;
+            filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,234,0,0.3));
+        }
+        50% {
+            filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 12px rgba(255,255,255,0.9)) drop-shadow(0 0 25px rgba(255,215,0,0.8));
+        }
+        100% {
+            background-position: -200% 50%;
+            filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,234,0,0.3));
+        }
+    }
+
+    /* 王者赤紅與黃金交替的呼吸氣場 */
+    @keyframes sovereign-main-aura {
+        0%, 100% { 
+            box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45); 
+        }
+        50% { 
+            box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .9), 0 0 35px rgba(255, 23, 68, .8), inset 0 1px 0 rgba(255,255,255,.7), inset 0 -10px 16px rgba(0,0,0,.6); 
+            transform: scale(1.02); 
+        }
+    }
         /* 3. 破産王：燒毀帳簿的焦啡殘字 */
         .effect-bankrupt {
             color: #dd8a48; letter-spacing: .13em; text-shadow: 1px 1px 0 #4b1d0b, 3px 4px 0 #090604, 0 0 5px rgba(157, 54, 15, .52);
@@ -75,11 +133,24 @@
         @keyframes runthrough { 0%, 100% { background-position: 0% 50%; } 48% { background-position: 100% 50%; } }
         @keyframes speed-trail { 0%, 100% { opacity: .16; transform: scaleX(.35); } 48% { opacity: 1; transform: scaleX(1); } }
 
-        /* 全稱號：終極形態 */
-        .effect-legend { isolation: isolate; padding: 7px 21px; border-radius: 3px; border: 1px solid #ffe69a; background: linear-gradient(180deg, rgba(81, 42, 3, .95), rgba(15, 18, 40, .96), rgba(72, 28, 78, .94)); color: #fff; background-clip: padding-box; text-shadow: 0 0 3px #fff, 0 0 9px #65eaff, 0 0 19px #e975ff; box-shadow: 0 0 0 2px #211300, 0 0 0 3px rgba(255, 205, 76, .68), 0 0 25px rgba(123, 193, 255, .58), inset 0 1px 0 rgba(255,255,255,.62); overflow: visible; font-weight: bold; }
+/* 全稱號：終極形態 */
+        .effect-legend { isolation: isolate; padding: 7px 21px; border-radius: 3px; border: 1px solid #ffe69a; background: linear-gradient(180deg, rgba(81, 42, 3, .95), rgba(15, 18, 40, .96), rgba(72, 28, 78, .94)); color: #fff; background-clip: padding-box; text-shadow: 0 0 3px #fff, 0 0 9px #65eaff, 0 0 19px #e975ff; box-shadow: 0 0 0 2px #211300, 0 0 0 3px rgba(255, 205, 76, .68), 0 0 25px rgba(123, 193, 255, .58), inset 0 1px 0 rgba(255,255,255,.62); overflow: visible; font-weight: bold; margin-top: 18px; }
         .effect-legend::before { content: ''; position: absolute; z-index: -1; inset: -13px -28px; border: 1px solid rgba(152, 230, 255, .62); border-radius: 50%; box-shadow: 0 0 19px rgba(112, 178, 255, .54), inset 0 0 18px rgba(241, 126, 255, .2); animation: legend-aura 3.6s ease-in-out infinite; }
         .effect-legend::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(108deg, transparent 35%, rgba(255,255,255,.8) 50%, transparent 65%); transform: translateX(-140%); animation: legend-sweep 3.6s ease-in-out infinite; }
-        
+
+    /* 🌟 終極形態專屬的「天上天下」文字 (同步強光設定) 🌟 */
+        .legend-supreme-text {
+            position: absolute; top: -18px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+            font-family: "Noto Serif JP", "Yu Mincho", "MS PMincho", "Hiragino Mincho Pro", serif; 
+            font-size: 14px; font-weight: 900; letter-spacing: 5px; text-indent: 5px;
+            background: linear-gradient(110deg, #ffd700 0%, #ffea00 15%, #ffffff 25%, #ffb300 35%, #ffd700 50%, #ffea00 65%, #ffffff 75%, #ffb300 85%, #ffd700 100%);
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            
+            /* 強制疊加極高亮度白金發光 */
+            text-shadow: 0 0 4px #fff, 0 0 10px #ffea00, 0 0 18px #ff9100;
+            filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9));
+            animation: supreme-glitter-text 2s linear infinite; z-index: 10;
+        }
         /* 🌟 全稱號中的彩虹色同步還原 🌟 */
         .legend-complete { position: relative; z-index: 1; background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); font-weight: 900; animation: rainbow-bg 2s linear infinite; }
         
@@ -175,7 +246,7 @@
         <div class="title-card">
             <div class="title-info">
                 <div class="title-name" style="color: #00e5ff;">✨ 神の引き (God's Pull)</div>
-                <div class="title-cond">獲得条件：1回転目で、大当り確率の分母が399以上（1/399・1/999など）の大当りを引き当てる。</div>
+                <div class="title-cond">獲得条件：1回転目で、大当り確率の分母が399以上（1/399・1/999など）の大当りを引てRUSH突入した時に獲得。</div>
             </div>
             <div class="preview-box"><span class="title-effect effect-godpull">プレイヤー名</span></div>
         </div>
@@ -200,6 +271,7 @@
         <p style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;">理論上、すべての称号を同時に所持した場合の見た目です。すべてを重ねず、専用の最終レジェンド演出に切り替えます。</p>
         <div class="preview-box" style="padding: 30px; margin-bottom: 50px;">
             <span class="title-effect effect-legend">
+                <span class="legend-supreme-text">天上天下</span>
                 <span class="legend-royal-lines" aria-hidden="true"></span>
                 <span class="legend-runthrough-trail" aria-hidden="true"></span>
                 <span class="legend-ichigeki-burst" aria-hidden="true"></span>
