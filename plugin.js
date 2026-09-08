@@ -188,28 +188,56 @@ window.getPluginPlayerNameHtml = function(userObj, isRank1, uid = null, disableC
 
     // 🌟 直接顯示名，徹底移除 (あなた)
     let display = name; 
-    let html = display;
+// 🌟 讀取玩家裝備狀態 (支援多選逗號字串)
+    let eq = "auto";
+    if (uid && typeof usersData !== 'undefined' && usersData[uid]) { eq = usersData[uid].equipped_title || "auto"; }
+    else if (uid && window.globalUsersData && window.globalUsersData[uid]) { eq = window.globalUsersData[uid].equipped_title || "auto"; }
 
-    if (isLegend) {
-        html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
-    } else {
-        if (isBankrupt) {
-            html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`;
-        } else if (isComplete) {
-            html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`;
-        } else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme) {
-            // 🌟 修正：只要係自己 (isSelf)，就強制用返原本嘅藍色 #00e5ff 🌟
-            let baseColor = userObj.isSelf ? '#00e5ff' : '#fff';
-            html = `<span style="color: ${baseColor};">${html}</span>`;
+    let html = display;
+    let baseColor = userObj.isSelf ? '#00e5ff' : '#fff'; // 如果係 index.html，保留你原本嘅 isDashboard 判斷
+
+    if (eq === "none") {
+        html = `<span style="color: ${baseColor};">${html}</span>`;
+    } else if (eq !== "auto") {
+        // 🌟 自訂模式：讀取陣列並疊加玩家勾選的特效 🌟
+        let selectedTitles = eq.split(',');
+        
+        if (selectedTitles.includes("legend") && isLegend) {
+            html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
+        } else {
+            // 底層特效 (彩虹 / 普通色)
+            if (selectedTitles.includes("supreme") && isComplete) {
+                html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`;
+            } else {
+                html = `<span style="color: ${baseColor};">${html}</span>`;
+            }
+            
+            // 外層疊加特效 (只要勾選咗就會按順序疊加)
+            if (selectedTitles.includes("godpull") && isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
+            if (selectedTitles.includes("runthrough") && isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
+            if (selectedTitles.includes("ichigeki") && isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
+            if (selectedTitles.includes("hell") && isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
+            if (selectedTitles.includes("supreme") && isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
+            
+            html = `<span class="title-effect">${html}</span>`;
         }
-        
-        if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
-        if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
-        if (isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
-        if (isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
-        if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
-        
-        html = `<span class="title-effect">${html}</span>`;
+    } else {
+        // 🌟 預設 Auto 模式：保持你原本的邏輯
+        if (isLegend) {
+            html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
+        } else {
+            if (isBankrupt) { html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`; }
+            else if (isComplete) { html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`; }
+            else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme) {
+                html = `<span style="color: ${baseColor};">${html}</span>`;
+            }
+            if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
+            if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
+            if (isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
+            if (isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
+            if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
+            html = `<span class="title-effect">${html}</span>`;
+        }
     }
 
     if (uid && !disableClick) {
@@ -239,11 +267,12 @@ window.showPluginProfile = function(uid) {
         title_godpull: u.title_godpull,
         title_runthrough: u.title_runthrough,
         title_ichigeki: u.title_ichigeki,
+        equipped_title: u.equipped_title, // 🌟 補返裝備設定落去
         isSelf: firebase.auth().currentUser && firebase.auth().currentUser.uid === uid
     };
 
-    // 🌟 核心修復：只在內容不同時才更新 DOM，保護 CSS 動畫不被重置
-    let nameHtml = window.getPluginPlayerNameHtml(mockUserObj, topUid === uid, null, true);
+    // 🌟 核心修復：傳入 uid 代替 null，等系統可以讀到裝備狀態
+    let nameHtml = window.getPluginPlayerNameHtml(mockUserObj, topUid === uid, uid, true);
     let nameEl = document.getElementById('p-modal-name');
     if (nameEl.innerHTML !== nameHtml) nameEl.innerHTML = nameHtml;
 
@@ -288,6 +317,44 @@ window.showPluginProfile = function(uid) {
     if (badgesEl.innerHTML !== bHtml) badgesEl.innerHTML = bHtml;
 
     document.getElementById('plugin-profile-modal').style.display = 'flex';
+
+// 🌟 注入多重稱號裝備選單 (加咗 Render Key 防止刷新彈回)
+    let selectorEl = document.getElementById('p-modal-title-selector');
+    if (firebase.auth().currentUser && firebase.auth().currentUser.uid === uid) {
+        let eq = u.equipped_title || "auto";
+        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.title_ichigeki}`;
+
+        if (selectorEl.getAttribute('data-render-key') !== renderKey) {
+            let isAuto = eq === "auto";
+            let isNone = eq === "none";
+            let isCustom = !isAuto && !isNone;
+            let isTop = (topUid === uid);
+
+            selectorEl.innerHTML = `
+                <div style="margin-top: 15px; text-align: left; background: #222; padding: 12px; border-radius: 8px; border: 1px solid #444;">
+                    <label style="color: #00e5ff; font-size: 0.9em; font-weight: bold; display: block; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 8px;">🏆 称号表示カスタム</label>
+                    <div style="font-size: 0.9em; line-height: 1.8; color: #eee;">
+                        <label><input type="radio" name="title_mode" value="auto" ${isAuto ? 'checked' : ''} onchange="window.toggleTitleChecks(this.value)"> 自動 (全て表示)</label><br>
+                        <label><input type="radio" name="title_mode" value="none" ${isNone ? 'checked' : ''} onchange="window.toggleTitleChecks(this.value)"> 🚫 非表示</label><br>
+                        <label><input type="radio" name="title_mode" value="custom" ${isCustom ? 'checked' : ''} onchange="window.toggleTitleChecks(this.value)"> 🔧 カスタム (複数選択可)</label><br>
+                        
+                        <div id="custom-title-list" style="margin-left: 25px; margin-top: 5px; padding: 5px 0; border-left: 2px solid #555; padding-left: 10px; ${isCustom ? 'display:block;' : 'display:none;'}">
+                            ${isTop && u.has_completed ? `<label><input type="checkbox" class="t-check" value="legend" ${eq.includes('legend') ? 'checked' : ''}> 天上天下</label><br>` : ''}
+                            ${u.has_completed ? `<label><input type="checkbox" class="t-check" value="supreme" ${eq.includes('supreme') ? 'checked' : ''}> コンプリート</label><br>` : ''}
+                            ${u.title_godpull ? `<label><input type="checkbox" class="t-check" value="godpull" ${eq.includes('godpull') ? 'checked' : ''}> 神の引き</label><br>` : ''}
+                            ${u.title_runthrough ? `<label><input type="checkbox" class="t-check" value="runthrough" ${eq.includes('runthrough') ? 'checked' : ''}> 駆け抜け王</label><br>` : ''}
+                            ${u.title_hell ? `<label><input type="checkbox" class="t-check" value="hell" ${eq.includes('hell') ? 'checked' : ''}> 単発地獄</label><br>` : ''}
+                            ${u.title_ichigeki ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 一撃王</label><br>` : ''}
+                        </div>
+                    </div>
+                    <button onclick="window.saveTitleSettings('${uid}')" style="margin-top: 12px; width: 100%; padding: 8px; background: #00e5ff; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">💾 設定を保存</button>
+                </div>`;
+            selectorEl.setAttribute('data-render-key', renderKey);
+        }
+    } else {
+        selectorEl.innerHTML = "";
+        selectorEl.removeAttribute('data-render-key');
+    }
 };
 
 const originalAlert = window.alert;
@@ -434,6 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="prog-container"><div class="prog-label"><span>⚡ 駆け抜け王 (7回連続)</span><span id="p-modal-run-text">0 / 7</span></div><div class="prog-bar-bg"><div id="p-modal-run-fill" class="prog-bar-fill fill-run" style="width: 0%;"></div></div></div>
                 <div class="prog-container"><div class="prog-label"><span>💥 一撃王 (本日の一撃王 10回)</span><span id="p-modal-ichi-text">0 / 10</span></div><div class="prog-bar-bg"><div id="p-modal-ichi-fill" class="prog-bar-fill fill-ichi" style="width: 0%;"></div></div></div>
                 <div class="badge-container" id="p-modal-badges"></div>
+                <div id="p-modal-title-selector"></div>
             </div>
         `;
         document.body.appendChild(modalHtml);
@@ -980,3 +1048,28 @@ setTimeout(() => {
         };
     }
 }, 2000);
+
+// 🌟 切換自訂稱號選單顯示/隱藏
+window.toggleTitleChecks = function(mode) {
+    let list = document.getElementById('custom-title-list');
+    if (list) list.style.display = (mode === 'custom') ? 'block' : 'none';
+};
+
+// 🌟 儲存多重稱號設定
+window.saveTitleSettings = function(uid) {
+    let modeNode = document.querySelector('input[name="title_mode"]:checked');
+    if (!modeNode) return;
+    let mode = modeNode.value;
+    let finalSave = "auto";
+    
+    if (mode === "none") {
+        finalSave = "none";
+    } else if (mode === "custom") {
+        let checks = document.querySelectorAll('.t-check:checked');
+        let selected = Array.from(checks).map(c => c.value);
+        finalSave = selected.length === 0 ? "none" : selected.join(',');
+    }
+    
+    firebase.database().ref('users/' + uid).update({ equipped_title: finalSave })
+    .then(() => { alert("✅ 称号の表示設定を保存しました！"); location.reload(); });
+};

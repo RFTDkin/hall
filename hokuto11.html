@@ -277,12 +277,12 @@
 
                         let r2 = Math.random();
                         let addP = 0;
-// ... 下面啲扣血/派彩邏輯照舊保留 ...
                         let resetText = "";
+                        let isExtreme = false;
 
                         if (!isReserve) {
                             // 電サポ中の振り分け
-                            if (r2 < 0.10) { addP = 6000; resetText = "🌈 極闘 EXTREME BATTLE！ 6000玉獲得！"; }
+                            if (r2 < 0.10) { addP = 6000; resetText = "🌈 極闘 EXTREME BATTLE 発生！ 6000玉獲得！"; isExtreme = true; }
                             else if (r2 < 0.50) { addP = 4500; resetText = "👑 TRIPLE HYPER BONUS！ 4500玉獲得！"; }
                             else if (r2 < 0.80) { addP = 1500; resetText = "💥 HYPER BONUS！ 1500玉獲得！"; }
                             else { addP = 0; resetText = "🔄 STリセット當選！ (出玉なし)"; }
@@ -293,10 +293,34 @@
                         }
 
                         this.session_payout += addP;
-                        addLog(resetText, addP >= 4500 ? "color-ultimate" : "color-hit");
+                        addLog(resetText, addP >= 4500 ? "color-ultimate" : (addP > 0 ? "color-hit" : "color-normal"));
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-                        addLog("⚡ 拳王RUSH 継続!!", "color-rush");
 
+                        // 🌟 極闘 EXTREME BATTLE (1G連) 邏輯 🌟
+                        if (isExtreme) {
+                            await sleep(1000);
+                            addLog(`🔥 極闘 EXTREME BATTLE 抽選中...`, "color-rush");
+                            await sleep(1500);
+                            
+                            let exRoll = Math.random();
+                            let exAddP = 0;
+                            let exText = "";
+                            
+                            if (exRoll < 0.10) { exAddP = 6000; exText = "💥 上乗せ覚醒！ +6000玉！ (最大12000玉到達！)"; }
+                            else if (exRoll < 0.50) { exAddP = 4500; exText = "👑 上乗せ成功！ +4500玉！"; }
+                            else if (exRoll < 0.80) { exAddP = 1500; exText = "💥 上乗せ成功！ +1500玉！"; }
+                            else { exAddP = 0; exText = "🔄 上乗せなし (STリセットのみ)"; }
+                            
+                            if (exAddP > 0) {
+                                this.session_payout += exAddP;
+                                addLog(exText, exAddP >= 4500 ? "color-ultimate" : "color-hit");
+                                addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                            } else {
+                                addLog(exText, "color-normal");
+                            }
+                        }
+
+                        addLog("⚡ 拳王RUSH 継続!!", "color-rush");
                         st_remain = 14; // ST 10 + 残保留 4 回復
                         updateUI();
                         await sleep(800);

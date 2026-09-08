@@ -999,6 +999,31 @@
         let maxHamariData = null;
         const authBtn = document.getElementById("auth-btn");
 
+                // 🌟 切換自訂稱號選單顯示/隱藏
+        window.toggleTitleChecks = function(mode) {
+            let list = document.getElementById('custom-title-list');
+            if (list) list.style.display = (mode === 'custom') ? 'block' : 'none';
+        };
+
+        // 🌟 儲存多重稱號設定
+        window.saveTitleSettings = function(uid) {
+            let modeNode = document.querySelector('input[name="title_mode"]:checked');
+            if (!modeNode) return;
+            let mode = modeNode.value;
+            let finalSave = "auto";
+            
+            if (mode === "none") {
+                finalSave = "none";
+            } else if (mode === "custom") {
+                let checks = document.querySelectorAll('.t-check:checked');
+                let selected = Array.from(checks).map(c => c.value);
+                finalSave = selected.length === 0 ? "none" : selected.join(',');
+            }
+            
+            firebase.database().ref('users/' + uid).update({ equipped_title: finalSave })
+            .then(() => { alert("✅ 称号の表示設定を保存しました！"); location.reload(); });
+        };
+        
         function getPlayerNameHtml(userObj, isRank1, uid = null, disableClick = false, isDashboard = false, showYouLabel = false) {
             let name = userObj.name || "Unknown";
             let isComplete = userObj.has_completed;
@@ -1012,29 +1037,56 @@
 
             // 🌟 只有當 showYouLabel 為 true 時才加上 (あなた)
             let display = (userObj.isSelf && showYouLabel) ? `${name} (あなた)` : name;
-            let html = display;
+        // 🌟 讀取玩家裝備狀態 (支援多選逗號字串)
+            let eq = "auto";
+            if (uid && typeof usersData !== 'undefined' && usersData[uid]) { eq = usersData[uid].equipped_title || "auto"; }
+            else if (uid && window.globalUsersData && window.globalUsersData[uid]) { eq = window.globalUsersData[uid].equipped_title || "auto"; }
 
-            if (isLegend) {
-                html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
-            } else {
-                if (isBankrupt) {
-                    html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`;
-                } else if (isComplete) {
-                    html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`;
-                } else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme) {
-                    // 無任何稱號先會顯示預設黃色/白色
-                    let baseColor = userObj.isSelf ? '#00e5ff' : (isDashboard ? '#ffca28' : '#fff');
-                    html = `<span style="color: ${baseColor};">${html}</span>`;
+            let html = display;
+            let baseColor = userObj.isSelf ? '#00e5ff' : '#fff'; // 如果係 index.html，保留你原本嘅 isDashboard 判斷
+
+            if (eq === "none") {
+                html = `<span style="color: ${baseColor};">${html}</span>`;
+            } else if (eq !== "auto") {
+                // 🌟 自訂模式：讀取陣列並疊加玩家勾選的特效 🌟
+                let selectedTitles = eq.split(',');
+                
+                if (selectedTitles.includes("legend") && isLegend) {
+                    html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
+                } else {
+                    // 底層特效 (彩虹 / 普通色)
+                    if (selectedTitles.includes("supreme") && isComplete) {
+                        html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`;
+                    } else {
+                        html = `<span style="color: ${baseColor};">${html}</span>`;
+                    }
+                    
+                    // 外層疊加特效 (只要勾選咗就會按順序疊加)
+                    if (selectedTitles.includes("godpull") && isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
+                    if (selectedTitles.includes("runthrough") && isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
+                    if (selectedTitles.includes("ichigeki") && isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
+                    if (selectedTitles.includes("hell") && isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
+                    if (selectedTitles.includes("supreme") && isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
+                    
+                    html = `<span class="title-effect">${html}</span>`;
                 }
-                
-                // 🌟 重點修復：為所有特效補上 inline-block 及 relative，確保 transform 動畫能正常運作 🌟
-                if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
-                if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
-                if (isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
-                if (isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
-                if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
-                
-                html = `<span class="title-effect">${html}</span>`;
+            } else {
+                // 🌟 預設 Auto 模式：保持你原本的邏輯
+                if (isLegend) {
+                    html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
+                } else {
+                    if (isBankrupt) { html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`; }
+                    else if (isComplete) { html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`; }
+                    else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme) {
+                        html = `<span style="color: ${baseColor};">${html}</span>`;
+                    }
+                    if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
+                    if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
+                    if (isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
+                    if (isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
+                    if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
+                    html = `<span class="title-effect">${html}</span>`;
+                }
             }
 
             if (uid && !disableClick) {
@@ -1133,7 +1185,31 @@
                 .sort((a,b) => b.balance - a.balance);
             if (richArr.length > 0) topUid = richArr[0].uid;
 
+            // 🌟 新增：實時更新左上角導覽列玩家名字 (套用稱號特效)
+            if (auth.currentUser && usersData[auth.currentUser.uid]) {
+                let cu = usersData[auth.currentUser.uid];
+                let mockSelf = {
+                    uid: auth.currentUser.uid,
+                    name: cu.username,
+                    balance: cu.balance,
+                    has_completed: cu.has_completed,
+                    title_hell: cu.title_hell,
+                    title_godpull: cu.title_godpull,
+                    title_runthrough: cu.title_runthrough,
+                    title_ichigeki: cu.title_ichigeki,
+                    equipped_title: cu.equipped_title, // 🌟 讀取裝備狀態
+                    isSelf: true
+                };
+                // 傳入 disableClick = true，因為 HTML 本身已經有 onclick 彈出 Profile
+                let navHtml = getPlayerNameHtml(mockSelf, topUid === auth.currentUser.uid, auth.currentUser.uid, true);
+                let navEl = document.getElementById("nav-username");
+                if (navEl.innerHTML !== navHtml) {
+                    navEl.innerHTML = navHtml;
+                }
+            }
+
             for (let uid in usersData) {
+            // ... 下面維持原本嘅 for loop ...
                 let u = usersData[uid];
                 let userBalance = u.balance || 0;
                 let dailyProfit = u.daily_profit || 0;
@@ -1399,7 +1475,8 @@
                 title_hell: u.title_hell, 
                 title_godpull: u.title_godpull, 
                 title_runthrough: u.title_runthrough,
-                title_ichigeki: u.title_ichigeki, 
+                title_ichigeki: u.title_ichigeki,
+                equipped_title: u.equipped_title, // 🌟 補返裝備設定落去
                 isSelf: auth.currentUser && auth.currentUser.uid === currentOpenProfileUid 
             };
 
@@ -1407,8 +1484,8 @@
             let richUsers = Object.values(usersData).filter(x => (x.balance || 0) >= 0).sort((a,b) => (b.balance || 0) - (a.balance || 0));
             if(richUsers.length > 0 && richUsers[0].username === u.username) isRank1 = true;
 
-            // 🌟 核心修復：只在內容不同時才更新，保護動畫完整播放
-            let nameHtml = getPlayerNameHtml(mockUserObj, isRank1, null, true);
+            // 🌟 核心修復：傳入 currentOpenProfileUid 代替 null，等系統可以讀到裝備狀態
+            let nameHtml = getPlayerNameHtml(mockUserObj, isRank1, currentOpenProfileUid, true);
             let nameEl = document.getElementById('modal-name');
             if (nameEl.innerHTML !== nameHtml) nameEl.innerHTML = nameHtml;
 
@@ -1453,6 +1530,44 @@
             
             let badgesEl = document.getElementById('modal-badges');
             if (badgesEl.innerHTML !== badgesHtml) badgesEl.innerHTML = badgesHtml;
+
+// 🌟 注入多重稱號裝備選單 (加咗 Render Key 防止刷新彈回)
+            let selectorEl = document.getElementById('modal-title-selector');
+            if (auth.currentUser && auth.currentUser.uid === currentOpenProfileUid) {
+                let eq = u.equipped_title || "auto";
+                // 建立一個獨特嘅 Key，只有當解鎖狀態或已存檔嘅裝備改變時，先允許重新繪製 UI
+                let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.title_ichigeki}`;
+                
+                if (selectorEl.getAttribute('data-render-key') !== renderKey) {
+                    let isAuto = eq === "auto";
+                    let isNone = eq === "none";
+                    let isCustom = !isAuto && !isNone;
+
+                    selectorEl.innerHTML = `
+                        <div style="margin-top: 15px; text-align: left; background: #222; padding: 12px; border-radius: 8px; border: 1px solid #444;">
+                            <label style="color: #00e5ff; font-size: 0.9em; font-weight: bold; display: block; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 8px;">🏆 称号表示カスタム</label>
+                            <div style="font-size: 0.9em; line-height: 1.8; color: #eee;">
+                                <label><input type="radio" name="title_mode" value="auto" ${isAuto ? 'checked' : ''} onchange="window.toggleTitleChecks(this.value)"> 自動 (全て表示)</label><br>
+                                <label><input type="radio" name="title_mode" value="none" ${isNone ? 'checked' : ''} onchange="window.toggleTitleChecks(this.value)"> 🚫 非表示</label><br>
+                                <label><input type="radio" name="title_mode" value="custom" ${isCustom ? 'checked' : ''} onchange="window.toggleTitleChecks(this.value)"> 🔧 カスタム (複数選択可)</label><br>
+                                
+                                <div id="custom-title-list" style="margin-left: 25px; margin-top: 5px; padding: 5px 0; border-left: 2px solid #555; padding-left: 10px; ${isCustom ? 'display:block;' : 'display:none;'}">
+                                    ${isRank1 && u.has_completed ? `<label><input type="checkbox" class="t-check" value="legend" ${eq.includes('legend') ? 'checked' : ''}> 天上天下</label><br>` : ''}
+                                    ${u.has_completed ? `<label><input type="checkbox" class="t-check" value="supreme" ${eq.includes('supreme') ? 'checked' : ''}> コンプリート</label><br>` : ''}
+                                    ${u.title_godpull ? `<label><input type="checkbox" class="t-check" value="godpull" ${eq.includes('godpull') ? 'checked' : ''}> 神の引き</label><br>` : ''}
+                                    ${u.title_runthrough ? `<label><input type="checkbox" class="t-check" value="runthrough" ${eq.includes('runthrough') ? 'checked' : ''}> 駆け抜け王</label><br>` : ''}
+                                    ${u.title_hell ? `<label><input type="checkbox" class="t-check" value="hell" ${eq.includes('hell') ? 'checked' : ''}> 単発地獄</label><br>` : ''}
+                                    ${u.title_ichigeki ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 一撃王</label><br>` : ''}
+                                </div>
+                            </div>
+                            <button onclick="window.saveTitleSettings('${currentOpenProfileUid}')" style="margin-top: 12px; width: 100%; padding: 8px; background: #00e5ff; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">💾 設定を保存</button>
+                        </div>`;
+                    selectorEl.setAttribute('data-render-key', renderKey);
+                }
+            } else {
+                selectorEl.innerHTML = "";
+                selectorEl.removeAttribute('data-render-key');
+            }
         }
 
 // 🌟 自動結算「本日の一撃王」並派發稱號
@@ -1515,6 +1630,7 @@
             </div>
 
             <div class="badge-container" id="modal-badges"></div>
+            <div id="modal-title-selector"></div>
         </div>
     </div>
     

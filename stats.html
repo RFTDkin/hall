@@ -1591,15 +1591,22 @@
                     else { payout += 1500; rush = false; }
 
                     if (rush && payout < 95000) {
-                        let st_remain = 14;
+                        let st_remain = 14; 
                         while (st_remain > 0 && payout < 95000) {
                             if (Math.random() < 1 / 10.7) {
                                 let r2 = Math.random();
-                                if (st_remain > 4) {
-                                    if (r2 < 0.10) payout += 6000;
+                                if (st_remain > 4) { // 電サポ中
+                                    if (r2 < 0.10) {
+                                        payout += 6000;
+                                        // 🌟 極闘 EXTREME BATTLE (1G連上乗せ)
+                                        let exRoll = Math.random();
+                                        if (exRoll < 0.10) payout += 6000;
+                                        else if (exRoll < 0.50) payout += 4500;
+                                        else if (exRoll < 0.80) payout += 1500;
+                                    }
                                     else if (r2 < 0.50) payout += 4500;
                                     else if (r2 < 0.80) payout += 1500;
-                                } else {
+                                } else { // 残保留
                                     if (r2 < 0.80) payout += 1500;
                                 }
                                 st_remain = 14;
