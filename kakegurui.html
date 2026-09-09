@@ -433,16 +433,21 @@
                         updateUI();
                         await sleep(800);
 
-                        // 60% 觸發運命の一撃
-                        addLog(`🔮 運命の一撃 発生あおり...`, "color-normal");
-                        await sleep(1000);
+                        // 🌟 修正：42% 機會觸發運命の一撃，58% 普通 ST 繼續
+                        if (Math.random() < 0.42) {
+                            addLog(`🔮 運命の一撃 発生！ (42%の振り分け)`, "color-judge");
+                            await sleep(1000);
 
-                        if (Math.random() < 0.60) {
-                            addLog(`🔥 運命の一撃 成功！ ツラヌキチャレンジ突入！`, "color-hit");
-                            await sleep(500);
-                            await this.play_tsuranuki();
+                            // 🌟 60% 成功進入 7500玉 Loop
+                            if (Math.random() < 0.60) {
+                                addLog(`🔥 運命の一撃 成功！ ツラヌキチャレンジ突入！`, "color-hit");
+                                await sleep(500);
+                                await this.play_tsuranuki();
+                            } else {
+                                addLog(`💨 運命の一撃 失敗... ST継続`, "color-fall");
+                            }
                         } else {
-                            addLog(`💨 運命の一撃 失敗... ST継続`, "color-normal");
+                            addLog(`✨ 通常大当り (58%の振り分け)... ST継続`, "color-normal");
                         }
 
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
