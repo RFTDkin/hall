@@ -428,25 +428,54 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!user) { window.location.href = "login.html"; return; }
             const uid = user.uid;
 
-            // 🌟 補上機台頁面的自動結算防護，防止舊紀錄被直接覆蓋 🌟
+// 🌟 自動結算「本日の一撃王」並派發稱號 (升級版：支援新舊系統及防覆蓋)
+        function processDailyBest() {
+            const today = new Date();
+            const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
+
+            // 1. 舊版單一紀錄結算防護 (處理遺留數據)
             db.ref('server_records/daily_best').once('value').then(snap => {
                 let data = snap.val();
-                const today = new Date();
-                const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
-                if (data && data.date !== todayStr && data.processed === false) {
+                if (data && data.date && data.date !== todayStr && data.processed !== true) {
                     db.ref('server_records/daily_best').transaction(curr => {
-                        if (curr && !curr.processed && curr.date === data.date) {
+                        if (curr && curr.processed !== true && curr.date === data.date) {
                             curr.processed = true; return curr;
                         }
                         return; 
                     }, (error, committed, snapshot) => {
                         if (committed && snapshot && snapshot.val()) {
                             let winnerUid = snapshot.val().uid;
-                            db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => (c || 0) + 1);
+                            if(winnerUid) db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => (c || 0) + 1);
                         }
                     });
                 }
             });
+
+            // 2. 新版每日獨立日誌結算 (精準追蹤每日)
+            db.ref('server_records/daily_bests_log').once('value').then(snap => {
+                let logs = snap.val();
+                if (logs) {
+                    for (let key in logs) {
+                        let rec = logs[key];
+                        // 只要唔係今日，而且未結算，就執行 +1
+                        if (rec && rec.date !== todayStr && rec.processed !== true) {
+                            db.ref(`server_records/daily_bests_log/${key}`).transaction(curr => {
+                                if (curr && curr.processed !== true) {
+                                    curr.processed = true; return curr;
+                                }
+                                return;
+                            }, (error, committed, snapshot) => {
+                                if (committed && snapshot && snapshot.val()) {
+                                    let winnerUid = snapshot.val().uid;
+                                    if(winnerUid) db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => (c || 0) + 1);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+        processDailyBest();
 
             const userRef = db.ref('users/' + uid);
             // ... 下面維持原本的 userRef.get() 邏輯 ...
@@ -808,12 +837,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (lastUI_payout >= 10000 && !alreadySaved) {
                         const todayDate = new Date();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
+                        const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`; // 👈 新增獨立 Key
+
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
+                        
+                        // 兼容舊版 Dashboard 顯示
                         db.ref('server_records/daily_best').transaction((curr) => {
-                        if (!curr || curr.date !== dateStr || lastUI_payout > curr.payout) {
-                            return { uid: uid, user: currentUserName, payout: lastUI_payout, date: dateStr, processed: false };
-                        }
-                        return;
+                            if (!curr || curr.date !== dateStr || lastUI_payout > curr.payout) {
+                                return { uid: uid, user: currentUserName, payout: lastUI_payout, date: dateStr, processed: false };
+                            }
+                            return;
+                        });
+
+                        // 🌟 寫入新版防覆蓋日誌 🌟
+                        db.ref(`server_records/daily_bests_log/${dateKey}`).transaction((curr) => {
+                            if (!curr || lastUI_payout > curr.payout) {
+                                return { uid: uid, user: currentUserName, payout: lastUI_payout, date: dateStr, processed: false };
+                            }
+                            return;
                         });
                     }
                 }
@@ -859,12 +900,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     completeTriggeredThisRush = true;
                     const todayDate = new Date();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
+                    const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`; // 👈 新增獨立 Key
+
                     db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: new_payout, date: dateStr });
+                    
                     db.ref('server_records/daily_best').transaction((curr) => {
                         if (!curr || curr.date !== dateStr || new_payout > curr.payout) {
                             return { uid: uid, user: currentUserName, payout: new_payout, date: dateStr, processed: false };
                         }
                         return; 
+                    });
+
+                    // 🌟 寫入新版防覆蓋日誌 🌟
+                    db.ref(`server_records/daily_bests_log/${dateKey}`).transaction((curr) => {
+                        if (!curr || new_payout > curr.payout) {
+                            return { uid: uid, user: currentUserName, payout: new_payout, date: dateStr, processed: false };
+                        }
+                        return;
                     });
 
                     if (!userData.has_completed) {
