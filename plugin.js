@@ -2,16 +2,7 @@
 // パチンコ全能プラグイン V29 (ランキング称号・プロフィール完全対応版)
 // ==========================================
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
-    authDomain: "p-hall.firebaseapp.com",
-    databaseURL: "https://p-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "p-hall",
-    storageBucket: "p-hall.firebasestorage.app",
-    messagingSenderId: "656958771527",
-    appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
-    measurementId: "G-46M19VQVY2"
-};
+const firebaseConfig = window.HallShared.firebaseConfig;
 
 const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63";
 
@@ -176,74 +167,15 @@ document.head.appendChild(globalPluginStyle);
 
 // 🌟 全局獲取玩家名稱與稱號 HTML (包含點擊事件)
 window.getPluginPlayerNameHtml = function(userObj, isRank1, uid = null, disableClick = false) {
-    let name = userObj.name || "Unknown";
-    let isComplete = userObj.has_completed;
-    let isBankrupt = userObj.balance <= -10000000;
-    let isHell = userObj.title_hell;
-    let isGod = userObj.title_godpull;
-    let isRunthrough = userObj.title_runthrough;
-    let isIchigeki = userObj.title_ichigeki;
-    let isSupreme = isComplete && isRank1;
-    let isLegend = isSupreme && isBankrupt && isHell && isGod && isRunthrough && isIchigeki;
-
-    // 🌟 直接顯示名，徹底移除 (あなた)
-    let display = name; 
-// 🌟 讀取玩家裝備狀態 (支援多選逗號字串)
-    let eq = "auto";
-    if (uid && typeof usersData !== 'undefined' && usersData[uid]) { eq = usersData[uid].equipped_title || "auto"; }
-    else if (uid && window.globalUsersData && window.globalUsersData[uid]) { eq = window.globalUsersData[uid].equipped_title || "auto"; }
-
-    let html = display;
-    let baseColor = userObj.isSelf ? '#00e5ff' : '#fff'; // 如果係 index.html，保留你原本嘅 isDashboard 判斷
-
-    if (eq === "none") {
-        html = `<span style="color: ${baseColor};">${html}</span>`;
-    } else if (eq !== "auto") {
-        // 🌟 自訂模式：讀取陣列並疊加玩家勾選的特效 🌟
-        let selectedTitles = eq.split(',');
-        
-        if (selectedTitles.includes("legend") && isLegend) {
-            html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
-        } else {
-            // 底層特效 (彩虹 / 普通色)
-            if (selectedTitles.includes("supreme") && isComplete) {
-                html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`;
-            } else {
-                html = `<span style="color: ${baseColor};">${html}</span>`;
-            }
-            
-            // 外層疊加特效 (只要勾選咗就會按順序疊加)
-            if (selectedTitles.includes("godpull") && isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
-            if (selectedTitles.includes("runthrough") && isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
-            if (selectedTitles.includes("ichigeki") && isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
-            if (selectedTitles.includes("hell") && isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
-            if (selectedTitles.includes("supreme") && isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
-            
-            html = `<span class="title-effect">${html}</span>`;
-        }
-    } else {
-        // 🌟 預設 Auto 模式：保持你原本的邏輯
-        if (isLegend) {
-            html = `<span class="title-effect effect-legend"><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span></span>`;
-        } else {
-            if (isBankrupt) { html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`; }
-            else if (isComplete) { html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`; }
-            else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme) {
-                html = `<span style="color: ${baseColor};">${html}</span>`;
-            }
-            if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
-            if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
-            if (isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
-            if (isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
-            if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
-            html = `<span class="title-effect">${html}</span>`;
-        }
-    }
-
-    if (uid && !disableClick) {
-        return `<span class="clickable-name" onpointerdown="window.showPluginProfile('${uid}')">${html}</span>`;
-    }
-    return html;
+    const titles = window.globalUsersData || {};
+    const equippedTitle = uid && titles[uid] ? titles[uid].equipped_title : "auto";
+    return window.HallShared.getTitleHtml(userObj, {
+        isRank1,
+        uid,
+        disableClick,
+        equippedTitle,
+        onClickName: 'window.showPluginProfile'
+    });
 };
 
 // 🌟 全局打開玩家 Profile Modal (加入防打斷更新機制)
@@ -428,41 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!user) { window.location.href = "login.html"; return; }
             const uid = user.uid;
 
-// 🌟 自動結算「本日の一撃王」並派發稱號。
-// 每日獨立日誌是唯一結算來源；單一 daily_best 只供畫面顯示，會被翌日覆蓋，不能用作派獎。
-        function processDailyBest() {
-            const today = new Date();
-            const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
-
-            // 每日獨立日誌結算。玩家資料內以日誌 key 作收據，保證重試亦不會重複 +1。
-            db.ref('server_records/daily_bests_log').once('value').then(snap => {
-                let logs = snap.val();
-                if (logs) {
-                    for (let key in logs) {
-                        let rec = logs[key];
-                        // 當天尚未結束不可派獎；過去每天都可以安全重試。
-                        if (rec && rec.date !== todayStr && rec.uid) {
-                            db.ref(`users/${rec.uid}`).transaction(userData => {
-                                if (!userData) return;
-                                const awards = userData.ichigeki_awards || {};
-                                if (awards[key]) return; // 此日已入帳，避免重新載入或多人同時結算時重複計算。
-                                userData.ichigeki_count = (userData.ichigeki_count || 0) + 1;
-                                awards[key] = { date: rec.date, payout: rec.payout || 0 };
-                                userData.ichigeki_awards = awards;
-                                return userData;
-                            }, (error, committed) => {
-                                // 只有玩家次數成功入帳後，先標記日誌已結算。
-                                // 即使這次失敗，下一次開啟頁面會再試，絕不會遺失獎勵。
-                                if (!error && committed) {
-                                    db.ref(`server_records/daily_bests_log/${key}/processed`).set(true);
-                                }
-                            });
-                        }
-                    }
-                }
-            }).catch(error => console.error('[Ichigeki settlement] 日誌讀取失敗', error));
-        }
-        processDailyBest();
+        window.HallShared.settleIchigekiAwards(db).catch(error => console.error('[Ichigeki settlement] 日誌讀取失敗', error));
 
             const userRef = db.ref('users/' + uid);
             // ... 下面維持原本的 userRef.get() 邏輯 ...
@@ -1097,25 +995,11 @@ setTimeout(() => {
 
 // 🌟 切換自訂稱號選單顯示/隱藏
 window.toggleTitleChecks = function(mode) {
-    let list = document.getElementById('custom-title-list');
-    if (list) list.style.display = (mode === 'custom') ? 'block' : 'none';
+    window.HallShared.toggleTitleChecks(mode);
 };
 
 // 🌟 儲存多重稱號設定
 window.saveTitleSettings = function(uid) {
-    let modeNode = document.querySelector('input[name="title_mode"]:checked');
-    if (!modeNode) return;
-    let mode = modeNode.value;
-    let finalSave = "auto";
-    
-    if (mode === "none") {
-        finalSave = "none";
-    } else if (mode === "custom") {
-        let checks = document.querySelectorAll('.t-check:checked');
-        let selected = Array.from(checks).map(c => c.value);
-        finalSave = selected.length === 0 ? "none" : selected.join(',');
-    }
-    
-    firebase.database().ref('users/' + uid).update({ equipped_title: finalSave })
-    .then(() => { alert("✅ 称号の表示設定を保存しました！"); location.reload(); });
+    window.HallShared.saveTitleSettings(uid)
+    .then(saved => { if (saved) { alert("✅ 称号の表示設定を保存しました！"); location.reload(); } });
 };

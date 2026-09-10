@@ -14,6 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="hall-shared.js"></script>
     <link rel="stylesheet" href="mobile.css">
 
     <style>
@@ -976,16 +977,7 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
-            authDomain: "p-hall.firebaseapp.com",
-            databaseURL: "https://p-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "p-hall",
-            storageBucket: "p-hall.firebasestorage.app",
-            messagingSenderId: "656958771527",
-            appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
-            measurementId: "G-46M19VQVY2"
-        };
+        const firebaseConfig = window.HallShared.firebaseConfig;
 
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
@@ -999,32 +991,34 @@
         let maxHamariData = null;
         const authBtn = document.getElementById("auth-btn");
 
-                // 🌟 切換自訂稱號選單顯示/隱藏
+        // 🌟 切換自訂稱號選單顯示/隱藏
         window.toggleTitleChecks = function(mode) {
-            let list = document.getElementById('custom-title-list');
-            if (list) list.style.display = (mode === 'custom') ? 'block' : 'none';
+            window.HallShared.toggleTitleChecks(mode);
         };
 
         // 🌟 儲存多重稱號設定
         window.saveTitleSettings = function(uid) {
-            let modeNode = document.querySelector('input[name="title_mode"]:checked');
-            if (!modeNode) return;
-            let mode = modeNode.value;
-            let finalSave = "auto";
-            
-            if (mode === "none") {
-                finalSave = "none";
-            } else if (mode === "custom") {
-                let checks = document.querySelectorAll('.t-check:checked');
-                let selected = Array.from(checks).map(c => c.value);
-                finalSave = selected.length === 0 ? "none" : selected.join(',');
-            }
-            
-            firebase.database().ref('users/' + uid).update({ equipped_title: finalSave })
-            .then(() => { alert("✅ 称号の表示設定を保存しました！"); location.reload(); });
+            window.HallShared.saveTitleSettings(uid)
+            .then(saved => { if (saved) { alert("✅ 称号の表示設定を保存しました！"); location.reload(); } });
         };
         
         function getPlayerNameHtml(userObj, isRank1, uid = null, disableClick = false, isDashboard = false, showYouLabel = false) {
+            const equippedTitle = uid && usersData[uid]
+                ? usersData[uid].equipped_title || "auto"
+                : uid && window.globalUsersData && window.globalUsersData[uid]
+                    ? window.globalUsersData[uid].equipped_title || "auto"
+                    : "auto";
+            return window.HallShared.getTitleHtml(userObj, {
+                isRank1,
+                uid,
+                disableClick,
+                equippedTitle,
+                onClickName: 'showProfile',
+                showYouLabel
+            });
+
+            /* Legacy implementation kept below temporarily for source-history readability.
+             * The return above makes HallShared the only active title-rendering source. */
             let name = userObj.name || "Unknown";
             let isComplete = userObj.has_completed;
             let isBankrupt = userObj.balance <= -10000000;
@@ -1573,6 +1567,10 @@
 // 🌟 自動結算「本日の一撃王」並派發稱號。
 // 每日獨立日誌是唯一結算來源；單一 daily_best 只供畫面顯示，會被翌日覆蓋，不能用作派獎。
         function processDailyBest() {
+            return window.HallShared.settleIchigekiAwards(db);
+
+            /* Legacy implementation kept below temporarily for source-history readability.
+             * The return above makes HallShared the only active settlement source. */
             const today = new Date();
             const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
 
