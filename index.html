@@ -1269,7 +1269,7 @@
             let loserEl = document.getElementById("today-loser");
             if (worstUserHtml && worstDailyProfit < 0) {
                 if (!loserEl.querySelector('.dash-name')) {
-                    loserEl.innerHTML = `<span class="dash-name"></span><br><span class="dash-amt" style="font-size:0.6em; color:#ff5252;"></span>`;
+                    loserEl.innerHTML = `<span class="dash-name" style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom;"></span><br><span class="dash-amt" style="font-size:0.6em; color:#ff5252;"></span>`;
                 }
                 let nEl = loserEl.querySelector('.dash-name');
                 let aEl = loserEl.querySelector('.dash-amt');
@@ -1324,7 +1324,7 @@
                 let cleanMachineName = bestHitMachine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
                 
                 if (!hitEl.querySelector('.dash-amt')) {
-                    hitEl.innerHTML = `<span class="dash-amt" style="color:#fff;"></span><br><span class="dash-name" style="font-size:0.55em;"></span>`;
+                    hitEl.innerHTML = `<span class="dash-amt" style="color:#fff;"></span><br><span class="dash-name" style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom; font-size:0.55em;"></span>`;
                 }
                 let aEl = hitEl.querySelector('.dash-amt');
                 let nEl = hitEl.querySelector('.dash-name');
@@ -1364,7 +1364,7 @@
                 let cleanHamariMachine = maxHamariData.machine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
                 
                 if (!hamariEl.querySelector('.dash-amt')) {
-                    hamariEl.innerHTML = `<span class="dash-amt" style="color:#ff9100;"></span><br><span class="dash-name" style="font-size:0.55em;"></span>`;
+                    hamariEl.innerHTML = `<span class="dash-amt" style="color:#ff9100;"></span><br><span class="dash-name" style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom; font-size:0.55em;"></span>`;
                 }
                 let aEl = hamariEl.querySelector('.dash-amt');
                 let nEl = hamariEl.querySelector('.dash-name');
@@ -1570,52 +1570,36 @@
             }
         }
 
-// 🌟 自動結算「本日の一撃王」並派發稱號 (升級版：支援新舊系統及防覆蓋)
+// 🌟 自動結算「本日の一撃王」並派發稱號。
+// 每日獨立日誌是唯一結算來源；單一 daily_best 只供畫面顯示，會被翌日覆蓋，不能用作派獎。
         function processDailyBest() {
             const today = new Date();
             const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
 
-            // 1. 舊版單一紀錄結算防護 (處理遺留數據)
-            db.ref('server_records/daily_best').once('value').then(snap => {
-                let data = snap.val();
-                if (data && data.date && data.date !== todayStr && data.processed !== true) {
-                    db.ref('server_records/daily_best').transaction(curr => {
-                        if (curr && curr.processed !== true && curr.date === data.date) {
-                            curr.processed = true; return curr;
-                        }
-                        return; 
-                    }, (error, committed, snapshot) => {
-                        if (committed && snapshot && snapshot.val()) {
-                            let winnerUid = snapshot.val().uid;
-                            if(winnerUid) db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => (c || 0) + 1);
-                        }
-                    });
-                }
-            });
-
-            // 2. 新版每日獨立日誌結算 (精準追蹤每日)
+            // 以玩家資料內的日誌 key 作收據，讓跨日結算可安全重試而不重複加分。
             db.ref('server_records/daily_bests_log').once('value').then(snap => {
                 let logs = snap.val();
                 if (logs) {
                     for (let key in logs) {
                         let rec = logs[key];
-                        // 只要唔係今日，而且未結算，就執行 +1
-                        if (rec && rec.date !== todayStr && rec.processed !== true) {
-                            db.ref(`server_records/daily_bests_log/${key}`).transaction(curr => {
-                                if (curr && curr.processed !== true) {
-                                    curr.processed = true; return curr;
-                                }
-                                return;
-                            }, (error, committed, snapshot) => {
-                                if (committed && snapshot && snapshot.val()) {
-                                    let winnerUid = snapshot.val().uid;
-                                    if(winnerUid) db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => (c || 0) + 1);
+                        if (rec && rec.date !== todayStr && rec.uid) {
+                            db.ref(`users/${rec.uid}`).transaction(userData => {
+                                if (!userData) return;
+                                const awards = userData.ichigeki_awards || {};
+                                if (awards[key]) return;
+                                userData.ichigeki_count = (userData.ichigeki_count || 0) + 1;
+                                awards[key] = { date: rec.date, payout: rec.payout || 0 };
+                                userData.ichigeki_awards = awards;
+                                return userData;
+                            }, (error, committed) => {
+                                if (!error && committed) {
+                                    db.ref(`server_records/daily_bests_log/${key}/processed`).set(true);
                                 }
                             });
                         }
                     }
                 }
-            });
+            }).catch(error => console.error('[Ichigeki settlement] 日誌讀取失敗', error));
         }
         processDailyBest();
     </script>

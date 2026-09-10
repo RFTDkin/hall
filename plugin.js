@@ -428,52 +428,39 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!user) { window.location.href = "login.html"; return; }
             const uid = user.uid;
 
-// 🌟 自動結算「本日の一撃王」並派發稱號 (升級版：支援新舊系統及防覆蓋)
+// 🌟 自動結算「本日の一撃王」並派發稱號。
+// 每日獨立日誌是唯一結算來源；單一 daily_best 只供畫面顯示，會被翌日覆蓋，不能用作派獎。
         function processDailyBest() {
             const today = new Date();
             const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
 
-            // 1. 舊版單一紀錄結算防護 (處理遺留數據)
-            db.ref('server_records/daily_best').once('value').then(snap => {
-                let data = snap.val();
-                if (data && data.date && data.date !== todayStr && data.processed !== true) {
-                    db.ref('server_records/daily_best').transaction(curr => {
-                        if (curr && curr.processed !== true && curr.date === data.date) {
-                            curr.processed = true; return curr;
-                        }
-                        return; 
-                    }, (error, committed, snapshot) => {
-                        if (committed && snapshot && snapshot.val()) {
-                            let winnerUid = snapshot.val().uid;
-                            if(winnerUid) db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => (c || 0) + 1);
-                        }
-                    });
-                }
-            });
-
-            // 2. 新版每日獨立日誌結算 (精準追蹤每日)
+            // 每日獨立日誌結算。玩家資料內以日誌 key 作收據，保證重試亦不會重複 +1。
             db.ref('server_records/daily_bests_log').once('value').then(snap => {
                 let logs = snap.val();
                 if (logs) {
                     for (let key in logs) {
                         let rec = logs[key];
-                        // 只要唔係今日，而且未結算，就執行 +1
-                        if (rec && rec.date !== todayStr && rec.processed !== true) {
-                            db.ref(`server_records/daily_bests_log/${key}`).transaction(curr => {
-                                if (curr && curr.processed !== true) {
-                                    curr.processed = true; return curr;
-                                }
-                                return;
-                            }, (error, committed, snapshot) => {
-                                if (committed && snapshot && snapshot.val()) {
-                                    let winnerUid = snapshot.val().uid;
-                                    if(winnerUid) db.ref(`users/${winnerUid}/ichigeki_count`).transaction(c => (c || 0) + 1);
+                        // 當天尚未結束不可派獎；過去每天都可以安全重試。
+                        if (rec && rec.date !== todayStr && rec.uid) {
+                            db.ref(`users/${rec.uid}`).transaction(userData => {
+                                if (!userData) return;
+                                const awards = userData.ichigeki_awards || {};
+                                if (awards[key]) return; // 此日已入帳，避免重新載入或多人同時結算時重複計算。
+                                userData.ichigeki_count = (userData.ichigeki_count || 0) + 1;
+                                awards[key] = { date: rec.date, payout: rec.payout || 0 };
+                                userData.ichigeki_awards = awards;
+                                return userData;
+                            }, (error, committed) => {
+                                // 只有玩家次數成功入帳後，先標記日誌已結算。
+                                // 即使這次失敗，下一次開啟頁面會再試，絕不會遺失獎勵。
+                                if (!error && committed) {
+                                    db.ref(`server_records/daily_bests_log/${key}/processed`).set(true);
                                 }
                             });
                         }
                     }
                 }
-            });
+            }).catch(error => console.error('[Ichigeki settlement] 日誌讀取失敗', error));
         }
         processDailyBest();
 
@@ -1019,86 +1006,93 @@ window._lastLoggedSpins = 0; // 🌟 建立獨立記憶體，死記最新轉數
 
 setTimeout(() => {
     if (typeof window.addLog === "function") {
-        const originalAddLog = window.addLog;
+    const originalAddLog = window.addLog;
+    window.addLog = function (text, className = "") {
+        // 1. 擋截無用 Log
+        if (text.includes("播放") || text.includes("再生") || text.includes("mp4") || text.includes("音效") || text.includes("請稍候")) {
+            return;
+        }
+        
+        // 2. 執行翻譯
+        let translatedText = text;
+        translatedText = translatedText.replace(/STOCK獲得！(\d+)玉 \(剩餘 (\d+)轉\)/g, "STOCK獲得！$1玉 (残り $2回転)");
+        translatedText = translatedText.replace(/剩餘 (\d+) 轉/g, "残り $1 回転");
+        translatedText = translatedText.replace(/獲得 (\d+) 玉/g, "$1 玉獲得");
+        translatedText = translatedText.replace(/大當り！ (\d+)連莊/g, "大当り！ $1連チャン");
 
-        window.addLog = function (text, className) {
-            originalAddLog(text, className);
-            try {
-                const user = firebase.auth().currentUser;
-                if (!user) return; 
+        for (let [zh, ja] of Object.entries(dict)) {
+            if (translatedText.includes(zh)) translatedText = translatedText.split(zh).join(ja);
+        }
 
-                const titleDb = firebase.database();
-                const uid = user.uid;
-                const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
+        originalAddLog(translatedText, className);
 
-                const rushEl = document.getElementById('ui-rush');
-                const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
+        // 3. 🏆 全自動稱號判定系統 (與翻譯系統同步執行，防止漏單)
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) return; 
+            const titleDb = firebase.database();
+            const uid = user.uid;
+            const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
+            const rushEl = document.getElementById('ui-rush');
+            const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
 
-                // 🌟 終極修正：直接從 Log 擷取普通轉數並暫存，徹底解決 UI 延遲造成的「錯位」誤判
-                let spinMatch = text.match(/\[\s*(\d+)\s*(?:回轉|回転)/);
-                if (spinMatch && !text.includes("ST") && !text.includes("残保留") && !text.includes("電サポ")) {
-                    window._lastLoggedSpins = parseInt(spinMatch[1]);
-                }
-                let actualSpins = window._lastLoggedSpins || 0;
-
-                const pageName = location.pathname.split('/').pop().toLowerCase();
-                
-                const heavyMachinePages = new Set([
-                    'bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html',
-                    'hokuto10.html', 'hokuto11.html', 'mushoku.html', 'seed.html', 'slime.html', 'takt.html', 'majo.html'
-                ]);
-                const isHeavyMachine = heavyMachinePages.has(pageName)
-                    || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣)/i.test(machineTitle);
-                
-                const isCharge = /チャージ|CHARGE/i.test(text);
-                const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(text) && !/チャレンジ|JUDGE|CZ/.test(text);
-
-                // ✨ 1. 神の引き (只有真正的 1 轉 + 成功突入 RUSH 才會發放)
-                if (isRealRushEnter && actualSpins === 1 && isHeavyMachine) {
-                    titleDb.ref('users/' + uid).update({ title_godpull: true });
-                    window._lastLoggedSpins = 0; // 發放後歸零，防止異常連發
-                }
-
-                // ⚡ 2. 駆け抜け王 (Rush Runner) 
-                const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(text);
-                const isRunthroughExplicit = /駆け抜け|スルー/.test(text);
-                
-                if (isRushEnd || isRunthroughExplicit) {
-                    if (isRunthroughExplicit || rushCount === 0) { 
-                        let ref = titleDb.ref('users/' + uid + '/runthrough_count');
-                        ref.transaction(count => {
-                            let newCount = (count || 0) + 1;
-                            if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
-                            return newCount;
-                        });
-                    } else {
-                        titleDb.ref('users/' + uid + '/runthrough_count').set(0);
-                    }
-                }
-
-                // 💀 3. 単発地獄 (Single Hell)
-                const isNormalLoss = !isRushEnd && !isCharge && /通常へ戻る|通常終了|通常へ|RUSH非突入|チャレンジ失敗|CZ失敗|任務失敗|チャンスタイム終了/.test(text);
-                if (isNormalLoss) {
-                    if (rushCount <= 1) {
-                        let ref = titleDb.ref('users/' + uid + '/single_hell_count');
-                        ref.transaction(count => {
-                            let newCount = (count || 0) + 1;
-                            if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
-                            return newCount;
-                        });
-                    }
-                }
-
-                // 🌟 4. 清空単発地獄
-                if (isRealRushEnter || text.includes("継続") || text.includes("連)") || rushCount >= 2) {
-                    titleDb.ref('users/' + uid + '/single_hell_count').set(0);
-                }
-
-            } catch (error) {
-                console.error('[Title interceptor] 判定失敗：遊戲會繼續運行', error);
+            let spinMatch = translatedText.match(/\[\s*(\d+)\s*(?:回轉|回転)/);
+            if (spinMatch && !translatedText.includes("ST") && !translatedText.includes("残保留") && !translatedText.includes("電サポ")) {
+                window._lastLoggedSpins = parseInt(spinMatch[1]);
             }
-        };
-    }
+            let actualSpins = window._lastLoggedSpins || 0;
+
+            const pageName = location.pathname.split('/').pop().toLowerCase();
+            const heavyMachinePages = new Set(['bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html', 'hokuto10.html', 'hokuto11.html', 'mushoku.html', 'seed.html', 'slime.html', 'takt.html', 'majo.html']);
+            const isHeavyMachine = heavyMachinePages.has(pageName) || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣)/i.test(machineTitle);
+            
+            const isCharge = /チャージ|CHARGE/i.test(translatedText);
+            const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText) && !/チャレンジ|JUDGE|CZ/.test(translatedText);
+
+            // ✨ 神の引き
+            if (isRealRushEnter && actualSpins === 1 && isHeavyMachine) {
+                titleDb.ref('users/' + uid).update({ title_godpull: true });
+                window._lastLoggedSpins = 0;
+            }
+
+            // ⚡ 駆け抜け王
+            const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(translatedText);
+            const isRunthroughExplicit = /駆け抜け|スルー/.test(translatedText);
+            
+            if (isRushEnd || isRunthroughExplicit) {
+                if (isRunthroughExplicit || rushCount === 0) { 
+                    titleDb.ref('users/' + uid + '/runthrough_count').transaction(count => {
+                        let newCount = (count || 0) + 1;
+                        if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
+                        return newCount;
+                    });
+                } else {
+                    titleDb.ref('users/' + uid + '/runthrough_count').set(0);
+                }
+            }
+
+            // 💀 単発地獄
+            const isNormalLoss = !isRushEnd && !isCharge && /通常へ戻る|通常終了|通常へ|RUSH非突入|チャレンジ失敗|CZ失敗|任務失敗|チャンスタイム終了/.test(translatedText);
+            if (isNormalLoss) {
+                if (rushCount <= 1) {
+                    titleDb.ref('users/' + uid + '/single_hell_count').transaction(count => {
+                        let newCount = (count || 0) + 1;
+                        if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
+                        return newCount;
+                    });
+                }
+            }
+
+            // 🌟 清空単発地獄
+            if (isRealRushEnter || translatedText.includes("継続") || translatedText.includes("連)") || rushCount >= 2) {
+                titleDb.ref('users/' + uid + '/single_hell_count').set(0);
+            }
+
+        } catch (error) {
+            console.error('[Title interceptor] Error:', error);
+        }
+    };
+}
 }, 2000);
 
 // 🌟 切換自訂稱號選單顯示/隱藏
