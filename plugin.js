@@ -455,9 +455,15 @@ document.addEventListener("DOMContentLoaded", () => {
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
         let pageText = originalTitle + " " + document.body.innerText;
-        let spinCost = 1000 / 17;
+        let spinCost = 1000 / 17; // 預設：1000円 = 17轉
+        
+        // 根據 stats.html 參數設定的例外機台
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 25;
+        else if (pageText.includes("ソードアート・オンライン")) spinCost = 1000 / 20;
+        else if (pageText.includes("タクトオーパス")) spinCost = 1000 / 41;
+        else if (pageText.includes("魔女と野獣")) spinCost = 1000 / 28;
+        else if (pageText.includes("ユニコーン2")) spinCost = 1000 / 30;
 
         // 🌟 生成排行榜與實時數據同步 🌟
         let currentMachineRankings = [];

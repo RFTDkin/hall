@@ -254,6 +254,9 @@
         .tag-unicorn2 {
             border-top: 5px solid #e91e63;
         }
+        .tag-fireforce {
+            border-top: 5px solid #ff5722;
+        }
     </style>
     <link rel="stylesheet" href="mobile.css">
 </head>
@@ -606,6 +609,19 @@
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit"
                     id="unicorn2-profit">---</span></div>
             <div class="progress-text" id="unicorn2-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-fireforce" id="card-fireforce">
+            <h3 class="machine-title">eA 炎炎ノ消防隊2Y</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins"
+                    id="fireforce-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout"
+                    id="fireforce-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max"
+                    id="fireforce-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit"
+                    id="fireforce-profit">---</span></div>
+            <div class="progress-text" id="fireforce-prog">待機中...</div>
         </div>
 
     </div>
@@ -1754,6 +1770,80 @@
             return { spins, payout };
         }
 
+        function simFireForce() {
+            let spins = 0, payout = 0;
+            
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 99.9) {
+                    let roll = Math.random();
+                    if (roll < 0.01) {
+                        // 1% 9R + LT直行
+                        payout += 900;
+                        if (payout < 95000) runFireForceLT();
+                    } else if (roll < 0.51) {
+                        // 50% 4R + RUSH
+                        payout += 400;
+                        if (payout < 95000) runFireForceRush();
+                    } else {
+                        // 49% 4R + チャレンジ
+                        payout += 400;
+                        let challengeSuccess = false;
+                        for (let i = 0; i < 5; i++) {
+                            if (Math.random() < 1 / 23.8) { challengeSuccess = true; break; }
+                        }
+                        if (challengeSuccess && payout < 95000) {
+                            let cr = Math.random();
+                            if (cr < 0.01) { payout += 900; runFireForceLT(); }
+                            else if (cr < 0.20) { payout += 900; runFireForceRush(); }
+                            else { payout += 400; runFireForceRush(); }
+                        }
+                    }
+                    break;
+                }
+            }
+
+            function runFireForceRush() {
+                let st_active = true;
+                while (st_active && payout < 95000) {
+                    let hit = false;
+                    for (let i = 0; i < 34; i++) {
+                        if (Math.random() < 1 / 23.8) { hit = true; break; }
+                    }
+                    if (hit) {
+                        let r = Math.random();
+                        if (r < 0.01) {
+                            payout += 900;
+                            if (payout < 95000) { runFireForceLT(); return; } // 跳轉 LT
+                        } else if (r < 0.20) {
+                            payout += 900;
+                        } else {
+                            payout += 400;
+                        }
+                    } else {
+                        st_active = false;
+                    }
+                }
+            }
+
+            function runFireForceLT() {
+                let lt_active = true;
+                while (lt_active && payout < 95000) {
+                    let hit = false;
+                    for (let i = 0; i < 68; i++) {
+                        if (Math.random() < 1 / 23.8) { hit = true; break; }
+                    }
+                    if (hit) {
+                        payout += (Math.random() < 0.20) ? 900 : 400;
+                    } else {
+                        lt_active = false;
+                    }
+                }
+            }
+            
+            return { spins, payout };
+        }
+
 
 
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
@@ -1870,6 +1960,7 @@
             await runMachineSim('takt', simTakt, 1000 / 41, iterations);
             await runMachineSim('majo', simMajo, 1000 / 28, iterations);
             await runMachineSim('unicorn2', simUnicorn2, 1000 / 30, iterations);
+            await runMachineSim('fireforce', simFireForce, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);
