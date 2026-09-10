@@ -248,48 +248,37 @@
             color: #888;
         }
 
-        /* 🏆 富豪ランキング トップ3（ただしコンプリート者の虹色称号は絶対に死守する） */
-        .ranking-table.rich tr:nth-child(1) td:not(:has(.rainbow-text)),
-        .ranking-table.rich tr:nth-child(1) td:not(:has(.rainbow-text)) span {
+/* 🏆 ランキング トップ3 / ワースト3 フォントサイズ（TR全体に適用して重複拡大を防ぐ） */
+        .ranking-table tr:nth-child(1) { font-size: 1.2em; font-weight: bold; }
+        .ranking-table tr:nth-child(2) { font-size: 1.1em; font-weight: bold; }
+        .ranking-table tr:nth-child(3) { font-size: 1.05em; font-weight: bold; }
+
+        /* 🏆 富豪ランキング カラー */
+        .ranking-table.rich tr:nth-child(1) td:not(:has(.effect-rainbow, .effect-supreme)),
+        .ranking-table.rich tr:nth-child(1) td:not(:has(.effect-rainbow, .effect-supreme)) span:not([class*="effect-"]) {
             color: #ffeb3b !important;
-            font-weight: bold;
-            font-size: 1.2em;
         }
-
-        .ranking-table.rich tr:nth-child(2) td:not(:has(.rainbow-text)),
-        .ranking-table.rich tr:nth-child(2) td:not(:has(.rainbow-text)) span {
+        .ranking-table.rich tr:nth-child(2) td:not(:has(.effect-rainbow, .effect-supreme)),
+        .ranking-table.rich tr:nth-child(2) td:not(:has(.effect-rainbow, .effect-supreme)) span:not([class*="effect-"]) {
             color: #ff5252 !important;
-            font-weight: bold;
-            font-size: 1.1em;
         }
-
-        .ranking-table.rich tr:nth-child(3) td:not(:has(.rainbow-text)),
-        .ranking-table.rich tr:nth-child(3) td:not(:has(.rainbow-text)) span {
+        .ranking-table.rich tr:nth-child(3) td:not(:has(.effect-rainbow, .effect-supreme)),
+        .ranking-table.rich tr:nth-child(3) td:not(:has(.effect-rainbow, .effect-supreme)) span:not([class*="effect-"]) {
             color: #cd7f32 !important;
-            font-weight: bold;
-            font-size: 1.05em;
         }
 
-        /* 📉 貧民ランキング ワースト3 */
-        .ranking-table.poor tr:nth-child(1) td:not(:has(.rainbow-text)),
-        .ranking-table.poor tr:nth-child(1) td:not(:has(.rainbow-text)) span {
+        /* 📉 貧民ランキング カラー */
+        .ranking-table.poor tr:nth-child(1) td:not(:has(.effect-rainbow, .effect-supreme)),
+        .ranking-table.poor tr:nth-child(1) td:not(:has(.effect-rainbow, .effect-supreme)) span:not([class*="effect-"]) {
             color: #00bcd4 !important;
-            font-weight: bold;
-            font-size: 1.2em;
         }
-
-        .ranking-table.poor tr:nth-child(2) td:not(:has(.rainbow-text)),
-        .ranking-table.poor tr:nth-child(2) td:not(:has(.rainbow-text)) span {
+        .ranking-table.poor tr:nth-child(2) td:not(:has(.effect-rainbow, .effect-supreme)),
+        .ranking-table.poor tr:nth-child(2) td:not(:has(.effect-rainbow, .effect-supreme)) span:not([class*="effect-"]) {
             color: #26c6da !important;
-            font-weight: bold;
-            font-size: 1.1em;
         }
-
-        .ranking-table.poor tr:nth-child(3) td:not(:has(.rainbow-text)),
-        .ranking-table.poor tr:nth-child(3) td:not(:has(.rainbow-text)) span {
+        .ranking-table.poor tr:nth-child(3) td:not(:has(.effect-rainbow, .effect-supreme)),
+        .ranking-table.poor tr:nth-child(3) td:not(:has(.effect-rainbow, .effect-supreme)) span:not([class*="effect-"]) {
             color: #4dd0e1 !important;
-            font-weight: bold;
-            font-size: 1.05em;
         }
 
         .hall-container {
@@ -1263,7 +1252,7 @@
             let loserEl = document.getElementById("today-loser");
             if (worstUserHtml && worstDailyProfit < 0) {
                 if (!loserEl.querySelector('.dash-name')) {
-                    loserEl.innerHTML = `<span class="dash-name" style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom;"></span><br><span class="dash-amt" style="font-size:0.6em; color:#ff5252;"></span>`;
+                    loserEl.innerHTML = `<span class="dash-name" style="display:inline-block; width:100%; white-space:normal; word-break:break-all; line-height:1.4;"></span><br><span class="dash-amt" style="font-size:0.6em; color:#ff5252;"></span>`;
                 }
                 let nEl = loserEl.querySelector('.dash-name');
                 let aEl = loserEl.querySelector('.dash-amt');
@@ -1318,7 +1307,7 @@
                 let cleanMachineName = bestHitMachine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
                 
                 if (!hitEl.querySelector('.dash-amt')) {
-                    hitEl.innerHTML = `<span class="dash-amt" style="color:#fff;"></span><br><span class="dash-name" style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom; font-size:0.55em;"></span>`;
+                    hitEl.innerHTML = `<span class="dash-amt" style="color:#fff;"></span><br><span class="dash-name" style="display:inline-block; width:100%; white-space:normal; word-break:break-all; line-height:1.4; font-size:0.55em; margin-top:2px;"></span>`;
                 }
                 let aEl = hitEl.querySelector('.dash-amt');
                 let nEl = hitEl.querySelector('.dash-name');
@@ -1358,7 +1347,7 @@
                 let cleanHamariMachine = maxHamariData.machine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
                 
                 if (!hamariEl.querySelector('.dash-amt')) {
-                    hamariEl.innerHTML = `<span class="dash-amt" style="color:#ff9100;"></span><br><span class="dash-name" style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom; font-size:0.55em;"></span>`;
+                    hamariEl.innerHTML = `<span class="dash-amt" style="color:#ff9100;"></span><br><span class="dash-name" style="display:inline-block; width:100%; white-space:normal; word-break:break-all; line-height:1.4; font-size:0.55em; margin-top:2px;"></span>`;
                 }
                 let aEl = hamariEl.querySelector('.dash-amt');
                 let nEl = hamariEl.querySelector('.dash-name');
