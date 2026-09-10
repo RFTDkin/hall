@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【無料】eギンパラVIVAFESTAHTA2 | パチンコシミュレーター</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b001a;
+            color: #eeeeee;
+            text-align: center;
+            padding-bottom: 60px;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #e040fb;
+            text-shadow: 0 0 15px rgba(224, 64, 251, 0.7);
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .left-panel { flex: 1; min-width: 320px; max-width: 500px; }
+        .right-panel { flex: 1; min-width: 320px; max-width: 400px; }
+
+        .stats-board {
+            background-color: #160024;
+            border: 2px solid #e040fb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.1em;
+            box-shadow: inset 0 0 15px rgba(224, 64, 251, 0.3);
+        }
+
+        .stat-item span {
+            display: block;
+            font-weight: bold;
+            color: #00e5ff;
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #6a1b9a;
+            color: white;
+            border: 1px solid #e040fb;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            background-color: #8e24aa;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px #e040fb;
+        }
+
+        button:disabled {
+            background-color: #311b92;
+            border-color: #444;
+            color: #777;
+            cursor: not-allowed;
+            transform: scale(1);
+            box-shadow: none;
+        }
+
+        .log-container {
+            background-color: #000000;
+            border: 1px solid #4a148c;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #e040fb; font-weight: bold; text-shadow: 0 0 5px #e040fb; }
+        .color-hit { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff5252; }
+        .color-challenge { color: #ffca28; font-weight: bold; text-shadow: 0 0 5px #ffca28; }
+        .color-normal { color: #9e9e9e; }
+        .color-ultimate { color: #00e5ff; font-weight: bold; text-shadow: 0 0 10px #00e5ff; font-size: 1.1em; }
+        .color-fall { color: #757575; font-weight: bold; }
+
+        .data-lamp-container {
+            background-color: #12001c;
+            border: 3px solid #6a1b9a;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(106, 27, 154, 0.4);
+        }
+
+        .data-lamp-title {
+            color: #e040fb;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px #e040fb;
+            letter-spacing: 2px;
+        }
+
+        table.data-lamp {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        table.data-lamp th, table.data-lamp td {
+            border: 1px solid #6a1b9a;
+            padding: 10px 5px;
+            text-align: center;
+        }
+
+        table.data-lamp th { background-color: #311b92; color: #00e5ff; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #1f0033; }
+        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ff5252; }
+        .empty-row { color: #444 !important; }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body>
+    <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">eギンパラVIVAFESTAHTA2</span></h1>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ VIVA開始</button>
+            </div>
+            <div class="log-container" id="log-box"></div>
+        </div>
+
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead>
+                        <tr><th>前次</th><th>當選回轉数</th><th>連莊数</th><th>獲得出玉</th></tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        class Ginpara {
+            constructor() {
+                this.state = "NORMAL";
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.history = [];
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+                if (this.session_spins % 100 === 0) {
+                    addLog(`現在回轉数: ${this.session_spins}`, "color-normal");
+                }
+
+                // 通常時確率: 1/319.6
+                if (Math.random() < (1 / 319.6)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 初当り當選！`, "color-hit");
+                    this.session_rush_count = 1;
+                    
+                    if (Math.random() < 0.001) {
+                        // 0.1%: 10R + LT直行 (∞×2)
+                        this.session_payout += 1500;
+                        addLog("🌈 奇跡のGREAT LUCKY！ 10R (1500玉) 獲得！ LT直行!!", "color-ultimate");
+                        updateUI();
+                        await sleep(1500);
+                        await this.play_infinity(2);
+                    } else {
+                        // 99.9%: 3R + ギンギラタイム
+                        this.session_payout += 450;
+                        addLog("✨ LUCKY 3R (450玉) 獲得。ギンギラタイム突入！", "color-rush");
+                        updateUI();
+                        await sleep(1000);
+                        await this.play_gingira();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            // ギンギラタイム: ST25回転 + 残り保留4個 = 計29回転
+            async play_gingira() {
+                addLog(`\n===== ✨ ギンギラタイム (ST25+4) 開始 =====`, "color-rush");
+                this.state = "GINGIRA";
+                let max_spins = 29;
+
+                for (let i = 1; i <= max_spins; i++) {
+                    let isReserve = i > 25;
+                    let current_spin = isReserve ? (i - 25) : i;
+
+                    if (!isReserve) {
+                        await sleep(40);
+                        document.getElementById("ui-spins").innerText = `ギンギラ中: ${current_spin}/25`;
+                    } else {
+                        await sleep(400);
+                        document.getElementById("ui-spins").innerText = `残保留: ${current_spin}/4`;
+                        addLog(`⏳ 残保留 ${current_spin}回転目...`, "color-normal");
+                    }
+
+                    // 右打ち実質確率: 1/49.7
+                    if (Math.random() < (1 / 49.7)) {
+                        this.session_rush_count += 1;
+                        let phaseName = isReserve ? '残保留' : 'ST';
+                        addLog(`\n🎉 [${phaseName} ${current_spin}回転目] 突破成功！ (總 ${this.session_rush_count}連)`, "color-hit");
+                        
+                        if (Math.random() < 0.75) {
+                            this.session_payout += 1500;
+                            addLog("💥 GREAT LUCKY！ 10R (1500玉) 獲得！", "color-hit");
+                        } else {
+                            this.session_payout += 450;
+                            addLog("✨ LUCKY 3R (450玉) 獲得", "color-normal");
+                        }
+                        
+                        addLog("🔥 FESTA RUSH 突入!!", "color-rush");
+                        updateUI();
+                        await sleep(1000);
+                        await this.play_festa();
+                        return;
+                    }
+                }
+
+                document.getElementById("ui-spins").innerText = `終了`;
+                addLog("\n💀 抜け... RUSH終了", "color-fall");
+                this.end_rush();
+            }
+
+            // FESTA RUSH: 前半5回(夢幻チャレンジ) + 後半70回 + 残保4回 = 計79回転
+            async play_festa() {
+                addLog(`\n===== 🎇 FESTA RUSH (ST75+4) 開始 =====`, "color-rush");
+                this.state = "FESTA";
+                let max_spins = 79;
+
+                for (let i = 1; i <= max_spins; i++) {
+                    let isReserve = i > 75;
+                    let current_spin = isReserve ? (i - 75) : (i > 5 ? i - 5 : i);
+
+                    if (i <= 5) {
+                        await sleep(400); // 夢幻チャレンジ (前半5回) 慢速
+                        document.getElementById("ui-spins").innerText = `夢幻チャレンジ: ${current_spin}/5`;
+                        addLog(`🔮 夢幻チャレンジ ${current_spin}回転目...`, "color-challenge");
+                    } else if (!isReserve) {
+                        await sleep(50); // 後半70回 快速
+                        document.getElementById("ui-spins").innerText = `FESTA RUSH: ${current_spin}/70`;
+                    } else {
+                        await sleep(400); // 残保留
+                        document.getElementById("ui-spins").innerText = `残保留: ${current_spin}/4`;
+                        addLog(`⏳ 残保留 ${current_spin}回転目...`, "color-normal");
+                    }
+
+                    // 右打ち実質確率: 1/49.7
+                    if (Math.random() < (1 / 49.7)) {
+                        this.session_rush_count += 1;
+                        let r = Math.random();
+                        let stock = 0;
+
+                        if (i <= 5) {
+                            // 夢幻チャレンジ中大当り (100% ∞突入)
+                            addLog(`\n🎉 [夢幻 ${current_spin}回転目] 當選！ (總 ${this.session_rush_count}連)`, "color-hit");
+                            if (r < 0.40) { this.session_payout += 1500; stock = 2; addLog("🌈 超GREAT LUCKY！ 10R(1500玉) + ∞×2!!", "color-ultimate"); }
+                            else if (r < 0.75) { this.session_payout += 1500; stock = 1; addLog("🔥 GREAT LUCKY！ 10R(1500玉) + ∞×1!", "color-ultimate"); }
+                            else { this.session_payout += 450; stock = 1; addLog("✨ LUCKY 3R(450玉) + ∞×1!", "color-ultimate"); }
+                        } else {
+                            // 後半/残保留中大当り (3% ∞突入)
+                            let pName = isReserve ? '残保留' : 'FESTA RUSH';
+                            addLog(`\n🎉 [${pName} ${current_spin}回転目] 當選！ (總 ${this.session_rush_count}連)`, "color-hit");
+                            if (r < 0.01) { this.session_payout += 1500; stock = 2; addLog("🌈 超GREAT LUCKY！ 10R(1500玉) + ∞×2!!", "color-ultimate"); }
+                            else if (r < 0.02) { this.session_payout += 1500; stock = 1; addLog("🔥 GREAT LUCKY！ 10R(1500玉) + ∞×1!", "color-ultimate"); }
+                            else if (r < 0.03) { this.session_payout += 450; stock = 1; addLog("✨ LUCKY 3R(450玉) + ∞×1!", "color-ultimate"); }
+                            else if (r < 0.76) { this.session_payout += 1500; stock = 0; addLog("💥 GREAT LUCKY！ 10R(1500玉)", "color-hit"); }
+                            else { this.session_payout += 450; stock = 0; addLog("✨ LUCKY 3R(450玉)", "color-normal"); }
+                        }
+
+                        updateUI();
+                        await sleep(1000);
+
+                        if (stock > 0) {
+                            await this.play_infinity(stock);
+                        } else {
+                            await this.play_festa(); // 重新進入 ST75
+                        }
+                        return;
+                    }
+                }
+
+                document.getElementById("ui-spins").innerText = `終了`;
+                addLog("\n💀 抜け... RUSH終了", "color-fall");
+                this.end_rush();
+            }
+
+            // 実質次回大当りまで (時短10000回転)
+            async play_infinity(stock) {
+                addLog(`\n===== ♾️ 実質次回大当りまで (ストック: ${stock}) =====`, "color-ultimate");
+                this.state = "INFINITY";
+                
+                while (stock > 0) {
+                    await sleep(800);
+                    let sp = 0;
+                    let hit = false;
+                    
+                    // 🌟 逐轉顯示 10000 轉，極速跳動數字！
+                    for (let i = 1; i <= 10000; i++) {
+                        sp = i;
+                        await sleep(30); // 30ms 極速跳字，俾玩家睇住數字飆升
+                        document.getElementById("ui-spins").innerText = `♾️時短: ${sp}回転`;
+
+                        if (Math.random() < (1 / 49.7)) {
+                            hit = true;
+                            break;
+                        }
+                    }
+                    
+                    this.session_rush_count += 1;
+                    stock--; // 消耗一次庫存
+                    
+                    if (hit) {
+                        addLog(`\n🎉 [実質次回 ${sp}回転目] 當選！ (總 ${this.session_rush_count}連) [剩餘ストック: ${stock}]`, "color-hit");
+
+                        let r = Math.random();
+                        let new_stock = 0;
+                        if (r < 0.01) { this.session_payout += 1500; new_stock = 2; addLog("🌈 超GREAT LUCKY！ 10R(1500玉) + ∞×2!!", "color-ultimate"); }
+                        else if (r < 0.02) { this.session_payout += 1500; new_stock = 1; addLog("🔥 GREAT LUCKY！ 10R(1500玉) + ∞×1!", "color-ultimate"); }
+                        else if (r < 0.03) { this.session_payout += 450; new_stock = 1; addLog("✨ LUCKY 3R(450玉) + ∞×1!", "color-ultimate"); }
+                        else if (r < 0.76) { this.session_payout += 1500; new_stock = 0; addLog("💥 GREAT LUCKY！ 10R(1500玉)", "color-hit"); }
+                        else { this.session_payout += 450; new_stock = 0; addLog("✨ LUCKY 3R(450玉)", "color-normal"); }
+
+                        // 如果新獲得的庫存比現在多，則覆蓋
+                        stock = Math.max(stock, new_stock);
+                    } else {
+                        addLog(`\n💀 10000回転スルー... 恐ろしいヒキ`, "color-fall");
+                    }
+                    
+                    updateUI();
+                    await sleep(1000);
+                }
+                
+                // 庫存耗盡，自動轉回普通 FESTA RUSH
+                addLog(`\n💨 ♾️ストック消化完了... FESTA RUSH へ移行`, "color-normal");
+                await this.play_festa();
+            }
+
+            end_rush() {
+                addLog(`📈 總連莊数: ${this.session_rush_count}連`);
+                addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                this.state = "NORMAL";
+                this.record_history();
+                updateUI();
+            }
+
+            record_history() {
+                this.history.unshift({ spins: this.session_spins, rush: this.session_rush_count, payout: this.session_payout });
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+                this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0;
+            }
+        }
+
+        let game = new Ginpara();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div");
+            div.className = `log-entry ${className}`;
+            div.innerText = text;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") document.getElementById("ui-spins").innerText = game.session_spins;
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) {
+                historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`;
+                return;
+            }
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `<td>${label}</td><td class="hit-spins">${record.spins}</td><td class="hit-rush">${record.rush}</td><td class="hit-payout">${record.payout}</td>`;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.disabled = true;
+
+            addLog("\n=== VIVA FESTA 開始 ===", "color-hit");
+
+            while (isPlaying) {
+                let hit = await game.play_normal();
+                updateUI();
+                if (game.session_spins % 100 === 0) await sleep(10);
+                if (hit) { isPlaying = false; break; }
+            }
+
+            btnPlay.disabled = false;
+            btnPlay.innerText = "▶️ プレイ続行";
+        }
+    </script>
+    <script src="hall-shared.js"></script>
+    <script src="plugin.js"></script>
+    <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; text-align: center; padding: 5px 0; border-top: 1px solid #333;">
+        <script type="text/javascript">
+            atOptions = { 'key' : 'ead8f1e5fdd30faaed33da77b3333cf4', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js"></script>
+    </div>
+</body>
+
+</html>

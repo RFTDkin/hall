@@ -254,9 +254,12 @@
         .tag-unicorn2 {
             border-top: 5px solid #e91e63;
         }
+
         .tag-fireforce {
             border-top: 5px solid #ff5722;
         }
+        .tag-ginpara { border-top: 5px solid #e040fb; }
+        .tag-sea5 { border-top: 5px solid #00bcd4; }
     </style>
     <link rel="stylesheet" href="mobile.css">
 </head>
@@ -622,6 +625,28 @@
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit"
                     id="fireforce-profit">---</span></div>
             <div class="progress-text" id="fireforce-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-ginpara" id="card-ginpara">
+            <h3 class="machine-title">eギンパラVIVAFESTAHTA2</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins"
+                    id="ginpara-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout"
+                    id="ginpara-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max"
+                    id="ginpara-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit"
+                    id="ginpara-profit">---</span></div>
+            <div class="progress-text" id="ginpara-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-sea5" id="card-sea5">
+            <h3 class="machine-title">PA大海物語5アグネス</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="sea5-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="sea5-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="sea5-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="sea5-profit">---</span></div>
+            <div class="progress-text" id="sea5-prog">待機中...</div>
         </div>
 
     </div>
@@ -1607,7 +1632,7 @@
                     else { payout += 1500; rush = false; }
 
                     if (rush && payout < 95000) {
-                        let st_remain = 14; 
+                        let st_remain = 14;
                         while (st_remain > 0 && payout < 95000) {
                             if (Math.random() < 1 / 10.7) {
                                 let r2 = Math.random();
@@ -1772,7 +1797,7 @@
 
         function simFireForce() {
             let spins = 0, payout = 0;
-            
+
             while (true) {
                 spins++;
                 if (Math.random() < 1 / 99.9) {
@@ -1840,7 +1865,173 @@
                     }
                 }
             }
-            
+
+            return { spins, payout };
+        }
+
+        function simGinpara() {
+            let spins = 0, payout = 0;
+
+            function playInfinity(stock) {
+                while (stock > 0 && payout < 95000) {
+                    stock--;
+                    let hit = false;
+                    for (let i = 0; i < 10000; i++) { if (Math.random() < 1 / 49.7) { hit = true; break; } }
+                    if (hit) {
+                        let r = Math.random();
+                        let new_stock = 0;
+                        if (r < 0.01) { payout += 1500; new_stock = 2; }
+                        else if (r < 0.02) { payout += 1500; new_stock = 1; }
+                        else if (r < 0.03) { payout += 450; new_stock = 1; }
+                        else if (r < 0.76) { payout += 1500; new_stock = 0; }
+                        else { payout += 450; new_stock = 0; }
+                        stock = Math.max(stock, new_stock);
+                    }
+                }
+            }
+
+            function playFesta() {
+                let active = true;
+                while (active && payout < 95000) {
+                    let hit = false;
+                    let hit_spin = 0;
+                    for (let i = 1; i <= 79; i++) {
+                        if (Math.random() < 1 / 49.7) { hit = true; hit_spin = i; break; }
+                    }
+                    if (hit) {
+                        if (hit_spin <= 5) {
+                            let r = Math.random();
+                            let stock = 0;
+                            if (r < 0.40) { payout += 1500; stock = 2; }
+                            else if (r < 0.75) { payout += 1500; stock = 1; }
+                            else { payout += 450; stock = 1; }
+                            playInfinity(stock);
+                        } else {
+                            let r = Math.random();
+                            let stock = 0;
+                            if (r < 0.01) { payout += 1500; stock = 2; }
+                            else if (r < 0.02) { payout += 1500; stock = 1; }
+                            else if (r < 0.03) { payout += 450; stock = 1; }
+                            else if (r < 0.76) { payout += 1500; stock = 0; }
+                            else { payout += 450; stock = 0; }
+                            if (stock > 0) playInfinity(stock);
+                        }
+                    } else {
+                        active = false;
+                    }
+                }
+            }
+
+            function playGingira() {
+                let hit = false;
+                for (let i = 0; i < 29; i++) { if (Math.random() < 1 / 49.7) { hit = true; break; } }
+                if (hit) {
+                    payout += (Math.random() < 0.75) ? 1500 : 450;
+                    if (payout < 95000) playFesta();
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 319.6) {
+                    if (Math.random() < 0.001) {
+                        payout += 1500;
+                        playInfinity(2);
+                    } else {
+                        payout += 450;
+                        playGingira();
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simSea5() {
+            let spins = 0, payout = 0;
+            let low_prob_spins = 0;
+            let yutime_available = true;
+
+            while (true) {
+                spins++;
+                low_prob_spins++;
+
+                if (Math.random() < 1 / 99.9) {
+                    processHit(false);
+                    break;
+                }
+
+                // 低確率299回転で遊タイム突入
+                if (low_prob_spins === 299 && yutime_available) {
+                    yutime_available = false;
+                    let yutime_hit = false;
+                    for (let i = 0; i < 379; i++) {
+                        spins++; 
+                        low_prob_spins++;
+                        if (Math.random() < 1 / 99.9) {
+                            yutime_hit = true;
+                            processHit(false);
+                            break;
+                        }
+                    }
+                    if (yutime_hit) break;
+                }
+            }
+
+            function processHit(start_happiness) {
+                let active = true;
+                let current_happiness = start_happiness;
+
+                while (active) {
+                    if (payout >= 95000) break;
+
+                    let r = Math.random();
+                    let next_jitan = 0;
+                    let next_happiness = false;
+
+                    // ハピネスチャンス中かどうかの振り分け
+                    if (current_happiness) {
+                        if (r < 0.04) { payout += 1080; next_jitan = 110; next_happiness = true; }
+                        else if (r < 0.64) { payout += 648; next_jitan = 110; next_happiness = true; }
+                        else { payout += 432; next_jitan = 110; next_happiness = true; }
+                    } else {
+                        if (r < 0.04) { payout += 1080; next_jitan = 110; next_happiness = true; }
+                        else if (r < 0.64) { payout += 648; next_jitan = 40; }
+                        else if (r < 0.70) { payout += 432; next_jitan = 40; }
+                        else { payout += 432; next_jitan = 15; }
+                    }
+
+                    low_prob_spins = 0;
+                    yutime_available = true;
+                    
+                    // ST 10回転
+                    let st_hit = false;
+                    for(let i = 0; i < 10; i++) {
+                        if (payout >= 95000) break;
+                        if (Math.random() < 1 / 19.5) { st_hit = true; break; }
+                    }
+
+                    if (st_hit) {
+                        current_happiness = next_happiness;
+                        continue;
+                    }
+
+                    // 時短回転
+                    let jitan_hit = false;
+                    for(let i = 0; i < next_jitan; i++) {
+                        if (payout >= 95000) break;
+                        low_prob_spins++;
+                        if (Math.random() < 1 / 99.9) { jitan_hit = true; break; }
+                    }
+
+                    if (jitan_hit) {
+                        current_happiness = next_happiness;
+                        continue;
+                    }
+
+                    active = false;
+                }
+            }
             return { spins, payout };
         }
 
@@ -1961,6 +2152,8 @@
             await runMachineSim('majo', simMajo, 1000 / 28, iterations);
             await runMachineSim('unicorn2', simUnicorn2, 1000 / 30, iterations);
             await runMachineSim('fireforce', simFireForce, 1000 / 17, iterations);
+            await runMachineSim('ginpara', simGinpara, 1000 / 22, iterations);
+            await runMachineSim('sea5', simSea5, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);

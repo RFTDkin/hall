@@ -254,19 +254,28 @@
                 let max_spins = 5;
 
                 for (let i = 1; i <= max_spins; i++) {
-                    await sleep(600);
-                    document.getElementById("ui-spins").innerText = `チャレンジ中: ${i}/${max_spins}`;
+                    await sleep(400); // 慢速倒數增加緊張感
+                    let isReserve = i > 1; // 第 2 轉開始就係残保
+                    let current_spin = isReserve ? (i - 1) : i;
+
+                    if (!isReserve) {
+                        document.getElementById("ui-spins").innerText = `チャレンジ中: ${current_spin}/1`;
+                    } else {
+                        document.getElementById("ui-spins").innerText = `残保留: ${current_spin}/4`;
+                        addLog(`⏳ 残保留 ${current_spin}回転目...`, "color-normal");
+                    }
 
                     // 右打ち実質大当り確率: 1/23.8
                     if (Math.random() < (1 / 23.8)) {
-                        addLog(`\n🎉 [チャレンジ ${i}回転] 突破成功！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
+                        let phaseName = isReserve ? '残保留' : 'ST';
+                        addLog(`\n🎉 [${phaseName} ${current_spin}回転目] 突破成功！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
                         await this.right_hit();
-                        return; // 進入下一階段，結束 Challenge
+                        return; 
                     }
                 }
 
                 // 失敗
-                document.getElementById("ui-spins").innerText = `チャレンジ中: ${max_spins}/${max_spins}`;
+                document.getElementById("ui-spins").innerText = `終了`;
                 addLog("\n💀 チャレンジ失敗... 通常へ戻る", "color-fall");
                 this.end_rush();
             }
@@ -278,17 +287,27 @@
                 let max_spins = 34;
 
                 for (let i = 1; i <= max_spins; i++) {
-                    await sleep(80);
-                    document.getElementById("ui-spins").innerText = `RUSH中: ${i}/${max_spins}`;
+                    let isReserve = i > 30; // 第 31 轉開始係残保
+                    let current_spin = isReserve ? (i - 30) : i;
+
+                    if (!isReserve) {
+                        await sleep(60); // ST 中快速消化
+                        document.getElementById("ui-spins").innerText = `RUSH中: ${current_spin}/30`;
+                    } else {
+                        await sleep(400); // 残保留慢速倒數
+                        document.getElementById("ui-spins").innerText = `残保留: ${current_spin}/4`;
+                        addLog(`⏳ 残保留 ${current_spin}回転目...`, "color-normal");
+                    }
 
                     if (Math.random() < (1 / 23.8)) {
-                        addLog(`\n🎉 [ST ${i}回転] 炎上當選！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
+                        let phaseName = isReserve ? '残保留' : 'ST';
+                        addLog(`\n🎉 [${phaseName} ${current_spin}回転目] 炎上當選！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
                         await this.right_hit();
                         return;
                     }
                 }
 
-                document.getElementById("ui-spins").innerText = `RUSH中: ${max_spins}/${max_spins}`;
+                document.getElementById("ui-spins").innerText = `終了`;
                 addLog("\n💀 ST抜け... RUSH終了", "color-fall");
                 this.end_rush();
             }
@@ -331,12 +350,22 @@
                 let max_spins = 68;
 
                 for (let i = 1; i <= max_spins; i++) {
-                    await sleep(40);
-                    document.getElementById("ui-spins").innerText = `LT中: ${i}/${max_spins}`;
+                    let isReserve = i > 64; // 第 65 轉開始係残保
+                    let current_spin = isReserve ? (i - 64) : i;
+
+                    if (!isReserve) {
+                        await sleep(50); // ST 中快速消化
+                        document.getElementById("ui-spins").innerText = `LT中: ${current_spin}/64`;
+                    } else {
+                        await sleep(400); // 残保留慢速倒數
+                        document.getElementById("ui-spins").innerText = `残保留: ${current_spin}/4`;
+                        addLog(`⏳ 残保留 ${current_spin}回転目...`, "color-normal");
+                    }
 
                     if (Math.random() < (1 / 23.8)) {
                         this.session_rush_count += 1;
-                        addLog(`\n🎉 [LT ${i}回転] アドラ當選！ (總 ${this.session_rush_count}連)`, "color-ultimate");
+                        let phaseName = isReserve ? '残保留' : 'LT';
+                        addLog(`\n🎉 [${phaseName} ${current_spin}回転目] アドラ當選！ (總 ${this.session_rush_count}連)`, "color-ultimate");
                         
                         let roll = Math.random();
                         if (roll < 0.20) {
@@ -359,7 +388,7 @@
                     }
                 }
 
-                document.getElementById("ui-spins").innerText = `LT中: ${max_spins}/${max_spins}`;
+                document.getElementById("ui-spins").innerText = `終了`;
                 addLog("\n💀 LT抜け... アドラバースト終了", "color-fall");
                 this.end_rush();
             }

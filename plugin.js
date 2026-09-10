@@ -464,6 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageText.includes("タクトオーパス")) spinCost = 1000 / 41;
         else if (pageText.includes("魔女と野獣")) spinCost = 1000 / 28;
         else if (pageText.includes("ユニコーン2")) spinCost = 1000 / 30;
+        else if (pageText.includes("ギンパラ")) spinCost = 1000 / 22;
 
         // 🌟 生成排行榜與實時數據同步 🌟
         let currentMachineRankings = [];
