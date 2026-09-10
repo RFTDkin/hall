@@ -62,7 +62,9 @@
             html = `<span class="title-effect">${html}</span>`;
         }
 
-        if (opts.uid && !opts.disableClick && typeof opts.onClickName === 'function') {
+        // onClickName is deliberately a JavaScript path string (e.g. showProfile / window.showPluginProfile)
+        // so the generated inline handler can work on both the lobby and machine pages.
+        if (opts.uid && !opts.disableClick && typeof opts.onClickName === 'string' && opts.onClickName) {
             return `<span class="clickable-name" onpointerdown="${opts.onClickName}('${opts.uid}')">${html}</span>`;
         }
         return html;
