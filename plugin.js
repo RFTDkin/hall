@@ -952,7 +952,12 @@ setTimeout(() => {
             const isHeavyMachine = heavyMachinePages.has(pageName) || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣)/i.test(machineTitle);
             
             const isCharge = /チャージ|CHARGE/i.test(translatedText);
-            const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText) && !/チャレンジ|JUDGE|CZ/.test(translatedText);
+            // Rush Challenge / CZ / 時短 への突入パターン（本RUSHではない）
+            const isRushChallengeEnter = /(チャレンジ|JUDGE|CZ|時短).*?(突入|開始)/.test(translatedText)
+                || /(突入|開始).*?(チャレンジ|JUDGE|CZ|時短)/.test(translatedText);
+            // 本RUSHへの突入（Rush Challenge・Charge・時短を除く）
+            const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText)
+                && !isRushChallengeEnter && !isCharge;
 
             // ✨ 神の引き
             if (isRealRushEnter && actualSpins === 1 && isHeavyMachine) {
@@ -960,35 +965,49 @@ setTimeout(() => {
                 window._lastLoggedSpins = 0;
             }
 
-            // ⚡ 駆け抜け王
-            const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(translatedText);
-            const isRunthroughExplicit = /駆け抜け|スルー/.test(translatedText);
-            
+            // ⚡ 駆け抜け王 ＆ runthrough_count 管理
+            // Rush Challenge 失敗 / 時短失敗 → 単発扱い（runthrough カウント対象外）
+            const isRushChallengeFailure = !isCharge
+                && /チャレンジ失敗|CZ失敗|JUDGE失敗|時短終了|任務失敗|チャンスタイム終了/.test(translatedText);
+            // 本RUSHの終了（Rush Challenge 失敗は除く）
+            const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(translatedText)
+                && !isRushChallengeFailure;
+            const isRunthroughExplicit = /駆け抜け|スルー/.test(translatedText) && !isRushChallengeFailure;
+
             if (isRushEnd || isRunthroughExplicit) {
-                if (isRunthroughExplicit || rushCount === 0) { 
+                // rushCount === 0 → 本RUSHに入ったが一度も当たらずに終了 → 駆け抜け
+                // rushCount >= 1 → 本RUSHで当たりあり → 駆け抜けではない → runthrough_count をリセット
+                if (isRunthroughExplicit || rushCount === 0) {
                     titleDb.ref('users/' + uid + '/runthrough_count').transaction(count => {
                         let newCount = (count || 0) + 1;
                         if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
                         return newCount;
                     });
                 } else {
+                    // 本RUSHで当たりあり（駆け抜けではない）→ runthrough_count をリセット
                     titleDb.ref('users/' + uid + '/runthrough_count').set(0);
                 }
             }
 
             // 💀 単発地獄
-            const isNormalLoss = !isRushEnd && !isCharge && /通常へ戻る|通常終了|通常へ|RUSH非突入|チャレンジ失敗|CZ失敗|任務失敗|チャンスタイム終了/.test(translatedText);
+            // 単発：Rush Challenge 失敗 / 時短失敗 / Charge失敗 / 通常終了（rushCount === 0 のみ）
+            // ※単発・Charge はすべて「単機」扱い（単発地獄カウント対象）
+            const isNormalLoss = !isRushEnd && !isRunthroughExplicit
+                && (isRushChallengeFailure
+                    || (isCharge && /失敗|外れ|非突入|通常/.test(translatedText))
+                    || (!isCharge && !isRushChallengeEnter
+                        && /通常へ戻る|通常終了|通常へ|RUSH非突入/.test(translatedText)
+                        && rushCount === 0));
             if (isNormalLoss) {
-                if (rushCount <= 1) {
-                    titleDb.ref('users/' + uid + '/single_hell_count').transaction(count => {
-                        let newCount = (count || 0) + 1;
-                        if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
-                        return newCount;
-                    });
-                }
+                titleDb.ref('users/' + uid + '/single_hell_count').transaction(count => {
+                    let newCount = (count || 0) + 1;
+                    if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
+                    return newCount;
+                });
             }
 
-            // 🌟 清空単発地獄
+            // 🌟 単発地獄カウントリセット
+            // 本RUSHに突入した（Rush Challenge ではない）、または連チャン継続中 → リセット
             if (isRealRushEnter || translatedText.includes("継続") || translatedText.includes("連)") || rushCount >= 2) {
                 titleDb.ref('users/' + uid + '/single_hell_count').set(0);
             }
