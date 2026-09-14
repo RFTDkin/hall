@@ -1004,6 +1004,14 @@
         </a>
     </div>
 
+    <!-- 👇 喺度加入免責聲明 👇 -->
+    <div style="max-width: 1200px; margin: 20px auto 40px auto; padding: 15px; background: #111; border: 1px solid #333; border-left: 4px solid #ffca28; border-radius: 8px; text-align: left; color: #aaa; font-size: 0.85em; line-height: 1.6;">
+        <strong style="color: #ffca28;">※ 免責事項及び注意事項 ※</strong><br>
+        当サイトは完全無料のシミュレーターゲームであり、実際の金銭のやり取りは一切ありません。サイト内の「円」や「玉」はすべて架空の数値です。<br>
+        なお、実際のパチンコ・パチスロは風俗営業等の規制及び業務の適正化等に関する法律（風営法）により、<strong>18歳未満の遊技が固く禁じられています。</strong>
+    </div>
+    <!-- 👆 免責聲明完結 👆 -->
+
     <script>
         const firebaseConfig = window.HallShared.firebaseConfig;
 
@@ -1146,10 +1154,10 @@
         let lastRenderTime = 0;
         let renderTimeout = null;
 
-        db.ref('users').on('value', (snapshot) => {
+        // 🚨 終極慳流量優化 4：大堂排行榜同總數值，每次 F5 重新整理時「只讀取 1 次」
+        db.ref('users').once('value').then((snapshot) => {
             usersData = snapshot.val() || {};
             
-            // 自動補發「單發地獄」稱號 (門檻 10 次)
             for (let uid in usersData) {
                 let u = usersData[uid];
                 if ((u.single_hell_count || 0) >= 10 && !u.title_hell) {
@@ -1157,20 +1165,21 @@
                     usersData[uid].title_hell = true;
                 }
             }
-
+            
             const user = auth.currentUser;
             if (user && usersData[user.uid]) {
                 document.getElementById("nav-balance").innerText = Math.round(usersData[user.uid].balance).toLocaleString();
+                
+                // 🚨 終極慳流量優化 5：自己嘅餘額維持實時更新
+                db.ref('users/' + user.uid).on('value', snap => {
+                    if(snap.exists()) {
+                        usersData[user.uid] = snap.val();
+                        document.getElementById("nav-balance").innerText = Math.round(snap.val().balance).toLocaleString();
+                        executeRender();
+                    }
+                });
             }
-
-            // 🌟 節流機制：限制最多每 1.5 秒更新一次 UI，防止狂閃及無法點擊 🌟
-            const now = Date.now();
-            if (now - lastRenderTime >= 1500) {
-                executeRender();
-            } else {
-                clearTimeout(renderTimeout);
-                renderTimeout = setTimeout(executeRender, 1500 - (now - lastRenderTime));
-            }
+            executeRender();
         });
 
         // 將更新 UI 的邏輯獨立抽出來

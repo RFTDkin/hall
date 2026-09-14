@@ -88,37 +88,48 @@
     }
 
     function settleIchigekiAwards(db, now) {
+        // 🌟 核心修正：只允許幫「自己」結算，完美避開 Firebase 權限封鎖
+        const user = window.firebase ? window.firebase.auth().currentUser : null;
+        if (!user) return Promise.resolve();
+        const myUid = user.uid;
+
         const date = now || new Date();
         const todayStr = `${date.getMonth() + 1}/${date.getDate()}`;
-        
+
         return db.ref('server_records/daily_bests_log').once('value').then(snapshot => {
             const logs = snapshot.val() || {};
+            const updates = [];
+
             Object.keys(logs).forEach(key => {
                 const record = logs[key];
-                
-                // 🌟 修正1：加入 record.processed 檢查，派過嘅唔好再浪費資源去查
-                if (!record || record.date === todayStr || !record.uid || record.processed) return;
-                
-                db.ref(`users/${record.uid}`).transaction(userData => {
-                    // 🌟 核心修正2：唔可以就咁 return 搞到 Abort。
-                    // 如果係 null，設定為空物件回傳，逼使 Firebase 發生「雜湊值不符 (Hash Mismatch)」，
-                    // 系統就會自動去 Server 攞返佢真正嘅 Profile 出嚟再跑多次！
+
+                // 🌟 過濾條件：
+                // 1. 必須係自己嘅 UID (唔好去搞人哋個 Profile)
+                // 2. 日期唔可以係今日 (確保過咗琴日 23:59 先派)
+                // 3. 未被處理過
+                if (!record || record.date === todayStr || record.uid !== myUid || record.processed) return;
+
+                const p = db.ref(`users/${myUid}`).transaction(userData => {
                     let data = userData || {};
-                    
                     const awards = data.ichigeki_awards || {};
-                    if (awards[key]) return; // 如果真係派咗先至 Abort
                     
+                    // 如果已經領取過，終止交易
+                    if (awards[key]) return; 
+
                     data.ichigeki_count = (data.ichigeki_count || 0) + 1;
                     awards[key] = { date: record.date, payout: record.payout || 0 };
                     data.ichigeki_awards = awards;
-                    
+
                     return data;
                 }, (error, committed) => {
                     if (!error && committed) {
+                        // 寫入成功後，將呢筆日誌標記為已處理
                         db.ref(`server_records/daily_bests_log/${key}/processed`).set(true);
                     }
                 });
+                updates.push(p);
             });
+            return Promise.all(updates);
         });
     }
 

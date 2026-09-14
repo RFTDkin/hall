@@ -576,39 +576,21 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-// 監聽全局玩家數據，一旦變動就重繪排行榜與 Modal
-        db.ref('users').on('value', snap => {
+// 🚨 終極慳流量優化 1：廢除全服 users 實時監聽，改為「只讀取 1 次」
+        db.ref('users').once('value').then(snap => {
             let users = snap.val() || {};
             
-            // 🌟 自動補發遺漏稱號邏輯 (確保各機台頁面也能自動修復舊數據) 🌟
-            for (let uid in users) {
-                let u = users[uid];
+            // 自動補發遺漏稱號邏輯 (只行一次)
+            for (let u_id in users) {
+                let u = users[u_id];
                 let needsUpdate = false;
                 let updates = {};
 
-                // 檢查單發地獄 (10次)
-                if ((u.single_hell_count || 0) >= 10 && !u.title_hell) {
-                    updates.title_hell = true;
-                    u.title_hell = true; // 即時更新本地數據顯示
-                    needsUpdate = true;
-                }
-                // 檢查駆け抜け王 (7次)
-                if ((u.runthrough_count || 0) >= 7 && !u.title_runthrough) {
-                    updates.title_runthrough = true;
-                    u.title_runthrough = true;
-                    needsUpdate = true;
-                }
-                // 檢查一擊王 (10次)
-                if ((u.ichigeki_count || 0) >= 10 && !u.title_ichigeki) {
-                    updates.title_ichigeki = true;
-                    u.title_ichigeki = true;
-                    needsUpdate = true;
-                }
+                if ((u.single_hell_count || 0) >= 10 && !u.title_hell) { updates.title_hell = true; u.title_hell = true; needsUpdate = true; }
+                if ((u.runthrough_count || 0) >= 7 && !u.title_runthrough) { updates.title_runthrough = true; u.title_runthrough = true; needsUpdate = true; }
+                if ((u.ichigeki_count || 0) >= 10 && !u.title_ichigeki) { updates.title_ichigeki = true; u.title_ichigeki = true; needsUpdate = true; }
 
-                // 如果有發現達標但未有稱號，即時寫入 Firebase
-                if (needsUpdate) {
-                    db.ref(`users/${uid}`).update(updates);
-                }
+                if (needsUpdate) db.ref(`users/${u_id}`).update(updates);
             }
 
             window.globalUsersData = users;
@@ -616,7 +598,19 @@ document.addEventListener("DOMContentLoaded", () => {
             if (window.currentOpenProfileUid) window.showPluginProfile(window.currentOpenProfileUid);
         });
 
-        db.ref('machine_rankings/' + machineName).on('value', (snapshot) => {
+        // 🚨 終極慳流量優化 2：只實時監聽「自己」嘅資料，其他人扣錢唔會再觸發全服下載
+        if (uid) {
+            db.ref('users/' + uid).on('value', snap => {
+                if (snap.exists() && window.globalUsersData) {
+                    window.globalUsersData[uid] = snap.val();
+                    renderMachineRankings(); // 輕量更新右上角自己個名
+                    if (window.currentOpenProfileUid === uid) window.showPluginProfile(uid);
+                }
+            });
+        }
+
+        // 🚨 終極慳流量優化 3：機台排行榜改為「只讀取 1 次」，唔再實時跳動
+        db.ref('machine_rankings/' + machineName).once('value').then((snapshot) => {
             currentMachineRankings = [];
             if (snapshot.exists()) {
                 snapshot.forEach(child => { currentMachineRankings.push(child.val()); });
