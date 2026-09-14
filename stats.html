@@ -260,6 +260,7 @@
         }
         .tag-ginpara { border-top: 5px solid #e040fb; }
         .tag-sea5 { border-top: 5px solid #00bcd4; }
+        .tag-iseleve { border-top: 5px solid #7c4dff; }
     </style>
     <link rel="stylesheet" href="mobile.css">
 </head>
@@ -647,6 +648,15 @@
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="sea5-max">---</span></div>
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="sea5-profit">---</span></div>
             <div class="progress-text" id="sea5-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-iseleve" id="card-iseleve">
+            <h3 class="machine-title">eいせれべFSZ</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="iseleve-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="iseleve-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="iseleve-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="iseleve-profit">---</span></div>
+            <div class="progress-text" id="iseleve-prog">待機中...</div>
         </div>
 
     </div>
@@ -2035,6 +2045,65 @@
             return { spins, payout };
         }
 
+        function simIseleve() {
+            let spins = 0, payout = 0;
+
+            function getRightPayout() {
+                let r = Math.random();
+                if (r < 0.01) return 4500;
+                if (r < 0.06) return 3300;
+                if (r < 0.39) return 2550;
+                if (r < 0.67) return 1800;
+                if (r < 0.87) return 1050;
+                return 450;
+            }
+
+            function play1GLoop(guaranteed) {
+                let loop = guaranteed || (Math.random() < 0.59);
+                while (loop && payout < 95000) {
+                    payout += getRightPayout();
+                    loop = Math.random() < 0.59;
+                }
+            }
+
+            function playRush(isFirstHit) {
+                let st = 70;
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 77.0) {
+                        payout += getRightPayout();
+                        if (isFirstHit) {
+                            play1GLoop(true);
+                            isFirstHit = false;
+                        } else {
+                            play1GLoop(false);
+                        }
+                        st = 70;
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 179.0) {
+                    let r = Math.random();
+                    if (r < 0.002) {
+                        payout += 1500;
+                        play1GLoop(true);
+                        if (payout < 95000) playRush(true);
+                    } else if (r < 0.200) {
+                        payout += 300;
+                        playRush(true);
+                    } else {
+                        payout += 300;
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
 
 
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
@@ -2154,6 +2223,7 @@
             await runMachineSim('fireforce', simFireForce, 1000 / 17, iterations);
             await runMachineSim('ginpara', simGinpara, 1000 / 22, iterations);
             await runMachineSim('sea5', simSea5, 1000 / 17, iterations);
+            await runMachineSim('iseleve', simIseleve, 1000 / 27, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);
