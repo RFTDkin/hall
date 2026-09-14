@@ -194,6 +194,13 @@
             line-height: 1.2;
         }
 
+        /* 🌟 修復看板名字出界：強制允許特效文字換行 🌟 */
+        .dash-name .title-effect {
+            white-space: normal !important;
+            word-break: break-all !important;
+            word-wrap: break-word !important;
+        }
+
         .rankings-wrapper {
             display: flex;
             justify-content: center;
@@ -912,7 +919,7 @@
                 <div class="machine-spec">
                     大当り確率: 1/399.8<br>
                     RUSH継続率: 約80%<br>
-                    <span style="color:#ffea00;">最大出玉: 12000個+α (極闘)</span>
+                    <span style="color:#ffea00;">最大出玉: 12000個(極闘)</span>
                 </div>
             </div>
             <div class="play-btn">▶️ 遊技開始 (PLAY)</div>

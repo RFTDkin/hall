@@ -161,7 +161,7 @@ globalPluginStyle.innerHTML = `
     .clickable-name:hover { filter: brightness(1.3); }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     #p-modal-name, #ui-username { word-wrap: break-word; word-break: break-all; white-space: normal; line-height: 1.3; }
-    #p-modal-name .title-effect, #ui-username .title-effect { white-space: normal !important; }
+    #p-modal-name .title-effect, #ui-username .title-effect, .dash-name .title-effect { white-space: normal !important; word-break: break-all !important; line-height: 1.3; }
 `;
 document.head.appendChild(globalPluginStyle);
 

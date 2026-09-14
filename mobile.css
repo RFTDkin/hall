@@ -134,5 +134,9 @@ body {
         font-size: 1.2em !important;
         word-wrap: break-word !important;
         word-break: break-all !important;
+        white-space: normal !important;
+    }
+    .dash-name .title-effect {
+        white-space: normal !important;
     }
 }
