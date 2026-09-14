@@ -908,6 +908,7 @@ setTimeout(() => {
 // 🏆 全自動稱號判定系統 (Log Interceptor)
 // ==========================================
 window._lastLoggedSpins = 0; // 🌟 建立獨立記憶體，死記最新轉數
+window._lastHellCountedSpin = -1; // 🌟 新增：死記邊一轉已經計過單發，防止雙重+1
 
 setTimeout(() => {
     if (typeof window.addLog === "function") {
@@ -956,8 +957,8 @@ setTimeout(() => {
             const isRushChallengeEnter = /(チャレンジ|JUDGE|CZ|時短).*?(突入|開始)/.test(translatedText)
                 || /(突入|開始).*?(チャレンジ|JUDGE|CZ|時短)/.test(translatedText);
             // 本RUSHへの突入（Rush Challenge・Charge・時短を除く）
-            const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText)
-                && !isRushChallengeEnter && !isCharge;
+            // 🌟 修正：排除「非突入」同「失敗」，防止系統見到「RUSH非突入」就誤以為入咗 RUSH 而清空單發計數！
+            const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText) && !/チャレンジ|JUDGE|CZ|非突入|失敗/.test(translatedText);
 
             // ✨ 神の引き
             if (isRealRushEnter && actualSpins === 1 && isHeavyMachine) {
@@ -966,48 +967,45 @@ setTimeout(() => {
             }
 
             // ⚡ 駆け抜け王 ＆ runthrough_count 管理
-            // Rush Challenge 失敗 / 時短失敗 → 単発扱い（runthrough カウント対象外）
-            const isRushChallengeFailure = !isCharge
-                && /チャレンジ失敗|CZ失敗|JUDGE失敗|時短終了|任務失敗|チャンスタイム終了/.test(translatedText);
-            // 本RUSHの終了（Rush Challenge 失敗は除く）
+            const isRushChallengeFailure = /チャレンジ失敗|CZ失敗|JUDGE失敗|時短終了|任務失敗|チャンスタイム終了|昇格失敗/.test(translatedText);
             const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(translatedText)
                 && !isRushChallengeFailure;
             const isRunthroughExplicit = /駆け抜け|スルー/.test(translatedText) && !isRushChallengeFailure;
-
+            
             if (isRushEnd || isRunthroughExplicit) {
-                // rushCount === 0 → 本RUSHに入ったが一度も当たらずに終了 → 駆け抜け
-                // rushCount >= 1 → 本RUSHで当たりあり → 駆け抜けではない → runthrough_count をリセット
-                if (isRunthroughExplicit || rushCount === 0) {
+                if (isRunthroughExplicit || rushCount === 0) { 
                     titleDb.ref('users/' + uid + '/runthrough_count').transaction(count => {
                         let newCount = (count || 0) + 1;
                         if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
                         return newCount;
                     });
                 } else {
-                    // 本RUSHで当たりあり（駆け抜けではない）→ runthrough_count をリセット
                     titleDb.ref('users/' + uid + '/runthrough_count').set(0);
                 }
             }
 
             // 💀 単発地獄
-            // 単発：Rush Challenge 失敗 / 時短失敗 / Charge失敗 / 通常終了（rushCount === 0 のみ）
-            // ※単発・Charge はすべて「単機」扱い（単発地獄カウント対象）
             const isNormalLoss = !isRushEnd && !isRunthroughExplicit
-                && (isRushChallengeFailure
-                    || (isCharge && /失敗|外れ|非突入|通常/.test(translatedText))
-                    || (!isCharge && !isRushChallengeEnter
-                        && /通常へ戻る|通常終了|通常へ|RUSH非突入/.test(translatedText)
-                        && rushCount === 0));
+                && (
+                    isRushChallengeFailure
+                    || /通常へ戻る|通常終了|通常へ|RUSH非突入/.test(translatedText)
+                    || (/(CHARGE|チャージ)/i.test(translatedText) && !/突入|開始|昇格|成功/.test(translatedText))
+                );
+
             if (isNormalLoss) {
-                titleDb.ref('users/' + uid + '/single_hell_count').transaction(count => {
-                    let newCount = (count || 0) + 1;
-                    if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
-                    return newCount;
-                });
+                // 🌟 加入防重複鎖：如果呢一轉 (actualSpins) 已經 +1 過，就自動 Block 咗佢
+                if (rushCount <= 1 && actualSpins !== window._lastHellCountedSpin) {
+                    window._lastHellCountedSpin = actualSpins; // 鎖定呢一轉，同一轉再有 Log 都唔理
+                    
+                    titleDb.ref('users/' + uid + '/single_hell_count').transaction(count => {
+                        let newCount = (count || 0) + 1;
+                        if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
+                        return newCount;
+                    });
+                }
             }
 
-            // 🌟 単発地獄カウントリセット
-            // 本RUSHに突入した（Rush Challenge ではない）、または連チャン継続中 → リセット
+            // 🌟 清空単発地獄
             if (isRealRushEnter || translatedText.includes("継続") || translatedText.includes("連)") || rushCount >= 2) {
                 titleDb.ref('users/' + uid + '/single_hell_count').set(0);
             }
