@@ -90,21 +90,33 @@
     function settleIchigekiAwards(db, now) {
         const date = now || new Date();
         const todayStr = `${date.getMonth() + 1}/${date.getDate()}`;
+        
         return db.ref('server_records/daily_bests_log').once('value').then(snapshot => {
             const logs = snapshot.val() || {};
             Object.keys(logs).forEach(key => {
                 const record = logs[key];
-                if (!record || record.date === todayStr || !record.uid) return;
+                
+                // 🌟 修正1：加入 record.processed 檢查，派過嘅唔好再浪費資源去查
+                if (!record || record.date === todayStr || !record.uid || record.processed) return;
+                
                 db.ref(`users/${record.uid}`).transaction(userData => {
-                    if (!userData) return;
-                    const awards = userData.ichigeki_awards || {};
-                    if (awards[key]) return;
-                    userData.ichigeki_count = (userData.ichigeki_count || 0) + 1;
+                    // 🌟 核心修正2：唔可以就咁 return 搞到 Abort。
+                    // 如果係 null，設定為空物件回傳，逼使 Firebase 發生「雜湊值不符 (Hash Mismatch)」，
+                    // 系統就會自動去 Server 攞返佢真正嘅 Profile 出嚟再跑多次！
+                    let data = userData || {};
+                    
+                    const awards = data.ichigeki_awards || {};
+                    if (awards[key]) return; // 如果真係派咗先至 Abort
+                    
+                    data.ichigeki_count = (data.ichigeki_count || 0) + 1;
                     awards[key] = { date: record.date, payout: record.payout || 0 };
-                    userData.ichigeki_awards = awards;
-                    return userData;
+                    data.ichigeki_awards = awards;
+                    
+                    return data;
                 }, (error, committed) => {
-                    if (!error && committed) db.ref(`server_records/daily_bests_log/${key}/processed`).set(true);
+                    if (!error && committed) {
+                        db.ref(`server_records/daily_bests_log/${key}/processed`).set(true);
+                    }
                 });
             });
         });
