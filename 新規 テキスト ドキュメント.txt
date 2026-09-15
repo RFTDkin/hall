@@ -56,3 +56,52 @@ http://localhost/*
 https://hall-bice.vercel.app/
 https://hall-bice.vercel.app/*
 https://RFTDkin.github.io/*
+
+
+你嘅擔憂係絕對正確而且非常有安全意識！喺 Cloud 架構入面，呢種駭客行為叫做「Billing Attack（帳單攻擊）」，專門針對 Pay-as-you-go 嘅系統狂刷 API，目的就係想搞到開發者收到天價月結單。
+
+如果你打算升級 Firebase Blaze Plan，為咗保護自己個荷包，你必須要學識以下嘅「防禦」同「應急」措施。Set 好晒安全網先升級，就可以高枕無憂！
+
+🛡️ 預防措施：點樣阻止駭客狂刷 API？
+1. 啟用 Firebase App Check（最強防護盾）
+呢個係 Firebase 官方提供嘅防護機制（Web 端通常結合 reCAPTCHA v3）。啟用之後，Firebase 會驗證每一個 Request 係咪真係由你指定嘅網域（例如你個 vercel.app）發出嚟。
+
+如果駭客寫 Python 腳本、用 Postman 或者透過 Terminal 狂打你個 Database，App Check 會直接喺外圍 Block 晒佢哋。
+
+重點：被 App Check 攔截嘅無效 Request 係唔會計入你嘅 Database 讀寫收費。
+
+2. 收緊 Firebase Security Rules（資料庫守衛）
+絕對唔好將 Database 打開做任人讀寫（例如 ".write": true）。你應該喺 Rules 入面寫明：
+
+只容許寫入特定嘅 Data（例如 payout 必須係數字，不能大過某個合理數值）。
+
+限制字串長度，防止駭客惡意塞入幾百 MB 嘅垃圾文字去刷爆你嘅 Storage 同 Download 流量。
+
+🚨 監控及應急煞掣：見到異常點算？
+3. 設定預算警告（Budget Alerts）
+Firebase 嘅計費背後其實係連住 Google Cloud Platform (GCP)。你綁咗信用卡之後，第一件事就係去 GCP Billing 後台設定「預算警告」。
+
+例如，你設定每個月預算上限為 $1,000 円。
+
+你可以 Set 當洗費達到 50%、90%、100% 嗰陣，系統要即刻彈 Email 甚至手機通知畀你，確保你唔會到月尾收到張單先如夢初醒。
+
+4. 終極應急煞掣：隨時可以即刻 Cut！
+如果你真係收到 Email 警告，發現 Database 被人惡意攻擊，你絕對可以即刻煞掣，有兩個最快嘅做法：
+
+方法 A：即時降級 (Downgrade)
+入去 Firebase 後台，將個 Plan 即刻轉返做 Spark（免費版）。系統會瞬間恢復「100人連線限制」同「10GB 流量上限」，即時截斷額外收費。
+
+方法 B：一秒鎖死 Database (Lockdown)
+衝入去 Firebase 後台嘅 Realtime Database -> Rules，將所有讀寫權限變成 false：
+
+JSON
+{
+  "rules": {
+    ".read": false,
+    ".write": false
+  }
+}
+一 Save 呢段 Code，成個 Database 就會即刻變成「銅牆鐵壁」。駭客嘅 API Request 會全部被彈走（Permission Denied），而被拒絕嘅 Request 係唔會產生昂貴流量費嘅。
+
+總結
+唔使太擔心，只要你去 Firebase 後台先 Set 好 App Check，再順手去 GCP Set 個 Budget Alert (預算警告)，其實個風險已經降到極低。搞掂呢兩樣嘢先綁信用卡，你就可以放心畀全服玩家一齊入嚟玩啦！打算今晚研究吓點 Set App Check 嗎？

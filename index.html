@@ -1330,7 +1330,7 @@
         // 網頁載入即刻執行一次
         fetchGlobalRankings();
         // 🌟 神奇計時器：每 15 秒 (15000 毫秒) 自動喺後台靜靜雞刷新排行榜
-        setInterval(fetchGlobalRankings, 15000);
+        // setInterval(fetchGlobalRankings, 15000);
 
         // 將更新 UI 的邏輯獨立抽出來
         function executeRender() {
@@ -1820,7 +1820,7 @@
             filteredRankingArray = [...fullRankingArray];
             rankingCurrentPage = 1;
             document.getElementById('search-ranking-input').value = "";
-
+            document.getElementById('search-title-select').value = ""; // 🌟 新增：重置下拉選單
             renderGlobalRankingPage();
             updateMyRankFooter();
             document.getElementById('global-ranking-modal').style.display = 'flex';
@@ -1878,11 +1878,25 @@
 
         function searchRanking() {
             const keyword = document.getElementById('search-ranking-input').value.toLowerCase();
-            if (!keyword) {
-                filteredRankingArray = [...fullRankingArray];
-            } else {
-                filteredRankingArray = fullRankingArray.filter(u => u.name.toLowerCase().includes(keyword));
-            }
+            const titleFilter = document.getElementById('search-title-select').value;
+            
+            filteredRankingArray = fullRankingArray.filter(u => {
+                // 1. 名字過濾
+                let matchText = u.name.toLowerCase().includes(keyword);
+                
+                // 2. 稱號過濾
+                let matchTitle = true;
+                if (titleFilter === "complete") matchTitle = u.has_completed === true;
+                else if (titleFilter === "godpull") matchTitle = u.title_godpull === true;
+                else if (titleFilter === "runthrough") matchTitle = u.title_runthrough === true;
+                else if (titleFilter === "hell") matchTitle = u.title_hell === true;
+                else if (titleFilter === "bankrupt") matchTitle = u.balance <= -10000000;
+                else if (titleFilter === "vip") matchTitle = u.is_vip === true;
+
+                // 必須同時符合名字同稱號先會顯示出嚟
+                return matchText && matchTitle;
+            });
+            
             rankingCurrentPage = 1;
             renderGlobalRankingPage();
         }
@@ -2047,7 +2061,21 @@
             <div style="padding: 20px; border-bottom: 1px solid #30363d; position: relative;">
                 <button class="close-btn" onclick="document.getElementById('global-ranking-modal').style.display='none'" style="top: 15px; right: 20px;">✖</button>
                 <h3 style="margin: 0 0 15px 0; color: #58a6ff; font-size: 1.4em; text-align: left;">🏆 全サーバー総合ランキング</h3>
-                <input type="text" id="search-ranking-input" oninput="searchRanking()" placeholder="🔍 プレイヤー名で検索..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #010409; color: #fff; font-size: 1em; box-sizing: border-box;">
+                
+                <!-- 🌟 升級版：雙重檢索 (名字 + 稱號) 🌟 -->
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="search-ranking-input" oninput="searchRanking()" placeholder="🔍 プレイヤー名で検索..." style="flex: 1; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #010409; color: #fff; font-size: 1em; outline: none;">
+                    
+                    <select id="search-title-select" onchange="searchRanking()" style="padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #010409; color: #8b949e; font-size: 0.95em; outline: none; cursor: pointer;">
+                        <option value="">👑 称号で絞り込み (全て)</option>
+                        <option value="complete">🌈 コンプリート</option>
+                        <option value="godpull">✨ 神の引き</option>
+                        <option value="runthrough">⚡ 駆け抜け王</option>
+                        <option value="hell">怨 単発地獄</option>
+                        <option value="bankrupt">💀 破産王</option>
+                        <option value="vip">💎 VIP スポンサー</option>
+                    </select>
+                </div>
             </div>
 
             <!-- 排名列表 (可捲動區域) -->
