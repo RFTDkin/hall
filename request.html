@@ -274,7 +274,7 @@
         }
 
         // 監聽數據庫，實時顯示留言與回覆
-        db.ref('community_requests').orderByChild('timestamp').on('value', (snapshot) => {
+        db.ref('community_requests').orderByChild('timestamp').once('value', (snapshot) => {
             const container = document.getElementById("message-container");
             container.innerHTML = "";
 
