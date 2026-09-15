@@ -639,8 +639,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 載入即刻執行一次
         fetchMachineRankings();
-        // 🌟 神奇計時器：每 15 秒自動刷新機台排行榜
-        setInterval(fetchMachineRankings, 15000);
 
         function disableMachine(msgText = "⛔ 本日の上限に達しました") {
             let playBtn = document.getElementById("btn-play");

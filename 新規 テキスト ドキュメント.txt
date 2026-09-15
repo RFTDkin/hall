@@ -146,3 +146,59 @@ JSON
 任務 2：VIP 全自動派發 (Webhook)
 
 將 Buy Me A Coffee 或者 PayPal 嘅 Webhook 連接去 Firebase Cloud Functions。一收到錢，Server 自動幫嗰個 sponsor-uid 寫入 is_vip: true，你以後就唔使再人手改 Data 咁辛苦！
+
+
+檢查結果：Firebase 下載量主要來自 Realtime Database，不是 Storage。458.65KB Storage 很小，不能解釋 9.27GB 下載量。
+
+最高風險來源
+
+所有 35 個機種頁面都載入 plugin.js
+
+例如：bluelock.html:687-688
+每次開啟機種頁面，plugin.js 都會下載整個 users：
+plugin.js:591-610
+如果使用者很多，這一次讀取就會下載全部玩家資料。
+另外每 15 秒重新下載該機種的全部排行榜：
+plugin.js:629-645
+排行榜只在瀏覽器下載完後才 .slice(0, 10)，所以即使畫面只顯示 10 筆，Firebase 仍可能傳送全部歷史紀錄。
+大堂首頁會下載整個 users
+
+index.html:1299-1328
+也會下載整個 machine_rankings：
+index.html:1343-1349
+每次重新整理首頁都會重新下載這些資料。
+排行榜資料可能持續累積
+
+plugin.js 會不斷寫入：
+machine_rankings/{machineName}
+plugin.js:751-764
+plugin.js:814-826
+但讀取時是整個 machine_rankings/{machineName}，沒有 Firebase limitToLast()，所以資料越多，每次 15 秒下載量越大。
+留言頁會一次下載全部留言
+
+request.html:277-304
+orderByChild('timestamp') 只是排序，沒有設定數量限制，因此會下載整個 community_requests。
+如果留言和回覆很多，重新開啟頁面就會下載全部內容。
+低影響來源
+
+login.html:78-81：註冊時寫入使用者資料，基本上不是主要下載來源。
+stats.html:736-741：只讀取目前登入使用者的資料，流量很小。
+index.html:1270-1285：只讀取目前使用者資料，流量很小。
+plugin.js:401-408：讀取 server_records/max_hamari，資料很小。
+hall-shared.js:78-86：只在儲存稱號設定時寫入資料，不是主要下載來源。
+最可能的主因排序
+
+plugin.js 的 db.ref('users').once('value')
+plugin.js 每 15 秒完整下載 machine_rankings/{machineName}
+index.html 完整下載 users
+index.html 完整下載 machine_rankings
+request.html 完整下載 community_requests
+你目前顯示的 0.06GB/分鐘 約等於 60MB/分鐘、3.6GB/小時。如果數字準確，通常代表同時有多個機種頁面開啟，或者 users / machine_rankings 已經變得很大。
+
+最有效的改善方向是：
+
+把 users 全體下載改成只讀必要欄位或建立公開排行榜資料。
+machine_rankings 改用 limitToLast(10)，並移除 15 秒輪詢或改成較長間隔。
+request.html 只讀取最新 20 至 50 筆留言。
+對排行榜資料設定保留數量，刪除舊紀錄。
+在 Firebase Console 的 Realtime Database Usage 中確認哪個 path 的下載量最高。
