@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let currentWallet = userData.balance;
 
         let currentMaxHamari = 0;
-        db.ref('server_records/max_hamari').on('value', (snap) => {
+        db.ref('server_records/max_hamari').once('value', (snap) => {
             if (snap.exists()) {
                 currentMaxHamari = parseInt(snap.val().spins) || 0;
             }
@@ -613,7 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 🚨 終極慳流量優化 2：只實時監聽「自己」嘅資料，其他人扣錢唔會再觸發全服下載
         if (uid) {
-            db.ref('users/' + uid).on('value', snap => {
+            db.ref('users/' + uid).once('value', snap => {
                 if (snap.exists() && window.globalUsersData) {
                     window.globalUsersData[uid] = snap.val();
                     renderMachineRankings(); // 輕量更新右上角自己個名
@@ -626,7 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
         function fetchMachineRankings() {
             // 🌟 機台排行榜：恢復安全實時監聽 (.on)
             // 因為「一萬發上榜」係低頻罕見事件，唔會對 Firebase 造成負擔
-            db.ref('machine_rankings/' + machineName).on('value', (snapshot) => {
+            db.ref('machine_rankings/' + machineName).once('value', (snapshot) => {
                 currentMachineRankings = [];
                 if (snapshot.exists()) {
                     snapshot.forEach(child => { currentMachineRankings.push(child.val()); });
