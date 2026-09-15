@@ -1315,7 +1315,7 @@
                 const user = auth.currentUser;
                 if (user && usersData[user.uid] && !window._isMyBalanceListening) {
                     window._isMyBalanceListening = true; // 防重複綁定
-                    db.ref('users/' + user.uid).on('value', snap => {
+                    db.ref('users/' + user.uid).once('value', snap => {
                         if(snap.exists()) {
                             usersData[user.uid] = snap.val();
                             document.getElementById("nav-balance").innerText = Math.round(snap.val().balance).toLocaleString();
