@@ -90,6 +90,12 @@ Firebase 嘅計費背後其實係連住 Google Cloud Platform (GCP)。你綁咗�
 
 方法 A：即時降級 (Downgrade)
 入去 Firebase 後台，將個 Plan 即刻轉返做 Spark（免費版）。系統會瞬間恢復「100人連線限制」同「10GB 流量上限」，即時截斷額外收費。
+優先事項：學識「緊急煞掣」（而家即刻記住）
+萬一你聽朝起身，發現 Email 收到 Budget Alert 話扣緊錢，你要識得即刻變返免費 Plan：
+
+點樣降級：入去 Firebase Console 左邊齒輪 (設定) -> プロジェクトの設定 (Project Settings) -> 上面 Tab 揀 使用量と請求額 (Usage and billing) -> 詳細と設定 (Details & Settings) -> 撳 「プランを変更 (Modify Plan)」，將佢轉返做 Spark (無料) 就即刻截斷收費。
+
+點樣鎖 Database：入 Realtime Database -> ルール (Rules)，將 read 同 write 改做 false，一秒踢走所有人。
 
 方法 B：一秒鎖死 Database (Lockdown)
 衝入去 Firebase 後台嘅 Realtime Database -> Rules，將所有讀寫權限變成 false：
@@ -105,3 +111,38 @@ JSON
 
 總結
 唔使太擔心，只要你去 Firebase 後台先 Set 好 App Check，再順手去 GCP Set 個 Budget Alert (預算警告)，其實個風險已經降到極低。搞掂呢兩樣嘢先綁信用卡，你就可以放心畀全服玩家一齊入嚟玩啦！打算今晚研究吓點 Set App Check 嗎？
+
+
+優先事項：學識「緊急煞掣」（而家即刻記住）
+萬一你聽朝起身，發現 Email 收到 Budget Alert 話扣緊錢，你要識得即刻變返免費 Plan：
+
+點樣降級：入去 Firebase Console 左邊齒輪 (設定) -> プロジェクトの設定 (Project Settings) -> 上面 Tab 揀 使用量と請求額 (Usage and billing) -> 詳細と設定 (Details & Settings) -> 撳 「プランを変更 (Modify Plan)」，將佢轉返做 Spark (無料) 就即刻截斷收費。
+
+點樣鎖 Database：入 Realtime Database -> ルール (Rules)，將 read 同 write 改做 false，一秒踢走所有人。
+
+📊 第一階段：觀察期（今晚至聽日）
+任務：監察刪除 setInterval 之後嘅流量變化。
+
+點做：乜都唔使搞，畀隻 Game 自己 Run 幾個鐘。聽朝入返你截圖呢個 使用状況 (Usage) 畫面，睇吓「ダウンロード (Download)」條線係咪平穩咗。如果由原本 1 個鐘 1.6GB 變返做幾個鐘先幾十 MB，即係止血成功！
+
+🛡️ 第二階段：防禦工程（未來一兩日搞）
+既然隻 Game 已經轉咗 Pay-as-you-go，防禦就變成最重要嘅一環：
+
+任務 1：收緊 Database Rules (重要！)
+
+你而家嘅 Rules 可能係任人讀寫。你要加規則，例如限制 payout 最多只可以寫入 99999，防止有人惡意寫入「99999999 玉」打亂你個排行榜。
+
+任務 2：開啟 Firebase App Check
+
+就係我哋之前提過，加個隱形嘅 reCAPTCHA v3 落你個網，等 Firebase 只接受「真人」嘅 Request，將所有 Python 刷分 Script 拒之門外。
+
+⚙️ 第三階段：自動化與架構優化（下星期慢慢玩）
+當 Server 穩定、防禦又做好，就可以用你 Cloud 專攻嘅技術去搞進階嘢：
+
+任務 1：極低流量排行榜 (Cloud Functions)
+
+寫支簡單嘅後端 Script，每 5 分鐘喺 Server-side 抽一次 Top 10，放落一個叫 top10_cache 嘅細 Node。前端 100 幾人淨係讀呢個細 Node，做到實時更新之餘，流量幾乎係零。
+
+任務 2：VIP 全自動派發 (Webhook)
+
+將 Buy Me A Coffee 或者 PayPal 嘅 Webhook 連接去 Firebase Cloud Functions。一收到錢，Server 自動幫嗰個 sponsor-uid 寫入 is_vip: true，你以後就唔使再人手改 Data 咁辛苦！

@@ -1340,13 +1340,13 @@
             lastRenderTime = Date.now();
         }
 
-        db.ref('machine_rankings').on('value', (snapshot) => {
+        db.ref('machine_rankings').once('value', (snapshot) => {
             rankingsData = snapshot.val() || {};
             updateDashboard();
         });
 
         // 史上最大ハマリの監視
-        db.ref('server_records/max_hamari').on('value', (snapshot) => {
+        db.ref('server_records/max_hamari').once('value', (snapshot) => {
             maxHamariData = snapshot.val();
             updateDashboard();
         });
