@@ -372,27 +372,23 @@
                     addLog(`現在回轉數: ${this.session_spins}`, "color-normal");
                 }
 
-                // 🌟 完美跟隨官方 (※1) 大当り確率: 1/349.9 (包含所有圖柄及記者會)
-                if (Math.random() < (1 / 349.9)) {
-                    
-                    let hitType = Math.random();
+                let roll = Math.random();
 
-                    // 1/349.9 裡面，有 87.5% 屬於 1/399.9 嘅圓餅圖 (包含 1500, 1050, 記者會成功)
-                    // 剩餘 12.5% 屬於 記者会見失敗 (得300玉通常)
-                    if (hitType < 0.875) {
-                        // 進入 1/399.9 嘅官方 100% 圓餅圖分配
-                        await this.normal_result_zugara();
-                    } else {
-                        // 🎤 記者会見 失敗 (佔總 1/2110 嘅 75.5%)
-                        addLog(`\n[${this.session_spins} 回轉] 🎤 記者会見 発生！`, "color-charge");
-                        addLog(`⏳ 昇格期待度 24.5%...`, "color-normal");
-                        await sleep(2000);
-                        
-                        this.session_payout += 300;
-                        addLog("💀 記者会見失敗... 2R (300玉) 獲得 (通常終了)", "color-fall");
-                        updateUI();
-                        this.record_history();
-                    }
+                // 🎯 1/399.9 本当り (図柄揃い / 記者会見成功)
+                if (roll < (1 / 399.9)) {
+                    await this.normal_result_zugara();
+                    return true;
+                }
+                // ⚡ 1/2110 記者会見失敗 (ハズレ・300玉)
+                else if (roll < (1 / 399.9) + (1 / 2110)) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎤 記者会見 発生！`, "color-charge");
+                    addLog(`⏳ 昇格期待度 24.5%...`, "color-normal");
+                    await sleep(2000);
+                    
+                    this.session_payout += 300;
+                    addLog("💀 記者会見失敗... 2R (300玉) 獲得 (通常終了)", "color-fall");
+                    updateUI();
+                    this.record_history();
                     return true;
                 }
 
@@ -460,31 +456,25 @@
                 while (this.state === "RUSH") {
                     await sleep(40);
                     current_rush_spins += 1;
-
                     document.getElementById("ui-spins").innerText = `BATTLE中: ${current_rush_spins}回転`;
 
+                    let r = Math.random();
+                    
                     // 1. 抽選 RUSH 大当り (約1/29)
-                    let hitRoll = Math.random() < (1 / 29);
-                    // 2. 抽選 転落小当り (約1/108)
-                    let fallRoll = Math.random() < (1 / 108);
-
-                    if (hitRoll) {
+                    if (r < (1 / 29)) {
                         this.session_rush_count += 1;
                         addLog(`\n🎉 BATTLE勝利！ (${current_rush_spins}回転)`, "color-hit");
 
-                        // 🌟 新增邏輯：12% 無出玉重置 vs 88% 正式派彩 🌟
+                        // 🌟 12% 無出玉重置 vs 88% 正式派彩
                         if (Math.random() < 0.12) {
                             addLog(`⚡ エゴイストアタック失敗！ 出玉なしでエゴイストBATTLE継続！`, "color-charge");
-                            // 唔洗加錢，直接跳過派彩，重置轉數
                         } else {
-                            let roll = Math.random();
+                            let payout_roll = Math.random();
                             let payout = 0;
 
                             // 7500個＋エゴストラタイム (0.5%)
-                            if (roll < 0.005) {
+                            if (payout_roll < 0.005) {
                                 addLog(`7500だけじゃ、終われない！！！！！！！！`, "color-ultimate");
-
-                                // 🌟 彈出 7500 專屬影片
                                 addLog(`🎵 播放專屬動畫 (7500.mp4) 中... 請稍候`, "color-music");
                                 await playVideoPopupAndWait(video7500);
 
@@ -519,17 +509,17 @@
                                 payout = extra_payout;
                             }
                             // 6000個 (5.2%)
-                            else if (roll < 0.005 + 0.052) {
+                            else if (payout_roll < 0.005 + 0.052) {
                                 payout = 6000;
                                 addLog(`🔥 嫌だ！俺は俺のゴールで！勝ちたい！ 6000玉獲得 !!`, "color-ultimate");
                             }
                             // 4500個 (19.8%)
-                            else if (roll < 0.057 + 0.198) {
+                            else if (payout_roll < 0.057 + 0.198) {
                                 payout = 4500;
                                 addLog(`💥 嫌だ！俺は俺のゴールで！勝ちたい！ 4500玉獲得 !`, "color-rush");
                             }
                             // 3000個 (38.0%)
-                            else if (roll < 0.255 + 0.380) {
+                            else if (payout_roll < 0.255 + 0.380) {
                                 payout = 3000;
                                 addLog(`⚡ 俺はストライカーだ！ 3000玉獲得`, "color-rush");
                             }
@@ -551,8 +541,8 @@
                         updateUI();
                         await sleep(800);
                     }
-                    // 沒有中獎但抽中轉落
-                    else if (fallRoll) {
+                    // 2. 抽選 転落小当り (約1/108)
+                    else if (r < (1 / 29) + (1 / 108)) {
                         addLog(`\n💀 転落... (${current_rush_spins}回転) BATTLE敗北`, "color-fall");
                         addLog(`📈 總連莊數: ${this.session_rush_count + 1}連 (含初當)`);
                         addLog(`💰 最終出玉: ${this.session_payout} 玉`);

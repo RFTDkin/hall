@@ -640,6 +640,55 @@
         #modal-name .title-effect {
             white-space: normal !important;
         }
+
+        /* 🌟 Top 5 下拉選單專用美化 🌟 */
+        .top5-scroll-container {
+            display: none;
+            margin-top: 15px;
+            font-size: 0.85em;
+            text-align: left;
+            background: rgba(26, 5, 5, 0.6); /* 半透明暗紅背景 */
+            border: 1px solid rgba(255, 82, 82, 0.4); /* 柔和嘅紅色邊框 */
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 180px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 10px rgba(255, 82, 82, 0.1);
+        }
+
+        /* ✨ 隱藏核突白邊，自訂幼細拉桿 (Webkit專用) ✨ */
+        .top5-scroll-container::-webkit-scrollbar {
+            width: 6px; /* 拉桿變幼 */
+        }
+        .top5-scroll-container::-webkit-scrollbar-track {
+            background: transparent; /* 軌道透明 */
+        }
+        .top5-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 82, 82, 0.6); /* 變成半透明紅色拉桿 */
+            border-radius: 10px;
+        }
+        .top5-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #ff5252; /* 滑鼠指過去變鮮紅 */
+        }
+
+        /* 🔘 Top 5 按鈕美化 */
+        .top5-toggle-btn {
+            background: rgba(255, 82, 82, 0.1);
+            border: 1px solid rgba(255, 82, 82, 0.5);
+            color: #ff8a80;
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 0.85em;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .top5-toggle-btn:hover {
+            background: rgba(255, 82, 82, 0.25);
+            box-shadow: 0 0 8px rgba(255, 82, 82, 0.5);
+            color: #fff;
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
 </head>
@@ -652,7 +701,10 @@
             💰 <span id="nav-balance" style="color: #00e676;">---</span> 円
         </div>
         <!-- 🌟 將右邊嘅按鈕用 flex 裝埋一齊，加個 gap 隔開 🌟 -->
+        <!-- 🌟 原本嘅導覽列按鈕區，加入贊助按鈕 🌟 -->
         <div style="display: flex; gap: 10px; align-items: center;">
+            <button onclick="openGlobalRanking()" style="background: #1f6feb; color: #fff; border: 1px solid #388bfd; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 1em; cursor: pointer; transition: 0.2s; box-shadow: 0 0 10px rgba(31, 111, 235, 0.5);">🏆 全サーバー順位</button>
+            <button onclick="document.getElementById('sponsor-modal').style.display='flex'" style="background: #ff9100; color: #fff; border: 1px solid #ffea00; padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 1em; cursor: pointer; transition: 0.2s; box-shadow: 0 0 10px rgba(255, 145, 0, 0.5);">☕個人開発者を支援</button>
             <a href="titles.html" style="background: #d4af37; color: #000; border: 1px solid #ffea00; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1em; transition: 0.2s;">称号一覧</a>
             <a href="request.html" style="background: #2ea043; color: white; border: 1px solid #3fb950; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1em; transition: 0.2s;">機種要望</a>
             <button id="auth-btn" class="auth-btn">読込中...</button>
@@ -678,6 +730,12 @@
             <div class="dash-title">👑 本日の一撃王</div>
             <div id="today-besthit" class="dash-value" style="color: #888;">集計中...</div>
             <div style="font-size: 0.7em; color: #666; margin-top: 5px;">※ 1万発以上の最高出玉</div>
+            
+            <!-- 🌟 新增：已美化的 Top 5 下拉選單 🌟 -->
+            <button class="top5-toggle-btn" onclick="const el = document.getElementById('today-hit-top5'); el.style.display = el.style.display === 'none' ? 'block' : 'none';">🔽 トップ5を表示</button>
+            <div id="today-hit-top5" class="top5-scroll-container">
+                <div style="color:#888; text-align:center;">集計中...</div>
+            </div>
         </div>
 
         <div class="dash-card loser">
@@ -797,11 +855,14 @@
             </div>
             <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
-        <a href="hellsing.html" class="machine-card card-hellsing">
+        <a href="hikikomari.html" class="machine-card" style="border-color: #d50000;">
             <div>
-                <h3 class="machine-title">P 烈核解放 (超孤紅の恤)</h3>
-                <div class="machine-spec">CZ確率: 1/129<br>RUSH継続率: 約77%<br><span style="color:#ff1744;">最大出玉: 6000個 +
-                        1G連</span></div>
+                <h3 class="machine-title" style="color: #ff1744;">eひきこまり吸血姫の悶々</h3>
+                <div class="machine-spec">
+                    CZ確率: 1/129<br>
+                    LT継続率: 約77%<br>
+                    <span style="color:#ffea00;">最大出玉: 孤紅の恤BONUSで最大6000個+1G連！</span>
+                </div>
             </div>
             <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
@@ -989,8 +1050,80 @@
 
         <a href="iseleve.html" class="machine-card" style="border-color: #7c4dff;">
             <div>
-                <h3 class="machine-title" style="color: #b388ff;">eいせれべFSZ</h3>
+                <h3 class="machine-title" style="color: #b388ff;">eいせれべ</h3>
                 <div class="machine-spec">大当り確率: 約1/179<br>RUSH突入率: 約20%<br><span style="color:#00e5ff;">トータル継続率: 約83% (1G連ループ)</span></div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+        </a>
+
+        <a href="rezero2.html" class="machine-card" style="border-color: #b388ff;">
+            <div>
+                <h3 class="machine-title" style="color: #b388ff;">e Re:ゼロ season2</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/349.9<br>
+                    RUSH継続率: 約77% (ST145回)<br>
+                    <span style="color:#ffca28;">右打ち中25%で3000個+αの強欲ループ！</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+        </a>
+
+        <a href="railgun.html" class="machine-card" style="border-color: #00e5ff;">
+            <div>
+                <h3 class="machine-title" style="color: #00e5ff;">eとある科学の超電磁砲</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/169.7<br>
+                    LT継続率: 約77%<br>
+                    <span style="color:#ff9100;">最大出玉: 7500個+α (1G連搭載)</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+        </a>
+
+        <a href="eightysix.html" class="machine-card" style="border-color: #45a29e;">
+            <div>
+                <h3 class="machine-title" style="color: #45a29e;">eエイティシックス</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/239.1<br>
+                    LT継続率: 約79%<br>
+                    <span style="color:#ff5252;">特化BONUS: キリヤ血戦で最大約12300個！</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+        </a>
+
+        <a href="otome7.html" class="machine-card" style="border-color: #ff4081;">
+            <div>
+                <h3 class="machine-title" style="color: #ff4081;">P戦国乙女7</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/399.6<br>
+                    LT継続率: 約77% (ST140回)<br>
+                    <span style="color:#ffeb3b;">右打ちALL 2000個+αループ！</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+        </a>
+
+        <a href="garo12.html" class="machine-card" style="border-color: #ffd700;">
+            <div>
+                <h3 class="machine-title" style="color: #ffd700;">e牙狼12</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/349.9<br>
+                    LT継続率: 約76%<br>
+                    <span style="color:#ff1744;">最大出玉: 7500個 (右打ち25%で7500個！)</span>
+                </div>
+            </div>
+            <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
+        </a>
+
+        <a href="sao_senkou.html" class="machine-card" style="border-color: #ff4081;">
+            <div>
+                <h3 class="machine-title" style="color: #ff4081;">e SAO 〜閃光の軌跡〜</h3>
+                <div class="machine-spec">
+                    大当り確率: 1/199.9<br>
+                    LT継続率: 約90%<br>
+                    <span style="color:#ffea00;">最大出玉: LT突入で期待出玉約12400個！</span>
+                </div>
             </div>
             <div class="play-btn">▶️ 遊技開始 (PLAY)</div>
         </a>
@@ -1007,8 +1140,8 @@
     <!-- 👇 喺度加入免責聲明 👇 -->
     <div style="max-width: 1200px; margin: 20px auto 40px auto; padding: 15px; background: #111; border: 1px solid #333; border-left: 4px solid #ffca28; border-radius: 8px; text-align: left; color: #aaa; font-size: 0.85em; line-height: 1.6;">
         <strong style="color: #ffca28;">※ 免責事項及び注意事項 ※</strong><br>
-        当サイトは完全無料のシミュレーターゲームであり、実際の金銭のやり取りは一切ありません。サイト内の「円」や「玉」はすべて架空の数値です。<br>
-        なお、実際のパチンコ・パチスロは風俗営業等の規制及び業務の適正化等に関する法律（風営法）により、<strong>18歳未満の遊技が固く禁じられています。</strong>
+        当サイトは完全無料のシミュレーターゲームであり、<strong>実際の金銭のやり取りは一切ありません。</strong>サイト内の「円」や「玉」はすべて架空の数値です。<br>
+        なお、実際のパチンコ・パチスロは風俗営業等の規制及び業務の適正化等に関する法律（風営法）により、18歳未満の遊技が固く禁じられています。
     </div>
     <!-- 👆 免責聲明完結 👆 -->
 
@@ -1107,12 +1240,15 @@
                 } else {
                     if (isBankrupt) { html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`; }
                     else if (isComplete) { html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`; }
-                    else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme) {
+                    else if (!isGod && !isRunthrough && !userObj.is_vip && !isHell && !isSupreme) {
                         html = `<span style="color: ${baseColor};">${html}</span>`;
                     }
                     if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
                     if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
-                    if (isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
+                    
+                    // 🌟 將一擊王特效改為綁定 VIP
+                    if (userObj.is_vip) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
+                    
                     if (isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
                     if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
                     html = `<span class="title-effect">${html}</span>`;
@@ -1127,6 +1263,10 @@
 
         auth.onAuthStateChanged((user) => {
             if (user) {
+                // 🌟 安全寫法：先檢查元素存唔存在，避免 Crash 🌟
+                let sponsorEl = document.getElementById('sponsor-uid');
+                if (sponsorEl) sponsorEl.innerText = user.uid;
+
                 db.ref('users/' + user.uid).once('value').then((snap) => {
                     if (snap.exists()) {
                         let userData = snap.val();
@@ -1154,33 +1294,43 @@
         let lastRenderTime = 0;
         let renderTimeout = null;
 
-        // 🚨 終極慳流量優化 4：大堂排行榜同總數值，每次 F5 重新整理時「只讀取 1 次」
-        db.ref('users').once('value').then((snapshot) => {
-            usersData = snapshot.val() || {};
-            
-            for (let uid in usersData) {
-                let u = usersData[uid];
-                if ((u.single_hell_count || 0) >= 10 && !u.title_hell) {
-                    db.ref(`users/${uid}`).update({ title_hell: true });
-                    usersData[uid].title_hell = true;
-                }
-            }
-            
-            const user = auth.currentUser;
-            if (user && usersData[user.uid]) {
-                document.getElementById("nav-balance").innerText = Math.round(usersData[user.uid].balance).toLocaleString();
+        // 🚨 終極慳流量優化 4：大堂排行榜 (15秒自動更新版)
+        function fetchGlobalRankings() {
+            db.ref('users').once('value').then((snapshot) => {
+                usersData = snapshot.val() || {};
                 
-                // 🚨 終極慳流量優化 5：自己嘅餘額維持實時更新
-                db.ref('users/' + user.uid).on('value', snap => {
-                    if(snap.exists()) {
-                        usersData[user.uid] = snap.val();
-                        document.getElementById("nav-balance").innerText = Math.round(snap.val().balance).toLocaleString();
-                        executeRender();
+                const myUser = auth.currentUser;
+                for (let uid in usersData) {
+                    let u = usersData[uid];
+                    if ((u.single_hell_count || 0) >= 10 && !u.title_hell) {
+                        // 🌟 修正：只允許系統幫「自己」補發稱號，禁止越權修改其他人資料 🌟
+                        if (myUser && myUser.uid === uid) {
+                            db.ref(`users/${uid}`).update({ title_hell: true }).catch(e => console.warn(e));
+                        }
+                        usersData[uid].title_hell = true; // 本地照樣更新顯示
                     }
-                });
-            }
-            executeRender();
-        });
+                }
+                
+                // 自己嘅餘額維持實時監聽 (只執行一次綁定)
+                const user = auth.currentUser;
+                if (user && usersData[user.uid] && !window._isMyBalanceListening) {
+                    window._isMyBalanceListening = true; // 防重複綁定
+                    db.ref('users/' + user.uid).on('value', snap => {
+                        if(snap.exists()) {
+                            usersData[user.uid] = snap.val();
+                            document.getElementById("nav-balance").innerText = Math.round(snap.val().balance).toLocaleString();
+                            executeRender();
+                        }
+                    });
+                }
+                executeRender();
+            });
+        }
+
+        // 網頁載入即刻執行一次
+        fetchGlobalRankings();
+        // 🌟 神奇計時器：每 15 秒 (15000 毫秒) 自動喺後台靜靜雞刷新排行榜
+        setInterval(fetchGlobalRankings, 15000);
 
         // 將更新 UI 的邏輯獨立抽出來
         function executeRender() {
@@ -1227,7 +1377,7 @@
                     title_hell: cu.title_hell,
                     title_godpull: cu.title_godpull,
                     title_runthrough: cu.title_runthrough,
-                    title_ichigeki: cu.title_ichigeki,
+                    is_vip: cu.is_vip,
                     equipped_title: cu.equipped_title, // 🌟 讀取裝備狀態
                     isSelf: true
                 };
@@ -1254,7 +1404,7 @@
                     title_hell: u.title_hell || false,
                     title_godpull: u.title_godpull || false,
                     title_runthrough: u.title_runthrough || false,
-                    title_ichigeki: u.title_ichigeki || false,
+                    is_vip: u.is_vip || false, // 🌟 補返 VIP 狀態
                     isSelf: (auth.currentUser && auth.currentUser.uid === uid)
                 };
 
@@ -1313,30 +1463,34 @@
 
             const today = new Date();
             const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
-            let bestHitUserName = null;
-            let bestHitPayout = 0;
-            let bestHitMachine = "";
-
+            
+            // 🌟 1. 收集今日所有過萬發紀錄
+            let todayHits = []; 
             for (let machine in rankingsData) {
                 for (let recordKey in rankingsData[machine]) {
                     let rec = rankingsData[machine][recordKey];
-                    if (rec.date === dateStr && rec.payout > bestHitPayout) {
-                        bestHitPayout = rec.payout;
-                        bestHitMachine = machine;
-                        bestHitUserName = rec.user;
+                    if (rec.date === dateStr && rec.payout >= 10000) {
+                        todayHits.push({
+                            user: rec.user,
+                            payout: rec.payout,
+                            machine: machine
+                        });
                     }
                 }
             }
 
-            // 🌟 一擊王：隔離名字與數值更新 🌟
+            // 🌟 2. 排序：由高至低排列，並抽取頭 5 名
+            todayHits.sort((a, b) => b.payout - a.payout);
+            let top5Hits = todayHits.slice(0, 5);
+
             let hitEl = document.getElementById("today-besthit");
-            if (bestHitUserName && bestHitPayout >= 10000) {
-                let hitUid = null;
-                let hitUserObj = { name: bestHitUserName, has_completed: false };
+            let top5El = document.getElementById("today-hit-top5");
+
+            // 🌟 輔助函數：搵返玩家完整資料用嚟出稱號特效
+            const getHitUserObj = (userName) => {
                 for (let uid in usersData) {
-                    if (usersData[uid].username === bestHitUserName) {
-                        hitUid = uid;
-                        hitUserObj = {
+                    if (usersData[uid].username === userName) {
+                        return {
                             uid: uid,
                             name: usersData[uid].username,
                             balance: usersData[uid].balance || 0,
@@ -1344,28 +1498,65 @@
                             title_hell: usersData[uid].title_hell || false,
                             title_godpull: usersData[uid].title_godpull || false,
                             title_runthrough: usersData[uid].title_runthrough || false,
-                            title_ichigeki: usersData[uid].title_ichigeki || false,
+                            is_vip: usersData[uid].is_vip || false,
+                            equipped_title: usersData[uid].equipped_title || "auto",
                             isSelf: (auth.currentUser && auth.currentUser.uid === uid)
                         };
-                        break;
                     }
                 }
+                return { name: userName, has_completed: false };
+            };
+
+            if (top5Hits.length > 0) {
+                // 🌟 第一名：更新主看板「本日の一撃王」
+                let bestHit = top5Hits[0];
+                let hitUserObj = getHitUserObj(bestHit.user);
+                let hitUid = hitUserObj.uid;
                 
                 let bestHitUserHtml = getPlayerNameHtml(hitUserObj, hitUid === topUid, hitUid, false, true);
-                let cleanMachineName = bestHitMachine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
+                let cleanMachineName = bestHit.machine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
                 
                 if (!hitEl.querySelector('.dash-amt')) {
                     hitEl.innerHTML = `<span class="dash-amt" style="color:#fff;"></span><br><span class="dash-name" style="display:inline-block; width:100%; white-space:normal; word-break:break-all; line-height:1.4; font-size:0.55em; margin-top:2px;"></span>`;
                 }
                 let aEl = hitEl.querySelector('.dash-amt');
                 let nEl = hitEl.querySelector('.dash-name');
-                let amtStr = `${bestHitPayout.toLocaleString()} 玉`;
+                let amtStr = `${bestHit.payout.toLocaleString()} 玉`;
                 let nameStr = `${bestHitUserHtml} (${cleanMachineName})`;
                 
                 if (aEl.innerText !== amtStr) aEl.innerText = amtStr;
                 if (nEl.innerHTML !== nameStr) nEl.innerHTML = nameStr;
+                
+                // 🌟 Top 5：更新下拉選單名單
+                let top5Html = "";
+                top5Hits.forEach((hit, index) => {
+                    let uObj = getHitUserObj(hit.user);
+                    let rankIcon = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"][index];
+                    let uHtml = getPlayerNameHtml(uObj, uObj.uid === topUid, uObj.uid, false, true);
+                    let cleanMach = hit.machine.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace(/\)/g, '').trim();
+                    
+                    // 最後一個唔需要加底線
+                    let isLast = index === top5Hits.length - 1;
+                    let borderStyle = isLast ? "" : "border-bottom: 1px dashed rgba(255, 82, 82, 0.3); margin-bottom: 8px; padding-bottom: 8px;";
+                    
+                    top5Html += `
+                        <div style="${borderStyle}">
+                            <div style="color: #ffca28; font-weight: bold; font-size: 1.1em; margin-bottom: 4px;">${rankIcon} ${hit.payout.toLocaleString()} 玉</div>
+                            <div style="line-height: 1.5; display: flex; flex-direction: column;">
+                                <span>${uHtml}</span>
+                                <span style="font-size: 0.8em; color: #aaa; margin-top: 2px;">🎰 ${cleanMach}</span>
+                            </div>
+                        </div>`;
+                });
+                
+                if (top5El && top5El.innerHTML !== top5Html) {
+                    top5El.innerHTML = top5Html;
+                }
+                
             } else {
+                // 無人過萬發嗰陣嘅顯示
                 hitEl.innerHTML = `<span style="color:#888;">記録待ち (1万発以上)</span>`;
+                if (top5El) top5El.innerHTML = `<div style="color:#888; text-align:center;">該当者なし</div>`;
             }
 
             // 🌟 史上最大ハマリ：隔離名字與數值更新 🌟
@@ -1384,7 +1575,7 @@
                             title_hell: usersData[uid].title_hell || false,
                             title_godpull: usersData[uid].title_godpull || false,
                             title_runthrough: usersData[uid].title_runthrough || false,
-                            title_ichigeki: usersData[uid].title_ichigeki || false,
+                            is_vip: usersData[uid].is_vip || false, // 🌟 補返 VIP 狀態
                             isSelf: (auth.currentUser && auth.currentUser.uid === uid)
                         };
                         break;
@@ -1423,7 +1614,7 @@
                     title_hell: u.title_hell || false,
                     title_godpull: u.title_godpull || false,
                     title_runthrough: u.title_runthrough || false,
-                    title_ichigeki: u.title_ichigeki || false,
+                    is_vip: u.is_vip || false,
                     isSelf: (auth.currentUser && auth.currentUser.uid === uid)
                 };
             });
@@ -1506,7 +1697,7 @@
                 title_hell: u.title_hell, 
                 title_godpull: u.title_godpull, 
                 title_runthrough: u.title_runthrough,
-                title_ichigeki: u.title_ichigeki,
+                is_vip: u.is_vip, // 🌟 補返 VIP 狀態
                 equipped_title: u.equipped_title, // 🌟 補返裝備設定落去
                 isSelf: auth.currentUser && auth.currentUser.uid === currentOpenProfileUid 
             };
@@ -1543,21 +1734,13 @@
             let rFillEl = document.getElementById('modal-run-fill');
             if (rFillEl.style.width !== rFill) rFillEl.style.width = rFill;
 
-            let iText = `${iC} / 10`;
-            let iTextEl = document.getElementById('modal-ichi-text');
-            if (iTextEl.innerText !== iText) iTextEl.innerText = iText;
-
-            let iFill = `${Math.min((iC / 10) * 100, 100)}%`;
-            let iFillEl = document.getElementById('modal-ichi-fill');
-            if (iFillEl.style.width !== iFill) iFillEl.style.width = iFill;
-
             let badgesHtml = '';
             badgesHtml += `<div class="badge ${u.has_completed ? 'active' : ''}">🌈 コンプリート</div>`;
             badgesHtml += `<div class="badge ${u.balance <= -10000000 ? 'active' : ''}">💀 破産王</div>`;
             badgesHtml += `<div class="badge ${u.title_godpull ? 'active' : ''}">✨ 神の引き</div>`;
             badgesHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
             badgesHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
-            badgesHtml += `<div class="badge ${u.title_ichigeki ? 'active' : ''}">💥 一撃王</div>`;
+            if (u.is_vip) badgesHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 8px #00e5ff;">💎 VIP スポンサー</div>`;
             
             let badgesEl = document.getElementById('modal-badges');
             if (badgesEl.innerHTML !== badgesHtml) badgesEl.innerHTML = badgesHtml;
@@ -1588,7 +1771,7 @@
                                     ${u.title_godpull ? `<label><input type="checkbox" class="t-check" value="godpull" ${eq.includes('godpull') ? 'checked' : ''}> 神の引き</label><br>` : ''}
                                     ${u.title_runthrough ? `<label><input type="checkbox" class="t-check" value="runthrough" ${eq.includes('runthrough') ? 'checked' : ''}> 駆け抜け王</label><br>` : ''}
                                     ${u.title_hell ? `<label><input type="checkbox" class="t-check" value="hell" ${eq.includes('hell') ? 'checked' : ''}> 単発地獄</label><br>` : ''}
-                                    ${u.title_ichigeki ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 一撃王</label><br>` : ''}
+                                    ${u.is_vip ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 💎 VIP 特権 (紫電)</label><br>` : ''}
                                 </div>
                             </div>
                             <button onclick="window.saveTitleSettings('${currentOpenProfileUid}')" style="margin-top: 12px; width: 100%; padding: 8px; background: #00e5ff; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">💾 設定を保存</button>
@@ -1601,42 +1784,173 @@
             }
         }
 
-// 🌟 自動結算「本日の一撃王」並派發稱號。
-// 每日獨立日誌是唯一結算來源；單一 daily_best 只供畫面顯示，會被翌日覆蓋，不能用作派獎。
-        function processDailyBest() {
-            return window.HallShared.settleIchigekiAwards(db);
+        // ==========================================
+        // 🏆 全伺服器排名與神明評語引擎
+        // ==========================================
+        let fullRankingArray = [];
+        let filteredRankingArray = [];
+        let rankingCurrentPage = 1;
+        const RANKING_PER_PAGE = 20;
 
-            /* Legacy implementation kept below temporarily for source-history readability.
-             * The return above makes HallShared the only active settlement source. */
-            const today = new Date();
-            const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
+        function openGlobalRanking() {
+            // 1. 抽取所有玩家並排序
+            fullRankingArray = Object.keys(usersData).map(uid => {
+                let u = usersData[uid];
+                return {
+                    uid: uid,
+                    name: u.username || "Unknown",
+                    balance: u.balance || 0,
+                    has_completed: u.has_completed || false,
+                    title_hell: u.title_hell || false,
+                    title_godpull: u.title_godpull || false,
+                    title_runthrough: u.title_runthrough || false,
+                    is_vip: u.is_vip || false,
+                    equipped_title: u.equipped_title || "auto",
+                    isSelf: (auth.currentUser && auth.currentUser.uid === uid)
+                };
+            });
+            
+            // 按金錢由多到少排序
+            fullRankingArray.sort((a, b) => b.balance - a.balance);
 
-            // 以玩家資料內的日誌 key 作收據，讓跨日結算可安全重試而不重複加分。
-            db.ref('server_records/daily_bests_log').once('value').then(snap => {
-                let logs = snap.val();
-                if (logs) {
-                    for (let key in logs) {
-                        let rec = logs[key];
-                        if (rec && rec.date !== todayStr && rec.uid) {
-                            db.ref(`users/${rec.uid}`).transaction(userData => {
-                                if (!userData) return;
-                                const awards = userData.ichigeki_awards || {};
-                                if (awards[key]) return;
-                                userData.ichigeki_count = (userData.ichigeki_count || 0) + 1;
-                                awards[key] = { date: rec.date, payout: rec.payout || 0 };
-                                userData.ichigeki_awards = awards;
-                                return userData;
-                            }, (error, committed) => {
-                                if (!error && committed) {
-                                    db.ref(`server_records/daily_bests_log/${key}/processed`).set(true);
-                                }
-                            });
-                        }
-                    }
-                }
-            }).catch(error => console.error('[Ichigeki settlement] 日誌讀取失敗', error));
+            // 賦予名次 (同金錢則名次一樣會更好，但簡單起見按 index 排)
+            fullRankingArray.forEach((user, index) => { user.rank = index + 1; });
+
+            // 2. 初始化搜尋與分頁
+            filteredRankingArray = [...fullRankingArray];
+            rankingCurrentPage = 1;
+            document.getElementById('search-ranking-input').value = "";
+
+            renderGlobalRankingPage();
+            updateMyRankFooter();
+            document.getElementById('global-ranking-modal').style.display = 'flex';
         }
-        processDailyBest();
+
+        function renderGlobalRankingPage() {
+            const tbody = document.getElementById('global-ranking-tbody');
+            const start = (rankingCurrentPage - 1) * RANKING_PER_PAGE;
+            const end = start + RANKING_PER_PAGE;
+            const pageData = filteredRankingArray.slice(start, end);
+
+            let html = "";
+            if (pageData.length === 0) {
+                html = `<tr><td colspan="3" style="padding: 20px; color:#888;">該当するプレイヤーがいません</td></tr>`;
+            } else {
+                const topUid = fullRankingArray.length > 0 ? fullRankingArray[0].uid : null;
+                pageData.forEach(user => {
+                    let rankText = user.rank === 1 ? "🥇 1" : user.rank === 2 ? "🥈 2" : user.rank === 3 ? "🥉 3" : user.rank;
+                    // 呼叫原本寫好嘅稱號特效函數
+                    let nameHtml = getPlayerNameHtml(user, topUid === user.uid, user.uid, false, false, true);
+                    
+                    let balColor = user.balance >= 0 ? "#c9d1d9" : "#4fc3f7";
+                    if(user.rank <= 3 && user.balance >= 0) {
+                         if(user.rank === 1) balColor = "#ffeb3b";
+                         if(user.rank === 2) balColor = "#ff5252";
+                         if(user.rank === 3) balColor = "#cd7f32";
+                    }
+                    
+                    html += `
+                        <tr style="transition: 0.2s; cursor: default;" onmouseover="this.style.background='#1c2128'" onmouseout="this.style.background='transparent'">
+                            <td style="border-bottom: 1px solid #21262d; padding: 12px; font-weight: bold; color: #8b949e;">${rankText}</td>
+                            <td style="border-bottom: 1px solid #21262d; padding: 12px; text-align: left;">${nameHtml}</td>
+                            <td style="border-bottom: 1px solid #21262d; padding: 12px; color:${balColor}; font-weight:bold; font-family: monospace; font-size: 1.1em;">${Math.round(user.balance).toLocaleString()}</td>
+                        </tr>`;
+                });
+            }
+            tbody.innerHTML = html;
+            
+            const totalPages = Math.ceil(filteredRankingArray.length / RANKING_PER_PAGE) || 1;
+            document.getElementById('ranking-page-info').innerText = `${rankingCurrentPage} / ${totalPages}`;
+            document.getElementById('ranking-btn-prev').disabled = rankingCurrentPage === 1;
+            document.getElementById('ranking-btn-next').disabled = rankingCurrentPage === totalPages;
+            
+            document.getElementById('ranking-btn-prev').style.opacity = rankingCurrentPage === 1 ? '0.5' : '1';
+            document.getElementById('ranking-btn-next').style.opacity = rankingCurrentPage === totalPages ? '0.5' : '1';
+        }
+
+        function changeRankingPage(dir) {
+            const totalPages = Math.ceil(filteredRankingArray.length / RANKING_PER_PAGE) || 1;
+            rankingCurrentPage += dir;
+            if (rankingCurrentPage < 1) rankingCurrentPage = 1;
+            if (rankingCurrentPage > totalPages) rankingCurrentPage = totalPages;
+            renderGlobalRankingPage();
+        }
+
+        function searchRanking() {
+            const keyword = document.getElementById('search-ranking-input').value.toLowerCase();
+            if (!keyword) {
+                filteredRankingArray = [...fullRankingArray];
+            } else {
+                filteredRankingArray = fullRankingArray.filter(u => u.name.toLowerCase().includes(keyword));
+            }
+            rankingCurrentPage = 1;
+            renderGlobalRankingPage();
+        }
+
+        // 🌟 核心：個人排名與階級評語 🌟
+        function updateMyRankFooter() {
+            const footer = document.getElementById('my-rank-footer');
+            if (!auth.currentUser) {
+                footer.innerHTML = "<div style='text-align:center; color:#888;'>ログインしていません</div>";
+                return;
+            }
+            
+            const myUid = auth.currentUser.uid;
+            const myUser = fullRankingArray.find(u => u.uid === myUid);
+            if (!myUser) {
+                footer.innerHTML = "<div style='text-align:center; color:#888;'>データが見つかりません</div>";
+                return;
+            }
+
+            const total = fullRankingArray.length;
+            const rank = myUser.rank;
+            const topPct = (rank / total) * 100;
+            const bottomPct = 100 - topPct;
+
+            let comment = "";
+            let color = "#fff";
+
+            // 👑 評語大集合
+            if (topPct <= 3) {
+                comment = "神の領域。あなたは全サーバー上位3%の選ばれし者です、現実でも無双できるかも！？";
+                color = "#ffeb3b"; // 金色
+            } else if (topPct <= 10) {
+                comment = "超絶ラッキー！パチンコ店が泣いて逃げるレベルの豪運の持ち主。";
+                color = "#00e676"; // 亮綠
+            } else if (topPct <= 30) {
+                comment = "優秀な勝ち組プレイヤー！この調子でガンガン稼ぎましょう。";
+                color = "#00e5ff"; // 青色
+            } else if (topPct <= 70) {
+                comment = "ごく普通の一般遊技者です。可もなく不可もなく、一番遊べている証拠ですね。";
+                color = "#8b949e"; // 灰色
+            } else if (bottomPct <= 5) {
+                comment = "圧倒的養分！現実のホールに行くと財布が消滅する危険性大です。";
+                color = "#d50000"; // 深紅
+            } else if (bottomPct <= 15) {
+                comment = "典型的な養分予備軍…。現実に行ったら給料が全部溶けますよ（泣）";
+                color = "#ff5252"; // 紅色
+            } else {
+                comment = "少し運が悪いようです。波が来るのを信じて耐えましょう！";
+                color = "#ff9100"; // 橙色
+            }
+
+            const topUid = fullRankingArray.length > 0 ? fullRankingArray[0].uid : null;
+            // 借用 getPlayerNameHtml 嚟出自己個名同稱號 (disableClick=false 等佢可以照撳)
+            const nameHtml = getPlayerNameHtml(myUser, topUid === myUid, myUid, false, false, false);
+
+            footer.innerHTML = `
+                <div style="font-size: 0.8em; color: #8b949e; margin-bottom: 8px;">📊 あなたの現在の順位</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-size: 1.3em; font-weight: bold; color: #fff;">${rank}<span style="font-size: 0.6em; color: #888;"> 位</span> <span style="font-size: 0.6em; font-weight: normal; color: #666;">/ ${total}人中</span></div>
+                    <div style="font-size: 1.1em; text-align: right; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nameHtml}</div>
+                    <div style="font-size: 1.2em; font-weight: bold; font-family: monospace; color: ${myUser.balance >= 0 ? '#00e676' : '#ff5252'}">${Math.round(myUser.balance).toLocaleString()} 円</div>
+                </div>
+                <div style="font-size: 0.85em; background: #161b22; padding: 10px; border-radius: 8px; border: 1px solid #30363d;">
+                    上位 <strong style="color:#00e5ff;">${topPct.toFixed(1)}%</strong> / 下位 <strong style="color:#ff5252;">${bottomPct.toFixed(1)}%</strong><br>
+                    <span style="color: ${color}; font-weight: bold; display: block; margin-top: 5px; line-height: 1.4;">💬 「${comment}」</span>
+                </div>
+            `;
+        }
     </script>
     
 <!-- 🌟 置底懸浮廣告區塊 🌟 -->
@@ -1651,8 +1965,11 @@
             };
     
         </script>
-        <!-- 🌟 玩家 Profile 彈出視窗 🌟 -->
-    <div id="profile-modal" class="profile-modal-overlay" onclick="if(event.target===this) closeProfile()">
+    
+        <script type="text/javascript" src="//www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js"></script>
+    </div>
+    <!-- 🌟 玩家 Profile 彈出視窗 🌟 -->
+    <div id="profile-modal" class="profile-modal-overlay" onclick="if(event.target===this) closeProfile()" style="z-index: 10005;">
         <div class="profile-card">
             <button class="close-btn" onclick="closeProfile()">✖</button>
             <h3>プレイヤー情報</h3>
@@ -1669,17 +1986,98 @@
                 <div class="prog-bar-bg"><div id="modal-run-fill" class="prog-bar-fill fill-run" style="width: 0%;"></div></div>
             </div>
 
-            <div class="prog-container">
-                <div class="prog-label"><span>💥 一撃王 (本日の一撃王 10回)</span><span id="modal-ichi-text">0 / 10</span></div>
-                <div class="prog-bar-bg"><div id="modal-ichi-fill" class="prog-bar-fill fill-ichi" style="width: 0%;"></div></div>
-            </div>
-
             <div class="badge-container" id="modal-badges"></div>
             <div id="modal-title-selector"></div>
         </div>
     </div>
-    
-        <script type="text/javascript" src="//www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js"></script>
+
+    <!-- 🌟 贊助與 VIP 視窗 🌟 -->
+    <div id="sponsor-modal" class="profile-modal-overlay" onclick="if(event.target===this) this.style.display='none'">
+        <div class="profile-card" style="max-width: 450px; border-top: 5px solid #ff9100;">
+            <button class="close-btn" onclick="document.getElementById('sponsor-modal').style.display='none'">✖</button>
+            <h3 style="color: #ffca28; font-size: 1.3em;">☕ 個人開発者を支援する</h3>
+            <p style="font-size: 0.9em; color: #ccc; line-height: 1.6; text-align: left;">
+                当サイトは個人で開発・運営しております。<br>
+                もしシミュレーターを楽しんでいただけたら、サポートをいただけるとサーバー維持の最大の励みになります！<br><br>
+                🎁 <strong style="color: #00e5ff;">スポンサー特典 (永久VIP)</strong><br>
+                <strong style="color: #ffea00;">$5 (約800円) 以上</strong>ご支援いただいた方には、感謝の印としてサイト運営期間中ずっと有効な<strong style="color: #ff5252;">「全機種の広告非表示」「回転数無限」</strong>と<strong style="color: #ffea00;">「💎VIP専用称号 (紫電)」</strong>を付与させていただきます。
+            </p>
+            
+            <div style="background: #222; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px dashed #555;">
+                <div style="font-size: 0.85em; color: #888; margin-bottom: 5px;">あなたの専用プレイヤーID (送金時のメモに必ず入力してください)</div>
+                <div id="sponsor-uid" style="font-family: monospace; font-size: 1.2em; color: #00e5ff; font-weight: bold; word-break: break-all;">
+                    <script>
+                        firebase.auth().onAuthStateChanged(user => {
+                            if (user) {
+                                let el = document.getElementById('sponsor-uid');
+                                if (el) el.innerText = user.uid;
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <!-- 🌟 贊助按鈕區 🌟 -->
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+                <a href="https://www.buymeacoffee.com/itpachinnkasu" target="_blank" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 140px; height: 50px; background: #FFDD00; color: #000; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 0.85em; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 12px rgba(255,221,0,0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.3)';">
+                    <span>☕ Buy Me a Coffee</span>
+                    <span style="font-size: 0.7em; font-weight: normal; opacity: 0.8;">(カード / Apple Pay)</span>
+                </a>
+                
+                <a href="https://www.paypal.com/ncp/payment/JDW2BKWHPS39S" target="_blank" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 140px; height: 50px; background: #003087; color: #fff; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 0.85em; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 12px rgba(0,48,135,0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.3)';">
+                    <span>💳 PayPal</span>
+                    <span style="font-size: 0.7em; font-weight: normal; opacity: 0.9;">(Worldwide)</span>
+                </a>
+
+                <a href="https://payme.hsbc/12026867672046e9b5f2d32626c536e2" target="_blank" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 140px; height: 50px; background: #E60012; color: #fff; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 0.85em; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 12px rgba(230,0,18,0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.3)';">
+                    <span>📱 PayMe</span>
+                    <span style="font-size: 0.7em; font-weight: normal; opacity: 0.9;">(HK Local)</span>
+                </a>
+            </div>
+            
+            <div style="font-size: 0.75em; color: #666; margin-top: 15px;">※ ご支援後、手動でVIP権限を付与するため、反映まで半日〜1日程度かかる場合がございます。<br>※ 送金時のメモ欄に必ず上記の「プレイヤーID」をご入力ください。</div>
+        </div>
+    </div>
+
+    <!-- 🌟 全伺服器排名大視窗 🌟 -->
+    <div id="global-ranking-modal" class="profile-modal-overlay" onclick="if(event.target===this) this.style.display='none'">
+        <div class="profile-card" style="width: 95%; max-width: 700px; height: 85vh; display: flex; flex-direction: column; padding: 0; border-top: 5px solid #1f6feb; overflow: hidden; background: #0d1117;">
+            
+            <!-- Header 與 搜尋列 -->
+            <div style="padding: 20px; border-bottom: 1px solid #30363d; position: relative;">
+                <button class="close-btn" onclick="document.getElementById('global-ranking-modal').style.display='none'" style="top: 15px; right: 20px;">✖</button>
+                <h3 style="margin: 0 0 15px 0; color: #58a6ff; font-size: 1.4em; text-align: left;">🏆 全サーバー総合ランキング</h3>
+                <input type="text" id="search-ranking-input" oninput="searchRanking()" placeholder="🔍 プレイヤー名で検索..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #010409; color: #fff; font-size: 1em; box-sizing: border-box;">
+            </div>
+
+            <!-- 排名列表 (可捲動區域) -->
+            <div style="flex: 1; overflow-y: auto; padding: 0;">
+                <table style="width: 100%; border-collapse: collapse; text-align: center; color: #c9d1d9;">
+                    <thead style="background: #161b22; position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
+                        <tr>
+                            <th style="padding: 12px; border-bottom: 1px solid #30363d; color: #8b949e;">順位</th>
+                            <th style="padding: 12px; border-bottom: 1px solid #30363d; color: #8b949e;">プレイヤー</th>
+                            <th style="padding: 12px; border-bottom: 1px solid #30363d; color: #8b949e;">所持金 (円)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="global-ranking-tbody">
+                        <!-- JS 動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分頁控制 -->
+            <div style="padding: 10px; background: #161b22; border-top: 1px solid #30363d; display: flex; justify-content: center; align-items: center; gap: 15px;">
+                <button id="ranking-btn-prev" onclick="changeRankingPage(-1)" style="background: #21262d; color: #fff; border: 1px solid #30363d; padding: 6px 15px; border-radius: 4px; cursor: pointer;">◀ 前へ</button>
+                <span id="ranking-page-info" style="font-weight: bold; color: #8b949e;">1 / 1</span>
+                <button id="ranking-btn-next" onclick="changeRankingPage(1)" style="background: #21262d; color: #fff; border: 1px solid #30363d; padding: 6px 15px; border-radius: 4px; cursor: pointer;">次へ ▶</button>
+            </div>
+
+            <!-- 🌟 登入玩家專屬排名 Footer (固定在最底) 🌟 -->
+            <div id="my-rank-footer" style="padding: 15px 20px; background: linear-gradient(180deg, #111 0%, #000 100%); border-top: 3px solid #ffca28; text-align: left; box-shadow: 0 -5px 15px rgba(0,0,0,0.8);">
+                <!-- JS 動態生成評語 -->
+            </div>
+        </div>
     </div>
 </body>
 

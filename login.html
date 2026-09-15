@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="hall-shared.js"></script>
     <style>
         body { font-family: 'Noto Sans JP', sans-serif; background-color: #050505; color: #fff; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-image: radial-gradient(circle at center, #1a001a 0%, #000000 100%); }
         .login-box { background: #111; border: 2px solid #00e5ff; border-radius: 15px; padding: 40px; width: 350px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.3); }
@@ -38,16 +39,7 @@
 
     <script>
         // Firebaseのコンフィグ設定
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
-            authDomain: "p-hall.firebaseapp.com",
-            databaseURL: "https://p-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "p-hall",
-            storageBucket: "p-hall.firebasestorage.app",
-            messagingSenderId: "656958771527",
-            appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
-            measurementId: "G-46M19VQVY2"
-        };
+        const firebaseConfig = window.HallShared.firebaseConfig;
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();

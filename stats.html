@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>総合収支シミュレーション - パチンコ運試し</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="hall-shared.js"></script>
     <style>
         body {
             font-family: 'Noto Sans JP', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -394,17 +398,13 @@
             <div class="progress-text" id="lycoris-prog">待機中...</div>
         </div>
 
-        <div class="machine-card tag-hellsing" id="card-hellsing">
-            <h3 class="machine-title">P 烈核解放 (超孤紅の恤)</h3>
-            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins"
-                    id="hellsing-spins">---</span></div>
-            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout"
-                    id="hellsing-payout">---</span></div>
-            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max"
-                    id="hellsing-max">---</span></div>
-            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit"
-                    id="hellsing-profit">---</span></div>
-            <div class="progress-text" id="hellsing-prog">待機中...</div>
+        <div class="machine-card tag-hikikomari" id="card-hikikomari" style="border-top: 5px solid #d50000;">
+            <h3 class="machine-title">eひきこまり吸血姫の悶々</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="hikikomari-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="hikikomari-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="hikikomari-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="hikikomari-profit">---</span></div>
+            <div class="progress-text" id="hikikomari-prog">待機中...</div>
         </div>
 
         <div class="machine-card tag-slime" id="card-slime">
@@ -659,15 +659,104 @@
             <div class="progress-text" id="iseleve-prog">待機中...</div>
         </div>
 
+        <div class="machine-card tag-rezero2" id="card-rezero2" style="border-top: 5px solid #d500f9;">
+            <h3 class="machine-title">e Re:ゼロから始める異世界生活 season2</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="rezero2-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="rezero2-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="rezero2-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="rezero2-profit">---</span></div>
+            <div class="progress-text" id="rezero2-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-railgun" id="card-railgun" style="border-top: 5px solid #00e5ff;">
+            <h3 class="machine-title">eとある科学の超電磁砲</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="railgun-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="railgun-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="railgun-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="railgun-profit">---</span></div>
+            <div class="progress-text" id="railgun-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-eightysix" id="card-eightysix" style="border-top: 5px solid #45a29e;">
+            <h3 class="machine-title">eエイティシックス</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="eightysix-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="eightysix-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="eightysix-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="eightysix-profit">---</span></div>
+            <div class="progress-text" id="eightysix-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-otome7" id="card-otome7" style="border-top: 5px solid #ff4081;">
+            <h3 class="machine-title">P戦国乙女7</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="otome7-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="otome7-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="otome7-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="otome7-profit">---</span></div>
+            <div class="progress-text" id="otome7-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-garo12" id="card-garo12" style="border-top: 5px solid #ffd700;">
+            <h3 class="machine-title">e牙狼12</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="garo12-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="garo12-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="garo12-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="garo12-profit">---</span></div>
+            <div class="progress-text" id="garo12-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-sao_senkou" id="card-sao_senkou" style="border-top: 5px solid #ff4081;">
+            <h3 class="machine-title">e SAO 〜閃光の軌跡〜</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="sao_senkou-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="sao_senkou-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="sao_senkou-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="sao_senkou-profit">---</span></div>
+            <div class="progress-text" id="sao_senkou-prog">待機中...</div>
+        </div>
+
     </div>
 
     <script>
+        // 🌟 初始化 Firebase
+        const firebaseConfig = window.HallShared.firebaseConfig;
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
         // 🌟 廣告設定與解鎖狀態 🌟
         const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63";
         let is100kUnlocked = false;
+        let is10000Unlocked = false;
+        let isUserVip = false; // 預設不是 VIP
+
+        // 🌟 檢查玩家登入狀態及 VIP 權限 🌟
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                db.ref('users/' + user.uid).once('value').then((snap) => {
+                    if (snap.exists() && snap.val().is_vip) {
+                        isUserVip = true;
+                        is10000Unlocked = true;
+                        is100kUnlocked = true;
+                        
+                        // VIP 玩家直接解鎖按鈕外觀
+                        const btn10k = document.getElementById('btn-start-10000');
+                        const btn100k = document.getElementById('btn-100k');
+                        
+                        btn10k.innerText = "▶️ 10,000回 遊技開始 (VIP)";
+                        btn10k.style.backgroundColor = "#238636"; // 變成綠色可撳狀態
+                        btn10k.style.borderColor = "rgba(240, 246, 252, 0.1)";
+
+                        btn100k.innerText = "▶️ 10万回 遊技開始 (VIP)";
+                        btn100k.style.backgroundColor = "#238636";
+                        btn100k.style.borderColor = "rgba(240, 246, 252, 0.1)";
+                    }
+                });
+            }
+        });
 
         function trigger100kSim() {
-            if (is100kUnlocked) {
+            if (is100kUnlocked || isUserVip) {
                 runAllSimulations(100000);
                 return;
             }
@@ -694,24 +783,22 @@
                         btns.forEach(b => b.disabled = false);
                         btn100k.disabled = false;
                         window.alert("🎉 認証成功！10万回演算機能が解放されました！");
-                        runAllSimulations(100000); // 自動幫玩家行 10 萬次
+                        runAllSimulations(100000); 
                     }
                 }, 1000);
             }
         }
 
         function checkAndRun10000() {
-            if (is10000Unlocked) {
+            if (is10000Unlocked || isUserVip) {
                 runAllSimulations(10000);
                 return;
             }
 
             let confirmAd = window.confirm("⚠️ 10,000回高速演算はサーバーに大きな負荷がかかります。\n\n広告を1回チェックして、このセッションの演算機能を解放しますか？");
             if (confirmAd) {
-                // 1. 開啟廣告
                 window.open(ADSTERRA_DIRECT_LINK, '_blank');
 
-                // 2. 鎖定全畫面按鈕並倒數
                 const btn = document.getElementById('btn-start-10000');
                 const btns = document.querySelectorAll('.btn-start');
                 btns.forEach(b => b.disabled = true);
@@ -728,7 +815,7 @@
                         is10000Unlocked = true;
                         btns.forEach(b => b.disabled = false);
                         window.alert("🎉 認証成功！10,000回演算機能が解放されました！");
-                        runAllSimulations(10000); // 🌟 倒數完自動幫佢跑，慳返佢撳多下
+                        runAllSimulations(10000); 
                     }
                 }, 1000);
             }
@@ -746,21 +833,26 @@
             let spins = 0, payout = 0;
             while (true) {
                 spins++;
-                if (Math.random() < 1 / 399.9) {
+                let r_main = Math.random();
+                
+                // 🎯 1/399.9 本当り (図柄揃い / 記者会見成功)
+                if (r_main < 1 / 399.9) {
                     let r = Math.random();
                     let rush = false;
                     let initialPayout = 0;
-                    if (r < 0.001) { initialPayout = 1500; rush = true; }
-                    else if (r < 0.501) { initialPayout = 1050; rush = true; }
-                    else if (r < 0.547) { initialPayout = 300; rush = true; }
-                    else { initialPayout = 1050; }
+                    
+                    if (r < 0.001) { initialPayout = 1500; rush = true; } // 0.1% 1500+LT
+                    else if (r < 0.501) { initialPayout = 1050; rush = true; } // 50% 1050+LT
+                    else if (r < 0.547) { initialPayout = 300; rush = true; } // 4.6% 300+LT
+                    else { initialPayout = 1050; } // 45.3% 通常
 
                     payout += initialPayout;
                     if (payout >= 95000) break;
 
                     if (rush) {
-                        let winRate = 108 / (33.2 + 108);
-                        while (true) {
+                        // 🌟 RUSH 実質継続率: 約76.5% (1/33.2で当り、1/108で転落)
+                        let winRate = 108 / (33.2 + 108); 
+                        while (payout < 95000) {
                             if (Math.random() < winRate) {
                                 let rr = Math.random();
                                 let addP = 0;
@@ -780,13 +872,18 @@
                                 else addP = 1500;
 
                                 payout += addP;
-                                if (payout >= 95000) break;
-                            } else break;
+                            } else {
+                                break; // 転落
+                            }
                         }
                     }
                     break;
+                } 
+                // ⚡ 1/2110 記者会見失敗 (ハズレ・300玉)
+                else if (r_main < (1 / 399.9) + (1 / 2110)) {
+                    payout += 300; 
+                    break; 
                 }
-                if (Math.random() < 1 / 2110) { payout += 300; break; }
             }
             return { spins, payout };
         }
@@ -838,30 +935,56 @@
             let spins = 0, payout = 0;
             while (true) {
                 spins++;
+                // 1/349.9 初当り
                 if (Math.random() < 1 / 349.9) {
                     payout += 1500;
                     if (payout >= 95000) break;
-                    if (Math.random() < 0.51) {
-                        let winCount = 0, inShikabane = true, winRate = 148 / (43 + 148);
-                        while (inShikabane) {
-                            if (payout >= 95000) { inShikabane = false; break; }
+                    
+                    // 🌟 修正：50.5% 突入
+                    if (Math.random() < 0.505) {
+                        let winCount = 0;
+                        let inShikabane = true;
+                        // 🌟 精確轉落率：約 77.48% 継続
+                        let winRate = 148 / (43 + 148); 
+
+                        while (inShikabane && payout < 95000) {
                             if (Math.random() < winRate) {
                                 payout += 3000;
                                 winCount++;
+                                
                                 if (winCount >= 2) {
-                                    inShikabane = false;
+                                    inShikabane = false; 
                                     let inKonshin = true;
+                                    let vStock = 0; // 🌟 修正：新增 V-Stock 真實結算系統
+                                    
                                     while (inKonshin && payout < 95000) {
-                                        if (Math.random() < 0.50) {
+                                        let isWin = false;
+                                        if (vStock > 0) {
+                                            vStock--;
+                                            isWin = true;
+                                        } else {
+                                            if (Math.random() < 0.50) isWin = true;
+                                        }
+
+                                        if (isWin) {
                                             let r = Math.random();
-                                            let addP = 3000;
-                                            if (r < 0.03) addP = 10500;
-                                            else if (r < 0.50) addP = 9000;
-                                            payout += addP;
-                                        } else inKonshin = false;
+                                            // 🌟 修正：3.2% (9000+V), 46.8% (9000), 50% (3000)
+                                            if (r < 0.032) {
+                                                payout += 9000;
+                                                vStock++;
+                                            } else if (r < 0.50) { 
+                                                payout += 9000;
+                                            } else {
+                                                payout += 3000;
+                                            }
+                                        } else {
+                                            inKonshin = false;
+                                        }
                                     }
                                 }
-                            } else inShikabane = false;
+                            } else {
+                                inShikabane = false; // 転落
+                            }
                         }
                     }
                     break;
@@ -958,30 +1081,49 @@
 
         function simJitsuryoku() {
             let spins = 0, payout = 0;
+            
+            function runLT() {
+                let inLT = true;
+                while (inLT && payout < 95000) {
+                    let ltHit = false;
+                    for (let i = 0; i < 145; i++) {
+                        if (Math.random() < 1 / 71.6) { ltHit = true; break; }
+                    }
+                    if (ltHit) {
+                        payout += 3000;
+                        if (Math.random() >= 0.87) {
+                            inLT = false; // 13% 振り分けで通常へ転落
+                        }
+                    } else {
+                        inLT = false; // 145回転スルーで通常へ転落
+                    }
+                }
+            }
+
+            function runST() {
+                let stHit = false;
+                for (let i = 0; i < 65; i++) {
+                    if (Math.random() < 1 / 94.1) { stHit = true; break; }
+                }
+                if (stHit) {
+                    payout += 3000;
+                    // 大当り時の約73%でラッキートリガー発動
+                    if (Math.random() < 0.73 && payout < 95000) {
+                        runLT();
+                    }
+                }
+            }
+
             while (true) {
                 spins++;
+                // 通常時 大当り確率 1/349.9
                 if (Math.random() < 1 / 349.9) {
                     payout += 450;
                     if (payout >= 95000) break;
+                    
+                    // 初当りの約50%でST突入
                     if (Math.random() < 0.50) {
-                        let hit = false;
-                        for (let i = 0; i < 65; i++) if (Math.random() < 1 / 94.1) { hit = true; break; }
-                        if (hit) {
-                            payout += 3000;
-                            if (payout >= 95000) break;
-                            if (Math.random() < 0.73) {
-                                let inLT = true;
-                                while (inLT && payout < 95000) {
-                                    let ltHit = false;
-                                    for (let i = 0; i < 145; i++) if (Math.random() < 1 / 71.6) { ltHit = true; break; }
-                                    if (ltHit) {
-                                        payout += 3000;
-                                        if (Math.random() >= 0.87) inLT = false;
-                                    }
-                                    else inLT = false;
-                                }
-                            }
-                        }
+                        runST();
                     }
                     break;
                 }
@@ -1022,31 +1164,38 @@
                 if (Math.random() < 1 / 259.7) {
                     let r = Math.random();
                     let enterLT = false;
-                    if (r < 0.001) { payout += 1500; enterLT = true; }
-                    else if (r < 0.450) { payout += 600; enterLT = true; }
-                    else if (r < 0.500) { payout += 310; enterLT = true; }
-                    else if (r < 0.800) { payout += 600; }
-                    else { payout += 310; }
+                    
+                    // 完美的 50% 突入與非突入區間
+                    if (r < 0.001) { payout += 1500; enterLT = true; } // 0.1%
+                    else if (r < 0.450) { payout += 600; enterLT = true; } // 44.9%
+                    else if (r < 0.500) { payout += 310; enterLT = true; } // 5.0%
+                    else if (r < 0.800) { payout += 600; } // 30.0%
+                    else { payout += 310; } // 20.0%
 
                     if (enterLT && payout < 95000) {
-                        let mode = Math.random() < 0.30 ? "B" : "A";
+                        let mode = Math.random() < 0.30 ? "B" : "A"; // 初回約30%入 Mode B
                         let st = 132;
-                        while (st > 0) {
-                            if (payout >= 95000) break;
+                        while (st > 0 && payout < 95000) {
                             if (Math.random() < 1 / 97.1) {
                                 if (mode === "A") {
                                     payout += 750;
-                                    if (Math.random() < 0.5) mode = "B";
+                                    if (Math.random() < 0.50) mode = "B"; // 50% 升級 Mode B
                                 } else {
-                                    if (Math.random() < 0.5) {
+                                    if (Math.random() < 0.50) {
                                         payout += 6000;
-                                        if (payout >= 95000) break;
-                                        while (Math.random() < 0.5 && payout < 95000) payout += 3000;
-                                    } else payout += 3000;
-                                    mode = "A";
+                                        // 50% Loop 上乘 3000玉
+                                        while (Math.random() < 0.50 && payout < 95000) {
+                                            payout += 3000; 
+                                        }
+                                    } else {
+                                        payout += 3000;
+                                    }
+                                    mode = "A"; // Mode B 完結後跌返 Mode A
                                 }
-                                st = 132;
-                            } else st--;
+                                st = 132; // ST 回復
+                            } else {
+                                st--;
+                            }
                         }
                     }
                     break;
@@ -1055,46 +1204,69 @@
             return { spins, payout };
         }
 
-        function simHellsing() {
+        function simHikikomari() {
             let spins = 0, payout = 0;
-            while (true) {
-                spins++;
-                if (Math.random() < 1 / 129) {
-                    let czSuccess = false;
-                    for (let i = 1; i <= 10; i++) {
-                        spins++;
-                        if (Math.random() < 1 / 25.5) { czSuccess = true; break; }
-                    }
-                    if (czSuccess) {
-                        let r = Math.random();
-                        let rush = false;
-                        if (r < 0.073) { payout += 1800; rush = true; }
-                        else if (r < 0.073 + 0.437) { payout += 1500; rush = true; }
-                        else { payout += 1500; }
+            
+            const p_komari_fail = (1 / 348) * 0.8;
+            const p_komari_success = (1 / 348) * 0.2;
+            const p_c_zitan = (1 / 129) - p_komari_success;
 
-                        if (rush && payout < 95000) {
-                            let st = 144;
-                            while (st > 0) {
-                                if (payout >= 95000) break;
-                                if (Math.random() < 1 / 99) {
-                                    if (Math.random() < 0.5) {
-                                        let loop = true;
-                                        while (loop && payout < 95000) {
-                                            let br = Math.random();
-                                            if (br < 0.125) { payout += 6000; loop = false; }
-                                            else if (br < 0.125 + 0.375) { payout += 4500; loop = false; }
-                                            else if (br < 0.50 + 0.375) { payout += 3000; loop = false; }
-                                            else { payout += 1500; loop = false; }
-                                        }
-                                    } else payout += 1500;
-                                    st = 144;
-                                } else st--;
+            while(true) {
+                spins++;
+                let roll = Math.random();
+                
+                if (roll < p_komari_fail) {
+                    payout += 300;
+                    break; 
+                } else if (roll < p_komari_fail + p_komari_success) {
+                    payout += 300;
+                    if (runCZ()) break;
+                } else if (roll < p_komari_fail + p_komari_success + p_c_zitan) {
+                    if (runCZ()) break;
+                }
+            }
+            
+            function runCZ() {
+                let cz_success = false;
+                for(let i=0; i<10; i++) {
+                    spins++; 
+                    if (Math.random() < 1/25.5) { cz_success = true; break; }
+                }
+                
+                if (cz_success) {
+                    let r = Math.random();
+                    if (r < 0.073) { payout += 1800; runLT(); } 
+                    else if (r < 0.073 + 0.437) { payout += 1500; runLT(); } 
+                    else { payout += 1500; }
+                }
+                return true; 
+            }
+            
+            function runLT() {
+                let st = 144;
+                while(st > 0 && payout < 95000) {
+                    if (Math.random() < 1/99) {
+                        if (Math.random() < 0.50) {
+                            // 孤紅の恤BONUS
+                            let loop = true;
+                            while(loop && payout < 95000) {
+                                let br = Math.random();
+                                if (br < 0.125) { payout += 6000; } // 1G連
+                                else if (br < 0.125 + 0.375) { payout += 4500; loop = false; }
+                                else if (br < 0.50 + 0.375) { payout += 3000; loop = false; }
+                                else { payout += 1500; loop = false; }
                             }
+                        } else {
+                            // 吸血姫BONUS
+                            payout += 1500;
                         }
-                        break;
+                        st = 144;
+                    } else {
+                        st--;
                     }
                 }
             }
+            
             return { spins, payout };
         }
 
@@ -1139,35 +1311,61 @@
 
         function simKakegurui() {
             let spins = 0, payout = 0;
+            
+            // ツラヌキチャレンジ (30% Loop)
+            function runTsuranuki() {
+                let inTsuranuki = true;
+                while (inTsuranuki && payout < 95000) {
+                    if (Math.random() < 0.30) {
+                        payout += 7500; // 30% 成功：7500玉上乗せ
+                    } else {
+                        payout += 1500; // 70% 失敗：保底1500玉
+                        inTsuranuki = false;
+                    }
+                }
+            }
+            
+            // 絶対王政RUSH BURST (ST135回)
+            function runRush() {
+                let st = 135;
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 99) {
+                        payout += 1500; // RUSH中 大当りはオール1500個以上
+                        
+                        // 🌟 修正：42%の振り分けで運命の一撃発生、そのうち60%で成功
+                        if (Math.random() < 0.42 && Math.random() < 0.60 && payout < 95000) {
+                            runTsuranuki();
+                        }
+                        st = 135; // STリセット
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
             while (true) {
                 spins++;
+                // 1/204 通常時大当り
                 if (Math.random() < 1 / 204) {
+                    // 25% 突入 50/50ジャッジメント
                     if (Math.random() < 0.25) {
+                        // 🌟 修正：ジャッジメント突入時点で1500玉獲得
+                        payout += 1500; 
+                        
                         if (Math.random() < 0.50) {
+                            // 50/50 成功 (+7500玉)
                             payout += 7500;
-                            if (payout >= 95000) break;
-                            let inTsuranuki = true;
-                            while (inTsuranuki && payout < 95000) {
-                                if (Math.random() < 0.30) payout += 7500;
-                                else { payout += 1500; inTsuranuki = false; }
-                            }
-                            let st = 135;
-                            while (st > 0 && payout < 95000) {
-                                if (Math.random() < 1 / 99) {
-                                    payout += 1500;
-                                    if (Math.random() < 0.60 && payout < 95000) {
-                                        let inTsuranukiRush = true;
-                                        while (inTsuranukiRush && payout < 95000) {
-                                            if (Math.random() < 0.30) payout += 7500;
-                                            else { payout += 1500; inTsuranukiRush = false; }
-                                        }
-                                    }
-                                    st = 135;
-                                } else st--;
-                            }
-                        } else payout += 1500;
-                    } else payout += 300;
-                    break;
+                            if (payout < 95000) runTsuranuki();
+                            if (payout < 95000) runRush();
+                        } else {
+                            // 50/50 失敗 (+1500玉して通常へ)
+                            payout += 1500;
+                        }
+                    } else {
+                        // 75% 通常 (300玉)
+                        payout += 300;
+                    }
+                    break; // 大当り終了で通常へ戻る
                 }
             }
             return { spins, payout };
@@ -1256,42 +1454,74 @@
 
         function simNanoha() {
             let spins = 0, payout = 0;
-            while (true) {
-                spins++;
-                if (Math.random() < 1 / 348.5) {
-                    let r = Math.random();
-                    if (r < 0.19) {
-                        payout += 300;
-                        if (payout < 95000 && Math.random() < 1 / 6) runNanohaST();
-                    } else {
-                        let r2 = Math.random();
-                        if (r2 < 0.0132) {
-                            payout += 3000;
-                            if (payout < 95000) runNanohaST();
-                        } else if (r2 < 0.0132 + 0.4934) {
-                            payout += 900;
-                            if (payout < 95000) runNanohaST();
-                        } else {
-                            payout += 900;
-                            let ct_hit = false;
-                            for (let i = 0; i < 100; i++) {
-                                if (Math.random() < 1 / 348.5) { ct_hit = true; break; }
-                            }
-                            if (ct_hit && payout < 95000) { payout += 1500; runNanohaST(); }
-                        }
-                    }
-                    break;
-                }
-            }
+
+            // フルドライブST (ST70回転 完走型)
             function runNanohaST() {
                 let st_active = true;
                 while (st_active && payout < 95000) {
                     let hits = 0;
+                    // 完走型：必定跑完 70 轉
                     for (let i = 0; i < 70; i++) {
-                        if (payout >= 95000) break;
-                        if (Math.random() < 1 / 51.6) { hits++; payout += 1500; }
+                        if (Math.random() < 1 / 51.6) { 
+                            hits++; 
+                        }
                     }
-                    if (hits === 0) st_active = false;
+                    
+                    if (hits > 0) {
+                        // 70轉結束後，一氣結算所有 STOCK
+                        payout += (hits * 1500);
+                    } else {
+                        st_active = false; // 駆け抜け終了
+                    }
+                }
+            }
+
+            // チャレンジタイム (時短100回転)
+            function runCT() {
+                let ct_hit = false;
+                for (let i = 0; i < 100; i++) {
+                    if (Math.random() < 1 / 348.5) { 
+                        ct_hit = true; 
+                        break; 
+                    }
+                }
+                if (ct_hit) {
+                    payout += 1500; // 引き戻し成功で 1500玉
+                    if (payout < 95000) runNanohaST();
+                }
+            }
+
+            while (true) {
+                spins++;
+                // 大当り確率 1/348.5
+                if (Math.random() < 1 / 348.5) {
+                    let r_type = Math.random();
+
+                    // 19% アクセラレイターチャンス (2R 300玉)
+                    if (r_type < 0.19) {
+                        payout += 300;
+                        if (Math.random() < (1 / 6) && payout < 95000) {
+                            runNanohaST();
+                        }
+                    } 
+                    // 81% 図柄揃い
+                    else {
+                        let r_bonus = Math.random();
+                        
+                        if (r_bonus < 0.0132) { // 1.32% (3000玉 + ST)
+                            payout += 3000;
+                            if (payout < 95000) runNanohaST();
+                        } 
+                        else if (r_bonus < 0.0132 + 0.4934) { // 49.34% (900玉 + ST)
+                            payout += 900;
+                            if (payout < 95000) runNanohaST();
+                        } 
+                        else { // 49.34% (900玉 + 時短100回)
+                            payout += 900;
+                            if (payout < 95000) runCT();
+                        }
+                    }
+                    break;
                 }
             }
             return { spins, payout };
@@ -1886,7 +2116,9 @@
                 while (stock > 0 && payout < 95000) {
                     stock--;
                     let hit = false;
-                    for (let i = 0; i < 10000; i++) { if (Math.random() < 1 / 49.7) { hit = true; break; } }
+                    for (let i = 0; i < 10000; i++) { 
+                        if (Math.random() < 1 / 49.7) { hit = true; break; } 
+                    }
                     if (hit) {
                         let r = Math.random();
                         let new_stock = 0;
@@ -1909,23 +2141,22 @@
                         if (Math.random() < 1 / 49.7) { hit = true; hit_spin = i; break; }
                     }
                     if (hit) {
+                        let r = Math.random();
+                        let stock = 0;
                         if (hit_spin <= 5) {
-                            let r = Math.random();
-                            let stock = 0;
+                            // 夢幻チャレンジ (前半5回)
                             if (r < 0.40) { payout += 1500; stock = 2; }
                             else if (r < 0.75) { payout += 1500; stock = 1; }
                             else { payout += 450; stock = 1; }
-                            playInfinity(stock);
                         } else {
-                            let r = Math.random();
-                            let stock = 0;
+                            // FESTA RUSH (後半70回 + 残保4回)
                             if (r < 0.01) { payout += 1500; stock = 2; }
                             else if (r < 0.02) { payout += 1500; stock = 1; }
                             else if (r < 0.03) { payout += 450; stock = 1; }
                             else if (r < 0.76) { payout += 1500; stock = 0; }
                             else { payout += 450; stock = 0; }
-                            if (stock > 0) playInfinity(stock);
                         }
+                        if (stock > 0) playInfinity(stock);
                     } else {
                         active = false;
                     }
@@ -1934,8 +2165,11 @@
 
             function playGingira() {
                 let hit = false;
-                for (let i = 0; i < 29; i++) { if (Math.random() < 1 / 49.7) { hit = true; break; } }
+                for (let i = 0; i < 29; i++) { 
+                    if (Math.random() < 1 / 49.7) { hit = true; break; } 
+                }
                 if (hit) {
+                    // ギンギラタイム (ST25回転) OR 残り保留
                     payout += (Math.random() < 0.75) ? 1500 : 450;
                     if (payout < 95000) playFesta();
                 }
@@ -2104,7 +2338,323 @@
             return { spins, payout };
         }
 
+        function simRezero2() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1 / 349.9) {
+                    let r = Math.random();
+                    if (r < 0.55) {
+                        payout += 3000;
+                        while(Math.random() < 0.25 && payout < 95000) { payout += 1500; }
+                        if (payout < 95000) runRezero2Rush();
+                    } else {
+                        payout += 1500;
+                    }
+                    break;
+                }
+            }
+            function runRezero2Rush() {
+                let st = 145;
+                while(st > 0 && payout < 95000) {
+                    if (Math.random() < 1/99.9) {
+                        let r = Math.random();
+                        if (r < 0.25) {
+                            payout += 3000;
+                            while(Math.random() < 0.25 && payout < 95000) { payout += 1500; }
+                        } else if (r < 0.80) {
+                            payout += 1500;
+                        } else {
+                            payout += 300;
+                        }
+                        st = 145;
+                    } else {
+                        st--;
+                    }
+                }
+            }
+            return { spins, payout };
+        }
 
+        function simRailgun() {
+            let spins = 0, payout = 0;
+            
+            function getRushPayout() {
+                let r = Math.random();
+                let added = 0;
+                let is1GLoop = false;
+                
+                if (r < 0.470) {
+                    added = 1500;
+                } else if (r < 0.701) {
+                    added = 3000;
+                } else if (r < 0.907) {
+                    added = 4500;
+                } else if (r < 0.967) { // 將 9.3% 拆分，前 6% 為 6000
+                    added = 6000;
+                } else { // 剩餘 3.3% 為 7500+ 及 1G連
+                    added = 7500;
+                    is1GLoop = true;
+                }
+                
+                payout += added;
+                
+                // 1G連 遞歸疊加
+                if (is1GLoop && payout < 95000) {
+                    getRushPayout();
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 169.7) {
+                    let r = Math.random();
+                    if (r < 0.25) {
+                        payout += 300;
+                        if (payout < 95000) runRailgunRush();
+                    } else {
+                        payout += 300;
+                    }
+                    break;
+                }
+            }
+            
+            function runRailgunRush() {
+                let st = 125;
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 86.8) {
+                        getRushPayout();
+                        st = 125; // ST回復
+                    } else {
+                        st--;
+                    }
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simEightySix() {
+            let spins = 0, payout = 0;
+
+            function runKiriyaBlood() {
+                let active = true;
+                let battle = 1;
+                while (active && battle <= 5 && payout < 95000) {
+                    // 🌟 修正：1戦目はV獲得濃厚 (100%勝率)
+                    let winRate = (battle === 1) ? 1.0 : 0.70; 
+                    if (Math.random() < winRate) {
+                        if (battle < 5) {
+                            payout += (Math.random() < 0.70) ? 1500 : 300;
+                            battle++;
+                        } else {
+                            payout += (Math.random() < 0.50) ? 4500 : 4800;
+                            active = false; // 完走終了
+                        }
+                    } else {
+                        active = false; // 敗北
+                    }
+                }
+            }
+
+            function generateRushPayout() {
+                if (Math.random() < 0.30) {
+                    payout += 300;
+                } else {
+                    payout += 1500;
+                    // 1500BONUS獲得時の約30%でキリヤ血戦突入
+                    if (Math.random() < 0.30 && payout < 95000) {
+                        runKiriyaBlood();
+                    }
+                }
+            }
+
+            function runOperation86() {
+                // 🌟 修正：直接使用包含 LAST JUDGE 在內的合算継続率 79%
+                while (Math.random() < 0.79 && payout < 95000) {
+                    generateRushPayout();
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 239.1) {
+                    let r = Math.random();
+                    if (r < 0.005) { // 0.5% 直行LT
+                        payout += 4500;
+                        if (payout < 95000) runOperation86();
+                    } else if (r < 0.550) { // 54.5% 突破チャレンジ
+                        payout += 300;
+                        // 🌟 修正：突破チャレンジ成功率 約55% (合算)
+                        if (Math.random() < 0.55 && payout < 95000) {
+                            generateRushPayout();
+                            if (payout < 95000) runOperation86();
+                        }
+                    } else { // 45% 通常
+                        payout += 300;
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simOtome7() {
+            let spins = 0, payout = 0;
+
+            function runRushPayout() {
+                payout += 2000;
+                while(Math.random() < 0.25 && payout < 95000) { payout += 2000; }
+            }
+
+            function runST() {
+                let st = 140;
+                while(st > 0 && payout < 95000) {
+                    if (Math.random() < 1/97.0) {
+                        runRushPayout();
+                        st = 140;
+                    } else { st--; }
+                }
+            }
+
+            function runJitan() {
+                for(let i=0; i<50; i++) {
+                    if (payout >= 95000) break;
+                    if (Math.random() < 1/399.6) {
+                        runRushPayout();
+                        if (payout < 95000) runST();
+                        break;
+                    }
+                }
+            }
+
+            while(true) {
+                spins++;
+                
+                let roll = Math.random();
+                
+                // 🎯 1/399.6 本當り (図柄揃い / 乙女BONUS)
+                if (roll < 1/399.6) {
+                    let r = Math.random();
+                    if (r < 0.25) {
+                        payout += 280;
+                        if (payout < 95000) runJitan();
+                    } else {
+                        let r2 = Math.random();
+                        if (r2 < 0.50) {
+                            payout += 3000;
+                        } else if (r2 < 0.928) { // 42.8%
+                            payout += 3000;
+                            if (payout < 95000) runST();
+                        } else { // 7.2%
+                            payout += 5000;
+                            while(Math.random() < 0.25 && payout < 95000) payout += 2000;
+                            if (payout < 95000) runST();
+                        }
+                    }
+                    break;
+                } 
+                // ⚡ 1/399.6 強カワチャージ (回血包)
+                else if (Math.random() < 1/399.6) {
+                    payout += 280;
+                    break; // 通常へ戻る
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simGaro12() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                let r = Math.random();
+                
+                // 1/349.99 總合機率
+                if (r < 1/437.49) {
+                    // 液晶図柄揃い
+                    payout += 1500;
+                    if (Math.random() < 0.50 && payout < 95000) {
+                        // 極限7500バトル
+                        if (Math.random() < 0.50) {
+                            payout += 7500;
+                            if (payout < 95000) {
+                                // 魔戒CHANCE LT
+                                let in_lt = true;
+                                while(in_lt && payout < 95000) {
+                                    let lt_r = Math.random();
+                                    if (lt_r < 0.25) payout += 7500;
+                                    else if (lt_r < 0.76) payout += 1500;
+                                    else { payout += 1500; in_lt = false; }
+                                }
+                            }
+                        } else {
+                            payout += 1500;
+                        }
+                    }
+                    break;
+                } else if (r < 1/349.99) {
+                    // ガロチャージ
+                    payout += 300;
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simSaoSenkou() {
+            let spins = 0, payout = 0;
+            while(true) {
+                spins++;
+                if (Math.random() < 1/199.9) {
+                    let r = Math.random();
+                    if (r < 0.01) { payout += 1500; if(payout < 95000) runRush("LIGHTNING_NEXT"); }
+                    else if (r < 0.70) { payout += 300; if(payout < 95000) runRush("SWORD"); }
+                    else { payout += 300; }
+                    break;
+                }
+            }
+            
+            function runRush(startMode) {
+                let mode = startMode;
+                while(mode !== "END" && payout < 95000) {
+                    let st_spins = (mode === "SWORD") ? 50 : (mode === "LIGHTNING_NEXT" ? 10000 : 115);
+                    let hit = false;
+                    for(let i=0; i<st_spins; i++){
+                        if (Math.random() < 1/59.9) { hit = true; break; }
+                    }
+                    
+                    if (hit) {
+                        if (mode === "SWORD") {
+                            let rr = Math.random();
+                            if (rr < 0.03) { payout += 1500; mode = "LIGHTNING_NEXT"; }
+                            else if (rr < 0.30) { payout += 1500; mode = "LIGHTNING"; }
+                            else if (rr < 0.70) { payout += 1500; mode = "SWORD"; }
+                            else { payout += 300; mode = "SWORD"; }
+                        } else { // LIGHTNING
+                            let rr = Math.random();
+                            if (rr < 0.225) { payout += 1500; mode = "LIGHTNING_NEXT"; }
+                            else if (rr < 0.70) { payout += 1500; mode = "LIGHTNING"; }
+                            else { payout += 300; mode = "LIGHTNING"; }
+                        }
+                    } else {
+                        // 残り保留4個 (SWORD 振り分け)
+                        let zan_hit = false;
+                        for(let i=0; i<4; i++){
+                            if(Math.random() < 1/59.9){ zan_hit = true; break; }
+                        }
+                        if (zan_hit) {
+                            let rr = Math.random();
+                            if (rr < 0.03) { payout += 1500; mode = "LIGHTNING_NEXT"; }
+                            else if (rr < 0.30) { payout += 1500; mode = "LIGHTNING"; }
+                            else if (rr < 0.70) { payout += 1500; mode = "SWORD"; }
+                            else { payout += 300; mode = "SWORD"; }
+                        } else {
+                            mode = "END";
+                        }
+                    }
+                }
+            }
+            return { spins, payout };
+        }
 
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
@@ -2200,10 +2750,10 @@
             await runMachineSim('dmdp', simDMDP, 1000 / 17, iterations);
             await runMachineSim('ghoul399', simGhoul399, 1000 / 17, iterations);
             await runMachineSim('ghoul999', simGhoul999, 1000 / 32, iterations);
-            await runMachineSim('jitsuryoku', simJitsuryoku, 1000 / 25, iterations);
+            await runMachineSim('jitsuryoku', simJitsuryoku, 1000 / 29, iterations);
             await runMachineSim('monono', simMononogatari, 1000 / 17, iterations);
             await runMachineSim('lycoris', simLycoris, 1000 / 17, iterations);
-            await runMachineSim('hellsing', simHellsing, 1000 / 17, iterations);
+            await runMachineSim('hikikomari', simHikikomari, 1000 / 17, iterations);
             await runMachineSim('slime', simSlime, 1000 / 17, iterations);
             await runMachineSim('kakegurui', simKakegurui, 1000 / 17, iterations);
             await runMachineSim('ggo', simGGO, 1000 / 17, iterations);
@@ -2224,6 +2774,12 @@
             await runMachineSim('ginpara', simGinpara, 1000 / 22, iterations);
             await runMachineSim('sea5', simSea5, 1000 / 17, iterations);
             await runMachineSim('iseleve', simIseleve, 1000 / 27, iterations);
+            await runMachineSim('rezero2', simRezero2, 1000 / 17, iterations);
+            await runMachineSim('railgun', simRailgun, 1000 / 17, iterations);
+            await runMachineSim('eightysix', simEightySix, 1000 / 20, iterations);
+            await runMachineSim('otome7', simOtome7, 1000 / 17, iterations);
+            await runMachineSim('garo12', simGaro12, 1000 / 17, iterations);
+            await runMachineSim('sao_senkou', simSaoSenkou, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);

@@ -198,7 +198,7 @@ window.showPluginProfile = function(uid) {
         title_hell: u.title_hell,
         title_godpull: u.title_godpull,
         title_runthrough: u.title_runthrough,
-        title_ichigeki: u.title_ichigeki,
+        is_vip: u.is_vip, // 🌟 補返 VIP 狀態
         equipped_title: u.equipped_title, // 🌟 補返裝備設定落去
         isSelf: firebase.auth().currentUser && firebase.auth().currentUser.uid === uid
     };
@@ -214,7 +214,6 @@ window.showPluginProfile = function(uid) {
     
     let hC = u.single_hell_count || 0;
     let rC = u.runthrough_count || 0;
-    let iC = u.ichigeki_count || 0;
 
     let hText = `${hC} / 10`;
     let hTextEl = document.getElementById('p-modal-hell-text');
@@ -230,20 +229,13 @@ window.showPluginProfile = function(uid) {
     let rFillEl = document.getElementById('p-modal-run-fill');
     if (rFillEl.style.width !== rFill) rFillEl.style.width = rFill;
 
-    let iText = `${iC} / 10`;
-    let iTextEl = document.getElementById('p-modal-ichi-text');
-    if (iTextEl.innerText !== iText) iTextEl.innerText = iText;
-    let iFill = `${Math.min((iC/10)*100, 100)}%`;
-    let iFillEl = document.getElementById('p-modal-ichi-fill');
-    if (iFillEl.style.width !== iFill) iFillEl.style.width = iFill;
-
     let bHtml = '';
     bHtml += `<div class="badge ${u.has_completed ? 'active' : ''}">🌈 コンプリート</div>`;
     bHtml += `<div class="badge ${u.balance <= -10000000 ? 'active' : ''}">💀 破産王</div>`;
     bHtml += `<div class="badge ${u.title_godpull ? 'active' : ''}">✨ 神の引き</div>`;
     bHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
     bHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
-    bHtml += `<div class="badge ${u.title_ichigeki ? 'active' : ''}">💥 一撃王</div>`;
+    if (u.is_vip) bHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 8px #00e5ff;">💎 VIP スポンサー</div>`;
     
     let badgesEl = document.getElementById('p-modal-badges');
     if (badgesEl.innerHTML !== bHtml) badgesEl.innerHTML = bHtml;
@@ -254,7 +246,7 @@ window.showPluginProfile = function(uid) {
     let selectorEl = document.getElementById('p-modal-title-selector');
     if (firebase.auth().currentUser && firebase.auth().currentUser.uid === uid) {
         let eq = u.equipped_title || "auto";
-        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.title_ichigeki}`;
+        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.is_vip}`;
 
         if (selectorEl.getAttribute('data-render-key') !== renderKey) {
             let isAuto = eq === "auto";
@@ -276,7 +268,7 @@ window.showPluginProfile = function(uid) {
                             ${u.title_godpull ? `<label><input type="checkbox" class="t-check" value="godpull" ${eq.includes('godpull') ? 'checked' : ''}> 神の引き</label><br>` : ''}
                             ${u.title_runthrough ? `<label><input type="checkbox" class="t-check" value="runthrough" ${eq.includes('runthrough') ? 'checked' : ''}> 駆け抜け王</label><br>` : ''}
                             ${u.title_hell ? `<label><input type="checkbox" class="t-check" value="hell" ${eq.includes('hell') ? 'checked' : ''}> 単発地獄</label><br>` : ''}
-                            ${u.title_ichigeki ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 一撃王</label><br>` : ''}
+                            ${u.is_vip ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 💎 VIP 特権 (紫電)</label><br>` : ''}
                         </div>
                     </div>
                     <button onclick="window.saveTitleSettings('${uid}')" style="margin-top: 12px; width: 100%; padding: 8px; background: #00e5ff; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">💾 設定を保存</button>
@@ -360,8 +352,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!user) { window.location.href = "login.html"; return; }
             const uid = user.uid;
 
-        window.HallShared.settleIchigekiAwards(db).catch(error => console.error('[Ichigeki settlement] 日誌讀取失敗', error));
-
             const userRef = db.ref('users/' + uid);
             // ... 下面維持原本的 userRef.get() 邏輯 ...
 
@@ -390,6 +380,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function runMachineLogic(db, auth, uid, currentUserName, userRef, userData) {
+        // ==========================================
+        // 💎 VIP 贊助者特權處理
+        // ==========================================
+        if (userData.is_vip) {
+            // 1. 殺死置底廣告區塊
+            const adContainer = document.querySelector('div[style*="position: fixed; bottom: 0"]');
+            if (adContainer) {
+                adContainer.remove(); // 物理消除廣告
+            }
+            // 2. 解除 5000 轉限制，變成無限轉
+            userData.max_allowed_spins = 999999;
+            // 🚫 已經刪除咗改 UI 嗰句，交畀下面嘅 renderWallet 處理
+        }
+
         const exchangeRate = 3.57;
         let currentWallet = userData.balance;
 
@@ -413,7 +417,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div style="font-size: 1.2em; color: #00e5ff; font-weight: bold; margin-bottom: 10px;"><span id="p-modal-balance">0</span> 円</div>
                 <div class="prog-container"><div class="prog-label"><span>💀 単発地獄 (10回連続)</span><span id="p-modal-hell-text">0 / 10</span></div><div class="prog-bar-bg"><div id="p-modal-hell-fill" class="prog-bar-fill fill-hell" style="width: 0%;"></div></div></div>
                 <div class="prog-container"><div class="prog-label"><span>⚡ 駆け抜け王 (7回連続)</span><span id="p-modal-run-text">0 / 7</span></div><div class="prog-bar-bg"><div id="p-modal-run-fill" class="prog-bar-fill fill-run" style="width: 0%;"></div></div></div>
-                <div class="prog-container"><div class="prog-label"><span>💥 一撃王 (本日の一撃王 10回)</span><span id="p-modal-ichi-text">0 / 10</span></div><div class="prog-bar-bg"><div id="p-modal-ichi-fill" class="prog-bar-fill fill-ichi" style="width: 0%;"></div></div></div>
                 <div class="badge-container" id="p-modal-badges"></div>
                 <div id="p-modal-title-selector"></div>
             </div>
@@ -446,7 +449,14 @@ document.addEventListener("DOMContentLoaded", () => {
             walletEl.innerText = Math.round(currentWallet).toLocaleString();
             walletEl.style.color = currentWallet >= 0 ? "#00e676" : "#ff5252";
             dailySpinsEl.innerText = userData.daily_spins;
-            maxSpinsEl.innerText = userData.max_allowed_spins;
+            
+            // 🌟 判定 VIP (保留置底廣告，只賦予無限轉數特權)
+            if (userData.is_vip) { 
+                userData.max_allowed_spins = 999999;
+                maxSpinsEl.innerText = "∞ (VIP)";
+            } else {
+                maxSpinsEl.innerText = userData.max_allowed_spins;
+            }
         }
         renderWallet();
 
@@ -459,13 +469,14 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // 根據 stats.html 參數設定的例外機台
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
-        else if (pageText.includes("実力至上主義")) spinCost = 1000 / 25;
+        else if (pageText.includes("実力至上主義")) spinCost = 1000 / 29;
         else if (pageText.includes("ソードアート・オンライン")) spinCost = 1000 / 20;
         else if (pageText.includes("タクトオーパス")) spinCost = 1000 / 41;
         else if (pageText.includes("魔女と野獣")) spinCost = 1000 / 28;
         else if (pageText.includes("ユニコーン2")) spinCost = 1000 / 30;
         else if (pageText.includes("ギンパラ")) spinCost = 1000 / 22;
         else if (pageText.includes("いせれべ")) spinCost = 1000 / 27;
+        else if (pageText.includes("エイティシックス")) spinCost = 1000 / 20;
 
         // 🌟 生成排行榜與實時數據同步 🌟
         let currentMachineRankings = [];
@@ -503,7 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     name: currentUserObj.username, balance: currentUserObj.balance,
                     has_completed: currentUserObj.has_completed, title_hell: currentUserObj.title_hell,
                     title_godpull: currentUserObj.title_godpull, title_runthrough: currentUserObj.title_runthrough,
-                    title_ichigeki: currentUserObj.title_ichigeki, isSelf: false 
+                    is_vip: currentUserObj.is_vip
                 };
                 let selfHtml = window.getPluginPlayerNameHtml(mockSelf, topUid === uid, uid, false);
                 let uiUserEl = document.getElementById("ui-username");
@@ -545,7 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             uid: u, name: data.username, balance: data.balance || 0,
                             has_completed: data.has_completed || false, title_hell: data.title_hell || false,
                             title_godpull: data.title_godpull || false, title_runthrough: data.title_runthrough || false,
-                            title_ichigeki: data.title_ichigeki || false, isSelf: (auth.currentUser && auth.currentUser.uid === u)
+                            is_vip: data.is_vip || false, isSelf: (auth.currentUser && auth.currentUser.uid === u)
                         };
                         break;
                     }
@@ -588,9 +599,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if ((u.single_hell_count || 0) >= 10 && !u.title_hell) { updates.title_hell = true; u.title_hell = true; needsUpdate = true; }
                 if ((u.runthrough_count || 0) >= 7 && !u.title_runthrough) { updates.title_runthrough = true; u.title_runthrough = true; needsUpdate = true; }
-                if ((u.ichigeki_count || 0) >= 10 && !u.title_ichigeki) { updates.title_ichigeki = true; u.title_ichigeki = true; needsUpdate = true; }
 
-                if (needsUpdate) db.ref(`users/${u_id}`).update(updates);
+                // 🌟 修正：只允許幫自己寫入資料，避免 Firebase 權限報錯 🌟
+                if (needsUpdate && firebase.auth().currentUser && firebase.auth().currentUser.uid === u_id) {
+                    db.ref(`users/${u_id}`).update(updates).catch(e => console.warn(e));
+                }
             }
 
             window.globalUsersData = users;
@@ -609,16 +622,25 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // 🚨 終極慳流量優化 3：機台排行榜改為「只讀取 1 次」，唔再實時跳動
-        db.ref('machine_rankings/' + machineName).once('value').then((snapshot) => {
-            currentMachineRankings = [];
-            if (snapshot.exists()) {
-                snapshot.forEach(child => { currentMachineRankings.push(child.val()); });
-                currentMachineRankings.sort((a, b) => b.payout - a.payout);
-                currentMachineRankings = currentMachineRankings.slice(0, 10);
-            }
-            renderMachineRankings();
-        });
+        // 🚨 終極慳流量優化 3：機台排行榜 (15秒自動更新版)
+        function fetchMachineRankings() {
+            // 🌟 機台排行榜：恢復安全實時監聽 (.on)
+            // 因為「一萬發上榜」係低頻罕見事件，唔會對 Firebase 造成負擔
+            db.ref('machine_rankings/' + machineName).on('value', (snapshot) => {
+                currentMachineRankings = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => { currentMachineRankings.push(child.val()); });
+                    currentMachineRankings.sort((a, b) => b.payout - a.payout);
+                    currentMachineRankings = currentMachineRankings.slice(0, 10);
+                }
+                renderMachineRankings();
+            });
+        }
+
+        // 載入即刻執行一次
+        fetchMachineRankings();
+        // 🌟 神奇計時器：每 15 秒自動刷新機台排行榜
+        setInterval(fetchMachineRankings, 15000);
 
         function disableMachine(msgText = "⛔ 本日の上限に達しました") {
             let playBtn = document.getElementById("btn-play");

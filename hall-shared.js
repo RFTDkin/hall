@@ -5,14 +5,13 @@
     'use strict';
 
     const firebaseConfig = {
-        apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
-        authDomain: "p-hall.firebaseapp.com",
-        databaseURL: "https://p-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "p-hall",
-        storageBucket: "p-hall.firebasestorage.app",
-        messagingSenderId: "656958771527",
-        appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
-        measurementId: "G-46M19VQVY2"
+        apiKey: "AIzaSyBTEHb2bUZZVLu_zMeBNt7mA_68pQJKRUw",
+        authDomain: "p-hall-v2.firebaseapp.com",
+        databaseURL: "https://p-hall-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "p-hall-v2",
+        storageBucket: "p-hall-v2.firebasestorage.app",
+        messagingSenderId: "39092458875",
+        appId: "1:39092458875:web:a82f8a48b3509429d759de"
     };
 
     function getTitleHtml(userObj, options) {
@@ -23,7 +22,7 @@
         const isHell = !!userObj.title_hell;
         const isGod = !!userObj.title_godpull;
         const isRunthrough = !!userObj.title_runthrough;
-        const isIchigeki = !!userObj.title_ichigeki;
+        const isIchigeki = !!userObj.is_vip; // 🌟 綁定紫電特效畀 VIP
         const isSupreme = isComplete && !!opts.isRank1;
         const isLegend = isSupreme && isBankrupt && isHell && isGod && isRunthrough && isIchigeki;
         const display = userObj.isSelf && opts.showYouLabel ? `${name} (あなた)` : name;
@@ -87,51 +86,5 @@
         return window.firebase.database().ref('users/' + uid).update({ equipped_title: equippedTitle }).then(() => true);
     }
 
-    function settleIchigekiAwards(db, now) {
-        // 🌟 核心修正：只允許幫「自己」結算，完美避開 Firebase 權限封鎖
-        const user = window.firebase ? window.firebase.auth().currentUser : null;
-        if (!user) return Promise.resolve();
-        const myUid = user.uid;
-
-        const date = now || new Date();
-        const todayStr = `${date.getMonth() + 1}/${date.getDate()}`;
-
-        return db.ref('server_records/daily_bests_log').once('value').then(snapshot => {
-            const logs = snapshot.val() || {};
-            const updates = [];
-
-            Object.keys(logs).forEach(key => {
-                const record = logs[key];
-
-                // 🌟 過濾條件：
-                // 1. 必須係自己嘅 UID (唔好去搞人哋個 Profile)
-                // 2. 日期唔可以係今日 (確保過咗琴日 23:59 先派)
-                // 3. 未被處理過
-                if (!record || record.date === todayStr || record.uid !== myUid || record.processed) return;
-
-                const p = db.ref(`users/${myUid}`).transaction(userData => {
-                    let data = userData || {};
-                    const awards = data.ichigeki_awards || {};
-                    
-                    // 如果已經領取過，終止交易
-                    if (awards[key]) return; 
-
-                    data.ichigeki_count = (data.ichigeki_count || 0) + 1;
-                    awards[key] = { date: record.date, payout: record.payout || 0 };
-                    data.ichigeki_awards = awards;
-
-                    return data;
-                }, (error, committed) => {
-                    if (!error && committed) {
-                        // 寫入成功後，將呢筆日誌標記為已處理
-                        db.ref(`server_records/daily_bests_log/${key}/processed`).set(true);
-                    }
-                });
-                updates.push(p);
-            });
-            return Promise.all(updates);
-        });
-    }
-
-    window.HallShared = Object.freeze({ firebaseConfig, getTitleHtml, toggleTitleChecks, saveTitleSettings, settleIchigekiAwards });
+    window.HallShared = Object.freeze({ firebaseConfig, getTitleHtml, toggleTitleChecks, saveTitleSettings });
 }());

@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="hall-shared.js"></script>
 
     <style>
         body {
@@ -200,16 +201,7 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfaLasiMg8AWvKvFONPePt-dIZ46x3yus",
-            authDomain: "p-hall.firebaseapp.com",
-            databaseURL: "https://p-hall-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "p-hall",
-            storageBucket: "p-hall.firebasestorage.app",
-            messagingSenderId: "656958771527",
-            appId: "1:656958771527:web:baee4ad9c5350ee31e3c62",
-            measurementId: "G-46M19VQVY2"
-        };
+        const firebaseConfig = window.HallShared.firebaseConfig;
 
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
