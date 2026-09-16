@@ -615,6 +615,15 @@
             <div class="progress-text" id="unicorn2-prog">待機中...</div>
         </div>
 
+        <div class="machine-card tag-unicorn2" id="card-unicorn2_129" style="border-top: 5px solid #ff8a80;">
+            <h3 class="machine-title">Pガンダムユニコーン2 129Ver</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="unicorn2_129-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="unicorn2_129-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="unicorn2_129-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="unicorn2_129-profit">---</span></div>
+            <div class="progress-text" id="unicorn2_129-prog">待機中...</div>
+        </div>
+
         <div class="machine-card tag-fireforce" id="card-fireforce">
             <h3 class="machine-title">eA 炎炎ノ消防隊2Y</h3>
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins"
@@ -626,6 +635,15 @@
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit"
                     id="fireforce-profit">---</span></div>
             <div class="progress-text" id="fireforce-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-fireforce" id="card-fireforce2_399" style="border-top: 5px solid #ff5722;">
+            <h3 class="machine-title">eフィーバー炎炎ノ消防隊2 399Ver</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="fireforce2_399-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="fireforce2_399-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="fireforce2_399-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="fireforce2_399-profit">---</span></div>
+            <div class="progress-text" id="fireforce2_399-prog">待機中...</div>
         </div>
 
         <div class="machine-card tag-ginpara" id="card-ginpara">
@@ -711,6 +729,15 @@
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="sao_senkou-max">---</span></div>
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="sao_senkou-profit">---</span></div>
             <div class="progress-text" id="sao_senkou-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card" id="card-tolove" style="border-top: 5px solid #ff4081;">
+            <h3 class="machine-title">P ToLOVEるダークネス</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="tolove-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="tolove-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="tolove-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="tolove-profit">---</span></div>
+            <div class="progress-text" id="tolove-prog">待機中...</div>
         </div>
 
     </div>
@@ -2035,6 +2062,42 @@
             return { spins, payout };
         }
 
+        function simUnicorn2_129() {
+            let spins = 0, payout = 0;
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 129.8) {
+                    let r = Math.random();
+                    if (r < 0.51) { payout += 300; runUnicorn129Rush(false); }
+                    else { payout += 300; }
+                    break;
+                }
+            }
+
+            function runUnicorn129Rush(isLT) {
+                let active = true;
+                while (active && payout < 95000) {
+                    let max_spins = isLT ? 100 : 60;
+                    let hit = false;
+                    for (let i = 0; i < max_spins + 4; i++) {
+                        if (Math.random() < 1 / 40.6) { hit = true; break; }
+                    }
+
+                    if (hit) {
+                        if (!isLT) {
+                            if (Math.random() < 0.04) { payout += 1400; isLT = true; }
+                            else { payout += 700; }
+                        } else {
+                            payout += 700;
+                        }
+                    } else {
+                        active = false;
+                    }
+                }
+            }
+            return { spins, payout };
+        }
+
         function simFireForce() {
             let spins = 0, payout = 0;
 
@@ -2106,6 +2169,74 @@
                 }
             }
 
+            return { spins, payout };
+        }
+
+        function simFireforce2_399() {
+            let spins = 0, payout = 0;
+
+            function runLT() {
+                let active = true;
+                let hitRate = 1 / 2.0;
+                let fallRate = 1 / 5.3;
+                let eventRate = hitRate + fallRate;
+                let isFirstBattle = true; // 🌟 標記 RUSH 第一次戰鬥
+
+                while (active && payout < 95000) {
+                    if (Math.random() < (hitRate / eventRate)) { // 🎯 中獎 (1/2.0)
+                        let is4500 = false;
+                        
+                        // 🌟 修正：RUSH 初回戰鬥必定為青ランプ (50% 攞 4500)
+                        if (isFirstBattle) {
+                            if (Math.random() < 0.50) is4500 = true;
+                            isFirstBattle = false; // 解除初回標記
+                        } else {
+                            // 內部狀態抽籤
+                            let stateRoll = Math.random();
+                            if (stateRoll < 0.60) { if (Math.random() < 0.14) is4500 = true; } // 白ランプ
+                            else if (stateRoll < 0.90) { if (Math.random() < 0.33) is4500 = true; } // 緑ランプ
+                            else { if (Math.random() < 0.50) is4500 = true; } // 青ランプ
+                        }
+
+                        if (is4500) {
+                            payout += 4500;
+                            while (Math.random() < 0.50 && payout < 95000) payout += 3000;
+                        } else {
+                            payout += 1500;
+                        }
+                    } else { // 💀 跌落 (1/5.3)
+                        active = false;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                let roll = Math.random();
+                let pHit = 1 / 399.9;
+                let pCharge = 1 / 2186.0;
+
+                if (roll < pHit) {
+                    let r = Math.random();
+                    if (r < 0.50) {
+                        payout += 3000;
+                        if (payout < 95000) runLT();
+                    } else if (r < 0.96) {
+                        payout += 1500;
+                    } else {
+                        payout += 300;
+                        // 命の呼吸チャレンジ 1轉決着 (1/2.0 引き戻し)
+                        if (Math.random() < 1 / 2.0) {
+                            payout += 1500;
+                            if (payout < 95000) runLT();
+                        }
+                    }
+                    break;
+                } else if (roll < pHit + pCharge) {
+                    payout += 300;
+                    break;
+                }
+            }
             return { spins, payout };
         }
 
@@ -2656,6 +2787,58 @@
             return { spins, payout };
         }
 
+        function simTolove() {
+            let spins = 0, payout = 0;
+
+            function getRightPayout() {
+                let r = Math.random();
+                if (r < 0.02) return 4500;
+                if (r < 0.17) return 3300;
+                if (r < 0.60) return 2100;
+                return 900;
+            }
+
+            function runST() {
+                let st = 140;
+                while(st > 0 && payout < 95000) {
+                    if (Math.random() < 1/97.0) {
+                        payout += getRightPayout();
+                        st = 140;
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1/319.6) {
+                    let r = Math.random();
+                    if (r < 0.05) {
+                        payout += 1500 + getRightPayout();
+                        if (payout < 95000) runST();
+                    } else if (r < 0.05 + 0.533) {
+                        payout += 450;
+                        if (payout < 95000) runST();
+                    } else {
+                        payout += 450;
+                        // 時短 100回
+                        let jitanHit = false;
+                        for(let i = 0; i < 100; i++) {
+                            if (payout >= 95000) break;
+                            if (Math.random() < 1/319.6) { jitanHit = true; break; }
+                        }
+                        if (jitanHit) {
+                            payout += getRightPayout();
+                            if (payout < 95000) runST();
+                        }
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
@@ -2770,6 +2953,7 @@
             await runMachineSim('takt', simTakt, 1000 / 41, iterations);
             await runMachineSim('majo', simMajo, 1000 / 28, iterations);
             await runMachineSim('unicorn2', simUnicorn2, 1000 / 30, iterations);
+            await runMachineSim('unicorn2_129', simUnicorn2_129, 1000 / 17, iterations);
             await runMachineSim('fireforce', simFireForce, 1000 / 17, iterations);
             await runMachineSim('ginpara', simGinpara, 1000 / 22, iterations);
             await runMachineSim('sea5', simSea5, 1000 / 17, iterations);
@@ -2780,6 +2964,8 @@
             await runMachineSim('otome7', simOtome7, 1000 / 17, iterations);
             await runMachineSim('garo12', simGaro12, 1000 / 17, iterations);
             await runMachineSim('sao_senkou', simSaoSenkou, 1000 / 17, iterations);
+            await runMachineSim('tolove', simTolove, 1000 / 17, iterations); // 1000円=17回転 (預設)
+            await runMachineSim('fireforce2_399', simFireforce2_399, 1000 / 17, iterations); // 1000円=17回転
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);

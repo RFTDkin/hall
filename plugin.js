@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 adContainer.remove(); // 物理消除廣告
             }
             // 2. 解除 5000 轉限制，變成無限轉
-            userData.max_allowed_spins = 999999;
+            userData.max_allowed_spins = 999999999;
             // 🚫 已經刪除咗改 UI 嗰句，交畀下面嘅 renderWallet 處理
         }
 
@@ -452,7 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // 🌟 判定 VIP (保留置底廣告，只賦予無限轉數特權)
             if (userData.is_vip) {
-                userData.max_allowed_spins = 999999;
+                userData.max_allowed_spins = 999999999;
                 maxSpinsEl.innerText = "∞ (VIP)";
             } else {
                 maxSpinsEl.innerText = userData.max_allowed_spins;
@@ -473,7 +473,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageText.includes("ソードアート・オンライン")) spinCost = 1000 / 20;
         else if (pageText.includes("タクトオーパス")) spinCost = 1000 / 41;
         else if (pageText.includes("魔女と野獣")) spinCost = 1000 / 28;
-        else if (pageText.includes("ユニコーン2")) spinCost = 1000 / 30;
+        else if (pageText.includes("ユニコーン2") && !pageText.includes("129Ver")) spinCost = 1000 / 30;
         else if (pageText.includes("ギンパラ")) spinCost = 1000 / 22;
         else if (pageText.includes("いせれべ")) spinCost = 1000 / 27;
         else if (pageText.includes("エイティシックス")) spinCost = 1000 / 20;

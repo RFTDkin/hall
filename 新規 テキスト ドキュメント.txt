@@ -148,57 +148,77 @@ JSON
 將 Buy Me A Coffee 或者 PayPal 嘅 Webhook 連接去 Firebase Cloud Functions。一收到錢，Server 自動幫嗰個 sponsor-uid 寫入 is_vip: true，你以後就唔使再人手改 Data 咁辛苦！
 
 
-檢查結果：Firebase 下載量主要來自 Realtime Database，不是 Storage。458.65KB Storage 很小，不能解釋 9.27GB 下載量。
 
-最高風險來源
 
-所有 35 個機種頁面都載入 plugin.js
 
-例如：bluelock.html:687-688
-每次開啟機種頁面，plugin.js 都會下載整個 users：
-plugin.js:591-610
-如果使用者很多，這一次讀取就會下載全部玩家資料。
-另外每 15 秒重新下載該機種的全部排行榜：
-plugin.js:629-645
-排行榜只在瀏覽器下載完後才 .slice(0, 10)，所以即使畫面只顯示 10 筆，Firebase 仍可能傳送全部歷史紀錄。
-大堂首頁會下載整個 users
 
-index.html:1299-1328
-也會下載整個 machine_rankings：
-index.html:1343-1349
-每次重新整理首頁都會重新下載這些資料。
-排行榜資料可能持續累積
+爆額時處理方法
 
-plugin.js 會不斷寫入：
-machine_rankings/{machineName}
-plugin.js:751-764
-plugin.js:814-826
-但讀取時是整個 machine_rankings/{machineName}，沒有 Firebase limitToLast()，所以資料越多，每次 15 秒下載量越大。
-留言頁會一次下載全部留言
+⏬ 緊急煞掣：降級回 Spark (免費) Plan
+萬一你想即刻截斷收費，退回 100 人連線限制，請跟住以下步驟：
 
-request.html:277-304
-orderByChild('timestamp') 只是排序，沒有設定數量限制，因此會下載整個 community_requests。
-如果留言和回覆很多，重新開啟頁面就會下載全部內容。
-低影響來源
+進入 Firebase Console，點擊左邊選單齒輪 ⚙️ 「プロジェクトの設定」 (Project Settings)。
 
-login.html:78-81：註冊時寫入使用者資料，基本上不是主要下載來源。
-stats.html:736-741：只讀取目前登入使用者的資料，流量很小。
-index.html:1270-1285：只讀取目前使用者資料，流量很小。
-plugin.js:401-408：讀取 server_records/max_hamari，資料很小。
-hall-shared.js:78-86：只在儲存稱號設定時寫入資料，不是主要下載來源。
-最可能的主因排序
+切換到上方選單嘅 「使用量と請求額」 (Usage and billing) Tab。
 
-plugin.js 的 db.ref('users').once('value')
-plugin.js 每 15 秒完整下載 machine_rankings/{machineName}
-index.html 完整下載 users
-index.html 完整下載 machine_rankings
-request.html 完整下載 community_requests
-你目前顯示的 0.06GB/分鐘 約等於 60MB/分鐘、3.6GB/小時。如果數字準確，通常代表同時有多個機種頁面開啟，或者 users / machine_rankings 已經變得很大。
+點擊 「詳細と設定」 (Details & Settings)。
 
-最有效的改善方向是：
+撳右下角嘅 「プランを変更」 (Modify Plan)。
 
-把 users 全體下載改成只讀必要欄位或建立公開排行榜資料。
-machine_rankings 改用 limitToLast(10)，並移除 15 秒輪詢或改成較長間隔。
-request.html 只讀取最新 20 至 50 筆留言。
-對排行榜資料設定保留數量，刪除舊紀錄。
-在 Firebase Console 的 Realtime Database Usage 中確認哪個 path 的下載量最高。
+選擇 「Spark (無料)」 並確認。系統會即時截斷所有 Blaze 計費，恢復免費限制。
+
+🔄 完美轉移指南 (金蟬脫殼大法)
+步驟 A：搬 Database 數據 (極簡單)
+
+喺現有嘅 Firebase 後台，入去 Realtime Database。
+
+右上角有粒「三個點」嘅掣，撳 「JSON をエクスポート」 (Export JSON)，就可以將成個 Database 下載落你部電腦。
+
+去新嘅 Firebase Account 開個新 Database，用同一粒掣撳 「JSON をインポート」 (Import JSON)，幾秒鐘就搬完！
+
+
+步驟 B：轉移玩家帳號 (Firebase Auth)
+因為玩家密碼經過高度加密，無法喺網頁後台直接下載，必須用終端機 (Terminal / PowerShell) 進行無損搬家：
+
+準備環境：確保電腦有 Node.js，輸入指令安裝工具 npm install -g firebase-tools。
+
+登入舊帳號：輸入 firebase login 登入你現時有 $125 帳單嘅 Google 帳號。
+
+匯出資料：輸入 firebase auth:export accounts.json --format=json --project p-hall-v2，將所有玩家帳號密碼安全下載成 accounts.json。
+
+匯入新場：登入新 Google 帳號後，輸入 firebase auth:import accounts.json --project [新Project-ID]，瞬間完成轉移。
+
+其他firebase cli
+firebase logout
+firebase login
+firebase login:add
+firebase login:list
+firebase login:use [你嘅另一個Email]
+
+步驟 C：更新前端 Code (最重要)
+當你搬好晒去新 Database 之後，你只需要打開你個 hall-shared.js，將入面嘅 firebaseConfig 換成新 Account 嗰條 API Key 同 URL，然後重新 Deploy 上 Vercel，全服玩家就會神不知鬼不覺咁連咗去新 Server。
+
+步驟 D：API 金鑰安全設定 (網域白名單)
+你記性非常好！開咗新 Firebase Project 後，系統會生成全新嘅 API Key。你必須將網域白名單加過去新 Server，否則駭客可以偷用你個 Database 刷 API：
+
+登入新帳號嘅 Google Cloud Console。
+
+左邊選單選擇 「API とサービス」 (APIs & Services) -> 「認証情報」 (Credentials)。
+
+點擊名為 Browser key (auto created by Firebase) 嘅 API 金鑰。
+
+喺 「アプリケーションの制限」 (Application restrictions) 選擇 「ウェブサイト」 (Websites)。
+
+將你提供嘅清單 (*.itch.io/*, *hall-bice.vercel.app/*, http://localhost/* 等) 逐一加入並儲存。
+
+ウェブサイト
+*.itch.io/*
+*html-classic.itch.zone/*
+*html5.plicy.net/*
+*itch.zone/*
+hall-bice.vercel.app/*
+http://127.0.0.1/*
+http://localhost/*
+https://hall-bice.vercel.app/
+https://hall-bice.vercel.app/*
+https://RFTDkin.github.io/*
