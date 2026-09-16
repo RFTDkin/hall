@@ -166,7 +166,7 @@ globalPluginStyle.innerHTML = `
 document.head.appendChild(globalPluginStyle);
 
 // 🌟 全局獲取玩家名稱與稱號 HTML (包含點擊事件)
-window.getPluginPlayerNameHtml = function(userObj, isRank1, uid = null, disableClick = false) {
+window.getPluginPlayerNameHtml = function (userObj, isRank1, uid = null, disableClick = false) {
     const titles = window.globalUsersData || {};
     const equippedTitle = uid && titles[uid] ? titles[uid].equipped_title : "auto";
     return window.HallShared.getTitleHtml(userObj, {
@@ -179,16 +179,16 @@ window.getPluginPlayerNameHtml = function(userObj, isRank1, uid = null, disableC
 };
 
 // 🌟 全局打開玩家 Profile Modal (加入防打斷更新機制)
-window.showPluginProfile = function(uid) {
+window.showPluginProfile = function (uid) {
     window.currentOpenProfileUid = uid;
     if (!window.globalUsersData || !window.globalUsersData[uid]) return;
-    
+
     let u = window.globalUsersData[uid];
     let topUid = null;
     let richArr = Object.keys(window.globalUsersData)
-        .map(k => ({uid: k, balance: window.globalUsersData[k].balance || 0}))
+        .map(k => ({ uid: k, balance: window.globalUsersData[k].balance || 0 }))
         .filter(u => u.balance >= 0)
-        .sort((a,b) => b.balance - a.balance);
+        .sort((a, b) => b.balance - a.balance);
     if (richArr.length > 0) topUid = richArr[0].uid;
 
     let mockUserObj = {
@@ -211,21 +211,21 @@ window.showPluginProfile = function(uid) {
     let balText = Math.round(u.balance || 0).toLocaleString();
     let balEl = document.getElementById('p-modal-balance');
     if (balEl.innerText !== balText) balEl.innerText = balText;
-    
+
     let hC = u.single_hell_count || 0;
     let rC = u.runthrough_count || 0;
 
     let hText = `${hC} / 10`;
     let hTextEl = document.getElementById('p-modal-hell-text');
     if (hTextEl.innerText !== hText) hTextEl.innerText = hText;
-    let hFill = `${Math.min((hC/10)*100, 100)}%`;
+    let hFill = `${Math.min((hC / 10) * 100, 100)}%`;
     let hFillEl = document.getElementById('p-modal-hell-fill');
     if (hFillEl.style.width !== hFill) hFillEl.style.width = hFill;
 
     let rText = `${rC} / 7`;
     let rTextEl = document.getElementById('p-modal-run-text');
     if (rTextEl.innerText !== rText) rTextEl.innerText = rText;
-    let rFill = `${Math.min((rC/7)*100, 100)}%`;
+    let rFill = `${Math.min((rC / 7) * 100, 100)}%`;
     let rFillEl = document.getElementById('p-modal-run-fill');
     if (rFillEl.style.width !== rFill) rFillEl.style.width = rFill;
 
@@ -236,13 +236,13 @@ window.showPluginProfile = function(uid) {
     bHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
     bHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
     if (u.is_vip) bHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 8px #00e5ff;">💎 VIP スポンサー</div>`;
-    
+
     let badgesEl = document.getElementById('p-modal-badges');
     if (badgesEl.innerHTML !== bHtml) badgesEl.innerHTML = bHtml;
 
     document.getElementById('plugin-profile-modal').style.display = 'flex';
 
-// 🌟 注入多重稱號裝備選單 (加咗 Render Key 防止刷新彈回)
+    // 🌟 注入多重稱號裝備選單 (加咗 Render Key 防止刷新彈回)
     let selectorEl = document.getElementById('p-modal-title-selector');
     if (firebase.auth().currentUser && firebase.auth().currentUser.uid === uid) {
         let eq = u.equipped_title || "auto";
@@ -408,7 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const modalHtml = document.createElement('div');
         modalHtml.id = 'plugin-profile-modal';
         modalHtml.className = 'profile-modal-overlay';
-        modalHtml.onclick = function(e) { if(e.target===this) { this.style.display='none'; window.currentOpenProfileUid=null; } };
+        modalHtml.onclick = function (e) { if (e.target === this) { this.style.display = 'none'; window.currentOpenProfileUid = null; } };
         modalHtml.innerHTML = `
             <div class="profile-card">
                 <button class="close-btn" onclick="document.getElementById('plugin-profile-modal').style.display='none'; window.currentOpenProfileUid=null;">✖</button>
@@ -449,9 +449,9 @@ document.addEventListener("DOMContentLoaded", () => {
             walletEl.innerText = Math.round(currentWallet).toLocaleString();
             walletEl.style.color = currentWallet >= 0 ? "#00e676" : "#ff5252";
             dailySpinsEl.innerText = userData.daily_spins;
-            
+
             // 🌟 判定 VIP (保留置底廣告，只賦予無限轉數特權)
-            if (userData.is_vip) { 
+            if (userData.is_vip) {
                 userData.max_allowed_spins = 999999;
                 maxSpinsEl.innerText = "∞ (VIP)";
             } else {
@@ -466,7 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let pageText = originalTitle + " " + document.body.innerText;
         let spinCost = 1000 / 17; // 預設：1000円 = 17轉
-        
+
         // 根據 stats.html 參數設定的例外機台
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 29;
@@ -502,9 +502,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // 🌟 1. 先計算富豪第一名 (為了判斷是否有天上天下稱號)
             let topUid = null;
             let richArr = Object.keys(window.globalUsersData)
-                .map(k => ({uid: k, balance: window.globalUsersData[k].balance || 0}))
+                .map(k => ({ uid: k, balance: window.globalUsersData[k].balance || 0 }))
                 .filter(u => u.balance >= 0)
-                .sort((a,b) => b.balance - a.balance);
+                .sort((a, b) => b.balance - a.balance);
             if (richArr.length > 0) topUid = richArr[0].uid;
 
             // 🌟 2. 搬到這裡！優先更新右上角自己的稱號顯示 (保護動畫，不受排行榜為空影響)
@@ -566,19 +566,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 let row = rows[idx];
 
                 if (row.cells[0].innerText !== rankText.toString()) row.cells[0].innerText = rankText;
-                
+
                 if (row.cells[1].innerHTML !== nameHtml) {
                     row.cells[1].innerHTML = nameHtml;
                     row.cells[1].style.fontWeight = "bold";
                 }
-                
+
                 let payoutText = rec.payout.toLocaleString();
                 if (row.cells[2].innerText !== payoutText) {
                     row.cells[2].innerText = payoutText;
                     row.cells[2].style.color = "#ff5252";
                     row.cells[2].style.fontWeight = "bold";
                 }
-                
+
                 if (row.cells[3].innerText !== rec.date) {
                     row.cells[3].innerText = rec.date;
                     row.cells[3].style.fontSize = "0.8em";
@@ -587,58 +587,107 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-// 🚨 終極慳流量優化 1：廢除全服 users 實時監聽，改為「只讀取 1 次」
-        db.ref('users').once('value').then(snap => {
-            let users = snap.val() || {};
-            
-            // 自動補發遺漏稱號邏輯 (只行一次)
-            for (let u_id in users) {
-                let u = users[u_id];
-                let needsUpdate = false;
-                let updates = {};
+        // ==========================================
+        // 🚨 極限慳流量架構：精準讀取 (取代原本嘅優化 1, 2, 3)
+        // ==========================================
+        window.globalUsersData = {};
+        let topUid = null;
 
-                if ((u.single_hell_count || 0) >= 10 && !u.title_hell) { updates.title_hell = true; u.title_hell = true; needsUpdate = true; }
-                if ((u.runthrough_count || 0) >= 7 && !u.title_runthrough) { updates.title_runthrough = true; u.title_runthrough = true; needsUpdate = true; }
+        async function fetchRankingsAndUsers() {
+            try {
+                // 1. 🌟 淨係攞呢部機台最高出玉嘅 10 條紀錄 (利用 limitToLast 阻截巨量下載)
+                const rankSnap = await db.ref('machine_rankings/' + machineName)
+                    .orderByChild('payout')
+                    .limitToLast(10)
+                    .once('value');
 
-                // 🌟 修正：只允許幫自己寫入資料，避免 Firebase 權限報錯 🌟
-                if (needsUpdate && firebase.auth().currentUser && firebase.auth().currentUser.uid === u_id) {
-                    db.ref(`users/${u_id}`).update(updates).catch(e => console.warn(e));
-                }
-            }
-
-            window.globalUsersData = users;
-            renderMachineRankings();
-            if (window.currentOpenProfileUid) window.showPluginProfile(window.currentOpenProfileUid);
-        });
-
-        // 🚨 終極慳流量優化 2：只實時監聽「自己」嘅資料，其他人扣錢唔會再觸發全服下載
-        if (uid) {
-            db.ref('users/' + uid).once('value', snap => {
-                if (snap.exists() && window.globalUsersData) {
-                    window.globalUsersData[uid] = snap.val();
-                    renderMachineRankings(); // 輕量更新右上角自己個名
-                    if (window.currentOpenProfileUid === uid) window.showPluginProfile(uid);
-                }
-            });
-        }
-
-        // 🚨 終極慳流量優化 3：機台排行榜 (15秒自動更新版)
-        function fetchMachineRankings() {
-            // 🌟 機台排行榜：恢復安全實時監聽 (.on)
-            // 因為「一萬發上榜」係低頻罕見事件，唔會對 Firebase 造成負擔
-            db.ref('machine_rankings/' + machineName).once('value', (snapshot) => {
                 currentMachineRankings = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => { currentMachineRankings.push(child.val()); });
-                    currentMachineRankings.sort((a, b) => b.payout - a.payout);
-                    currentMachineRankings = currentMachineRankings.slice(0, 10);
+                if (rankSnap.exists()) {
+                    rankSnap.forEach(child => { currentMachineRankings.push(child.val()); });
+                    // Firebase limitToLast 係由細排到大，所以要反轉佢
+                    currentMachineRankings.reverse();
                 }
+
+                // 2. 🌟 準備一個陣列去裝住我哋要精準 Download 嘅 Request
+                let promises = [];
+
+                // (A) 攞全服最有錢第 1 名 (為咗出「天上天下」霸氣稱號)
+                promises.push(
+                    db.ref('users').orderByChild('balance').limitToLast(1).once('value').then(snap => {
+                        if (snap.exists()) {
+                            snap.forEach(child => {
+                                topUid = child.key;
+                                window.globalUsersData[child.key] = child.val();
+                            });
+                        }
+                    })
+                );
+
+                // (B) 攞自己嘅資料 (為咗補發稱號及顯示餘額)
+                if (uid) {
+                    promises.push(
+                        db.ref('users/' + uid).once('value').then(snap => {
+                            if (snap.exists()) {
+                                let u = snap.val();
+                                window.globalUsersData[uid] = u;
+
+                                // 自動補發遺漏稱號
+                                let needsUpdate = false;
+                                let updates = {};
+                                if ((u.single_hell_count || 0) >= 10 && !u.title_hell) { updates.title_hell = true; u.title_hell = true; needsUpdate = true; }
+                                if ((u.runthrough_count || 0) >= 7 && !u.title_runthrough) { updates.title_runthrough = true; u.title_runthrough = true; needsUpdate = true; }
+                                if (needsUpdate && firebase.auth().currentUser && firebase.auth().currentUser.uid === uid) {
+                                    db.ref(`users/${uid}`).update(updates).catch(e => console.warn(e));
+                                }
+                            }
+                        })
+                    );
+                }
+
+                // (C) 攞排行榜上面嗰 10 個人嘅資料 (為咗出佢哋專屬嘅稱號特效！)
+                let uniqueNames = [...new Set(currentMachineRankings.map(r => r.user))];
+                uniqueNames.forEach(name => {
+                    promises.push(
+                        db.ref('users').orderByChild('username').equalTo(name).once('value').then(snap => {
+                            if (snap.exists()) {
+                                snap.forEach(child => {
+                                    window.globalUsersData[child.key] = child.val();
+                                });
+                            }
+                        })
+                    );
+                });
+
+                // 3. 🌟 等呢十幾個極微型嘅 Request 全部完成，先一次過 Render 畫面！
+                await Promise.all(promises);
+
+                // 👇👇👇 新增呢一段：只實時監聽「自己」嘅資料變動，極低流量！ 👇👇👇
+                if (uid && !window._isMyProfileListening) {
+                    window._isMyProfileListening = true;
+                    db.ref('users/' + uid).on('value', snap => {
+                        if (snap.exists()) {
+                            // 實時將最新嘅自己資料放入緩存
+                            window.globalUsersData[uid] = snap.val();
+                            
+                            // 如果你宜家咁啱打開緊自己個 Profile 視窗，就即刻刷新畫面！
+                            if (window.currentOpenProfileUid === uid) {
+                                window.showPluginProfile(uid);
+                            }
+                        }
+                    });
+                }
+                // 👆👆👆 新增結束 👆👆👆
+
                 renderMachineRankings();
-            });
+                if (window.currentOpenProfileUid) window.showPluginProfile(window.currentOpenProfileUid);
+
+            } catch (error) {
+                console.error("データの読み込みに失敗しました:", error);
+            }
         }
 
-        // 載入即刻執行一次
-        fetchMachineRankings();
+        // 載入網頁即刻執行一次
+        fetchRankingsAndUsers();
 
         function disableMachine(msgText = "⛔ 本日の上限に達しました") {
             let playBtn = document.getElementById("btn-play");
@@ -676,7 +725,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         userData.max_allowed_spins += 4000;
                         userRef.update({ max_allowed_spins: userData.max_allowed_spins }).then(() => {
                             window.alert("🎉 認証成功！上限が +4000回転 追加されました！\n(システムを再起動します)");
-                            window.location.reload(); 
+                            window.location.reload();
                         });
                     }
                 }, 1000);
@@ -725,7 +774,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (currentData === null || new_spins > currentData.spins) {
                             return { user: currentUserName, spins: new_spins, machine: machineName, date: dateStr };
                         }
-                        return; 
+                        return;
                     });
                 }
 
@@ -747,7 +796,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`; // 👈 新增獨立 Key
 
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
-                        
+
                         // 兼容舊版 Dashboard 顯示
                         db.ref('server_records/daily_best').transaction((curr) => {
                             if (!curr || curr.date !== dateStr || lastUI_payout > curr.payout) {
@@ -810,12 +859,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`; // 👈 新增獨立 Key
 
                     db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: new_payout, date: dateStr });
-                    
+
                     db.ref('server_records/daily_best').transaction((curr) => {
                         if (!curr || curr.date !== dateStr || new_payout > curr.payout) {
                             return { uid: uid, user: currentUserName, payout: new_payout, date: dateStr, processed: false };
                         }
-                        return; 
+                        return;
                     });
 
                     // 🌟 寫入新版防覆蓋日誌 🌟
@@ -927,118 +976,118 @@ window._lastHellCountedSpin = -1; // 🌟 新增：死記邊一轉已經計過�
 
 setTimeout(() => {
     if (typeof window.addLog === "function") {
-    const originalAddLog = window.addLog;
-    window.addLog = function (text, className = "") {
-        // 1. 擋截無用 Log
-        if (text.includes("播放") || text.includes("再生") || text.includes("mp4") || text.includes("音效") || text.includes("請稍候")) {
-            return;
-        }
-        
-        // 2. 執行翻譯
-        let translatedText = text;
-        translatedText = translatedText.replace(/STOCK獲得！(\d+)玉 \(剩餘 (\d+)轉\)/g, "STOCK獲得！$1玉 (残り $2回転)");
-        translatedText = translatedText.replace(/剩餘 (\d+) 轉/g, "残り $1 回転");
-        translatedText = translatedText.replace(/獲得 (\d+) 玉/g, "$1 玉獲得");
-        translatedText = translatedText.replace(/大當り！ (\d+)連莊/g, "大当り！ $1連チャン");
-
-        for (let [zh, ja] of Object.entries(dict)) {
-            if (translatedText.includes(zh)) translatedText = translatedText.split(zh).join(ja);
-        }
-
-        originalAddLog(translatedText, className);
-
-        // 3. 🏆 全自動稱號判定系統 (與翻譯系統同步執行，防止漏單)
-        try {
-            const user = firebase.auth().currentUser;
-            if (!user) return; 
-            const titleDb = firebase.database();
-            const uid = user.uid;
-            const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
-            const rushEl = document.getElementById('ui-rush');
-            const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
-
-            let spinMatch = translatedText.match(/\[\s*(\d+)\s*(?:回轉|回転)/);
-            if (spinMatch && !translatedText.includes("ST") && !translatedText.includes("残保留") && !translatedText.includes("電サポ")) {
-                window._lastLoggedSpins = parseInt(spinMatch[1]);
-            }
-            let actualSpins = window._lastLoggedSpins || 0;
-
-            const pageName = location.pathname.split('/').pop().toLowerCase();
-            const heavyMachinePages = new Set(['bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html', 'hokuto10.html', 'hokuto11.html', 'mushoku.html', 'seed.html', 'slime.html', 'takt.html', 'majo.html']);
-            const isHeavyMachine = heavyMachinePages.has(pageName) || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣)/i.test(machineTitle);
-            
-            const isCharge = /チャージ|CHARGE/i.test(translatedText);
-            // Rush Challenge / CZ / 時短 への突入パターン（本RUSHではない）
-            const isRushChallengeEnter = /(チャレンジ|JUDGE|CZ|時短).*?(突入|開始)/.test(translatedText)
-                || /(突入|開始).*?(チャレンジ|JUDGE|CZ|時短)/.test(translatedText);
-            // 本RUSHへの突入（Rush Challenge・Charge・時短を除く）
-            // 🌟 修正：排除「非突入」同「失敗」，防止系統見到「RUSH非突入」就誤以為入咗 RUSH 而清空單發計數！
-            const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText) && !/チャレンジ|JUDGE|CZ|非突入|失敗/.test(translatedText);
-
-            // ✨ 神の引き
-            if (isRealRushEnter && actualSpins === 1 && isHeavyMachine) {
-                titleDb.ref('users/' + uid).update({ title_godpull: true });
-                window._lastLoggedSpins = 0;
+        const originalAddLog = window.addLog;
+        window.addLog = function (text, className = "") {
+            // 1. 擋截無用 Log
+            if (text.includes("播放") || text.includes("再生") || text.includes("mp4") || text.includes("音效") || text.includes("請稍候")) {
+                return;
             }
 
-            // ⚡ 駆け抜け王 ＆ runthrough_count 管理
-            const isRushChallengeFailure = /チャレンジ失敗|CZ失敗|JUDGE失敗|時短終了|任務失敗|チャンスタイム終了|昇格失敗/.test(translatedText);
-            const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(translatedText)
-                && !isRushChallengeFailure;
-            const isRunthroughExplicit = /駆け抜け|スルー/.test(translatedText) && !isRushChallengeFailure;
-            
-            if (isRushEnd || isRunthroughExplicit) {
-                if (isRunthroughExplicit || rushCount === 0) { 
-                    titleDb.ref('users/' + uid + '/runthrough_count').transaction(count => {
-                        let newCount = (count || 0) + 1;
-                        if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
-                        return newCount;
-                    });
-                } else {
-                    titleDb.ref('users/' + uid + '/runthrough_count').set(0);
+            // 2. 執行翻譯
+            let translatedText = text;
+            translatedText = translatedText.replace(/STOCK獲得！(\d+)玉 \(剩餘 (\d+)轉\)/g, "STOCK獲得！$1玉 (残り $2回転)");
+            translatedText = translatedText.replace(/剩餘 (\d+) 轉/g, "残り $1 回転");
+            translatedText = translatedText.replace(/獲得 (\d+) 玉/g, "$1 玉獲得");
+            translatedText = translatedText.replace(/大當り！ (\d+)連莊/g, "大当り！ $1連チャン");
+
+            for (let [zh, ja] of Object.entries(dict)) {
+                if (translatedText.includes(zh)) translatedText = translatedText.split(zh).join(ja);
+            }
+
+            originalAddLog(translatedText, className);
+
+            // 3. 🏆 全自動稱號判定系統 (與翻譯系統同步執行，防止漏單)
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) return;
+                const titleDb = firebase.database();
+                const uid = user.uid;
+                const machineTitle = document.querySelector('h1') ? document.querySelector('h1').innerText : "";
+                const rushEl = document.getElementById('ui-rush');
+                const rushCount = rushEl ? parseInt(rushEl.innerText) : 0;
+
+                let spinMatch = translatedText.match(/\[\s*(\d+)\s*(?:回轉|回転)/);
+                if (spinMatch && !translatedText.includes("ST") && !translatedText.includes("残保留") && !translatedText.includes("電サポ")) {
+                    window._lastLoggedSpins = parseInt(spinMatch[1]);
                 }
-            }
+                let actualSpins = window._lastLoggedSpins || 0;
 
-            // 💀 単発地獄
-            const isNormalLoss = !isRushEnd && !isRunthroughExplicit
-                && (
-                    isRushChallengeFailure
-                    || /通常へ戻る|通常終了|通常へ|RUSH非突入/.test(translatedText)
-                    || (/(CHARGE|チャージ)/i.test(translatedText) && !/突入|開始|昇格|成功/.test(translatedText))
-                );
+                const pageName = location.pathname.split('/').pop().toLowerCase();
+                const heavyMachinePages = new Set(['bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html', 'hokuto10.html', 'hokuto11.html', 'mushoku.html', 'seed.html', 'slime.html', 'takt.html', 'majo.html']);
+                const isHeavyMachine = heavyMachinePages.has(pageName) || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣)/i.test(machineTitle);
 
-            if (isNormalLoss) {
-                // 🌟 加入防重複鎖：如果呢一轉 (actualSpins) 已經 +1 過，就自動 Block 咗佢
-                if (rushCount <= 1 && actualSpins !== window._lastHellCountedSpin) {
-                    window._lastHellCountedSpin = actualSpins; // 鎖定呢一轉，同一轉再有 Log 都唔理
-                    
-                    titleDb.ref('users/' + uid + '/single_hell_count').transaction(count => {
-                        let newCount = (count || 0) + 1;
-                        if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
-                        return newCount;
-                    });
+                const isCharge = /チャージ|CHARGE/i.test(translatedText);
+                // Rush Challenge / CZ / 時短 への突入パターン（本RUSHではない）
+                const isRushChallengeEnter = /(チャレンジ|JUDGE|CZ|時短).*?(突入|開始)/.test(translatedText)
+                    || /(突入|開始).*?(チャレンジ|JUDGE|CZ|時短)/.test(translatedText);
+                // 本RUSHへの突入（Rush Challenge・Charge・時短を除く）
+                // 🌟 修正：排除「非突入」同「失敗」，防止系統見到「RUSH非突入」就誤以為入咗 RUSH 而清空單發計數！
+                const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText) && !/チャレンジ|JUDGE|CZ|非突入|失敗/.test(translatedText);
+
+                // ✨ 神の引き
+                if (isRealRushEnter && actualSpins === 1 && isHeavyMachine) {
+                    titleDb.ref('users/' + uid).update({ title_godpull: true });
+                    window._lastLoggedSpins = 0;
                 }
-            }
 
-            // 🌟 清空単発地獄
-            if (isRealRushEnter || translatedText.includes("継続") || translatedText.includes("連)") || rushCount >= 2) {
-                titleDb.ref('users/' + uid + '/single_hell_count').set(0);
-            }
+                // ⚡ 駆け抜け王 ＆ runthrough_count 管理
+                const isRushChallengeFailure = /チャレンジ失敗|CZ失敗|JUDGE失敗|時短終了|任務失敗|チャンスタイム終了|昇格失敗/.test(translatedText);
+                const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(translatedText)
+                    && !isRushChallengeFailure;
+                const isRunthroughExplicit = /駆け抜け|スルー/.test(translatedText) && !isRushChallengeFailure;
 
-        } catch (error) {
-            console.error('[Title interceptor] Error:', error);
-        }
-    };
-}
+                if (isRushEnd || isRunthroughExplicit) {
+                    if (isRunthroughExplicit || rushCount === 0) {
+                        titleDb.ref('users/' + uid + '/runthrough_count').transaction(count => {
+                            let newCount = (count || 0) + 1;
+                            if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });
+                            return newCount;
+                        });
+                    } else {
+                        titleDb.ref('users/' + uid + '/runthrough_count').set(0);
+                    }
+                }
+
+                // 💀 単発地獄
+                const isNormalLoss = !isRushEnd && !isRunthroughExplicit
+                    && (
+                        isRushChallengeFailure
+                        || /通常へ戻る|通常終了|通常へ|RUSH非突入/.test(translatedText)
+                        || (/(CHARGE|チャージ)/i.test(translatedText) && !/突入|開始|昇格|成功/.test(translatedText))
+                    );
+
+                if (isNormalLoss) {
+                    // 🌟 加入防重複鎖：如果呢一轉 (actualSpins) 已經 +1 過，就自動 Block 咗佢
+                    if (rushCount <= 1 && actualSpins !== window._lastHellCountedSpin) {
+                        window._lastHellCountedSpin = actualSpins; // 鎖定呢一轉，同一轉再有 Log 都唔理
+
+                        titleDb.ref('users/' + uid + '/single_hell_count').transaction(count => {
+                            let newCount = (count || 0) + 1;
+                            if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
+                            return newCount;
+                        });
+                    }
+                }
+
+                // 🌟 清空単発地獄
+                if (isRealRushEnter || translatedText.includes("継続") || translatedText.includes("連)") || rushCount >= 2) {
+                    titleDb.ref('users/' + uid + '/single_hell_count').set(0);
+                }
+
+            } catch (error) {
+                console.error('[Title interceptor] Error:', error);
+            }
+        };
+    }
 }, 2000);
 
 // 🌟 切換自訂稱號選單顯示/隱藏
-window.toggleTitleChecks = function(mode) {
+window.toggleTitleChecks = function (mode) {
     window.HallShared.toggleTitleChecks(mode);
 };
 
 // 🌟 儲存多重稱號設定
-window.saveTitleSettings = function(uid) {
+window.saveTitleSettings = function (uid) {
     window.HallShared.saveTitleSettings(uid)
-    .then(saved => { if (saved) { alert("✅ 称号の表示設定を保存しました！"); location.reload(); } });
+        .then(saved => { if (saved) { alert("✅ 称号の表示設定を保存しました！"); location.reload(); } });
 };

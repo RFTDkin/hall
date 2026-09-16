@@ -266,6 +266,7 @@
                 inputEl.value = "";
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = "送信する";
+                window.location.reload(); // 🌟 加呢句，Send完自動F5刷新畫面
             }).catch(err => {
                 alert("エラーが発生しました: " + err.message);
                 btnSubmit.disabled = false;
@@ -274,7 +275,7 @@
         }
 
         // 監聽數據庫，實時顯示留言與回覆
-        db.ref('community_requests').orderByChild('timestamp').once('value', (snapshot) => {
+        db.ref('community_requests').orderByChild('timestamp').limitToLast(30).once('value', (snapshot) => {
             const container = document.getElementById("message-container");
             container.innerHTML = "";
 
@@ -384,6 +385,9 @@
         function deleteMsg(key) {
             if (confirm("本当にこのメッセージを削除しますか？")) {
                 db.ref('community_requests/' + key).remove()
+                .then(() => {
+                    window.location.reload(); // 🌟 刪除成功後自動 F5 刷新畫面
+                })
                 .catch(err => {
                     alert("削除エラーが発生しました: " + err.message);
                 });
@@ -425,6 +429,7 @@
             }).then(() => {
                 inputEl.value = "";
                 toggleReplyBox(parentKey); // 成功後自動收埋個輸入框
+                window.location.reload(); // 🌟 加呢句，回覆完自動F5刷新畫面
             }).catch(err => {
                 alert("エラーが発生しました: " + err.message);
             });
