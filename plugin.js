@@ -147,6 +147,36 @@ globalPluginStyle.innerHTML = `
     table.data-lamp td:nth-child(2) .title-effect {
         white-space: normal !important;
     }
+
+    /* 🌟 機種專屬傳說稱號 🌟 */
+    .effect-bl-legend { position: relative; display: inline-block; z-index: 1; overflow: hidden; padding: 0 5px; }
+    .effect-bl-legend::before { content: ''; position: absolute; z-index: -1; top: 50%; left: -25px; width: 22px; height: 22px; transform: translateY(-50%); background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(0,229,255,0.3)" stroke="%2300e5ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 7l3 4-1.5 5h-3L9 11z"/><path d="M12 7V2M15 11l4.5-2M13.5 16l3.5 4.5M10.5 16l-3.5 4.5M9 11L4.5 9"/></svg>'); filter: drop-shadow(0 0 4px #00e5ff); animation: bl-soccer-roll 2s linear infinite; }
+    @keyframes bl-soccer-roll { 0% { left: -25px; transform: translateY(-50%) rotate(0deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 100%; transform: translateY(-50%) rotate(360deg); opacity: 0; } }
+
+    .effect-ghoul-legend { position: relative; display: inline-block; z-index: 1; padding: 0 15px; color: #fff; text-shadow: 0 0 4px #ff1744; }
+    .effect-ghoul-legend::before { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 110%; height: 38px; background: #000; border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid #ff1744; box-shadow: 0 0 15px #ff1744, inset 0 0 15px #ff1744; animation: ghoul-blink-wide 4s infinite; }
+    .effect-ghoul-legend::after { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 14px; height: 14px; background: #ff1744; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #ff0000, inset 0 0 4px #000; animation: ghoul-blink-iris-wide 4s infinite; }
+    @keyframes ghoul-blink-wide { 0%, 46%, 54%, 100% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0.1); } }
+    @keyframes ghoul-blink-iris-wide { 0%, 46%, 54%, 100% { transform: translate(-50%, -50%) scaleY(1); opacity: 1; } 50% { transform: translate(-50%, -50%) scaleY(0.1); opacity: 0; } }
+
+    .effect-lycoris-legend { position: relative; display: inline-block; z-index: 1; overflow: hidden; padding: 0 5px; }
+    .effect-lycoris-legend::before { content: '💩'; position: absolute; z-index: -1; font-size: 1.2em; opacity: 0.8; animation: poop-jump 2.5s linear infinite, poop-color 1.5s linear infinite; }
+    @keyframes poop-jump { 0% { left: -20px; top: 100%; opacity: 0; } 10% { opacity: 1; top: 100%; } 20% { top: -20%; } 30% { top: 100%; } 40% { top: -20%; } 50% { top: 100%; } 60% { top: -20%; } 70% { top: 100%; } 80% { top: -20%; } 90% { top: 100%; opacity: 1; } 100% { left: 100%; top: 100%; opacity: 0; } }
+    @keyframes poop-color { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+
+    .effect-mushoku-legend { position: relative; display: inline-block; z-index: 1; padding: 0 10px; }
+    .effect-mushoku-legend::before { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 45px; height: 35px; transform: translate(-50%, -50%); background-image: url('rokishipantsu.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.7; animation: pantsu-float 3s ease-in-out infinite; }
+    @keyframes pantsu-float { 0%, 100% { transform: translate(-50%, -40%) rotate(-5deg); } 50% { transform: translate(-50%, -60%) rotate(5deg); } }
+
+    /* 終極預覽圖層 */
+    .legend-ghoul-eye { position: absolute; z-index: -2; top: 50%; left: 50%; width: 120%; height: 50px; background: rgba(0, 0, 0, 0.75); border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid rgba(255, 23, 68, 0.8); box-shadow: 0 0 15px #ff1744, inset 0 0 15px #ff1744; animation: ghoul-blink-wide 4s infinite; }
+    .legend-ghoul-eye::after { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 16px; height: 16px; background: rgba(255, 23, 68, 0.9); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #ff0000, inset 0 0 4px #000; animation: ghoul-blink-iris-wide 4s infinite; }
+    .legend-mushoku-pantsu { position: absolute; z-index: -1; top: 50%; left: 50%; width: 55px; height: 45px; transform: translate(-50%, -50%); background-image: url('rokishipantsu.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.5; filter: drop-shadow(0 0 8px #4fc3f7); animation: pantsu-float 3s ease-in-out infinite; }
+    .legend-bl-soccer { position: absolute; z-index: 5; top: 50%; left: -35px; width: 22px; height: 22px; transform: translateY(-50%); background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(0,229,255,0.4)" stroke="%2300e5ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 7l3 4-1.5 5h-3L9 11z"/><path d="M12 7V2M15 11l4.5-2M13.5 16l3.5 4.5M10.5 16l-3.5 4.5M9 11L4.5 9"/></svg>'); filter: drop-shadow(0 0 6px #00e5ff); animation: legend-soccer-roll 3s linear infinite; }
+    @keyframes legend-soccer-roll { 0% { left: -35px; transform: translateY(-50%) rotate(0deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 110%; transform: translateY(-50%) rotate(360deg); opacity: 0; } }
+    .legend-lycoris-poop { position: absolute; z-index: 6; opacity: 0.9; animation: legend-poop-jump 3.5s linear infinite, poop-color 1.5s linear infinite; }
+    .legend-lycoris-poop::before { content: '💩'; font-size: 1.2em; }
+    @keyframes legend-poop-jump { 0% { left: -30px; top: 100%; opacity: 0; } 10% { opacity: 1; top: 100%; } 20% { top: -20%; } 30% { top: 100%; } 40% { top: -20%; } 50% { top: 100%; } 60% { top: -20%; } 70% { top: 100%; } 80% { top: -20%; } 90% { top: 100%; opacity: 1; } 100% { left: 110%; top: 100%; opacity: 0; } }
     /* Modal & UI */
     @media screen and (max-width: 768px) {
         #plugin-ui-container { position: relative !important; top: 0 !important; right: 0 !important; align-items: center !important; width: 100% !important; margin-bottom: 20px !important; flex-direction: column !important; }
@@ -187,7 +217,6 @@ window.getPluginPlayerNameHtml = function (userObj, isRank1, uid = null, disable
     });
 };
 
-// 🌟 全局打開玩家 Profile Modal (加入防打斷更新機制)
 window.showPluginProfile = function (uid) {
     window.currentOpenProfileUid = uid;
     if (!window.globalUsersData || !window.globalUsersData[uid]) return;
@@ -201,18 +230,16 @@ window.showPluginProfile = function (uid) {
     if (richArr.length > 0) topUid = richArr[0].uid;
 
     let mockUserObj = {
-        name: u.username,
-        balance: u.balance,
-        has_completed: u.has_completed,
-        title_hell: u.title_hell,
-        title_godpull: u.title_godpull,
-        title_runthrough: u.title_runthrough,
-        is_vip: u.is_vip, // 🌟 補返 VIP 狀態
-        equipped_title: u.equipped_title, // 🌟 補返裝備設定落去
+        name: u.username, balance: u.balance, has_completed: u.has_completed,
+        title_hell: u.title_hell, title_godpull: u.title_godpull,
+        title_runthrough: u.title_runthrough, is_vip: u.is_vip,
+        // 🌟 新增資料對接
+        title_bl_legend: u.title_bl_legend, title_ghoul_legend: u.title_ghoul_legend,
+        title_lycoris_legend: u.title_lycoris_legend, title_mushoku_legend: u.title_mushoku_legend,
+        equipped_title: u.equipped_title,
         isSelf: firebase.auth().currentUser && firebase.auth().currentUser.uid === uid
     };
 
-    // 🌟 核心修復：傳入 uid 代替 null，等系統可以讀到裝備狀態
     let nameHtml = window.getPluginPlayerNameHtml(mockUserObj, topUid === uid, uid, true);
     let nameEl = document.getElementById('p-modal-name');
     if (nameEl.innerHTML !== nameHtml) nameEl.innerHTML = nameHtml;
@@ -221,21 +248,15 @@ window.showPluginProfile = function (uid) {
     let balEl = document.getElementById('p-modal-balance');
     if (balEl.innerText !== balText) balEl.innerText = balText;
 
-    let hC = u.single_hell_count || 0;
-    let rC = u.runthrough_count || 0;
-
-    let hText = `${hC} / 10`;
-    let hTextEl = document.getElementById('p-modal-hell-text');
+    let hC = u.single_hell_count || 0; let rC = u.runthrough_count || 0;
+    let hText = `${hC} / 10`; let hTextEl = document.getElementById('p-modal-hell-text');
     if (hTextEl.innerText !== hText) hTextEl.innerText = hText;
-    let hFill = `${Math.min((hC / 10) * 100, 100)}%`;
-    let hFillEl = document.getElementById('p-modal-hell-fill');
+    let hFill = `${Math.min((hC / 10) * 100, 100)}%`; let hFillEl = document.getElementById('p-modal-hell-fill');
     if (hFillEl.style.width !== hFill) hFillEl.style.width = hFill;
 
-    let rText = `${rC} / 7`;
-    let rTextEl = document.getElementById('p-modal-run-text');
+    let rText = `${rC} / 7`; let rTextEl = document.getElementById('p-modal-run-text');
     if (rTextEl.innerText !== rText) rTextEl.innerText = rText;
-    let rFill = `${Math.min((rC / 7) * 100, 100)}%`;
-    let rFillEl = document.getElementById('p-modal-run-fill');
+    let rFill = `${Math.min((rC / 7) * 100, 100)}%`; let rFillEl = document.getElementById('p-modal-run-fill');
     if (rFillEl.style.width !== rFill) rFillEl.style.width = rFill;
 
     let bHtml = '';
@@ -245,22 +266,24 @@ window.showPluginProfile = function (uid) {
     bHtml += `<div class="badge ${u.title_hell ? 'active' : ''}">怨 単発地獄</div>`;
     bHtml += `<div class="badge ${u.title_runthrough ? 'active' : ''}">⚡ 駆け抜け王</div>`;
     if (u.is_vip) bHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 8px #00e5ff;">💎 VIP スポンサー</div>`;
+    
+    // 🌟 新增機種傳說徽章
+    if (u.title_bl_legend) bHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff;">⚽ 俺、はストライカーだ！</div>`;
+    if (u.title_ghoul_legend) bHtml += `<div class="badge active" style="border-color: #ff1744; color: #ff1744;">🩸 僕、は喰種だ</div>`;
+    if (u.title_lycoris_legend) bHtml += `<div class="badge active" style="border-color: #ff5252; color: #ff5252;">💩 ホットでプレミアムうんこ</div>`;
+    if (u.title_mushoku_legend) bHtml += `<div class="badge active" style="border-color: #4fc3f7; color: #4fc3f7;">🪄 ロキシーのパンツ御神体</div>`;
 
     let badgesEl = document.getElementById('p-modal-badges');
     if (badgesEl.innerHTML !== bHtml) badgesEl.innerHTML = bHtml;
-
     document.getElementById('plugin-profile-modal').style.display = 'flex';
 
-    // 🌟 注入多重稱號裝備選單 (加咗 Render Key 防止刷新彈回)
     let selectorEl = document.getElementById('p-modal-title-selector');
     if (firebase.auth().currentUser && firebase.auth().currentUser.uid === uid) {
         let eq = u.equipped_title || "auto";
-        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.is_vip}`;
+        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.is_vip}-${u.title_bl_legend}-${u.title_ghoul_legend}-${u.title_lycoris_legend}-${u.title_mushoku_legend}`;
 
         if (selectorEl.getAttribute('data-render-key') !== renderKey) {
-            let isAuto = eq === "auto";
-            let isNone = eq === "none";
-            let isCustom = !isAuto && !isNone;
+            let isAuto = eq === "auto"; let isNone = eq === "none"; let isCustom = !isAuto && !isNone;
             let isTop = (topUid === uid);
 
             selectorEl.innerHTML = `
@@ -278,6 +301,11 @@ window.showPluginProfile = function (uid) {
                             ${u.title_runthrough ? `<label><input type="checkbox" class="t-check" value="runthrough" ${eq.includes('runthrough') ? 'checked' : ''}> 駆け抜け王</label><br>` : ''}
                             ${u.title_hell ? `<label><input type="checkbox" class="t-check" value="hell" ${eq.includes('hell') ? 'checked' : ''}> 単発地獄</label><br>` : ''}
                             ${u.is_vip ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 💎 VIP 特権 (紫電)</label><br>` : ''}
+                            <!-- 🌟 新增機種稱號裝備選項 -->
+                            ${u.title_bl_legend ? `<label><input type="checkbox" class="t-check" value="bl_legend" ${eq.includes('bl_legend') ? 'checked' : ''}> ⚽ 俺、はストライカーだ！</label><br>` : ''}
+                            ${u.title_ghoul_legend ? `<label><input type="checkbox" class="t-check" value="ghoul_legend" ${eq.includes('ghoul_legend') ? 'checked' : ''}> 🩸 僕、は喰種だ</label><br>` : ''}
+                            ${u.title_lycoris_legend ? `<label><input type="checkbox" class="t-check" value="lycoris_legend" ${eq.includes('lycoris_legend') ? 'checked' : ''}> 💩 プレミアムうんこ</label><br>` : ''}
+                            ${u.title_mushoku_legend ? `<label><input type="checkbox" class="t-check" value="mushoku_legend" ${eq.includes('mushoku_legend') ? 'checked' : ''}> 🪄 ロキシーのパンツ</label><br>` : ''}
                         </div>
                     </div>
                     <button onclick="window.saveTitleSettings('${uid}')" style="margin-top: 12px; width: 100%; padding: 8px; background: #00e5ff; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">💾 設定を保存</button>
@@ -528,7 +556,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     name: currentUserObj.username, balance: currentUserObj.balance,
                     has_completed: currentUserObj.has_completed, title_hell: currentUserObj.title_hell,
                     title_godpull: currentUserObj.title_godpull, title_runthrough: currentUserObj.title_runthrough,
-                    is_vip: currentUserObj.is_vip
+                    is_vip: currentUserObj.is_vip,
+                    // 👇 補返呢 4 行，右上角就會認得新稱號特效！
+                    title_bl_legend: currentUserObj.title_bl_legend || false,
+                    title_ghoul_legend: currentUserObj.title_ghoul_legend || false,
+                    title_lycoris_legend: currentUserObj.title_lycoris_legend || false,
+                    title_mushoku_legend: currentUserObj.title_mushoku_legend || false
                 };
                 let selfHtml = window.getPluginPlayerNameHtml(mockSelf, topUid === uid, uid, false);
                 let uiUserEl = document.getElementById("ui-username");
@@ -1248,6 +1281,61 @@ setTimeout(() => {
                     titleDb.ref('users/' + uid + '/single_hell_count').set(0);
                 }
 
+                // ==========================================
+                // 🌟 第三步：4 大機種傳說稱號判定系統 🌟
+                // ==========================================
+                const isBlueLock = pageName.includes("bluelock") || machineTitle.includes("ブルーロック");
+                const isGhoul = pageName.includes("ghoul") || machineTitle.includes("東京喰種");
+                const isLycoris = pageName.includes("lycoris") || machineTitle.includes("リコリス");
+                const isMushoku = pageName.includes("mushoku") || machineTitle.includes("無職転生");
+
+                // 提取 Log 內包含的玉數 (自動過濾逗號，方便判斷 30000玉 / 6000玉)
+                let ballMatch = translatedText.replace(/,/g, '').match(/(\d+)玉/);
+                let earnedBalls = ballMatch ? parseInt(ballMatch[1]) : 0;
+
+                // 1. ⚽ Blue Lock
+                if (isBlueLock) {
+                    // 條件：全回転 (0.1%) 当選、または RUSH中に「7500だけじゃ終われない」を獲得
+                    if (translatedText.includes("全回転") || translatedText.includes("7500だけじゃ終われない")) {
+                        titleDb.ref('users/' + uid).update({ title_bl_legend: true });
+                        // 彈出提示恭喜玩家
+                        window.alert("🎉 伝説の称号【俺、はストライカーだ！】を獲得しました！\nプロフィールから装備できます！");
+                    }
+                }
+                
+                // 2. 🩸 東京喰種
+                if (isGhoul) {
+                    // 條件：一撃で30,000玉以上を上乗せする。もしくはチャージ昇格
+                    if (earnedBalls >= 30000 || /(チャージ|CHARGE).*?(昇格)/.test(translatedText)) {
+                        titleDb.ref('users/' + uid).update({ title_ghoul_legend: true });
+                        window.alert("🎉 伝説の称号【僕、は喰種だ】を獲得しました！\nプロフィールから装備できます！");
+                    }
+                }
+
+                // 3. 💩 Lycoris Recoil
+                if (isLycoris) {
+                    // 條件：上乗せ時、一撃で30,000玉以上を上乗せする。
+                    if (earnedBalls >= 30000) {
+                        titleDb.ref('users/' + uid).update({ title_lycoris_legend: true });
+                        window.alert("🎉 伝説の称号【ホットでプレミアムうんこ】を獲得しました！\nプロフィールから装備できます！");
+                    }
+                }
+
+                // 4. 🪄 無職転生
+                if (isMushoku) {
+                    // 如果斷開 RUSH，重置 6000 玉計數器
+                    if (isRushEnd || isNormalLoss) {
+                        window._mushoku_6000_count = 0;
+                    }
+                    // 條件：RUSH中に「6000玉 (10R×4)」を5回以上獲得する
+                    if (earnedBalls === 6000) {
+                        window._mushoku_6000_count = (window._mushoku_6000_count || 0) + 1;
+                        if (window._mushoku_6000_count >= 5) {
+                            titleDb.ref('users/' + uid).update({ title_mushoku_legend: true });
+                            window.alert("🎉 伝説の称号【ロキシーのパンツ御神体】を獲得しました！\nプロフィールから装備できます！");
+                        }
+                    }
+                }
             } catch (error) {
                 console.error('[Title interceptor] Error:', error);
             }
