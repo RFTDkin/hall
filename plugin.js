@@ -926,6 +926,105 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         }
 
+        function getShareText(payout, rushCount) {
+            const compText = payout >= 95000 ? "\n🎉【完成全機種挑戰！】🎉" : "";
+            return `【一擊獲得 ${payout.toLocaleString()} 玉！】${compText}\n🎰 機種：${machineName}\n💥 本次出玉：${payout.toLocaleString()} 玉（${rushCount} 連莊）\n\n你今日嘅運氣有幾勁？🔥\n#柏青哥模擬器 #柏青哥 #網頁版柏青哥 #免費遊戲 #神抽`;
+        }
+
+        function getThreadsShareUrl(text) {
+            return `https://www.threads.com/intent/post?text=${encodeURIComponent(`${text}\n\n${window.location.href}`)}`;
+        }
+
+        function openThreadsShare(text, shareWindow = null) {
+            const shareUrl = getThreadsShareUrl(text);
+            if (shareWindow && !shareWindow.closed) {
+                shareWindow.location.href = shareUrl;
+                shareWindow.focus();
+                return;
+            }
+            const openedWindow = window.open(shareUrl, '_blank');
+            if (!openedWindow) {
+                window.alert('ポップアップがブロックされました。ブラウザのポップアップ許可後、もう一度お試しください。');
+            }
+        }
+
+        function createShareCardBlob(payout, rushCount) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1200;
+                canvas.height = 630;
+                const context = canvas.getContext('2d');
+                if (!context) {
+                    resolve(null);
+                    return;
+                }
+
+                const background = context.createLinearGradient(0, 0, 1200, 630);
+                background.addColorStop(0, '#090b16');
+                background.addColorStop(0.55, '#17102d');
+                background.addColorStop(1, '#5b1729');
+                context.fillStyle = background;
+                context.fillRect(0, 0, canvas.width, canvas.height);
+
+                context.globalAlpha = 0.2;
+                context.fillStyle = '#ffca28';
+                context.beginPath();
+                context.arc(1030, 80, 190, 0, Math.PI * 2);
+                context.fill();
+                context.fillStyle = '#00e5ff';
+                context.beginPath();
+                context.arc(120, 590, 150, 0, Math.PI * 2);
+                context.fill();
+                context.globalAlpha = 1;
+
+                context.strokeStyle = '#ffca28';
+                context.lineWidth = 4;
+                context.strokeRect(28, 28, 1144, 574);
+                context.textBaseline = 'middle';
+                context.fillStyle = '#ffca28';
+                context.font = 'bold 32px "Noto Sans JP", sans-serif';
+                context.fillText('🎰 バーチャル パチンコホール', 70, 90);
+
+                context.fillStyle = '#ffffff';
+                context.font = 'bold 48px "Noto Sans JP", sans-serif';
+                const title = machineName.length > 24 ? `${machineName.slice(0, 24)}…` : machineName;
+                context.fillText(title, 70, 170);
+
+                context.fillStyle = '#ffeb3b';
+                context.font = '900 106px "Noto Sans JP", sans-serif';
+                context.fillText(`${payout.toLocaleString()} 玉`, 70, 330);
+
+                context.fillStyle = '#ffffff';
+                context.font = 'bold 38px "Noto Sans JP", sans-serif';
+                context.fillText(`${rushCount.toLocaleString()} 連莊`, 75, 415);
+                context.fillStyle = payout >= 95000 ? '#ff80ab' : '#9cefff';
+                context.font = 'bold 30px "Noto Sans JP", sans-serif';
+                context.fillText(payout >= 95000 ? '🎉 完成全機種挑戰！' : '一擊戰績達成！', 75, 500);
+
+                context.fillStyle = '#c9d1d9';
+                context.font = '24px "Noto Sans JP", sans-serif';
+                context.fillText('免費網頁版柏青哥模擬器', 760, 550);
+                canvas.toBlob(resolve, 'image/png');
+            });
+        }
+
+        function downloadShareCard() {
+            const payout = window.latest_payout_for_share || 0;
+            const rushCount = window.latest_rush_for_share || 0;
+            if (payout < 10000) {
+                window.alert("一万発を達成してから画像を保存してください！");
+                return;
+            }
+            createShareCardBlob(payout, rushCount).then((blob) => {
+                if (!blob) return;
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `pachinko-result-${payout}.png`;
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+            });
+        }
+
         const playBtn = document.getElementById("btn-play");
         const btnContainer = playBtn ? playBtn.parentNode : null;
 
@@ -939,24 +1038,65 @@ document.addEventListener("DOMContentLoaded", () => {
                 let payout = window.latest_payout_for_share || 0;
                 let rushCount = window.latest_rush_for_share || 0;
                 if (payout < 10000) { window.alert("一万発を達成してからポストしてください！"); return; }
-                let compText = payout >= 95000 ? "\n🎉【コンプリート達成！】🎉" : "";
-                let text = `【一撃一万発達成！】${compText}\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター\n`;
+                const text = `【一撃一万発達成！】\n🎰 機種：${machineName}\n💥 今回の獲得出玉：${payout.toLocaleString()}玉 (${rushCount}連チャン)\n\n今日のヒキは神レベル！？🔥\n#パチンコ #神引き #一万発 #パチンコシミュレーター`;
                 let url = window.location.href;
                 let shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
                 window.open(shareUrl, '_blank');
             };
             btnContainer.appendChild(shareBtn);
 
+            const threadsBtn = document.createElement("button");
+            threadsBtn.id = "btn-share-threads";
+            threadsBtn.innerText = "🧵 Threadsで戦績をシェア";
+            threadsBtn.style.cssText = "background-color: #17102d; color: #ffca28; border: 2px solid #ffca28; display: none; margin-left: 5px; box-shadow: 0 0 12px rgba(255, 202, 40, 0.35); cursor: pointer; padding: 12px 20px; font-size: 1.1em; border-radius: 5px; font-weight: bold;";
+            threadsBtn.onclick = async () => {
+                const payout = window.latest_payout_for_share || 0;
+                const rushCount = window.latest_rush_for_share || 0;
+                if (payout < 10000) { window.alert("一万発を達成してからシェアしてください！"); return; }
+                const text = getShareText(payout, rushCount);
+                // Reserve the tab during the user click so desktop popup blockers do not cancel it after await.
+                const shareWindow = window.open('about:blank', '_blank');
+                if (navigator.share && navigator.canShare) {
+                    const blob = await createShareCardBlob(payout, rushCount);
+                    const file = blob ? new File([blob], `pachinko-result-${payout}.png`, { type: 'image/png' }) : null;
+                    if (file && navigator.canShare({ files: [file] })) {
+                        try {
+                            if (shareWindow && !shareWindow.closed) shareWindow.close();
+                            await navigator.share({ title: 'パチンコ実績', text, url: window.location.href, files: [file] });
+                            return;
+                        } catch (error) {
+                            if (error.name === 'AbortError') return;
+                        }
+                    }
+                }
+                openThreadsShare(text, shareWindow);
+            };
+            btnContainer.appendChild(threadsBtn);
+
+            const imageBtn = document.createElement("button");
+            imageBtn.id = "btn-save-share-image";
+            imageBtn.innerText = "🖼️ 戦績画像を保存";
+            imageBtn.style.cssText = "background-color: #17102d; color: #ffca28; border: 2px solid #ffca28; display: none; margin-left: 5px; box-shadow: 0 0 12px rgba(255, 202, 40, 0.35); cursor: pointer; padding: 12px 20px; font-size: 1.1em; border-radius: 5px; font-weight: bold;";
+            imageBtn.onclick = downloadShareCard;
+            btnContainer.appendChild(imageBtn);
+
             if (playBtn) {
                 const observer = new MutationObserver((mutations) => {
                     mutations.forEach((mutation) => {
                         if (mutation.type === "attributes" && mutation.attributeName === "disabled") {
                             let sBtn = document.getElementById("btn-share-x");
+                            let threadsShareBtn = document.getElementById("btn-share-threads");
+                            let saveImageBtn = document.getElementById("btn-save-share-image");
                             if (!playBtn.disabled) {
                                 playBtn.innerText = "▶️ プレイ続行";
-                                if (window.latest_payout_for_share >= 10000 && sBtn) sBtn.style.display = "inline-block";
+                                const canShare = window.latest_payout_for_share >= 10000;
+                                if (sBtn) sBtn.style.display = canShare ? "inline-block" : "none";
+                                if (threadsShareBtn) threadsShareBtn.style.display = canShare ? "inline-block" : "none";
+                                if (saveImageBtn) saveImageBtn.style.display = canShare ? "inline-block" : "none";
                             } else {
                                 if (sBtn) sBtn.style.display = "none";
+                                if (threadsShareBtn) threadsShareBtn.style.display = "none";
+                                if (saveImageBtn) saveImageBtn.style.display = "none";
                                 window.latest_payout_for_share = 0;
                                 window.latest_rush_for_share = 0;
                             }

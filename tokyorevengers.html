@@ -35,11 +35,90 @@
         table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
         table.data-lamp td.hit-payout { color: #ff5252; font-weight: bold; }
         .empty-row { color: #444 !important; }
+        .blackout-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            background: #000;
+            opacity: 0;
+            visibility: hidden;
+        }
+        .blackout-overlay.is-active {
+            visibility: visible;
+            animation: blackout-screen 4.8s ease-in-out forwards;
+        }
+        .blackout-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.12em;
+            font-family: "Arial Black", Impact, sans-serif;
+            font-size: clamp(2rem, 7vw, 6rem);
+            line-height: 1.15;
+            letter-spacing: 0.04em;
+            text-align: center;
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        .blackout-congrats {
+            font-size: 0.72em;
+        }
+        .blackout-reserve {
+            font-size: 0.82em;
+        }
+        .blackout-payout {
+            font-size: 1.2em;
+        }
+        .blackout-rainbow {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: blackout-rainbow 2s linear infinite;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75));
+            font-weight: 900;
+        }
+        @keyframes blackout-rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        .blackout-overlay.is-active .blackout-message {
+            animation: blackout-message 4.8s ease-in-out forwards;
+        }
+        @keyframes blackout-screen {
+            0% { opacity: 0; }
+            10%, 88% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        @keyframes blackout-message {
+            0%, 15% { opacity: 0; transform: scale(1.35); }
+            25%, 80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.96); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .blackout-overlay.is-active,
+            .blackout-overlay.is-active .blackout-message {
+                animation-duration: 2.4s;
+            }
+        }
     </style>
     <link rel="stylesheet" href="mobile.css">
 </head>
 
 <body>
+    <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div class="blackout-congrats blackout-rainbow">おめでとう！</div>
+            <div id="blackout-reserve-text" class="blackout-reserve blackout-rainbow">保留連一回目当選！</div>
+            <div class="blackout-payout blackout-rainbow">+3000！</div>
+        </div>
+    </div>
+
     <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">e東京リベンジャーズ聖夜決戦編</span></h1>
     <div class="main-container">
         <div class="left-panel">
@@ -196,12 +275,11 @@
 
                                 if (reserveHits.length > 0) {
                                     await sleep(1000);
-                                    addLog(`ブラックアウト！！！`, "color-normal");
-                                    await sleep(1500);
-
-                                    for (let simSpin of reserveHits) {
+                                    for (let reserveIndex = 0; reserveIndex < reserveHits.length; reserveIndex++) {
                                         this.session_rush_count += 1;
-                                        currentHitPayout += 3000; 
+                                        currentHitPayout += 3000;
+                                        addLog(`ブラックアウト！！！ (保留連${reserveIndex + 1}回目)`, "color-normal");
+                                        await playBlackout演出(reserveIndex + 1);
                                         addLog(`🌈 保留連当選！！ (V-STOCK) 3000玉 上乗せ！`, "color-ultimate");
                                         await sleep(800);
                                     }
@@ -284,6 +362,68 @@
             const div = document.createElement("div"); div.className = `log-entry ${className}`; div.innerText = text;
             logBox.appendChild(div); logBox.scrollTop = logBox.scrollHeight;
         }
+
+        function playBlackout演出(hitNumber = 1) {
+            const overlay = document.getElementById("blackout-overlay");
+            const reserveText = document.getElementById("blackout-reserve-text");
+            if (reserveText) reserveText.innerText = `保留連${hitNumber}回目当選！`;
+            // playBlackoutSound();
+            if (!overlay) return sleep(4800);
+            overlay.classList.remove("is-active");
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+            return sleep(4800).then(() => {
+                overlay.classList.remove("is-active");
+            });
+        }
+
+        // function playBlackoutSound() {
+        //     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        //     if (!AudioContextClass) return;
+        //     const audioContext = new AudioContextClass();
+        //     const startTime = audioContext.currentTime;
+        //     const masterGain = audioContext.createGain();
+        //     masterGain.gain.setValueAtTime(0.0001, startTime);
+        //     masterGain.gain.exponentialRampToValueAtTime(0.24, startTime + 0.025);
+        //     masterGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 1.9);
+        //     masterGain.connect(audioContext.destination);
+
+        //     const impact = audioContext.createOscillator();
+        //     const impactGain = audioContext.createGain();
+        //     impact.type = "square";
+        //     impact.frequency.setValueAtTime(92, startTime);
+        //     impact.frequency.exponentialRampToValueAtTime(38, startTime + 0.42);
+        //     impactGain.gain.setValueAtTime(0.0001, startTime);
+        //     impactGain.gain.exponentialRampToValueAtTime(0.8, startTime + 0.018);
+        //     impactGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.5);
+        //     impact.connect(impactGain);
+        //     impactGain.connect(masterGain);
+        //     impact.start(startTime);
+        //     impact.stop(startTime + 0.55);
+
+        //     const charge = audioContext.createOscillator();
+        //     charge.type = "sawtooth";
+        //     charge.frequency.setValueAtTime(180, startTime + 0.12);
+        //     charge.frequency.exponentialRampToValueAtTime(980, startTime + 1.35);
+        //     charge.connect(masterGain);
+        //     charge.start(startTime + 0.12);
+        //     charge.stop(startTime + 1.55);
+
+        //     const hit = audioContext.createOscillator();
+        //     const hitGain = audioContext.createGain();
+        //     hit.type = "triangle";
+        //     hit.frequency.setValueAtTime(740, startTime + 1.35);
+        //     hit.frequency.exponentialRampToValueAtTime(1480, startTime + 1.7);
+        //     hitGain.gain.setValueAtTime(0.0001, startTime + 1.35);
+        //     hitGain.gain.exponentialRampToValueAtTime(0.45, startTime + 1.4);
+        //     hitGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 2.05);
+        //     hit.connect(hitGain);
+        //     hitGain.connect(masterGain);
+        //     hit.start(startTime + 1.35);
+        //     hit.stop(startTime + 2.1);
+
+        //     setTimeout(() => audioContext.close(), 2400);
+        // }
 
         function updateUI() {
             if (game.state === "NORMAL") document.getElementById("ui-spins").innerText = game.session_spins;
