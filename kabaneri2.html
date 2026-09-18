@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【無料】e甲鉄城のカバネリ2 | パチンコシミュレーター</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a1a; color: #eeeeee; text-align: center; padding-bottom: 60px; margin: 0; padding: 20px; }
+        h1 { color: #ff9800; text-shadow: 0 0 15px rgba(255, 152, 0, 0.7); font-weight: 900; letter-spacing: 2px; }
+        .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
+        .left-panel, .right-panel { flex: 1; min-width: 320px; }
+        .left-panel { max-width: 500px; }
+        .right-panel { max-width: 400px; }
+        .stats-board { background-color: #111122; border: 2px solid #ff9800; border-radius: 10px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-around; font-size: 1.1em; box-shadow: inset 0 0 15px rgba(255, 152, 0, 0.5); }
+        .stat-item span { display: block; font-weight: bold; color: #ffca28; font-size: 1.3em; margin-top: 5px; }
+        button { background: linear-gradient(180deg, #e65100 0%, #bf360c 100%); color: white; border: 1px solid #ffb74d; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; transition: transform 0.1s, box-shadow 0.2s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 15px #ff9800; }
+        button:disabled { background: #263238; border-color: #444; color: #777; cursor: not-allowed; transform: scale(1); box-shadow: none; }
+        .log-container { background-color: #000000; border: 1px solid #e65100; border-radius: 5px; height: 400px; overflow-y: auto; padding: 10px; text-align: left; font-family: 'Courier New', Courier, monospace; line-height: 1.5; }
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #ffca28; font-weight: bold; text-shadow: 0 0 5px #ffca28; }
+        .color-hit { color: #ff9800; font-weight: bold; text-shadow: 0 0 5px #ff9800; }
+        .color-normal { color: #bdbdbd; }
+        .color-lt { color: #ff3d00; font-weight: 900; text-shadow: 0 0 15px #ff3d00; font-size: 1.1em; }
+        .color-ultimate { color: #e040fb; font-weight: 900; text-shadow: 0 0 15px #e040fb; font-size: 1.1em; }
+        .color-fall { color: #757575; font-weight: bold; }
+        .data-lamp-container { background-color: #111122; border: 3px solid #ff9800; border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(255, 152, 0, 0.5); }
+        .data-lamp-title { color: #ffcc80; margin-top: 0; margin-bottom: 15px; text-align: center; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 5px #ffcc80; letter-spacing: 2px; }
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #e65100; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #3e2723; color: #ffeb3b; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #1c1c2d; }
+        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ff9800; font-weight: bold; }
+        .empty-row { color: #444 !important; }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body>
+    <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">e甲鉄城のカバネリ2</span></h1>
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 遊技開始</button>
+            </div>
+            <div class="log-container" id="log-box"></div>
+        </div>
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead><tr><th>前次</th><th>當選回轉数</th><th>連莊数</th><th>獲得出玉</th></tr></thead>
+                    <tbody id="history-tbody"><tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        class Kabaneri2 {
+            constructor() { this.state = "NORMAL"; this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0; this.history = []; this.rush_spins = 0; }
+
+            async play_normal() {
+                this.session_spins += 1;
+                if (this.session_spins % 100 === 0) addLog(`現在回轉数: ${this.session_spins}`, "color-normal");
+
+                // 通常時大当り確率 1/319.7
+                if (Math.random() < 1 / 319.7) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い當選！`, "color-hit");
+                    let r = Math.random();
+
+                    this.session_payout += 750;
+
+                    // 50%: 750個 + RUSH (LT) 直行
+                    if (r < 0.50) {
+                        addLog("🔥 決戦BONUS！ 美馬に勝利 (750玉)", "color-ultimate");
+                        addLog("🌈 海門決戦 (ST134回 / LT) 突入！！", "color-lt");
+                        this.session_rush_count = 1;
+                        updateUI(); await sleep(2000);
+                        await this.play_rush();
+                    } 
+                    // 50%: 750個 + 時短なし
+                    else {
+                        addLog("💦 決戦BONUS 敗北... (750玉)", "color-normal");
+                        addLog("💀 通常へ戻る", "color-normal");
+                        updateUI(); this.record_history();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            async play_rush() {
+                this.state = "ST";
+                let max_spins = 134;
+                let hitRate = 1 / 98.3;
+                let modeName = "海門決戦";
+                
+                addLog(`\n===== 🚂 KABANERI OF THE IRON FORTRESS ${modeName} =====`, "color-lt");
+                
+                let initial_rush_count = this.session_rush_count;
+                updateUI();
+
+                while (this.state === "ST") {
+                    let hit = false;
+
+                    for (this.rush_spins = 1; this.rush_spins <= max_spins; this.rush_spins++) {
+                        await sleep(40);
+                        
+                        let remaining = max_spins - this.rush_spins;
+                        document.getElementById("ui-spins").innerText = `${modeName}残り: ${remaining}/${max_spins}`;
+
+                        // 🎯 右打ち中大当り抽選 (1/98.3)
+                        if (Math.random() < hitRate) {
+                            hit = true;
+                            this.session_rush_count += 1;
+                            addLog(`\n🎉 [${modeName} ${this.rush_spins}回転目] 當選！ (總 ${this.session_rush_count}連)`, "color-hit");
+
+                            let right_r = Math.random();
+
+                            // 6.2%: 6000個 + 7.7%ループ
+                            if (right_r < 0.062) {
+                                this.session_payout += 6000;
+                                addLog(`👑 ツラヌキBONUS！！ 6000玉獲得！`, "color-ultimate");
+                                updateUI();
+                                
+                                let inUwanose = true;
+                                let loopCount = 0;
+
+                                // 🌟 無論成唔成功，都會進入抽選 LOOP 營造氣氛
+                                while (inUwanose) {
+                                    addLog(`⏳ 3000玉上乗せ抽選中...`, "color-normal");
+                                    await sleep(1500); // 🌟 停頓 1.5 秒營造緊張感
+
+                                    if (Math.random() < 0.077) {
+                                        loopCount++;
+                                        this.session_payout += 3000;
+                                        addLog(`🔥 さらなるツラヌキ！！ +3000玉 (計 ${this.session_payout}玉)`, "color-ultimate");
+                                        updateUI();
+                                        await sleep(1000); // 🌟 中獎後稍為停頓再進入下一次抽獎
+                                    } else {
+                                        if (loopCount === 0) {
+                                            addLog(`💦 上乗せならず...`, "color-fall");
+                                        } else {
+                                            addLog(`💨 上乗せ終了`, "color-normal");
+                                        }
+                                        inUwanose = false;
+                                    }
+                                }
+                            } 
+                            // 73.8%: 3000個 (累積 80%)
+                            else if (right_r < 0.800) {
+                                this.session_payout += 3000;
+                                addLog(`💥 ツラヌキBONUS！ 3000玉獲得`, "color-lt");
+                            } 
+                            // 20%: 1500個
+                            else {
+                                this.session_payout += 1500;
+                                addLog(`✨ カバネリBONUS！ 1500玉獲得`, "color-hit");
+                            }
+                            
+                            addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                            updateUI(); await sleep(1500);
+                            break; // 擊中後跳出 for loop，重置 ST
+                        }
+                    }
+
+                    // 💀 ST 消化完畢無中獎 (駆け抜け)
+                    if (!hit) {
+                        document.getElementById("ui-spins").innerText = `終了`;
+                        let endMsg = (this.session_rush_count === initial_rush_count) ? `\n💀 ST終了 (駆け抜け)` : `\n💀 ST終了`;
+                        addLog(endMsg, "color-fall");
+                        addLog(`📈 總連莊数: ${this.session_rush_count}連 (含初當)`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                        this.state = "NORMAL"; 
+                        this.record_history(); 
+                        updateUI();
+                        break;
+                    }
+                }
+            }
+
+            record_history() {
+                this.history.unshift({ spins: this.session_spins, rush: this.session_rush_count, payout: this.session_payout });
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+                this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0;
+            }
+        }
+
+        let game = new Kabaneri2();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div"); div.className = `log-entry ${className}`; div.innerText = text;
+            logBox.appendChild(div); logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") document.getElementById("ui-spins").innerText = game.session_spins;
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) { historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`; return; }
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `<td>${label}</td><td class="hit-spins">${record.spins}</td><td class="hit-rush">${record.rush}</td><td class="hit-payout">${record.payout}</td>`;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true; btnPlay.disabled = true;
+            addLog("\n=== 甲鉄城のカバネリ2 出発！ ===", "color-hit");
+            while (isPlaying) {
+                let ended = await game.play_normal(); updateUI();
+                if (game.session_spins % 100 === 0 && game.state === "NORMAL") await sleep(10);
+                if (ended) { isPlaying = false; break; }
+            }
+            btnPlay.disabled = false; btnPlay.innerText = "▶️ プレイ続行";
+        }
+    </script>
+    <script src="hall-shared.js"></script>
+    <script src="plugin.js"></script>
+    <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; text-align: center; padding: 5px 0; border-top: 1px solid #333;">
+        <script type="text/javascript">atOptions = { 'key' : 'ead8f1e5fdd30faaed33da77b3333cf4', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };</script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js"></script>
+    </div>
+</body>
+</html>

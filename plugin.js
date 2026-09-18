@@ -4,6 +4,15 @@
 
 const firebaseConfig = window.HallShared.firebaseConfig;
 
+// 👇 🌟 加入呢個 JST 強制轉換函數 🌟 👇
+function getJSTDate() {
+    const now = new Date();
+    // 將本地時間轉為 UTC，再加 9 個鐘 (36,000,000 毫秒) 變為日本時間
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    return new Date(utc + (3600000 * 9));
+}
+// 👆 🌟 加入完畢 🌟 👆
+
 const ADSTERRA_DIRECT_LINK = "https://www.effectivecpmnetwork.com/sczzxy44h?key=37be73e9e8ae708b133564c039a61e63";
 
 window.latest_payout_for_share = 0;
@@ -359,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!snapshot.exists()) { auth.signOut(); window.location.href = "login.html"; return; }
                 let userData = snapshot.val();
                 let currentUserName = userData.username || "Guest";
-                const todayStr = new Date().toDateString();
+                const todayStr = getJSTDate().toDateString();
 
                 if (userData.last_date !== todayStr) {
                     userData.daily_spins = 0;
@@ -477,6 +486,11 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageText.includes("ギンパラ")) spinCost = 1000 / 22;
         else if (pageText.includes("いせれべ")) spinCost = 1000 / 27;
         else if (pageText.includes("エイティシックス")) spinCost = 1000 / 20;
+        else if (pageText.includes("まどか☆マギカ")) spinCost = 1000 / 20;
+        else if (pageText.includes("カフェテラス")) spinCost = 1000 / 27;
+        else if (pageText.includes("Re:ゼロ") && pageText.includes("129")) spinCost = 1000 / 16;
+        else if (pageText.includes("バキ2")) spinCost = 1000 / 16;
+        else if (pageText.includes("大工の源さん")) spinCost = 1000 / 18;
 
         // 🌟 生成排行榜與實時數據同步 🌟
         let currentMachineRankings = [];
@@ -742,6 +756,25 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof window.updateUI === "function") {
             const originalUpdateUI = window.updateUI;
             window.updateUI = function () {
+                // 👇 🌟 跨日實時動態重置 (已轉用 JST) 🌟 👇
+                const todayStr = getJSTDate().toDateString(); // 👈 換成 getJSTDate()
+                if (userData.last_date !== todayStr) {
+                    userData.daily_spins = 0;
+                    userData.daily_profit = 0;
+                    userData.last_date = todayStr;
+                    userRef.update({ daily_spins: 0, daily_profit: 0, last_date: todayStr });
+                    
+                    // 強制解鎖機台，無須 F5 刷新
+                    let playBtn = document.getElementById("btn-play");
+                    if (playBtn && playBtn.disabled) {
+                        playBtn.disabled = false;
+                        playBtn.innerText = "▶️ 遊技開始";
+                    }
+                    let adBtn = document.getElementById("btn-reward-ad");
+                    if (adBtn) adBtn.remove();
+                }
+                // 👆 🌟 跨日重置結束 🌟 👆
+                
                 originalUpdateUI();
                 translateDOM();
 
@@ -767,7 +800,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (new_spins > 100 && new_spins > currentMaxHamari) {
                     currentMaxHamari = new_spins;
-                    const todayDate = new Date();
+                    const todayDate = getJSTDate();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
 
                     db.ref('server_records/max_hamari').transaction((currentData) => {
@@ -791,7 +824,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     completeTriggeredThisRush = false;
 
                     if (lastUI_payout >= 10000 && !alreadySaved) {
-                        const todayDate = new Date();
+                        const todayDate = getJSTDate();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                         const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`; // 👈 新增獨立 Key
 
@@ -854,7 +887,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (new_payout >= 95000 && !completeTriggeredThisRush) {
                     completeTriggeredThisRush = true;
-                    const todayDate = new Date();
+                    const todayDate = getJSTDate();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                     const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`; // 👈 新增獨立 Key
 
@@ -1032,12 +1065,13 @@ setTimeout(() => {
 
                 // ⚡ 駆け抜け王 ＆ runthrough_count 管理
                 const isRushChallengeFailure = /チャレンジ失敗|CZ失敗|JUDGE失敗|時短終了|任務失敗|チャンスタイム終了|昇格失敗/.test(translatedText);
-                const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落/.test(translatedText)
+                const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|ST終了|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落|アルティメット終了|ワルプルギス終了/.test(translatedText)
                     && !isRushChallengeFailure;
                 const isRunthroughExplicit = /駆け抜け|スルー/.test(translatedText) && !isRushChallengeFailure;
 
                 if (isRushEnd || isRunthroughExplicit) {
-                    if (isRunthroughExplicit || rushCount === 0) {
+                    // 🌟 修正：將 === 0 改為 <= 1，因為初當入 RUSH 已經當作 1 連
+                    if (isRunthroughExplicit || rushCount <= 1) {
                         titleDb.ref('users/' + uid + '/runthrough_count').transaction(count => {
                             let newCount = (count || 0) + 1;
                             if (newCount >= 7) titleDb.ref('users/' + uid).update({ title_runthrough: true });

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【無料】e東京リベンジャーズ聖夜決戦編 | パチンコシミュレーター</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d0d; color: #eeeeee; text-align: center; padding-bottom: 60px; margin: 0; padding: 20px; }
+        h1 { color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.7); font-weight: 900; letter-spacing: 2px; }
+        .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
+        .left-panel, .right-panel { flex: 1; min-width: 320px; }
+        .left-panel { max-width: 500px; }
+        .right-panel { max-width: 400px; }
+        .stats-board { background-color: #1a1a1a; border: 2px solid #ffd700; border-radius: 10px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-around; font-size: 1.1em; box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.5); }
+        .stat-item span { display: block; font-weight: bold; color: #ff5252; font-size: 1.3em; margin-top: 5px; }
+        button { background: linear-gradient(180deg, #b8860b 0%, #8b6508 100%); color: white; border: 1px solid #ffd700; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; transition: transform 0.1s, box-shadow 0.2s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 15px #ffd700; }
+        button:disabled { background: #333333; border-color: #555; color: #777; cursor: not-allowed; transform: scale(1); box-shadow: none; }
+        .log-container { background-color: #000000; border: 1px solid #b8860b; border-radius: 5px; height: 400px; overflow-y: auto; padding: 10px; text-align: left; font-family: 'Courier New', Courier, monospace; line-height: 1.5; }
+        .log-entry { margin: 5px 0; }
+        .color-rush { color: #ffd700; font-weight: bold; text-shadow: 0 0 5px #ffd700; }
+        .color-hit { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff5252; }
+        .color-normal { color: #bdbdbd; }
+        .color-lt { color: #ff1744; font-weight: 900; text-shadow: 0 0 15px #ff1744; font-size: 1.1em; }
+        .color-ultimate { color: #e040fb; font-weight: 900; text-shadow: 0 0 15px #e040fb; font-size: 1.1em; }
+        .color-fall { color: #757575; font-weight: bold; }
+        .data-lamp-container { background-color: #1a1a1a; border: 3px solid #ffd700; border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        .data-lamp-title { color: #ffd700; margin-top: 0; margin-bottom: 15px; text-align: center; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 5px #ffd700; letter-spacing: 2px; }
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #b8860b; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #332b00; color: #ffd700; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #111111; }
+        table.data-lamp td.hit-spins { color: #ffeb3b; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ff5252; font-weight: bold; }
+        .empty-row { color: #444 !important; }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+
+<body>
+    <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">e東京リベンジャーズ聖夜決戦編</span></h1>
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 遊技開始</button>
+            </div>
+            <div class="log-container" id="log-box"></div>
+        </div>
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead><tr><th>前次</th><th>當選回轉数</th><th>連莊数</th><th>獲得出玉</th></tr></thead>
+                    <tbody id="history-tbody"><tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        class TokyoRevengers {
+            constructor() { this.state = "NORMAL"; this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0; this.history = []; this.rush_spins = 0; }
+
+            async play_normal() {
+                this.session_spins += 1;
+                if (this.session_spins % 100 === 0) addLog(`現在回轉数: ${this.session_spins}`, "color-normal");
+
+                // 通常時大当り確率 1/199.8
+                if (Math.random() < 1 / 199.8) {
+                    addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い當選！`, "color-hit");
+                    let r = Math.random();
+
+                    this.session_payout += 300;
+
+                    // 50%: 300個 + 聖夜決戦 (突破チャレンジ)
+                    if (r < 0.50) {
+                        addLog("🏍️ TOKYO卍BONUS！ (300玉)", "color-rush");
+                        addLog("⚡ 聖夜決戦 突入！！ (大当り or 転落まで)", "color-rush");
+                        this.session_rush_count = 1;
+                        updateUI(); await sleep(2000);
+                        await this.play_battle();
+                    } 
+                    // 50%: 300個 + 通常
+                    else {
+                        addLog("💦 リベンジャーズBONUS... (300玉)", "color-normal");
+                        addLog("💀 演出失敗... 通常へ戻る", "color-normal");
+                        updateUI(); this.record_history();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            // 聖夜決戦 (突破チャレンジ: 1/10.27 vs 1/9.86)
+            async play_battle() {
+                this.state = "BATTLE";
+                addLog(`\n===== ⚔️ 聖夜決戦 =====`, "color-rush");
+                
+                let hitRate = 1 / 10.27;
+                let fallRate = 1 / 9.86;
+                this.rush_spins = 0;
+
+                while (this.state === "BATTLE") {
+                    await sleep(600); // 🌟 停頓營造戰鬥緊張感
+                    this.rush_spins++;
+                    document.getElementById("ui-spins").innerText = `聖夜決戦: ${this.rush_spins}回転目`;
+
+                    let r = Math.random();
+
+                    // 🎯 勝利 (1/10.27)
+                    if (r < hitRate) {
+                        this.session_rush_count += 1;
+                        addLog(`\n🎉 [バトル ${this.rush_spins}回転目] 勝利！！ (總 ${this.session_rush_count}連)`, "color-hit");
+                        
+                        this.session_payout += 1500;
+                        addLog(`👑 CLIMAX卍BONUS！ 1500玉獲得！`, "color-ultimate");
+                        addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        updateUI(); await sleep(1500);
+
+                        addLog(`🌈 ラッキートリガー発動！！ 聖夜決戦CLIMAXへ！！`, "color-lt");
+                        await sleep(1500);
+                        await this.play_lt();
+                        break;
+                    } 
+                    // 💀 敗北 (1/9.86)
+                    else if (r < hitRate + fallRate) {
+                        document.getElementById("ui-spins").innerText = `終了`;
+                        addLog(`\n💀 バトル敗北... (転落 1/9.86)`, "color-fall");
+                        addLog(`📈 總連莊数: ${this.session_rush_count}連 (含初當)`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                        this.state = "NORMAL"; 
+                        this.record_history(); 
+                        updateUI();
+                        break;
+                    }
+                }
+            }
+
+            // 聖夜決戦CLIMAX (ST11 + 残保留4)
+            async play_lt() {
+                this.state = "LT";
+                let max_spins = 11;
+                let hitRate = 1 / 10.27;
+                
+                addLog(`\n===== 🌈 聖夜決戦CLIMAX =====`, "color-lt");
+                let initial_rush_count = this.session_rush_count;
+                updateUI();
+
+                while (this.state === "LT") {
+                    let hit = false;
+                    let st_reset = false;
+
+                    // 🌟 將 ST 11 轉分為 3 個 Batch: [1-5], [6-10], [11]
+                    let st_batches = [
+                        [1, 2, 3, 4, 5],
+                        [6, 7, 8, 9, 10],
+                        [11]
+                    ];
+
+                    // 🎯 ST 期間 (1~11轉)
+                    for (let b = 0; b < st_batches.length; b++) {
+                        let batch = st_batches[b];
+                        
+                        for (let i = 0; i < batch.length; i++) {
+                            let current_spin = batch[i];
+                            this.rush_spins = current_spin;
+                            await sleep(400);
+                            
+                            let remaining = max_spins - current_spin;
+                            document.getElementById("ui-spins").innerText = `ST残り: ${remaining}/${max_spins}`;
+
+                            // 逐粒波抽獎 (1/10.27)
+                            if (Math.random() < hitRate) {
+                                hit = true;
+                                this.session_rush_count += 1;
+                                addLog(`\n🎉 [ST ${current_spin}回転目] 當選！ (總 ${this.session_rush_count}連)`, "color-hit");
+
+                                let currentHitPayout = 3000;
+                                addLog(`🔥 聖夜決戦BONUS3000！！ 3000玉獲得！`, "color-ultimate");
+
+                                // 🌟 保留連 (V-STOCK) 判定：只 Check 呢個 Batch 淨低嘅波
+                                let reserveHits = [];
+                                for (let j = i + 1; j < batch.length; j++) {
+                                    if (Math.random() < hitRate) {
+                                        reserveHits.push(batch[j]);
+                                    }
+                                }
+
+                                if (reserveHits.length > 0) {
+                                    await sleep(1000);
+                                    addLog(`ブラックアウト！！！`, "color-normal");
+                                    await sleep(1500);
+
+                                    for (let simSpin of reserveHits) {
+                                        this.session_rush_count += 1;
+                                        currentHitPayout += 3000; 
+                                        addLog(`🌈 保留連当選！！ (V-STOCK) 3000玉 上乗せ！`, "color-ultimate");
+                                        await sleep(800);
+                                    }
+                                    addLog(`👑 一撃 計 ${currentHitPayout}玉 獲得！！`, "color-ultimate");
+                                }
+
+                                
+                                this.session_payout += currentHitPayout;
+                                addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                                updateUI(); await sleep(1500);
+                                
+                                st_reset = true;
+                                break; // 打破當前 Batch 迴圈
+                            }
+                        }
+                        if (st_reset) break; // 打破所有 ST Batch，重置 ST
+                    }
+
+                    // 🎯 殘保留期間 (12~15轉) - 只有當 ST 1~11 冇中先會進入
+                    if (!st_reset) {
+                        let zanhoryu = [12, 13, 14, 15];
+                        for (let i = 0; i < zanhoryu.length; i++) {
+                            let current_spin = zanhoryu[i];
+                            this.rush_spins = current_spin;
+                            await sleep(400);
+                            
+                            let displaySpin = current_spin - max_spins;
+                            let res_remaining = 4 - displaySpin;
+                            document.getElementById("ui-spins").innerText = `残保留: ${res_remaining}/4`;
+
+                            if (Math.random() < hitRate) {
+                                hit = true;
+                                this.session_rush_count += 1;
+                                addLog(`\n🎉 [残保留 ${displaySpin}回転目] 當選！ (總 ${this.session_rush_count}連)`, "color-hit");
+
+                                // 殘保留純派 1500玉，絕對冇保留連
+                                this.session_payout += 1500;
+                                addLog(`💥 REVENGE BONUS1500！ 1500玉獲得`, "color-rush");
+                                addLog(`✨ 引き戻し成功！ STリセット！`, "color-lt");
+                                
+                                addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                                updateUI(); await sleep(1500);
+                                
+                                st_reset = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // 💀 ST 消化完畢無中獎 (駆け抜け)
+                    if (!st_reset) {
+                        document.getElementById("ui-spins").innerText = `終了`;
+                        addLog(`\n💀 ST終了`, "color-fall");
+                        addLog(`📈 總連莊数: ${this.session_rush_count}連 (含初當)`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                        this.state = "NORMAL"; 
+                        this.record_history(); 
+                        updateUI();
+                        break;
+                    }
+                }
+            }
+            
+
+            record_history() {
+                this.history.unshift({ spins: this.session_spins, rush: this.session_rush_count, payout: this.session_payout });
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+                this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0;
+            }
+        }
+
+        let game = new TokyoRevengers();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div"); div.className = `log-entry ${className}`; div.innerText = text;
+            logBox.appendChild(div); logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") document.getElementById("ui-spins").innerText = game.session_spins;
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) { historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`; return; }
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `<td>${label}</td><td class="hit-spins">${record.spins}</td><td class="hit-rush">${record.rush}</td><td class="hit-payout">${record.payout}</td>`;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true; btnPlay.disabled = true;
+            addLog("\n=== 東京リベンジャーズ 出陣！ ===", "color-hit");
+            while (isPlaying) {
+                let ended = await game.play_normal(); updateUI();
+                if (game.session_spins % 100 === 0 && game.state === "NORMAL") await sleep(10);
+                if (ended) { isPlaying = false; break; }
+            }
+            btnPlay.disabled = false; btnPlay.innerText = "▶️ プレイ続行";
+        }
+    </script>
+    <script src="hall-shared.js"></script>
+    <script src="plugin.js"></script>
+    <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; text-align: center; padding: 5px 0; border-top: 1px solid #333;">
+        <script type="text/javascript">atOptions = { 'key' : 'ead8f1e5fdd30faaed33da77b3333cf4', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };</script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js"></script>
+    </div>
+</body>
+</html>
