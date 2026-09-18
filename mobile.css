@@ -126,8 +126,26 @@ body {
         grid-template-columns: 1fr 1fr !important;
     }
     .hall-container {
-        grid-template-columns: 1fr !important;
-        padding: 0 10px !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        padding: 0 6px !important;
+    }
+    .machine-card {
+        min-width: 0 !important;
+        padding: 16px 10px !important;
+    }
+    .machine-title {
+        font-size: 1.05em !important;
+        overflow-wrap: anywhere !important;
+    }
+    .machine-spec {
+        font-size: 0.78em !important;
+        line-height: 1.45 !important;
+        overflow-wrap: anywhere !important;
+    }
+    .play-btn {
+        padding: 8px 4px !important;
+        font-size: 0.85em !important;
     }
     /* 10. 修復首頁數據看板數字出界問題 */
     .dash-value {
