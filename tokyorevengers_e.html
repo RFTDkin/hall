@@ -167,22 +167,21 @@
 
                             let right_r = Math.random();
                             let isAlpha = false;
+                            let awardedPayout = 1500;
 
                             if (this.state === "JITAN") {
-                                if (right_r < 0.0025) { this.session_payout += 4500; isAlpha = true; } // 0.25%
-                                else if (right_r < 0.050) { this.session_payout += 3000; } // 4.75%
-                                else { this.session_payout += 1500; } // 95%
+                                if (right_r < 0.0025) { awardedPayout = 4500; isAlpha = true; } // 0.25%
+                                else if (right_r < 0.050) { awardedPayout = 3000; } // 4.75%
                             } else { // ST
-                                if (right_r < 0.025) { this.session_payout += 4500; isAlpha = true; } // 2.5%
-                                else if (right_r < 0.500) { this.session_payout += 3000; } // 47.5%
-                                else { this.session_payout += 1500; } // 50%
+                                if (right_r < 0.025) { awardedPayout = 4500; isAlpha = true; } // 2.5%
+                                else if (right_r < 0.500) { awardedPayout = 3000; } // 47.5%
                             }
+                            this.session_payout += awardedPayout;
 
                             if (isAlpha) {
                                 addLog(`👑 限界突破BONUS！！ 4500玉獲得！`, "color-ultimate");
                                 await this.play_uwanose();
-                            } else if (this.session_payout % 3000 === 0 && !isAlpha) {
-                                // ちょっと大雑把ですが、直近出玉で判別 (3000獲得時)
+                            } else if (awardedPayout === 3000) {
                                 addLog(`🔥 天上天下BONUS！ 3000玉獲得`, "color-lt");
                             } else {
                                 addLog(`✨ 東京卍會BONUS！ 1500玉獲得`, "color-hit");
