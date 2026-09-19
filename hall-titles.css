@@ -101,10 +101,59 @@
 .legend-ichigeki-burst { position: absolute; z-index: 1; top: 50%; left: -20%; right: -20%; height: 2px; pointer-events: none; transform: translateY(-50%) skewX(-45deg); background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.8), #00e5ff, rgba(213, 0, 249, 0.8), transparent); filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8)); animation: legend-ichigeki 1.5s infinite; }
 
 /* 🌟 終極預覽防出界層 (綁死位置，防止排版崩壞) 🌟 */
-.legend-ghoul-eye { position: absolute; z-index: -2; top: 50%; left: 50%; width: 120%; height: 50px; background: rgba(0, 0, 0, 0.75); border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid rgba(255, 23, 68, 0.8); box-shadow: 0 0 15px #ff1744, inset 0 0 15px #ff1744; animation: ghoul-blink-wide 4s infinite; pointer-events: none; }
-.legend-ghoul-eye::after { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 16px; height: 16px; background: rgba(255, 23, 68, 0.9); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #ff0000, inset 0 0 4px #000; animation: ghoul-blink-iris-wide 4s infinite; }
-.legend-mushoku-pantsu { position: absolute; z-index: -1; top: 50%; left: 50%; width: 55px; height: 45px; transform: translate(-50%, -50%); background-image: url('rokishipantsu.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.5; filter: drop-shadow(0 0 8px #4fc3f7); animation: pantsu-float 3s ease-in-out infinite; pointer-events: none; }
+.legend-ghoul-eye { 
+    position: absolute; 
+    z-index: -2; 
+    top: 50%; 
+    left: 50%; 
+    /* 👇 幅を枠より少し広く、高さを枠全体を包み込めるサイズに調整 */
+    width: calc(100% + 70px); 
+    height: 120px; 
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="%233300ff"/><stop offset="20%" stop-color="%23aa00ff"/><stop offset="50%" stop-color="%23ff00aa"/><stop offset="100%" stop-color="%23ff003c"/></linearGradient></defs><g fill="none" stroke="url(%23g)"><path d="M 5 65 Q 90 -10 195 65" stroke-width="4"/><path d="M 15 70 Q 100 5 185 55" stroke-width="2" opacity="0.8"/><path d="M -5 60 Q 80 15 180 80" stroke-width="1.5"/><path d="M 30 30 L 70 5 L 140 20" stroke-width="2"/><path d="M 20 40 L 90 -5 L 160 30" stroke-width="1.5"/><path d="M 50 15 L 100 5 L 120 10" stroke-width="1.5"/></g><g fill="none"><path d="M 5 65 Q 100 130 195 65" stroke-width="4" stroke="%23ff003c"/><path d="M 15 55 Q 90 115 185 60" stroke-width="2" stroke="%23ff00aa" opacity="0.8"/><path d="M 60 100 L 55 125 L 65 105" stroke-width="3" stroke="%23ff003c"/><path d="M 120 105 L 115 130 L 125 110" stroke-width="3" stroke="%23ff003c"/><path d="M 150 90 L 155 115 L 165 85" stroke-width="2" stroke="%23ff00aa"/><path d="M 85 108 L 82 120 L 88 110" stroke-width="1.5" stroke="%23ff003c"/></g></svg>'); 
+    background-size: 100% 100%; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    transform: translate(-50%, -50%); 
+    filter: drop-shadow(0 0 5px #ff0055) drop-shadow(0 0 12px #a200ff); 
+    animation: ghoul-blink-wide 4s infinite; 
+    pointer-events: none; 
+}
 
+.legend-ghoul-eye::after { 
+    content: ''; 
+    position: absolute; 
+    z-index: -1; 
+    top: 50%; 
+    left: 50%; 
+    /* 👇 瞳のサイズも少し大きくして迫力をアップ */
+    width: 36px; 
+    height: 36px; 
+    background: #ff0015; 
+    border-radius: 50%; 
+    transform: translate(-50%, -50%); 
+    box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000, inset 0 0 10px #aa0000; 
+    animation: ghoul-blink-iris-wide 4s infinite; 
+    pointer-events: none; 
+}
+
+.legend-mushoku-pantsu { 
+    position: absolute; 
+    z-index: 10; 
+    top: 50%; 
+    /* 👇 右側にしっかりはみ出すように位置を調整 */
+    right: -35px; 
+    width: 40px; 
+    height: 32px; 
+    transform: translateY(-50%); 
+    background-image: url('rokishipantsu.png'); 
+    background-size: contain; 
+    background-repeat: no-repeat; 
+    background-position: center; 
+    opacity: 1; 
+    filter: drop-shadow(0 0 8px #4fc3f7); 
+    animation: pantsu-float 3s ease-in-out infinite; 
+    pointer-events: none; 
+}
 /* 終極形態防出界 Overlay (用嚟裝足球同屎) */
 .legend-bl-soccer, .legend-lycoris-poop { position: absolute !important; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 5; overflow: visible; }
 .legend-bl-soccer::before { content: ''; position: absolute; z-index: 2; width: 26px; height: 26px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><clipPath id="ball-clip"><circle cx="50" cy="50" r="48"/></clipPath><radialGradient id="bg" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="%23ffffff"/><stop offset="60%" stop-color="%23e0e0e0"/><stop offset="90%" stop-color="%23a0a0a0"/><stop offset="100%" stop-color="%23777777"/></radialGradient><polygon id="p" points="50,15 62,24 56,41 50,37 44,41 38,24" fill="%234B63C6" stroke="%23111" stroke-width="1.5" stroke-linejoin="round"/><g id="f"><use href="%23p"/><use href="%23p" transform="rotate(72 50 50)"/><use href="%23p" transform="rotate(144 50 50)"/><use href="%23p" transform="rotate(216 50 50)"/><use href="%23p" transform="rotate(288 50 50)"/></g></defs><circle cx="50" cy="50" r="48" fill="url(%23bg)"/><g clip-path="url(%23ball-clip)"><path d="M 50 15 L 50 0 M 83 39 L 98 34 M 71 78 L 81 92 M 29 78 L 19 92 M 17 39 L 2 34 M 29 78 L 71 78 L 83 39 L 50 15 L 17 39 Z" fill="none" stroke="%23111" stroke-width="1.5" opacity="0.6"/><use href="%23f"/><use href="%23f" transform="translate(-65, -35) scale(0.8)"/><use href="%23f" transform="translate(60, -15) scale(0.8) rotate(36 50 50)"/><use href="%23f" transform="translate(-40, 55) scale(0.8) rotate(-36 50 50)"/><use href="%23f" transform="translate(50, 50) scale(0.8) rotate(18 50 50)"/></g><circle cx="50" cy="50" r="48" fill="none" stroke="%23111" stroke-width="2.5"/></svg>'); background-size: contain; background-repeat: no-repeat; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.6)) drop-shadow(0 0 3px #00e5ff); animation: bl-bounce-ball 3.5s linear infinite; pointer-events: none; }

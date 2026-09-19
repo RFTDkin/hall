@@ -20,171 +20,15 @@ window.latest_rush_for_share = 0;
 window.globalUsersData = {};
 window.currentOpenProfileUid = null;
 
-// 🌟 將所有稱號特效及 Modal CSS 注入到機台頁面 🌟
-const globalPluginStyle = document.createElement('style');
-globalPluginStyle.innerHTML = `
-    /* 稱號共用 */
-    .title-effect { position: relative; display: inline-block; white-space: nowrap; }
-    
-    /* 虹色コンプリート */
-    .effect-rainbow { background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow-bg 2s linear infinite; font-weight: 900; }
-    @keyframes rainbow-bg { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-
-/* 2. サーバーの覇者：天上天下 終極霸氣銘牌 */
-    .effect-supreme {
-        position: relative; isolation: isolate; padding: 6px 20px; color: #fff8d8; border: 1px solid #f6d36c; border-radius: 2px;
-        background: linear-gradient(180deg, rgba(92, 55, 4, .94), rgba(30, 16, 0, .96) 48%, rgba(106, 65, 5, .92));
-        box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45);
-        overflow: visible; font-weight: bold;
-        margin-top: 18px; 
-        animation: sovereign-main-aura 3.8s ease-in-out infinite;
-    }
-
-    .effect-supreme::before {
-        content: ''; position: absolute; z-index: -1; top: 50%; left: -22px; right: -22px; height: 1px; transform: translateY(-50%);
-        background: linear-gradient(90deg, transparent, #f6d36c 12%, #ffefad 22%, transparent 35%, transparent 65%, #ffefad 78%, #f6d36c 88%, transparent);
-        box-shadow: 0 -7px 10px rgba(255, 196, 45, .24), 0 7px 10px rgba(255, 196, 45, .24);
-    }
-
-    .effect-supreme::after {
-        content: '天上天下';
-        position: absolute;
-        top: -18px;
-        left: 50%;
-        transform: translateX(-50%);
-        white-space: nowrap;
-        font-family: "Noto Serif JP", "Yu Mincho", "MS PMincho", "Hiragino Mincho Pro", serif; 
-        font-size: 14px;
-        font-weight: 900;
-        letter-spacing: 5px;
-        text-indent: 5px;
-        background: linear-gradient(110deg, #ffd700 0%, #ffea00 15%, #ffffff 25%, #ffb300 35%, #ffd700 50%, #ffea00 65%, #ffffff 75%, #ffb300 85%, #ffd700 100%);
-        background-size: 200% auto;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 4px #fff, 0 0 10px #ffea00, 0 0 18px #ff9100;
-        filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9));
-        animation: supreme-glitter-text 2s linear infinite;
-        z-index: 10;
-    }
-
-    @keyframes supreme-glitter-text {
-        0% { background-position: 0% 50%; filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,234,0,0.3)); }
-        50% { filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 12px rgba(255,255,255,0.9)) drop-shadow(0 0 25px rgba(255,215,0,0.8)); }
-        100% { background-position: -200% 50%; filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,234,0,0.3)); }
-    }
-
-    @keyframes sovereign-main-aura {
-        0%, 100% { box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .62), 0 0 18px rgba(255, 189, 31, .72), inset 0 1px 0 rgba(255,255,255,.52), inset 0 -10px 16px rgba(0,0,0,.45); }
-        50% { box-shadow: 0 0 0 2px #281801, 0 0 0 3px rgba(247, 201, 73, .9), 0 0 35px rgba(255, 23, 68, .8), inset 0 1px 0 rgba(255,255,255,.7), inset 0 -10px 16px rgba(0,0,0,.6); transform: scale(1.02); }
-    }
-    /* 破産王 */
-    .effect-bankrupt { color: #dd8a48; letter-spacing: .13em; text-shadow: 1px 1px 0 #4b1d0b, 3px 4px 0 #090604, 0 0 5px rgba(157, 54, 15, .52); background: linear-gradient(100deg, #7d2c12 0%, #e89450 26%, #ffbd73 44%, #9d3717 52%, #e48743 66%, #64200e 100%); background-size: 180% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: .55px #361207; animation: bankrupt-fade 4.8s ease-in-out infinite; font-weight: 900; }
-    .effect-bankrupt::after { content: ''; position: absolute; inset: -10% 1%; pointer-events: none; opacity: .96; background: linear-gradient(110deg, transparent 0 20%, #260b05 20.5% 23%, transparent 23.5% 100%), linear-gradient(72deg, transparent 0 39%, #3a1006 39.5% 42.5%, transparent 43% 100%), linear-gradient(118deg, transparent 0 58%, #260b05 58.5% 61%, transparent 61.5% 100%), linear-gradient(66deg, transparent 0 76%, #431307 76.5% 79%, transparent 79.5% 100%); filter: drop-shadow(1px 0 0 rgba(255, 194, 113, .34)); }
-    @keyframes bankrupt-fade { 0%, 100% { opacity: .82; background-position: 0% 50%; } 48% { opacity: 1; background-position: 100% 50%; } }
-
-    /* 単発地獄 */
-    .effect-hell { color: #e3d6d8; text-shadow: 0 0 2px #fff, 2px 0 7px rgba(210, 14, 45, .78), -2px 0 7px rgba(85, 0, 12, .9); animation: hell-echo 3.2s steps(1, end) infinite; font-weight: bold; }
-    .effect-hell::before, .effect-hell::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; opacity: 0; }
-    .effect-hell::before { color: #ff214e; transform: translateX(-2px); animation: hell-ghost 3.2s steps(1, end) infinite; }
-    .effect-hell::after { color: #580012; transform: translateX(3px); animation: hell-ghost 3.2s steps(1, end) .08s infinite; }
-    @keyframes hell-echo { 0%, 72%, 100% { transform: translateX(0); } 74% { transform: translateX(-2px); } 76% { transform: translateX(2px); } 78% { transform: translateX(-1px); } }
-    @keyframes hell-ghost { 0%, 72%, 100% { opacity: 0; } 74%, 78% { opacity: .72; } }
-
-    /* 神の引き */
-    .effect-godpull { color: #f6fdff; letter-spacing: .1em; text-shadow: 0 0 2px #fff, 0 0 7px #9cefff, 0 0 18px #397cff, 0 0 30px rgba(132, 78, 255, .58); animation: god-pulse 2.8s ease-in-out infinite; font-weight: bold; }
-    .effect-godpull::before { content: ''; position: absolute; z-index: -1; inset: -8px -13px; border: 1px solid rgba(145, 226, 255, .68); border-radius: 50%; box-shadow: 0 0 11px rgba(65, 158, 255, .58), inset 0 0 12px rgba(129, 87, 255, .27); opacity: .25; animation: miracle-ring 2.8s ease-out infinite; }
-    .effect-godpull::after { content: '✦'; position: absolute; z-index: 1; right: -9px; top: -11px; color: #e9fdff; font-size: 10px; text-shadow: 0 0 7px #45c9ff, 0 0 13px #7d5cff; animation: miracle-star 2.8s ease-in-out infinite; }
-    @keyframes god-pulse { 0%, 100% { filter: brightness(1); } 48% { filter: brightness(1.48); } }
-    @keyframes miracle-ring { 0% { opacity: .78; transform: scale(.42); } 60%, 100% { opacity: 0; transform: scale(1.22); } }
-    @keyframes miracle-star { 0%, 42%, 100% { opacity: .18; transform: scale(.65) rotate(0); } 52% { opacity: 1; transform: scale(1.22) rotate(28deg); } }
-
-    /* 駆け抜け王 */
-    .effect-runthrough { color: #fff0c6; text-shadow: -4px 0 0 rgba(255, 61, 19, .22), -9px 0 8px rgba(255, 61, 19, .36), 0 0 8px rgba(255, 178, 64, .75); background: linear-gradient(90deg, #ff431e, #ffbc4b 32%, #fff7d3 48%, #ff7a28 64%, #b51f14); background-size: 190% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: runthrough 1.9s ease-in-out infinite; font-weight: bold; }
-    .effect-runthrough::after { content: ''; position: absolute; right: calc(100% + 5px); top: 49%; width: 30px; height: 1px; background: linear-gradient(90deg, transparent, #ff4c24, #ffd169); box-shadow: 0 -4px 7px rgba(255, 84, 30, .7), 0 4px 7px rgba(255, 84, 30, .45); transform-origin: right center; animation: speed-trail 1.9s ease-in-out infinite; }
-    @keyframes runthrough { 0%, 100% { background-position: 0% 50%; } 48% { background-position: 100% 50%; } }
-    @keyframes speed-trail { 0%, 100% { opacity: .16; transform: scaleX(.35); } 48% { opacity: 1; transform: scaleX(1); } }
-
-    /* 一撃王 (Cyberpunk) */
-    .effect-ichigeki { position: relative; display: inline-block; white-space: nowrap; color: #ffffff; font-weight: 900; letter-spacing: .08em; text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; animation: ichigeki-smash 1.5s infinite; isolation: isolate; }
-    .effect-ichigeki::after { content: ''; position: absolute; z-index: -1; top: 50%; left: -15%; right: -15%; height: 50%; transform: translateY(-50%) skewX(-45deg); background: linear-gradient(90deg, transparent, rgba(213, 0, 249, 0.7), #00e5ff, rgba(213, 0, 249, 0.7), transparent); filter: blur(2px); animation: ichigeki-slash 1.5s infinite; }
-    @keyframes ichigeki-smash { 0%, 100% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; } 10% { transform: scale(1.08); text-shadow: 0 0 10px #ffffff, 0 0 20px #00e5ff, 0 0 30px #d500f9, 3px 3px 0px #311b92, -3px -3px 0px #00e5ff; } 25% { transform: scale(1); text-shadow: 0 0 5px #d500f9, 0 0 12px #aa00ff, 2px 2px 0px #311b92, -2px -2px 0px #00e5ff; } }
-    @keyframes ichigeki-slash { 0%, 100% { opacity: 0.2; transform: translateY(-50%) skewX(-45deg) scaleX(0.8); } 10% { opacity: 1; transform: translateY(-50%) skewX(-45deg) scaleX(1.1); filter: blur(4px) brightness(1.5); } 25% { opacity: 0.4; transform: translateY(-50%) skewX(-45deg) scaleX(0.9); filter: blur(2px); } }
-
-/* 全稱號：終極形態 */
-    .effect-legend { 
-        isolation: isolate; padding: 7px 21px; border-radius: 3px; border: 1px solid #ffe69a; 
-        background: linear-gradient(180deg, rgba(81, 42, 3, .95), rgba(15, 18, 40, .96), rgba(72, 28, 78, .94)); 
-        color: #fff; background-clip: padding-box; text-shadow: 0 0 3px #fff, 0 0 9px #65eaff, 0 0 19px #e975ff; 
-        box-shadow: 0 0 0 2px #211300, 0 0 0 3px rgba(255, 205, 76, .68), 0 0 25px rgba(123, 193, 255, .58), inset 0 1px 0 rgba(255,255,255,.62); 
-        overflow: visible; font-weight: bold; margin-top: 18px; 
-    }
-    .effect-legend::before { content: ''; position: absolute; z-index: -1; inset: -13px -28px; border: 1px solid rgba(152, 230, 255, .62); border-radius: 50%; box-shadow: 0 0 19px rgba(112, 178, 255, .54), inset 0 0 18px rgba(241, 126, 255, .2); animation: legend-aura 3.6s ease-in-out infinite; }
-    .effect-legend::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(108deg, transparent 35%, rgba(255,255,255,.8) 50%, transparent 65%); transform: translateX(-140%); animation: legend-sweep 3.6s ease-in-out infinite; }
-
-    /* 🌟 終極形態專屬的「天上天下」文字 🌟 */
-    .legend-supreme-text {
-        position: absolute; top: -18px; left: 50%; transform: translateX(-50%); white-space: nowrap;
-        font-family: "Noto Serif JP", "Yu Mincho", "MS PMincho", "Hiragino Mincho Pro", serif; 
-        font-size: 14px; font-weight: 900; letter-spacing: 5px; text-indent: 5px;
-        background: linear-gradient(110deg, #ffd700 0%, #ffea00 15%, #ffffff 25%, #ffb300 35%, #ffd700 50%, #ffea00 65%, #ffffff 75%, #ffb300 85%, #ffd700 100%);
-        background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 4px #fff, 0 0 10px #ffea00, 0 0 18px #ff9100;
-        filter: drop-shadow(0 1px 0 #8a6906) drop-shadow(0 2px 0 #5e4702) drop-shadow(0 3px 2px rgba(0,0,0,0.9));
-        animation: supreme-glitter-text 2s linear infinite; z-index: 10;
-    }
-    
-    @keyframes legend-sweep { 0%, 53% { transform: translateX(-140%); } 78%, 100% { transform: translateX(140%); } }
-
-    /* 🌟 新增：解決機台內歷代排行榜長名字出界問題 🌟 */
-    table.data-lamp td:nth-child(2) { 
-        max-width: 140px; 
-        word-wrap: break-word; 
-        word-break: break-all; 
-        white-space: normal !important; 
-        line-height: 1.4;
-    }
-    table.data-lamp td:nth-child(2) .title-effect {
-        white-space: normal !important;
-    }
-
-    /* 🌟 機種專屬傳說稱號 🌟 */
-    .effect-bl-legend { position: relative; display: inline-block; z-index: 1; overflow: hidden; padding: 0 5px; }
-    .effect-bl-legend::before { content: ''; position: absolute; z-index: -1; top: 50%; left: -25px; width: 22px; height: 22px; transform: translateY(-50%); background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(0,229,255,0.3)" stroke="%2300e5ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 7l3 4-1.5 5h-3L9 11z"/><path d="M12 7V2M15 11l4.5-2M13.5 16l3.5 4.5M10.5 16l-3.5 4.5M9 11L4.5 9"/></svg>'); filter: drop-shadow(0 0 4px #00e5ff); animation: bl-soccer-roll 2s linear infinite; }
-    @keyframes bl-soccer-roll { 0% { left: -25px; transform: translateY(-50%) rotate(0deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 100%; transform: translateY(-50%) rotate(360deg); opacity: 0; } }
-
-    .effect-ghoul-legend { position: relative; display: inline-block; z-index: 1; padding: 0 15px; color: #fff; text-shadow: 0 0 4px #ff1744; }
-    .effect-ghoul-legend::before { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 110%; height: 38px; background: #000; border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid #ff1744; box-shadow: 0 0 15px #ff1744, inset 0 0 15px #ff1744; animation: ghoul-blink-wide 4s infinite; }
-    .effect-ghoul-legend::after { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 14px; height: 14px; background: #ff1744; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #ff0000, inset 0 0 4px #000; animation: ghoul-blink-iris-wide 4s infinite; }
-    @keyframes ghoul-blink-wide { 0%, 46%, 54%, 100% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0.1); } }
-    @keyframes ghoul-blink-iris-wide { 0%, 46%, 54%, 100% { transform: translate(-50%, -50%) scaleY(1); opacity: 1; } 50% { transform: translate(-50%, -50%) scaleY(0.1); opacity: 0; } }
-
-    .effect-lycoris-legend { position: relative; display: inline-block; z-index: 1; overflow: hidden; padding: 0 5px; }
-    .effect-lycoris-legend::before { content: '💩'; position: absolute; z-index: -1; font-size: 1.2em; opacity: 0.8; animation: poop-jump 2.5s linear infinite, poop-color 1.5s linear infinite; }
-    @keyframes poop-jump { 0% { left: -20px; top: 100%; opacity: 0; } 10% { opacity: 1; top: 100%; } 20% { top: -20%; } 30% { top: 100%; } 40% { top: -20%; } 50% { top: 100%; } 60% { top: -20%; } 70% { top: 100%; } 80% { top: -20%; } 90% { top: 100%; opacity: 1; } 100% { left: 100%; top: 100%; opacity: 0; } }
-    @keyframes poop-color { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
-
-    .effect-mushoku-legend { position: relative; display: inline-block; z-index: 1; padding: 0 10px; }
-    .effect-mushoku-legend::before { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 45px; height: 35px; transform: translate(-50%, -50%); background-image: url('rokishipantsu.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.7; animation: pantsu-float 3s ease-in-out infinite; }
-    @keyframes pantsu-float { 0%, 100% { transform: translate(-50%, -40%) rotate(-5deg); } 50% { transform: translate(-50%, -60%) rotate(5deg); } }
-
-    /* 終極預覽圖層 */
-    .legend-ghoul-eye { position: absolute; z-index: -2; top: 50%; left: 50%; width: 120%; height: 50px; background: rgba(0, 0, 0, 0.75); border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid rgba(255, 23, 68, 0.8); box-shadow: 0 0 15px #ff1744, inset 0 0 15px #ff1744; animation: ghoul-blink-wide 4s infinite; }
-    .legend-ghoul-eye::after { content: ''; position: absolute; z-index: -1; top: 50%; left: 50%; width: 16px; height: 16px; background: rgba(255, 23, 68, 0.9); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #ff0000, inset 0 0 4px #000; animation: ghoul-blink-iris-wide 4s infinite; }
-    .legend-mushoku-pantsu { position: absolute; z-index: -1; top: 50%; left: 50%; width: 55px; height: 45px; transform: translate(-50%, -50%); background-image: url('rokishipantsu.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.5; filter: drop-shadow(0 0 8px #4fc3f7); animation: pantsu-float 3s ease-in-out infinite; }
-    .legend-bl-soccer { position: absolute; z-index: 5; top: 50%; left: -35px; width: 22px; height: 22px; transform: translateY(-50%); background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(0,229,255,0.4)" stroke="%2300e5ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 7l3 4-1.5 5h-3L9 11z"/><path d="M12 7V2M15 11l4.5-2M13.5 16l3.5 4.5M10.5 16l-3.5 4.5M9 11L4.5 9"/></svg>'); filter: drop-shadow(0 0 6px #00e5ff); animation: legend-soccer-roll 3s linear infinite; }
-    @keyframes legend-soccer-roll { 0% { left: -35px; transform: translateY(-50%) rotate(0deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 110%; transform: translateY(-50%) rotate(360deg); opacity: 0; } }
-    .legend-lycoris-poop { position: absolute; z-index: 6; opacity: 0.9; animation: legend-poop-jump 3.5s linear infinite, poop-color 1.5s linear infinite; }
-    .legend-lycoris-poop::before { content: '💩'; font-size: 1.2em; }
-    @keyframes legend-poop-jump { 0% { left: -30px; top: 100%; opacity: 0; } 10% { opacity: 1; top: 100%; } 20% { top: -20%; } 30% { top: 100%; } 40% { top: -20%; } 50% { top: 100%; } 60% { top: -20%; } 70% { top: 100%; } 80% { top: -20%; } 90% { top: 100%; opacity: 1; } 100% { left: 110%; top: 100%; opacity: 0; } }
-    /* Modal & UI */
+// 🌟 保留極少量機台專用 Modal Layout CSS 🌟
+const pluginModalStyle = document.createElement('style');
+pluginModalStyle.innerHTML = `
     @media screen and (max-width: 768px) {
         #plugin-ui-container { position: relative !important; top: 0 !important; right: 0 !important; align-items: center !important; width: 100% !important; margin-bottom: 20px !important; flex-direction: column !important; }
         #plugin-ui-container > div { width: 90% !important; max-width: none !important; }
     }
     .profile-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; animation: fadeIn 0.2s; }
     .profile-card { background: #111; border: 2px solid #444; border-radius: 12px; padding: 25px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.8); border-top: 5px solid #ff1744; }
-    .profile-card h3 { margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; color: #ccc; font-size: 1em; }
     .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; color: #888; background: none; border: none; font-size: 1.2em; font-weight: bold; }
     .prog-container { margin-top: 15px; text-align: left; }
     .prog-label { font-size: 0.85em; color: #aaa; display: flex; justify-content: space-between; margin-bottom: 5px; }
@@ -199,10 +43,8 @@ globalPluginStyle.innerHTML = `
     .clickable-name { cursor: pointer; border-bottom: 1px dashed #555; padding-bottom: 2px; transition: 0.2s; }
     .clickable-name:hover { filter: brightness(1.3); }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    #p-modal-name, #ui-username { word-wrap: break-word; word-break: break-all; white-space: normal; line-height: 1.3; }
-    #p-modal-name .title-effect, #ui-username .title-effect, .dash-name .title-effect { white-space: normal !important; word-break: break-all !important; line-height: 1.3; }
 `;
-document.head.appendChild(globalPluginStyle);
+document.head.appendChild(pluginModalStyle);
 
 // 🌟 全局獲取玩家名稱與稱號 HTML (包含點擊事件)
 window.getPluginPlayerNameHtml = function (userObj, isRank1, uid = null, disableClick = false) {
@@ -390,7 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const uid = user.uid;
 
             const userRef = db.ref('users/' + uid);
-            // ... 下面維持原本的 userRef.get() 邏輯 ...
 
             userRef.get().then((snapshot) => {
                 if (!snapshot.exists()) { auth.signOut(); window.location.href = "login.html"; return; }
@@ -428,7 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             // 2. 解除 5000 轉限制，變成無限轉
             userData.max_allowed_spins = 999999999;
-            // 🚫 已經刪除咗改 UI 嗰句，交畀下面嘅 renderWallet 處理
         }
 
         const exchangeRate = 3.57;
@@ -487,7 +327,6 @@ document.addEventListener("DOMContentLoaded", () => {
             walletEl.style.color = currentWallet >= 0 ? "#00e676" : "#ff5252";
             dailySpinsEl.innerText = userData.daily_spins;
 
-            // 🌟 判定 VIP (保留置底廣告，只賦予無限轉數特權)
             if (userData.is_vip) {
                 userData.max_allowed_spins = 999999999;
                 maxSpinsEl.innerText = "∞ (VIP)";
@@ -502,9 +341,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
         let pageText = originalTitle + " " + document.body.innerText;
-        let spinCost = 1000 / 17; // 預設：1000円 = 17轉
+        let spinCost = 1000 / 16; 
 
-        // 根據 stats.html 參數設定的例外機台
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 29;
         else if (pageText.includes("ソードアート・オンライン")) spinCost = 1000 / 20;
@@ -541,7 +379,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const tbody = document.getElementById("machine-ranking-body");
             if (!tbody) return;
 
-            // 🌟 1. 先計算富豪第一名 (為了判斷是否有天上天下稱號)
             let topUid = null;
             let richArr = Object.keys(window.globalUsersData)
                 .map(k => ({ uid: k, balance: window.globalUsersData[k].balance || 0 }))
@@ -549,7 +386,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 .sort((a, b) => b.balance - a.balance);
             if (richArr.length > 0) topUid = richArr[0].uid;
 
-            // 🌟 2. 搬到這裡！優先更新右上角自己的稱號顯示 (保護動畫，不受排行榜為空影響)
             let currentUserObj = window.globalUsersData[uid];
             if (currentUserObj) {
                 let mockSelf = {
@@ -557,7 +393,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     has_completed: currentUserObj.has_completed, title_hell: currentUserObj.title_hell,
                     title_godpull: currentUserObj.title_godpull, title_runthrough: currentUserObj.title_runthrough,
                     is_vip: currentUserObj.is_vip,
-                    // 👇 補返呢 4 行，右上角就會認得新稱號特效！
                     title_bl_legend: currentUserObj.title_bl_legend || false,
                     title_ghoul_legend: currentUserObj.title_ghoul_legend || false,
                     title_lycoris_legend: currentUserObj.title_lycoris_legend || false,
@@ -570,7 +405,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // 🌟 3. 現在才判斷排行榜是否為空，如果是空就 return
             if (currentMachineRankings.length === 0) {
                 if (tbody.innerHTML !== `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`) {
                     tbody.innerHTML = `<tr><td colspan="4" class="empty-row">一万発達成者なし</td></tr>`;
@@ -578,7 +412,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // 🌟 4. 核心修復：比較行數，如果不對才重建表格框架
             let rows = tbody.children;
             if (rows.length !== currentMachineRankings.length || (rows.length > 0 && rows[0].cells.length === 1)) {
                 let html = "";
@@ -589,7 +422,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 rows = tbody.children;
             }
 
-            // 🌟 5. 進行差異更新，只改動有變化的格子
             currentMachineRankings.forEach((rec, idx) => {
                 let rankText = (idx === 0) ? "🥇" : (idx === 1) ? "🥈" : (idx === 2) ? "🥉" : (idx + 1);
 
@@ -635,14 +467,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // ==========================================
-        // 🚨 極限慳流量架構：精準讀取 (取代原本嘅優化 1, 2, 3)
+        // 🚨 極限慳流量架構：精準讀取
         // ==========================================
         window.globalUsersData = {};
         let topUid = null;
 
         async function fetchRankingsAndUsers() {
             try {
-                // 1. 🌟 淨係攞呢部機台最高出玉嘅 10 條紀錄 (利用 limitToLast 阻截巨量下載)
                 const rankSnap = await db.ref('machine_rankings/' + machineName)
                     .orderByChild('payout')
                     .limitToLast(10)
@@ -651,14 +482,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentMachineRankings = [];
                 if (rankSnap.exists()) {
                     rankSnap.forEach(child => { currentMachineRankings.push(child.val()); });
-                    // Firebase limitToLast 係由細排到大，所以要反轉佢
                     currentMachineRankings.reverse();
                 }
 
-                // 2. 🌟 準備一個陣列去裝住我哋要精準 Download 嘅 Request
                 let promises = [];
 
-                // (A) 攞全服最有錢第 1 名 (為咗出「天上天下」霸氣稱號)
                 promises.push(
                     db.ref('users').orderByChild('balance').limitToLast(1).once('value').then(snap => {
                         if (snap.exists()) {
@@ -670,15 +498,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                 );
 
-                // (B) 攞自己嘅資料 (為咗補發稱號及顯示餘額)
                 if (uid) {
                     promises.push(
                         db.ref('users/' + uid).once('value').then(snap => {
                             if (snap.exists()) {
                                 let u = snap.val();
                                 window.globalUsersData[uid] = u;
-
-                                // 自動補發遺漏稱號
                                 let needsUpdate = false;
                                 let updates = {};
                                 if ((u.single_hell_count || 0) >= 10 && !u.title_hell) { updates.title_hell = true; u.title_hell = true; needsUpdate = true; }
@@ -691,7 +516,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
                 }
 
-                // (C) 攞排行榜上面嗰 10 個人嘅資料 (為咗出佢哋專屬嘅稱號特效！)
                 let uniqueNames = [...new Set(currentMachineRankings.map(r => r.user))];
                 uniqueNames.forEach(name => {
                     promises.push(
@@ -705,25 +529,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
                 });
 
-                // 3. 🌟 等呢十幾個極微型嘅 Request 全部完成，先一次過 Render 畫面！
                 await Promise.all(promises);
 
-                // 👇👇👇 新增呢一段：只實時監聽「自己」嘅資料變動，極低流量！ 👇👇👇
                 if (uid && !window._isMyProfileListening) {
                     window._isMyProfileListening = true;
                     db.ref('users/' + uid).on('value', snap => {
                         if (snap.exists()) {
-                            // 實時將最新嘅自己資料放入緩存
                             window.globalUsersData[uid] = snap.val();
-                            
-                            // 如果你宜家咁啱打開緊自己個 Profile 視窗，就即刻刷新畫面！
                             if (window.currentOpenProfileUid === uid) {
                                 window.showPluginProfile(uid);
                             }
                         }
                     });
                 }
-                // 👆👆👆 新增結束 👆👆👆
 
                 renderMachineRankings();
                 if (window.currentOpenProfileUid) window.showPluginProfile(window.currentOpenProfileUid);
@@ -733,7 +551,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // 載入網頁即刻執行一次
         fetchRankingsAndUsers();
 
         function disableMachine(msgText = "⛔ 本日の上限に達しました") {
@@ -789,15 +606,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof window.updateUI === "function") {
             const originalUpdateUI = window.updateUI;
             window.updateUI = function () {
-                // 👇 🌟 跨日實時動態重置 (已轉用 JST) 🌟 👇
-                const todayStr = getJSTDate().toDateString(); // 👈 換成 getJSTDate()
+                const todayStr = getJSTDate().toDateString();
                 if (userData.last_date !== todayStr) {
                     userData.daily_spins = 0;
                     userData.daily_profit = 0;
                     userData.last_date = todayStr;
                     userRef.update({ daily_spins: 0, daily_profit: 0, last_date: todayStr });
                     
-                    // 強制解鎖機台，無須 F5 刷新
                     let playBtn = document.getElementById("btn-play");
                     if (playBtn && playBtn.disabled) {
                         playBtn.disabled = false;
@@ -806,7 +621,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     let adBtn = document.getElementById("btn-reward-ad");
                     if (adBtn) adBtn.remove();
                 }
-                // 👆 🌟 跨日重置結束 🌟 👆
                 
                 originalUpdateUI();
                 translateDOM();
@@ -859,11 +673,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (lastUI_payout >= 10000 && !alreadySaved) {
                         const todayDate = getJSTDate();
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
-                        const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`; // 👈 新增獨立 Key
+                        const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`;
 
                         db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
 
-                        // 兼容舊版 Dashboard 顯示
                         db.ref('server_records/daily_best').transaction((curr) => {
                             if (!curr || curr.date !== dateStr || lastUI_payout > curr.payout) {
                                 return { uid: uid, user: currentUserName, payout: lastUI_payout, date: dateStr, processed: false };
@@ -871,7 +684,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             return;
                         });
 
-                        // 🌟 寫入新版防覆蓋日誌 🌟
                         db.ref(`server_records/daily_bests_log/${dateKey}`).transaction((curr) => {
                             if (!curr || lastUI_payout > curr.payout) {
                                 return { uid: uid, user: currentUserName, payout: lastUI_payout, date: dateStr, processed: false };
@@ -922,7 +734,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     completeTriggeredThisRush = true;
                     const todayDate = getJSTDate();
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
-                    const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`; // 👈 新增獨立 Key
+                    const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`;
 
                     db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: new_payout, date: dateStr });
 
@@ -933,7 +745,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         return;
                     });
 
-                    // 🌟 寫入新版防覆蓋日誌 🌟
                     db.ref(`server_records/daily_bests_log/${dateKey}`).transaction((curr) => {
                         if (!curr || new_payout > curr.payout) {
                             return { uid: uid, user: currentUserName, payout: new_payout, date: dateStr, processed: false };
@@ -961,7 +772,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function getShareText(payout, rushCount) {
             const compText = payout >= 95000 ? "\n🎉【完成全機種挑戰！】🎉" : "";
-            return `【一擊獲得 ${payout.toLocaleString()} 玉！】${compText}\n🎰 機種：${machineName}\n💥 本次出玉：${payout.toLocaleString()} 玉（${rushCount} 連莊）\n\n你今日嘅運氣有幾勁？🔥\n#柏青哥模擬器 #柏青哥 #網頁版柏青哥 #免費遊戲 #神抽`;
+            return `【一撃獲得 ${payout.toLocaleString()} 玉！】${compText}\n🎰 機種：${machineName}\n💥 本次出玉：${payout.toLocaleString()} 玉（${rushCount} 連莊）\n\n你今日嘅運氣有幾勁？🔥\n#柏青哥模擬器 #柏青哥 #網頁版柏青哥 #免費遊戲 #神抽`;
         }
 
         function getThreadsShareUrl(text) {
@@ -1032,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 context.fillText(`${rushCount.toLocaleString()} 連莊`, 75, 415);
                 context.fillStyle = payout >= 95000 ? '#ff80ab' : '#9cefff';
                 context.font = 'bold 30px "Noto Sans JP", sans-serif';
-                context.fillText(payout >= 95000 ? '🎉 完成全機種挑戰！' : '一擊戰績達成！', 75, 500);
+                context.fillText(payout >= 95000 ? '🎉 完成全機種挑戰！' : '一擊戦績達成！', 75, 500);
 
                 context.fillStyle = '#c9d1d9';
                 context.font = '24px "Noto Sans JP", sans-serif';
@@ -1087,7 +898,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const rushCount = window.latest_rush_for_share || 0;
                 if (payout < 10000) { window.alert("一万発を達成してからシェアしてください！"); return; }
                 const text = getShareText(payout, rushCount);
-                // Reserve the tab during the user click so desktop popup blockers do not cancel it after await.
                 const shareWindow = window.open('about:blank', '_blank');
                 if (navigator.share && navigator.canShare) {
                     const blob = await createShareCardBlob(payout, rushCount);
@@ -1177,19 +987,17 @@ setTimeout(() => {
 // ==========================================
 // 🏆 全自動稱號判定系統 (Log Interceptor)
 // ==========================================
-window._lastLoggedSpins = 0; // 🌟 建立獨立記憶體，死記最新轉數
-window._lastHellCountedSpin = -1; // 🌟 新增：死記邊一轉已經計過單發，防止雙重+1
+window._lastLoggedSpins = 0; 
+window._lastHellCountedSpin = -1; 
 
 setTimeout(() => {
     if (typeof window.addLog === "function") {
         const originalAddLog = window.addLog;
         window.addLog = function (text, className = "") {
-            // 1. 擋截無用 Log
             if (text.includes("播放") || text.includes("再生") || text.includes("mp4") || text.includes("音效") || text.includes("請稍候")) {
                 return;
             }
 
-            // 2. 執行翻譯
             let translatedText = text;
             translatedText = translatedText.replace(/STOCK獲得！(\d+)玉 \(剩餘 (\d+)轉\)/g, "STOCK獲得！$1玉 (残り $2回転)");
             translatedText = translatedText.replace(/剩餘 (\d+) 轉/g, "残り $1 回転");
@@ -1202,7 +1010,6 @@ setTimeout(() => {
 
             originalAddLog(translatedText, className);
 
-            // 3. 🏆 全自動稱號判定系統 (與翻譯系統同步執行，防止漏單)
             try {
                 const user = firebase.auth().currentUser;
                 if (!user) return;
@@ -1223,11 +1030,8 @@ setTimeout(() => {
                 const isHeavyMachine = heavyMachinePages.has(pageName) || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣)/i.test(machineTitle);
 
                 const isCharge = /チャージ|CHARGE/i.test(translatedText);
-                // Rush Challenge / CZ / 時短 への突入パターン（本RUSHではない）
                 const isRushChallengeEnter = /(チャレンジ|JUDGE|CZ|時短).*?(突入|開始)/.test(translatedText)
                     || /(突入|開始).*?(チャレンジ|JUDGE|CZ|時短)/.test(translatedText);
-                // 本RUSHへの突入（Rush Challenge・Charge・時短を除く）
-                // 🌟 修正：排除「非突入」同「失敗」，防止系統見到「RUSH非突入」就誤以為入咗 RUSH 而清空單發計數！
                 const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText) && !/チャレンジ|JUDGE|CZ|非突入|失敗/.test(translatedText);
 
                 // ✨ 神の引き
@@ -1236,14 +1040,13 @@ setTimeout(() => {
                     window._lastLoggedSpins = 0;
                 }
 
-                // ⚡ 駆け抜け王 ＆ runthrough_count 管理
+                // ⚡ 駆け抜け王
                 const isRushChallengeFailure = /チャレンジ失敗|CZ失敗|JUDGE失敗|時短終了|任務失敗|チャンスタイム終了|昇格失敗/.test(translatedText);
                 const isRushEnd = /RUSH\s*終了|IMPACT MODE終了|ST抜け|ST終了|LT終了|決着.*RUSH終了|BATTLE敗北|バトル敗北|ボールを奪われた.*転落|ST.*スルー.*終了|ST駆け抜け.*終了|魂神の一撃.*失敗|敗北.*転落.*終了|(?:振り分け|退学).*通常へ転落|アルティメット終了|ワルプルギス終了/.test(translatedText)
                     && !isRushChallengeFailure;
                 const isRunthroughExplicit = /駆け抜け|スルー/.test(translatedText) && !isRushChallengeFailure;
 
                 if (isRushEnd || isRunthroughExplicit) {
-                    // 🌟 修正：將 === 0 改為 <= 1，因為初當入 RUSH 已經當作 1 連
                     if (isRunthroughExplicit || rushCount <= 1) {
                         titleDb.ref('users/' + uid + '/runthrough_count').transaction(count => {
                             let newCount = (count || 0) + 1;
@@ -1264,10 +1067,8 @@ setTimeout(() => {
                     );
 
                 if (isNormalLoss) {
-                    // 🌟 加入防重複鎖：如果呢一轉 (actualSpins) 已經 +1 過，就自動 Block 咗佢
                     if (rushCount <= 1 && actualSpins !== window._lastHellCountedSpin) {
-                        window._lastHellCountedSpin = actualSpins; // 鎖定呢一轉，同一轉再有 Log 都唔理
-
+                        window._lastHellCountedSpin = actualSpins; 
                         titleDb.ref('users/' + uid + '/single_hell_count').transaction(count => {
                             let newCount = (count || 0) + 1;
                             if (newCount >= 10) titleDb.ref('users/' + uid).update({ title_hell: true });
@@ -1276,7 +1077,6 @@ setTimeout(() => {
                     }
                 }
 
-                // 🌟 清空単発地獄
                 if (isRealRushEnter || translatedText.includes("継続") || translatedText.includes("連)") || rushCount >= 2) {
                     titleDb.ref('users/' + uid + '/single_hell_count').set(0);
                 }
@@ -1289,45 +1089,61 @@ setTimeout(() => {
                 const isLycoris = pageName.includes("lycoris") || machineTitle.includes("リコリス");
                 const isMushoku = pageName.includes("mushoku") || machineTitle.includes("無職転生");
 
-                // 提取 Log 內包含的玉數 (自動過濾逗號，方便判斷 30000玉 / 6000玉)
-                let ballMatch = translatedText.replace(/,/g, '').match(/(\d+)玉/);
-                let earnedBalls = ballMatch ? parseInt(ballMatch[1]) : 0;
+                // 👇👇👇 完美修復：優先讀取 (計 XXX玉)，防止畀 +3000玉 呃咗 👇👇👇
+                let noCommaText = translatedText.replace(/,/g, '');
+                let earnedBalls = 0;
+                let matchTotal = noCommaText.match(/\(計\s*(\d+)玉\)/);
+                if (matchTotal) {
+                    earnedBalls = parseInt(matchTotal[1]); // 優先拎總數
+                } else {
+                    let matchSingle = noCommaText.match(/(\d+)玉/);
+                    earnedBalls = matchSingle ? parseInt(matchSingle[1]) : 0; // 無總數先拎普通數字
+                }
+                // 👆👆👆 修復完畢 👆👆👆
 
                 // 1. ⚽ Blue Lock
                 if (isBlueLock) {
-                    // 條件：全回転 (0.1%) 当選、または RUSH中に「7500だけじゃ終われない」を獲得
-                    if (translatedText.includes("全回転") || translatedText.includes("7500だけじゃ終われない")) {
+                    if (translatedText.includes("全回転") || translatedText.includes("7500だけじゃ、終われない")) {
                         titleDb.ref('users/' + uid).update({ title_bl_legend: true });
-                        // 彈出提示恭喜玩家
                         window.alert("🎉 伝説の称号【俺、はストライカーだ！】を獲得しました！\nプロフィールから装備できます！");
                     }
                 }
                 
                 // 2. 🩸 東京喰種
                 if (isGhoul) {
-                    // 條件：一撃で30,000玉以上を上乗せする。もしくはチャージ昇格
                     if (earnedBalls >= 30000 || /(チャージ|CHARGE).*?(昇格)/.test(translatedText)) {
                         titleDb.ref('users/' + uid).update({ title_ghoul_legend: true });
-                        window.alert("🎉 伝説の称号【僕、は喰種だ】を獲得しました！\nプロフィールから装備できます！");
+                        
+                        // 👇 新增防重複鎖 + 延遲彈出
+                        if (!window._ghoul_awarded) {
+                            window._ghoul_awarded = true; // 鎖定，防止同一局彈兩次
+                            setTimeout(() => {
+                                window.alert("🎉 伝説の称号【僕、は喰種だ】を獲得しました！\nプロフィールから装備できます！");
+                            }, 1500); // 延遲 1.5 秒
+                        }
                     }
                 }
 
                 // 3. 💩 Lycoris Recoil
                 if (isLycoris) {
-                    // 條件：上乗せ時、一撃で30,000玉以上を上乗せする。
                     if (earnedBalls >= 30000) {
                         titleDb.ref('users/' + uid).update({ title_lycoris_legend: true });
-                        window.alert("🎉 伝説の称号【ホットでプレミアムうんこ】を獲得しました！\nプロフィールから装備できます！");
+                        
+                        // 👇 新增防重複鎖 + 延遲彈出
+                        if (!window._lycoris_awarded) {
+                            window._lycoris_awarded = true; // 鎖定，防止同一局彈兩次
+                            setTimeout(() => {
+                                window.alert("🎉 伝説の称号【ホットでプレミアムうんこ】を獲得しました！\nプロフィールから装備できます！");
+                            }, 1500); // 延遲 1.5 秒，等畫面印完晒所有上乗せ先彈
+                        }
                     }
                 }
 
                 // 4. 🪄 無職転生
                 if (isMushoku) {
-                    // 如果斷開 RUSH，重置 6000 玉計數器
                     if (isRushEnd || isNormalLoss) {
                         window._mushoku_6000_count = 0;
                     }
-                    // 條件：RUSH中に「6000玉 (10R×4)」を5回以上獲得する
                     if (earnedBalls === 6000) {
                         window._mushoku_6000_count = (window._mushoku_6000_count || 0) + 1;
                         if (window._mushoku_6000_count >= 5) {
@@ -1343,12 +1159,10 @@ setTimeout(() => {
     }
 }, 2000);
 
-// 🌟 切換自訂稱號選單顯示/隱藏
 window.toggleTitleChecks = function (mode) {
     window.HallShared.toggleTitleChecks(mode);
 };
 
-// 🌟 儲存多重稱號設定
 window.saveTitleSettings = function (uid) {
     window.HallShared.saveTitleSettings(uid)
         .then(saved => { if (saved) { alert("✅ 称号の表示設定を保存しました！"); location.reload(); } });
