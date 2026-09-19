@@ -1505,27 +1505,31 @@
         let lastRenderTime = 0;
         let renderTimeout = null;
 
-        // 🚨 終極慳流量優化 4：大堂排行榜 (15秒自動更新版)
+        // 🚨 終極同步優化：用 Promise.all 等齊所有數據先一次過顯示
         function fetchGlobalRankings() {
-            db.ref('users').once('value').then((snapshot) => {
-                usersData = snapshot.val() || {};
+            Promise.all([
+                db.ref('users').once('value'),
+                db.ref('machine_rankings').once('value'),
+                db.ref('server_records/max_hamari').once('value')
+            ]).then(([usersSnap, rankingsSnap, hamariSnap]) => {
+                usersData = usersSnap.val() || {};
+                rankingsData = rankingsSnap.val() || {};
+                maxHamariData = hamariSnap.val() || {};
                 
                 const myUser = auth.currentUser;
                 for (let uid in usersData) {
                     let u = usersData[uid];
                     if ((u.single_hell_count || 0) >= 10 && !u.title_hell) {
-                        // 🌟 修正：只允許系統幫「自己」補發稱號，禁止越權修改其他人資料 🌟
                         if (myUser && myUser.uid === uid) {
                             db.ref(`users/${uid}`).update({ title_hell: true }).catch(e => console.warn(e));
                         }
-                        usersData[uid].title_hell = true; // 本地照樣更新顯示
+                        usersData[uid].title_hell = true; 
                     }
                 }
                 
-                // 自己嘅餘額維持實時監聽 (只執行一次綁定)
                 const user = auth.currentUser;
                 if (user && usersData[user.uid] && !window._isMyBalanceListening) {
-                    window._isMyBalanceListening = true; // 防重複綁定
+                    window._isMyBalanceListening = true; 
                     db.ref('users/' + user.uid).once('value', snap => {
                         if(snap.exists()) {
                             usersData[user.uid] = snap.val();
@@ -1534,7 +1538,11 @@
                         }
                     });
                 }
+                
+                // 🌟 等齊三份數據，確保全部看板同時 Load 出嚟
                 executeRender();
+            }).catch(error => {
+                console.error("數據同步載入失敗:", error);
             });
         }
 
@@ -1548,17 +1556,6 @@
             if (currentOpenProfileUid) updateProfileModal();
             lastRenderTime = Date.now();
         }
-
-        db.ref('machine_rankings').once('value', (snapshot) => {
-            rankingsData = snapshot.val() || {};
-            updateDashboard();
-        });
-
-        // 史上最大ハマリの監視
-        db.ref('server_records/max_hamari').once('value', (snapshot) => {
-            maxHamariData = snapshot.val();
-            updateDashboard();
-        });
 
         function updateDashboard() {
             let todayParlorProfit = 0;
