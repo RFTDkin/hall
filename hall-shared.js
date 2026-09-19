@@ -26,6 +26,7 @@
         // 🌟 新增 4 大機種傳說稱號
         const isBl = !!userObj.title_bl_legend;
         const isGhoul = !!userObj.title_ghoul_legend;
+        const isGhoulCharge = !!userObj.title_ghoul_charge;
         const isLycoris = !!userObj.title_lycoris_legend;
         const isMushoku = !!userObj.title_mushoku_legend;
 
@@ -36,8 +37,8 @@
         const baseColor = userObj.isSelf ? '#00e5ff' : '#fff';
         let html = display;
 
-        // 🌟 終極形態 HTML (加入血輪眼、底褲、足球、彩色屎)
-        const legendHtml = `<span class="title-effect effect-legend"><span class="legend-ghoul-eye" aria-hidden="true"></span><span class="legend-mushoku-pantsu" aria-hidden="true"></span><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span><span class="legend-bl-soccer" aria-hidden="true"></span><span class="legend-lycoris-poop" aria-hidden="true"></span></span>`;
+        // 🌟 終極形態 HTML (加入血輪眼、底褲、足球、彩色屎、彼岸花)
+        const legendHtml = `<span class="title-effect effect-legend"><span class="legend-ghoul-eye" aria-hidden="true"></span><span class="legend-mushoku-pantsu" aria-hidden="true"></span><span class="legend-supreme-text">天上天下</span><span class="legend-royal-lines"></span><span class="legend-runthrough-trail"></span><span class="legend-ichigeki-burst"></span><span class="legend-hell-echo" data-text="${display}"></span><span class="legend-complete">${display}</span><span class="legend-bl-soccer" aria-hidden="true"></span><span class="legend-lycoris-poop" aria-hidden="true"></span><span class="legend-ghoul-flower-left" aria-hidden="true"></span><span class="legend-ghoul-flower-right" aria-hidden="true"></span></span>`;
 
         if (eq === "none") {
             html = `<span style="color: ${baseColor};">${html}</span>`;
@@ -57,6 +58,7 @@
                 // 🌟 自訂裝備判斷
                 if (selectedTitles.includes("bl_legend") && isBl) html = `<span class="effect-bl-legend" style="display: inline-block; position: relative;">${html}</span>`;
                 if (selectedTitles.includes("ghoul_legend") && isGhoul) html = `<span class="effect-ghoul-legend" style="display: inline-block; position: relative;">${html}</span>`;
+                if (selectedTitles.includes("ghoul_charge") && isGhoulCharge) html = `<span class="effect-ghoul-flower" style="display: inline-block; position: relative;">${html}</span>`; // 👈 これを追加
                 if (selectedTitles.includes("lycoris_legend") && isLycoris) html = `<span class="effect-lycoris-legend" style="display: inline-block; position: relative;">${html}</span>`;
                 if (selectedTitles.includes("mushoku_legend") && isMushoku) html = `<span class="effect-mushoku-legend" style="display: inline-block; position: relative;">${html}</span>`;
 
@@ -78,6 +80,7 @@
             // 🌟 自動疊加判斷
             if (isBl) html = `<span class="effect-bl-legend" style="display: inline-block; position: relative;">${html}</span>`;
             if (isGhoul) html = `<span class="effect-ghoul-legend" style="display: inline-block; position: relative;">${html}</span>`;
+            if (isGhoulCharge) html = `<span class="effect-ghoul-flower" style="display: inline-block; position: relative;">${html}</span>`; // 👈 これを追加
             if (isLycoris) html = `<span class="effect-lycoris-legend" style="display: inline-block; position: relative;">${html}</span>`;
             if (isMushoku) html = `<span class="effect-mushoku-legend" style="display: inline-block; position: relative;">${html}</span>`;
 

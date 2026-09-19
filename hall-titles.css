@@ -76,7 +76,6 @@
 
 /* 無職轉生：ロキシーのパンツ */
 .effect-mushoku-legend { position: relative; display: inline-block; z-index: 1; padding-right: 35px; }
-.effect-mushoku-legend::before { content: ''; position: absolute; z-index: 1; top: 50%; right: -5px; width: 35px; height: 28px; transform: translateY(-50%); background-image: url('rokishipantsu.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.9; filter: drop-shadow(0 0 8px #4fc3f7); animation: pantsu-float 3s ease-in-out infinite; }
 @keyframes pantsu-float { 0%, 100% { transform: translateY(-40%) rotate(-10deg); } 50% { transform: translateY(-60%) rotate(10deg); } }
 
 /* ======================================================== */
@@ -136,23 +135,61 @@
     pointer-events: none; 
 }
 
+/* ======================================================== */
+/* 無職転生：ロキシーのパンツ御神体 (移至正下方 - 完美置中修正) */
+/* ======================================================== */
+.effect-mushoku-legend {
+    position: relative;
+    display: inline-block;
+    /* 加入 !important 強制覆蓋舊設定，確保左右 padding 為 0 */
+    padding: 0 0 25px 0 !important; 
+    white-space: nowrap;
+}
+
+.effect-mushoku-legend::after {
+    content: '';
+    position: absolute;
+    z-index: 10;
+    bottom: -5px;
+    left: 50%;
+    width: 40px;
+    height: 32px;
+    background-image: url('rokishipantsu.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 8px #4fc3f7);
+    animation: pantsu-float-bottom 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes pantsu-float-bottom {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-6px); }
+}
+
+/* 🌟 終極預覽版用 (防出界層 - 正下方置中) 🌟 */
 .legend-mushoku-pantsu { 
     position: absolute; 
-    z-index: 10; 
-    top: 50%; 
-    /* 👇 右側にしっかりはみ出すように位置を調整 */
-    right: -35px; 
-    width: 40px; 
-    height: 32px; 
-    transform: translateY(-50%); 
+    z-index: 20; 
+    /* 移去外框正下方 */
+    bottom: -30px; 
+    left: 50%; 
+    width: 45px; 
+    height: 35px; 
     background-image: url('rokishipantsu.png'); 
     background-size: contain; 
     background-repeat: no-repeat; 
     background-position: center; 
-    opacity: 1; 
     filter: drop-shadow(0 0 8px #4fc3f7); 
-    animation: pantsu-float 3s ease-in-out infinite; 
+    animation: pantsu-float-bottom 3s ease-in-out infinite; 
     pointer-events: none; 
+}
+
+/* 專屬置中浮動動畫 (避免 X 軸 transform 被覆蓋) */
+@keyframes pantsu-float-bottom {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-6px); }
 }
 /* 終極形態防出界 Overlay (用嚟裝足球同屎) */
 .legend-bl-soccer, .legend-lycoris-poop { position: absolute !important; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 5; overflow: visible; }
@@ -169,3 +206,57 @@
 /* 🌟 防止所有 Modal 同排行榜入面嘅長名字推爆框 🌟 */
 table.data-lamp td:nth-child(2), #modal-name, #p-modal-name, #ui-username, .dash-name { word-wrap: break-word; word-break: break-all; white-space: normal; line-height: 1.4; }
 table.data-lamp td:nth-child(2) .title-effect, #modal-name .title-effect, #p-modal-name .title-effect, #ui-username .title-effect, .dash-name .title-effect { white-space: normal !important; word-break: break-all !important; line-height: 1.4; }
+
+/* ======================================================== */
+/* 東京喰種：何もできないのは、もう嫌なんだ (立體紅白彼岸花) */
+/* ======================================================== */
+.effect-ghoul-flower { 
+    position: relative; display: inline-block; padding: 0 55px; 
+    color: #fff; font-weight: bold; z-index: 1;
+    animation: flower-text 4s infinite alternate ease-in-out;
+}
+
+/* 🌟 超精細彼岸花 SVG Mask (包含花心、彎曲長鬚、花藥) */
+.effect-ghoul-flower::before, .effect-ghoul-flower::after,
+.legend-ghoul-flower-left, .legend-ghoul-flower-right {
+    content: ''; position: absolute; top: 50%; width: 55px; height: 55px; 
+    transform: translateY(-50%);
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='black' stroke-linecap='round'><path d='M50,70 Q45,50 35,45 Q50,55 50,70' fill='black'/><path d='M50,70 Q55,50 65,45 Q50,55 50,70' fill='black'/><path d='M50,70 Q40,60 30,65 Q45,70 50,70' fill='black'/><path d='M50,70 Q60,60 70,65 Q55,70 50,70' fill='black'/><path d='M50,70 L50,45' stroke-width='5'/><path d='M50,60 C35,35 15,10 5,30' stroke-width='2'/><path d='M50,60 C65,35 85,10 95,30' stroke-width='2'/><path d='M50,60 C30,40 5,20 2,45' stroke-width='1.5'/><path d='M50,60 C70,40 95,20 98,45' stroke-width='1.5'/><path d='M50,60 C40,30 25,5 15,15' stroke-width='2.5'/><path d='M50,60 C60,30 75,5 85,15' stroke-width='2.5'/><path d='M50,65 C25,55 0,55 10,80' stroke-width='1.5'/><path d='M50,65 C75,55 100,55 90,80' stroke-width='1.5'/><path d='M50,55 C45,15 35,0 25,5' stroke-width='2'/><path d='M50,55 C55,15 65,0 75,5' stroke-width='2'/><path d='M50,65 Q25,40 15,45' stroke-width='3'/><path d='M50,65 Q75,40 85,45' stroke-width='3'/><path d='M50,70 L50,100' stroke-width='4'/></g><g fill='black'><circle cx='5' cy='30' r='3'/><circle cx='95' cy='30' r='3'/><circle cx='2' cy='45' r='2.5'/><circle cx='98' cy='45' r='2.5'/><circle cx='15' cy='15' r='3'/><circle cx='85' cy='15' r='3'/><circle cx='10' cy='80' r='2.5'/><circle cx='90' cy='80' r='2.5'/><circle cx='25' cy='5' r='3'/><circle cx='75' cy='5' r='3'/><circle cx='15' cy='45' r='3'/><circle cx='85' cy='45' r='3'/></g></svg>") center/contain no-repeat;
+    animation: higanbana-3d-swap 4s infinite alternate ease-in-out;
+}
+
+.effect-ghoul-flower::before { left: -5px; }
+.effect-ghoul-flower::after { right: -5px; transform: translateY(-50%) scaleX(-1); }
+
+/* 🌟 終極預覽版用 (防出界) */
+.legend-ghoul-flower-left { left: -55px; }
+.legend-ghoul-flower-right { right: -55px; transform: translateY(-50%) scaleX(-1); pointer-events: none; }
+
+/* 🌟 3D 立體陰影與紅白切換動畫 */
+@keyframes higanbana-3d-swap {
+    0%, 30% { 
+        background-color: #ff1133; 
+        /* 黑色內核(造出假立體) + 紅色光暈 + 深紅擴散 */
+        filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.9)) drop-shadow(0 0 3px #ff0000) drop-shadow(0 0 10px #b30000); 
+    }
+    70%, 100% { 
+        background-color: #ffffff; 
+        /* 黑色內核(造出假立體) + 冰白光暈 + 灰白擴散 */
+        filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.7)) drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 10px #bbbbbb); 
+    }
+}
+
+@keyframes flower-text {
+    0%, 30% { text-shadow: 0 0 5px #ff0000, 0 0 12px #ff0000; color: #ffebef; }
+    70%, 100% { text-shadow: 0 0 5px #ffffff, 0 0 12px #ffffff, 0 0 20px #aaa; color: #ffffff; }
+}
+
+/* 🌟 終極預覽版用 (防出界) */
+.legend-ghoul-flower-left, .legend-ghoul-flower-right {
+    position: absolute; z-index: 15; top: 50%; width: 45px; height: 45px; transform: translateY(-50%); pointer-events: none;
+    background-color: #ff0015;
+    -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 90 Q30 50 5 30 M50 90 Q70 50 95 30 M50 90 Q20 70 0 65 M50 90 Q80 70 100 65 M50 90 Q40 30 25 5 M50 90 Q60 30 75 5 M50 90 L50 10" fill="none" stroke="black" stroke-width="4" stroke-linecap="round"/><circle cx="25" cy="5" r="3" fill="black"/><circle cx="75" cy="5" r="3" fill="black"/><circle cx="5" cy="30" r="3" fill="black"/><circle cx="95" cy="30" r="3" fill="black"/><circle cx="50" cy="10" r="3" fill="black"/></svg>') center/contain no-repeat;
+    animation: higanbana-swap 4s infinite alternate;
+}
+.legend-ghoul-flower-left { left: -45px; }
+.legend-ghoul-flower-right { right: -45px; transform: translateY(-50%) scaleX(-1); }

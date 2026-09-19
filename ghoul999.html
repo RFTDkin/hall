@@ -216,12 +216,35 @@
         .empty-row {
             color: #444 !important;
         }
+
+        /* 🌟 ブラックアウト演出 (喰種チャージ昇格用) 🌟 */
+        .blackout-overlay {
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none; background: #000; opacity: 0; visibility: hidden;
+        }
+        .blackout-overlay.is-active { visibility: visible; animation: blackout-screen 4.8s ease-in-out forwards; }
+        .blackout-message { display: flex; flex-direction: column; align-items: center; gap: 0.2em; font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.5rem, 5vw, 4rem); line-height: 1.2; letter-spacing: 0.04em; text-align: center; transform: scale(0.8); opacity: 0; }
+        .blackout-rainbow {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: blackout-rainbow 2s linear infinite; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); font-weight: 900;
+        }
+        @keyframes blackout-rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        .blackout-overlay.is-active .blackout-message { animation: blackout-message 4.8s ease-in-out forwards; }
+        @keyframes blackout-screen { 0% { opacity: 0; } 10%, 88% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        @keyframes blackout-message { 0%, 15% { opacity: 0; transform: scale(1.35); } 25%, 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.96); } }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+    <!-- 🌟 ブラックアウト演出用 HTML 🌟 -->
+    <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div class="blackout-rainbow" style="font-size: 0.6em;">ハハハハ！</div>
+            <div class="blackout-rainbow" style="font-size: 0.8em;">素敵よその表情！</div>
+            <div class="blackout-rainbow" style="font-size: 0.7em;">喰種チャージ昇格で<br>RUSH突入！</div>
+        </div>
+    </div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P 東京喰種 999ver</span></h1>
 
@@ -269,6 +292,16 @@
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rushMedia = document.getElementById("rush-media");
+        function playBlackout演出() {
+            const overlay = document.getElementById("blackout-overlay");
+            if (!overlay) return sleep(4800);
+            overlay.classList.remove("is-active");
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+            return sleep(4800).then(() => {
+                overlay.classList.remove("is-active");
+            });
+        }
         let audioUnlocked = false;
 
         // RUSH中獎時彈出 Rize 影片
@@ -373,12 +406,11 @@
                     // 🌟 修正：Charge 內部 0.5% 極低機率突入 RUSH 🌟
                     if (Math.random() < 0.005) {
                         this.session_payout += 7500;
+                        
+                        addLog(`ドン！！！`, "color-normal"); // 👈 加入 log
+                        await playBlackout演出(); // 👈 觸發黑畫面
+                        
                         addLog(`🌈 昇格発生！奇跡の 0.5%！ 7500玉獲得 ＋ HYPER喰種RUSH突入！`, "color-ultimate");
-
-                        rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
-                        rushMedia.load();
-                        addLog(`🎵 播放專屬動畫 中... 請稍候`, "color-music");
-                        await playVideoPopupAndWait(rushMedia);
 
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         updateUI();

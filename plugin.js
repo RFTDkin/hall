@@ -76,7 +76,7 @@ window.showPluginProfile = function (uid) {
         title_hell: u.title_hell, title_godpull: u.title_godpull,
         title_runthrough: u.title_runthrough, is_vip: u.is_vip,
         // 🌟 新增資料對接
-        title_bl_legend: u.title_bl_legend, title_ghoul_legend: u.title_ghoul_legend,
+        title_bl_legend: u.title_bl_legend, title_ghoul_legend: u.title_ghoul_legend,title_ghoul_charge: u.title_ghoul_charge,
         title_lycoris_legend: u.title_lycoris_legend, title_mushoku_legend: u.title_mushoku_legend,
         equipped_title: u.equipped_title,
         isSelf: firebase.auth().currentUser && firebase.auth().currentUser.uid === uid
@@ -112,6 +112,7 @@ window.showPluginProfile = function (uid) {
     // 🌟 新增機種傳說徽章
     if (u.title_bl_legend) bHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff;">⚽ 俺、はストライカーだ！</div>`;
     if (u.title_ghoul_legend) bHtml += `<div class="badge active" style="border-color: #ff1744; color: #ff1744;">🩸 僕、は喰種だ</div>`;
+    if (u.title_ghoul_charge) bHtml += `<div class="badge active" style="border-color: #fff; color: #ff1744; text-shadow: 0 0 5px rgba(255,0,0,0.5);">🥀 何もできないのは…</div>`;
     if (u.title_lycoris_legend) bHtml += `<div class="badge active" style="border-color: #ff5252; color: #ff5252;">💩 ホットでプレミアムうんこ</div>`;
     if (u.title_mushoku_legend) bHtml += `<div class="badge active" style="border-color: #4fc3f7; color: #4fc3f7;">🪄 ロキシーのパンツ御神体</div>`;
 
@@ -146,6 +147,7 @@ window.showPluginProfile = function (uid) {
                             <!-- 🌟 新增機種稱號裝備選項 -->
                             ${u.title_bl_legend ? `<label><input type="checkbox" class="t-check" value="bl_legend" ${eq.includes('bl_legend') ? 'checked' : ''}> ⚽ 俺、はストライカーだ！</label><br>` : ''}
                             ${u.title_ghoul_legend ? `<label><input type="checkbox" class="t-check" value="ghoul_legend" ${eq.includes('ghoul_legend') ? 'checked' : ''}> 🩸 僕、は喰種だ</label><br>` : ''}
+                            ${u.title_ghoul_charge ? `<label><input type="checkbox" class="t-check" value="ghoul_charge" ${eq.includes('ghoul_charge') ? 'checked' : ''}> 🥀 何もできないのは、もう嫌なんだ</label><br>` : ''}
                             ${u.title_lycoris_legend ? `<label><input type="checkbox" class="t-check" value="lycoris_legend" ${eq.includes('lycoris_legend') ? 'checked' : ''}> 💩 プレミアムうんこ</label><br>` : ''}
                             ${u.title_mushoku_legend ? `<label><input type="checkbox" class="t-check" value="mushoku_legend" ${eq.includes('mushoku_legend') ? 'checked' : ''}> 🪄 ロキシーのパンツ</label><br>` : ''}
                         </div>
@@ -1111,15 +1113,25 @@ setTimeout(() => {
                 
                 // 2. 🩸 東京喰種
                 if (isGhoul) {
-                    if (earnedBalls >= 30000 || /(チャージ|CHARGE).*?(昇格)/.test(translatedText)) {
+                    // 第一個稱號：30,000玉 (僕、は喰種だ)
+                    if (earnedBalls >= 30000) {
                         titleDb.ref('users/' + uid).update({ title_ghoul_legend: true });
-                        
-                        // 👇 新增防重複鎖 + 延遲彈出
                         if (!window._ghoul_awarded) {
-                            window._ghoul_awarded = true; // 鎖定，防止同一局彈兩次
+                            window._ghoul_awarded = true; 
                             setTimeout(() => {
                                 window.alert("🎉 伝説の称号【僕、は喰種だ】を獲得しました！\nプロフィールから装備できます！");
-                            }, 1500); // 延遲 1.5 秒
+                            }, 1500); 
+                        }
+                    }
+                    
+                    // 第二個稱號：Charge昇格 (何もできないのは、もう嫌なんだ)
+                    if (/(チャージ|CHARGE).*?(昇格)/.test(translatedText)) {
+                        titleDb.ref('users/' + uid).update({ title_ghoul_charge: true });
+                        if (!window._ghoul_charge_awarded) {
+                            window._ghoul_charge_awarded = true; 
+                            setTimeout(() => {
+                                window.alert("🎉 伝説の称号【何もできないのは、もう嫌なんだ】を獲得しました！\nプロフィールから装備できます！");
+                            }, 1500); 
                         }
                     }
                 }

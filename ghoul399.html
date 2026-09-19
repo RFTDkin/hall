@@ -216,12 +216,36 @@
         .empty-row {
             color: #444 !important;
         }
+
+        /* 🌟 ブラックアウト演出 (喰種チャージ昇格用) 🌟 */
+        .blackout-overlay {
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none; background: #000; opacity: 0; visibility: hidden;
+        }
+        .blackout-overlay.is-active { visibility: visible; animation: blackout-screen 4.8s ease-in-out forwards; }
+        .blackout-message { display: flex; flex-direction: column; align-items: center; gap: 0.2em; font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.5rem, 5vw, 4rem); line-height: 1.2; letter-spacing: 0.04em; text-align: center; transform: scale(0.8); opacity: 0; }
+        .blackout-rainbow {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: blackout-rainbow 2s linear infinite; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); font-weight: 900;
+        }
+        @keyframes blackout-rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        .blackout-overlay.is-active .blackout-message { animation: blackout-message 4.8s ease-in-out forwards; }
+        @keyframes blackout-screen { 0% { opacity: 0; } 10%, 88% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        @keyframes blackout-message { 0%, 15% { opacity: 0; transform: scale(1.35); } 25%, 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.96); } }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+
+    <!-- 🌟 ブラックアウト演出用 HTML 🌟 -->
+    <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div class="blackout-rainbow" style="font-size: 0.6em;">ハハハハ！</div>
+            <div class="blackout-rainbow" style="font-size: 0.8em;">素敵よその表情！</div>
+            <div class="blackout-rainbow" style="font-size: 0.7em;">喰種チャージ昇格で<br>RUSH突入！</div>
+        </div>
+    </div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P 東京喰種 399ver</span></h1>
 
@@ -269,6 +293,47 @@
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rushMedia = document.getElementById("rush-media");
+        function playBlackout演出() {
+            // 🌟 播放東京喰種風格嘅「ドン！」重低音音效
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    const audioCtx = new AudioContextClass();
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+
+                    // 使用正弦波 (Sine wave) 營造極重嘅低音下潛感
+                    osc.type = 'sine';
+                    
+                    // 從 150Hz 瞬間急降到 35Hz (製造震撼嘅「ドン！」衝擊感)
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.3);
+
+                    // 音量控制：瞬間爆發，然後慢慢向後衰減
+                    gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.7, audioCtx.currentTime + 0.05); // 強烈起擊
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2); // 餘音
+
+                    osc.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 1.2);
+                }
+            } catch (e) {
+                console.log("Audio play blocked", e);
+            }
+
+            // 畫面黑幕與彩色字動畫
+            const overlay = document.getElementById("blackout-overlay");
+            if (!overlay) return sleep(4800);
+            overlay.classList.remove("is-active");
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+            return sleep(4800).then(() => {
+                overlay.classList.remove("is-active");
+            });
+        }
         let audioUnlocked = false;
 
         // RUSH中獎時彈出影片
@@ -342,42 +407,43 @@
                 // 🎯 路線 1: 図柄揃い (1/399.9)
                 if (roll < (1 / 399.9)) {
                     addLog(`\n[${this.session_spins} 回轉] 🩸 図柄揃い大当り！`, "color-hit");
-                    await this.normal_result();
+                    await this.normal_result(true); // 傳入 true 代表係図柄揃い
                     return true;
                 }
                 // ⚡ 路線 2: 喰種チャージ (另外一個 1/399.9，機率疊加上去變成 2/399.9)
                 else if (roll < (2 / 399.9)) {
                     addLog(`\n[${this.session_spins} 回轉] 喰種チャージ當選！`, "color-charge");
-                    this.session_payout += 300;
-                    addLog(`💥 2R 300玉獲得 (通常終了)`);
-                    updateUI();
-                    this.record_history();
+                    await this.normal_result(false); // 傳入 false 代表係チャージ
                     return true;
                 }
 
                 return false;
             }
 
-            async normal_result() {
+            async normal_result(isZuegara) {
                 let r = Math.random();
                 let enterRush = false;
 
-                if (r < 0.50) {
+                if (isZuegara) {
+                    // 🩸 路線 1 (図柄揃い): 50% 突入 1500玉 / 50% 通常 1500玉
                     this.session_payout += 1500;
-                    enterRush = true;
-                    addLog("🌈 10R 1500玉獲得！ RUSH突入！", "color-ultimate");
-                } else if (r < 0.51) {
-                    this.session_payout += 300;
-                    enterRush = true;
-                    addLog("🎯 2R 300玉獲得！ 喰種ジャージでRUSH突入！", "color-rush");
-                    // 🌟 新增：喰種チャージ入RUSH播專屬片 🌟
-                    rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
-                    rushMedia.load(); // 👈 🌟 修正：ここにも強制読み込みを追加
-                    addLog(`🎵 播放專屬動畫 (Charge入RUSH) 中... 請稍候`, "color-music");
-                    await playVideoPopupAndWait(rushMedia);
+                    if (r < 0.50) {
+                        enterRush = true;
+                        addLog("🌈 10R 1500玉獲得！ RUSH突入！", "color-ultimate");
+                    } else {
+                        addLog("😭 10R 1500玉獲得 (通常終了)", "color-normal");
+                    }
                 } else {
-                    this.session_payout += 1500;
-                    addLog("😭 10R 1500玉獲得 (通常終了)", "color-normal");
+                    // ⚡ 路線 2 (喰種チャージ): 1% 昇格 300玉 / 99% 通常 300玉
+                    this.session_payout += 300;
+                    if (r < 0.01) {
+                        enterRush = true;
+                        addLog(`ドン！！！`, "color-normal"); // 👈 加入 log
+                        await playBlackout演出(); // 👈 觸發黑畫面
+                        addLog("🎯 ハハハハ！！！素敵よその表情！ 喰種チャージ昇格でRUSH突入！", "color-rush");
+                    } else {
+                        addLog("💥 2R 300玉獲得 (通常終了)", "color-normal");
+                    }
                 }
 
                 addLog(`💰 累積出玉: ${this.session_payout} 玉`);
