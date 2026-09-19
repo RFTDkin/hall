@@ -217,20 +217,62 @@
             color: #444 !important;
         }
 
-        /* 🌟 ブラックアウト演出 (喰種チャージ昇格用) 🌟 */
+        /* 🌟 ブラックアウト演出 (喰種チャージ昇格用 - 究極進化版) 🌟 */
         .blackout-overlay {
-            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none; background: #000; opacity: 0; visibility: hidden;
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none; 
+            background: #000; /* 底色純黑 */
+            opacity: 0; visibility: hidden;
         }
-        .blackout-overlay.is-active { visibility: visible; animation: blackout-screen 4.8s ease-in-out forwards; }
+        
+        /* 🌟 開頭嘅白底 + 藍金十字撕裂光 🌟 */
+        .blackout-overlay::before {
+            content: ''; position: absolute; inset: 0; z-index: -1;
+            /* 利用多重 radial-gradient 疊加出十字撕裂形狀 */
+            background: 
+                /* 橫向長條裂縫 (左右極長，上下極幼) */
+                radial-gradient(ellipse 150% 6% at center, #000000 5%, #0011ff 12%, #ffd700 22%, #00aaff 40%, transparent 60%),
+                /* 縱向短條裂縫 (上下稍長，左右極幼) */
+                radial-gradient(ellipse 8% 55% at center, #000000 5%, #0011ff 15%, #ffd700 25%, #00aaff 45%, transparent 65%),
+                /* 底色純白閃光 */
+                #ffffff;
+            opacity: 0;
+            /* 加強對比度，令邊緣顏色變得銳利，產生「撕裂」嘅錯覺 */
+            filter: contrast(1.5);
+        }
+
+        .blackout-overlay.is-active { visibility: visible; animation: blackout-bg 6s forwards; }
+        .blackout-overlay.is-active::before { animation: blackout-flash 6s forwards; }
+        .blackout-overlay.is-active .blackout-message { animation: blackout-text 6s forwards; }
+
         .blackout-message { display: flex; flex-direction: column; align-items: center; gap: 0.2em; font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.5rem, 5vw, 4rem); line-height: 1.2; letter-spacing: 0.04em; text-align: center; transform: scale(0.8); opacity: 0; }
         .blackout-rainbow {
             background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
             background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: blackout-rainbow 2s linear infinite; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); font-weight: 900;
         }
+
         @keyframes blackout-rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-        .blackout-overlay.is-active .blackout-message { animation: blackout-message 4.8s ease-in-out forwards; }
-        @keyframes blackout-screen { 0% { opacity: 0; } 10%, 88% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
-        @keyframes blackout-message { 0%, 15% { opacity: 0; transform: scale(1.35); } 25%, 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.96); } }
+        
+        /* 整體黑幕維持時間 (總長 6秒) */
+        @keyframes blackout-bg { 
+            0% { opacity: 0; } 
+            2%, 85% { opacity: 1; } 
+            100% { opacity: 0; visibility: hidden; } 
+        }
+        
+        /* 白藍閃光動畫 (瞬間爆發然後 0.6秒內消失變黑) */
+        @keyframes blackout-flash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(2); }
+            2% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(2); }
+            10% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+            100% { opacity: 0; }
+        }
+
+        /* 延遲彩色文字 (頭 2秒完全隱藏，製造死寂黑幕) */
+        @keyframes blackout-text { 
+            0%, 33% { opacity: 0; transform: scale(1.35); } /* 33% 大約係 2秒 */
+            40%, 80% { opacity: 1; transform: scale(1); } 
+            100% { opacity: 0; transform: scale(0.96); } 
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
@@ -294,31 +336,49 @@
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rushMedia = document.getElementById("rush-media");
         function playBlackout演出() {
-            // 🌟 播放東京喰種風格嘅「ドン！」重低音音效
+            // 🌟 播放增強版「ドン！」重低音音效
             try {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) {
-                    const audioCtx = new AudioContextClass();
-                    const osc = audioCtx.createOscillator();
-                    const gainNode = audioCtx.createGain();
+                if (window.audioCtx) {
+                    // 確保被休眠嘅音頻系統被喚醒
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
 
-                    // 使用正弦波 (Sine wave) 營造極重嘅低音下潛感
-                    osc.type = 'sine';
-                    
-                    // 從 150Hz 瞬間急降到 35Hz (製造震撼嘅「ドン！」衝擊感)
-                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.3);
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator(); // 負責極低頻下潛
+                    const osc2 = ctx.createOscillator(); // 負責「敲擊」嘅顆粒感
+                    const filter = ctx.createBiquadFilter();
+                    const gainNode = ctx.createGain();
 
-                    // 音量控制：瞬間爆發，然後慢慢向後衰減
-                    gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0.7, audioCtx.currentTime + 0.05); // 強烈起擊
-                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2); // 餘音
+                    // 第一層：深沉嘅 Sub-bass
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
 
-                    osc.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
+                    // 第二層：帶有機械感嘅打擊聲
+                    osc2.type = 'square';
+                    osc2.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
 
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 1.2);
+                    // 低通濾波器：令方波唔會太刺耳，只保留悶響
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(800, ctx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+
+                    // 音量爆發與衰減
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+
+                    // 連接線路
+                    osc1.connect(gainNode);
+                    osc2.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+
+                    // 同步發聲
+                    osc1.start(ctx.currentTime);
+                    osc2.start(ctx.currentTime);
+                    osc1.stop(ctx.currentTime + 1.2);
+                    osc2.stop(ctx.currentTime + 1.2);
                 }
             } catch (e) {
                 console.log("Audio play blocked", e);
@@ -326,11 +386,11 @@
 
             // 畫面黑幕與彩色字動畫
             const overlay = document.getElementById("blackout-overlay");
-            if (!overlay) return sleep(4800);
+            if (!overlay) return sleep(6000);
             overlay.classList.remove("is-active");
             void overlay.offsetWidth;
             overlay.classList.add("is-active");
-            return sleep(4800).then(() => {
+            return sleep(6000).then(() => {
                 overlay.classList.remove("is-active");
             });
         }
@@ -583,11 +643,21 @@
             btnPlay.disabled = true;
             if(btnReset) btnReset.disabled = true;
 
+            // 👇 替換呢段 audioUnlocked 嘅邏輯 👇
             if (!audioUnlocked) {
-                // 預先載入預設影片解鎖音訊權限
                 rushMedia.load();
+                
+                // 🌟 玩家撳掣嗰一刻，即刻解鎖 AudioContext
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    window.audioCtx = new AudioContextClass();
+                    if (window.audioCtx.state === 'suspended') {
+                        window.audioCtx.resume();
+                    }
+                }
                 audioUnlocked = true;
             }
+            // 👆 替換完畢 👆
 
             addLog("\n=== ゲーム開始 ===", "color-hit");
 

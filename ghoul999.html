@@ -217,27 +217,56 @@
             color: #444 !important;
         }
 
-        /* 🌟 ブラックアウト演出 (喰種チャージ昇格用) 🌟 */
+        /* 🌟 ブラックアウト演出 (究極進化版) 🌟 */
         .blackout-overlay {
-            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none; background: #000; opacity: 0; visibility: hidden;
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none; 
+            background: #000;
+            opacity: 0; visibility: hidden;
         }
-        .blackout-overlay.is-active { visibility: visible; animation: blackout-screen 4.8s ease-in-out forwards; }
+        
+        .blackout-overlay::before {
+            content: ''; position: absolute; inset: 0; z-index: -1;
+            background: 
+                radial-gradient(ellipse 150% 6% at center, #000000 5%, #0011ff 12%, #ffd700 22%, #00aaff 40%, transparent 60%),
+                radial-gradient(ellipse 8% 55% at center, #000000 5%, #0011ff 15%, #ffd700 25%, #00aaff 45%, transparent 65%),
+                #ffffff;
+            opacity: 0;
+            filter: contrast(1.5);
+        }
+
+        .blackout-overlay.is-active { visibility: visible; animation: blackout-bg 6s forwards; }
+        .blackout-overlay.is-active::before { animation: blackout-flash 6s forwards; }
+        .blackout-overlay.is-active .blackout-message { animation: blackout-text 6s forwards; }
+
         .blackout-message { display: flex; flex-direction: column; align-items: center; gap: 0.2em; font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.5rem, 5vw, 4rem); line-height: 1.2; letter-spacing: 0.04em; text-align: center; transform: scale(0.8); opacity: 0; }
+        
         .blackout-rainbow {
             background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
             background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: blackout-rainbow 2s linear infinite; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); font-weight: 900;
         }
+
         @keyframes blackout-rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-        .blackout-overlay.is-active .blackout-message { animation: blackout-message 4.8s ease-in-out forwards; }
-        @keyframes blackout-screen { 0% { opacity: 0; } 10%, 88% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
-        @keyframes blackout-message { 0%, 15% { opacity: 0; transform: scale(1.35); } 25%, 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.96); } }
+        
+        @keyframes blackout-bg { 0% { opacity: 0; } 2%, 85% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        
+        @keyframes blackout-flash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(2); }
+            2% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(2); }
+            10% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+            100% { opacity: 0; }
+        }
+
+        @keyframes blackout-text { 
+            0%, 33% { opacity: 0; transform: scale(1.35); } 
+            40%, 80% { opacity: 1; transform: scale(1); } 
+            100% { opacity: 0; transform: scale(0.96); } 
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
-    <!-- 🌟 ブラックアウト演出用 HTML 🌟 -->
     <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
         <div class="blackout-message">
             <div class="blackout-rainbow" style="font-size: 0.6em;">ハハハハ！</div>
@@ -292,17 +321,55 @@
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rushMedia = document.getElementById("rush-media");
-        function playBlackout演出() {
+        let audioUnlocked = false;
+
+        function playBlackout演出(hitNumber = 1) {
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gainNode = ctx.createGain();
+
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+
+                    osc2.type = 'square';
+                    osc2.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(800, ctx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+
+                    osc1.connect(gainNode);
+                    osc2.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+
+                    osc1.start(ctx.currentTime);
+                    osc2.start(ctx.currentTime);
+                    osc1.stop(ctx.currentTime + 1.2);
+                    osc2.stop(ctx.currentTime + 1.2);
+                }
+            } catch (e) { console.log(e); }
+
             const overlay = document.getElementById("blackout-overlay");
-            if (!overlay) return sleep(4800);
+            if (!overlay) return sleep(6000);
             overlay.classList.remove("is-active");
             void overlay.offsetWidth;
             overlay.classList.add("is-active");
-            return sleep(4800).then(() => {
+            return sleep(6000).then(() => {
                 overlay.classList.remove("is-active");
             });
         }
-        let audioUnlocked = false;
 
         // RUSH中獎時彈出 Rize 影片
         function playVideoPopupAndWait(mediaElement) {
@@ -402,21 +469,23 @@
                 // ⚡ 路線 2: 喰種チャージ (1/538.8) - 疊加機率
                 else if (roll < (1 / 999) + (1 / 538.8)) {
                     addLog(`\n[${this.session_spins} 回轉] ⚡ 喰種CHARGE 發生！`, "color-charge");
-                    
-                    // 🌟 修正：Charge 內部 0.5% 極低機率突入 RUSH 🌟
                     if (Math.random() < 0.005) {
                         this.session_payout += 7500;
-                        
-                        addLog(`ドン！！！`, "color-normal"); // 👈 加入 log
-                        await playBlackout演出(); // 👈 觸發黑畫面
-                        
+                        addLog(`ドン！！！`, "color-normal");
+                        await playBlackout演出();
                         addLog(`🌈 昇格発生！奇跡の 0.5%！ 7500玉獲得 ＋ HYPER喰種RUSH突入！`, "color-ultimate");
-
+                        
+                        rushMedia.src = "https://files.catbox.moe/5q4j7h.mp4";
+                        rushMedia.load();
+                        addLog(`🎵 播放專屬動畫 中... 請稍候`, "color-music");
+                        await playVideoPopupAndWait(rushMedia);
+                        
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         updateUI();
                         await sleep(1000);
                         await this.play_rush();
                     } else {
+                        // ... (照舊) ...
                         // 昇格なし (300個) - 99.5% 機率
                         this.session_payout += 300;
                         addLog(`💥 昇格なし... 2R 300玉獲得 (通常終了)`, "color-fall");
@@ -590,7 +659,12 @@
             if(btnReset) btnReset.disabled = true;
 
             if (!audioUnlocked) {
-                rushMedia.load();
+                if (rushMedia) rushMedia.load();
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    window.audioCtx = new AudioContextClass();
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                }
                 audioUnlocked = true;
             }
 
