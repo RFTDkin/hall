@@ -28,7 +28,7 @@ pluginModalStyle.innerHTML = `
         #plugin-ui-container > div { width: 90% !important; max-width: none !important; }
     }
     .profile-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; animation: fadeIn 0.2s; }
-    .profile-card { background: #111; border: 2px solid #444; border-radius: 12px; padding: 25px; width: 90%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.8); border-top: 5px solid #ff1744; }
+    .profile-card { background: #111; border: 2px solid #444; border-radius: 12px; padding: 25px; width: 90%; max-width: 400px; text-align: center; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.8); border-top: 5px solid #ff1744; max-height: 85vh; overflow-y: auto; margin: auto; }
     .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; color: #888; background: none; border: none; font-size: 1.2em; font-weight: bold; }
     .prog-container { margin-top: 15px; text-align: left; }
     .prog-label { font-size: 0.85em; color: #aaa; display: flex; justify-content: space-between; margin-bottom: 5px; }
@@ -397,6 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     is_vip: currentUserObj.is_vip,
                     title_bl_legend: currentUserObj.title_bl_legend || false,
                     title_ghoul_legend: currentUserObj.title_ghoul_legend || false,
+                    title_ghoul_charge: currentUserObj.title_ghoul_charge || false,
                     title_lycoris_legend: currentUserObj.title_lycoris_legend || false,
                     title_mushoku_legend: currentUserObj.title_mushoku_legend || false
                 };
@@ -437,7 +438,14 @@ document.addEventListener("DOMContentLoaded", () => {
                             uid: u, name: data.username, balance: data.balance || 0,
                             has_completed: data.has_completed || false, title_hell: data.title_hell || false,
                             title_godpull: data.title_godpull || false, title_runthrough: data.title_runthrough || false,
-                            is_vip: data.is_vip || false, isSelf: (auth.currentUser && auth.currentUser.uid === u)
+                            is_vip: data.is_vip || false, isSelf: (auth.currentUser && auth.currentUser.uid === u),
+                            // 👇 一次過補齊 5 個機種特效
+                            title_bl_legend: data.title_bl_legend || false,
+                            title_ghoul_legend: data.title_ghoul_legend || false,
+                            title_ghoul_charge: data.title_ghoul_charge || false,
+                            title_lycoris_legend: data.title_lycoris_legend || false,
+                            title_mushoku_legend: data.title_mushoku_legend || false,
+                            isSelf: (auth.currentUser && auth.currentUser.uid === u)
                         };
                         break;
                     }
@@ -1158,7 +1166,7 @@ setTimeout(() => {
                     }
                     if (earnedBalls === 6000) {
                         window._mushoku_6000_count = (window._mushoku_6000_count || 0) + 1;
-                        if (window._mushoku_6000_count >= 5) {
+                        if (window._mushoku_6000_count >= 7) {
                             titleDb.ref('users/' + uid).update({ title_mushoku_legend: true });
                             window.alert("🎉 伝説の称号【ロキシーのパンツ御神体】を獲得しました！\nプロフィールから装備できます！");
                         }
