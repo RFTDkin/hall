@@ -216,12 +216,135 @@
         .empty-row {
             color: #444 !important;
         }
+
+        /* 🌟 Blue Lock RUSH 專屬演出 CSS 🌟 */
+        #bl-anim-overlay {
+            position: fixed; inset: 0; z-index: 15000; display: none; 
+            align-items: center; justify-content: center; background: rgba(0,0,0,0.85); overflow: hidden;
+        }
+        /* 藍色十字光 */
+        #bl-anim-cross {
+            position: absolute; background: radial-gradient(ellipse at center, #ffffff 0%, #00e5ff 40%, transparent 80%);
+            opacity: 0; box-shadow: 0 0 50px #00e5ff; width: 0; height: 0;
+        }
+        @keyframes blCrossAnim {
+            0% { width: 600px; height: 600px; border-radius: 50%; opacity: 0; transform: scale(1.5); }
+            30% { width: 250px; height: 250px; border-radius: 50%; opacity: 1; transform: scale(0.5); }
+            50% { width: 150vw; height: 40px; border-radius: 50%; opacity: 1; transform: scale(1); filter: brightness(2); }
+            100% { width: 150vw; height: 10px; border-radius: 50%; opacity: 0; transform: scale(1.2); }
+        }
+        /* 飛埋嚟嘅足球 */
+        /* ⚽ 飛埋嚟嘅足球 (右上角拋物線飛入) */
+        #bl-anim-ball {
+            position: absolute; font-size: 60px; opacity: 0; filter: drop-shadow(0 0 20px #00e5ff);
+        }
+        @keyframes blBallAnim {
+            0% { transform: translate(45vw, -40vh) scale(0.1) rotate(0deg); opacity: 0; }
+            5% { opacity: 1; }
+            /* 製造弧度：X軸同Y軸用唔同速度推進 */
+            30% { transform: translate(40vw, -20vh) scale(2) rotate(180deg); }
+            60% { transform: translate(20vw, -5vh) scale(8) rotate(540deg); opacity: 1; }
+            100% { transform: translate(0vw, 0vh) scale(55) rotate(1080deg); opacity: 0; }
+        }
+
+        /* 💥 逼真爆裂紋理 (不對稱玻璃碎片 + 強烈反光) */
+        #bl-anim-shatter { 
+            position: absolute; inset: 0; 
+            background-image: 
+                radial-gradient(circle at 40% 40%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 5%, transparent 35%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath stroke='%23ffffff' stroke-width='0.4' fill='none' d='M40 40 L-10 -10 M40 40 L20 -20 M40 40 L60 -10 M40 40 L110 10 M40 40 L120 40 M40 40 L100 80 M40 40 L50 120 M40 40 L10 110 M40 40 L-20 70 M40 40 L-20 30'/%3E%3Cpath stroke='%23ffffff' stroke-width='0.8' fill='none' d='M40 40 L15 10 M40 40 L45 5 M40 40 L80 30 M40 40 L65 75 M40 40 L20 80 M40 40 L5 50'/%3E%3Cpath stroke='%23ffffff' stroke-width='1.5' fill='none' d='M40 40 L25 20 L45 25 L50 45 L30 50 Z M45 25 L65 20 M50 45 L70 60 M30 50 L15 70 M25 20 L5 25'/%3E%3Cpolygon fill='%23ffffff' opacity='0.9' points='40,40 25,20 45,25'/%3E%3Cpolygon fill='%23ffffff' opacity='0.6' points='40,40 30,50 50,45'/%3E%3C/svg%3E");
+            background-size: cover; background-position: center;
+            opacity: 0; pointer-events: none; z-index: 1; 
+        }
+        @keyframes blShatterAnim { 
+            0% { opacity: 1; transform: scale(1.1); filter: brightness(5); } 
+            5% { transform: scale(1) translate(20px, -20px); filter: brightness(4) invert(1); }
+            10% { transform: scale(1) translate(-20px, 20px); filter: brightness(2) invert(0); }
+            20% { opacity: 1; filter: brightness(1); }
+            100% { opacity: 0; filter: brightness(1); transform: scale(1.05); } 
+        }
+
+        /* ⏳ 終極懸念數字 (由一團模糊光球慢慢聚焦成形) */
+        @keyframes blTextAnim {
+            0% { transform: scale(0); opacity: 0; filter: blur(30px); }
+            30% { transform: scale(0.3); opacity: 0.6; filter: blur(25px); }
+            65% { transform: scale(0.6); opacity: 0.9; filter: blur(12px) drop-shadow(0 0 10px rgba(255,255,255,0.8)); }
+            85% { transform: scale(1.1); opacity: 1; filter: blur(3px) drop-shadow(0 0 20px rgba(255,255,255,1)); }
+            100% { transform: scale(1.3); opacity: 1; filter: blur(0px) drop-shadow(0 0 30px rgba(255,255,255,1)); }
+        }
+
+        /* 確保彩色數字會喺爆 Mon 裂痕之上顯示 */
+        #bl-anim-text {
+            position: absolute; font-size: 15vw; font-weight: 900; font-family: "Arial Black", Impact, sans-serif;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text;
+            -webkit-text-stroke: 3px #ffffff; filter: drop-shadow(0 0 20px rgba(255,255,255,0.8));
+            animation: blRainbowText 2s linear infinite; opacity: 0;
+            z-index: 2; /* 👈 加呢行確保數字最前 */
+        }
+        @keyframes blTextAnim {
+            0% { transform: scale(0.1); opacity: 0; }
+            20% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes blRainbowText { to { background-position: 200% center; } }
+
+        /* 🌟 EGOIST Blackout 🌟 */
+        .bl-blackout-overlay {
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none; 
+            background: #000; opacity: 0; visibility: hidden;
+        }
+        .bl-blackout-overlay::before {
+            content: ''; position: absolute; inset: 0; z-index: -1;
+            background: radial-gradient(ellipse 150% 6% at center, #000000 5%, #0011ff 12%, #ffd700 22%, #00aaff 40%, transparent 60%),
+                        radial-gradient(ellipse 8% 55% at center, #000000 5%, #0011ff 15%, #ffd700 25%, #00aaff 45%, transparent 65%), #ffffff;
+            opacity: 0; filter: contrast(1.5);
+        }
+        .bl-blackout-overlay.is-active { visibility: visible; animation: blackout-bg 6s forwards; }
+        .bl-blackout-overlay.is-active::before { animation: blackout-flash 6s forwards; }
+        .bl-blackout-overlay.is-active .blackout-message { animation: blackout-text 6s forwards; }
+        /* 👇 補回缺失嘅 Blackout 動畫同文字特效 👇 */
+        .blackout-message { display: flex; flex-direction: column; align-items: center; gap: 0.2em; font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.5rem, 5vw, 4rem); line-height: 1.2; letter-spacing: 0.04em; text-align: center; transform: scale(0.8); opacity: 0; }
+        
+        .blackout-rainbow {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: blackout-rainbow 2s linear infinite; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); font-weight: 900;
+        }
+        @keyframes blackout-rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes blackout-bg { 0% { opacity: 0; } 2%, 85% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        @keyframes blackout-flash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(2); }
+            2% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(2); }
+            10% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+            100% { opacity: 0; }
+        }
+        @keyframes blackout-text { 
+            0%, 33% { opacity: 0; transform: scale(1.35); } 
+            40%, 80% { opacity: 1; transform: scale(1); } 
+            100% { opacity: 0; transform: scale(0.96); } 
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+
+    <!-- RUSH 專屬演出圖層 -->
+    <div id="bl-anim-overlay">
+        <div id="bl-anim-cross"></div>
+        <div id="bl-anim-ball">⚽</div>
+        <div id="bl-anim-shatter"></div>
+        <div id="bl-anim-text"></div>
+    </div>
+
+    <!-- EGOIST Blackout 圖層 -->
+    <div id="bl-blackout-overlay" class="bl-blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div class="blackout-rainbow" style="font-size: 1.2em;">You are</div>
+            <div class="blackout-rainbow" style="font-size: 1.5em;">EGOIST!!!</div>
+        </div>
+    </div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P ブルーロック (Blue Lock) 399ver</span></h1>
 
@@ -278,6 +401,122 @@
         const video7500 = document.getElementById("video-7500");
         const videoBL1500LT = document.getElementById("video-bl1500lt");
         let audioUnlocked = false;
+
+        // 🌟 處理 Blue Lock 動畫邏輯
+        async function playBLRushAnim(payout) {
+            if (payout < 3000) return; // 1500 冇動畫
+
+            const overlay = document.getElementById('bl-anim-overlay');
+            const cross = document.getElementById('bl-anim-cross');
+            const ball = document.getElementById('bl-anim-ball');
+            const shatter = document.getElementById('bl-anim-shatter');
+            const text = document.getElementById('bl-anim-text');
+
+            // 重置狀態
+            overlay.style.display = 'flex';
+            cross.style.animation = 'none'; ball.style.animation = 'none';
+            shatter.style.animation = 'none'; text.style.animation = 'none';
+            text.innerText = ''; text.style.display = 'none';
+
+            // 1. 藍色十字光
+            void cross.offsetWidth; 
+            cross.style.animation = 'blCrossAnim 1.2s ease-out forwards';
+            await sleep(800); // 等十字光展開
+
+            // 2. 足球飛出嚟
+            void ball.offsetWidth;
+            ball.style.animation = 'blBallAnim 0.9s ease-in forwards';
+            await sleep(850); // 足球擊中屏幕前一刻
+
+            // 如果只係 3000，唔會爆 Mon，完結動畫
+            if (payout === 3000) {
+                overlay.style.display = 'none';
+                return;
+            }
+
+            // 3. 4500 以上：爆 Mon ＋ 觸發碎裂音效！
+            void shatter.offsetWidth;
+            shatter.style.animation = 'blShatterAnim 1.5s ease-out forwards';
+            playShatterSound(); // 👈 播放爆Mon碎玻璃音效！
+
+            // 4. 彩色數字慢慢變大 (極致懸念感：加長至 5 秒聚焦！)
+            text.innerText = payout;
+            text.style.display = 'block';
+            void text.offsetWidth;
+            text.style.animation = 'blTextAnim 15s ease-in-out forwards'; // 👈 延長到 5 秒
+
+            // 等待 5 秒懸念時間
+            await sleep(4000); // 👈 配合動畫延長
+            overlay.style.display = 'none';
+
+            // 5. 如果係 7500，觸發 Blackout 彩蛋
+            if (payout === 7500) {
+                await playEgoistBlackout();
+            }
+        }
+
+        // 🌟 處理 EGOIST Blackout
+        function playEgoistBlackout() {
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator(); const osc2 = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter(); const gainNode = ctx.createGain();
+                    osc1.type = 'sine'; osc1.frequency.setValueAtTime(200, ctx.currentTime); osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+                    osc2.type = 'square'; osc2.frequency.setValueAtTime(150, ctx.currentTime); osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+                    filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, ctx.currentTime); filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime); gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05); gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+                    osc1.connect(gainNode); osc2.connect(filter); filter.connect(gainNode); gainNode.connect(ctx.destination);
+                    osc1.start(ctx.currentTime); osc2.start(ctx.currentTime); osc1.stop(ctx.currentTime + 1.2); osc2.stop(ctx.currentTime + 1.2);
+                }
+            } catch (e) {}
+
+            const b_overlay = document.getElementById("bl-blackout-overlay");
+            if (!b_overlay) return sleep(6000);
+            b_overlay.classList.remove("is-active");
+            void b_overlay.offsetWidth;
+            b_overlay.classList.add("is-active");
+            return sleep(6000).then(() => { b_overlay.classList.remove("is-active"); });
+        }
+
+        // 🌟 處理爆 Mon 玻璃碎裂音效
+        function playShatterSound() {
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    
+                    // 1. 低頻重擊聲 (Impact)
+                    const osc = ctx.createOscillator();
+                    const gainOsc = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    gainOsc.gain.setValueAtTime(1, ctx.currentTime);
+                    gainOsc.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    osc.connect(gainOsc); gainOsc.connect(ctx.destination);
+                    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
+
+                    // 2. 玻璃碎裂雜音 (高頻 White Noise)
+                    const bufferSize = ctx.sampleRate * 1; 
+                    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const noiseFilter = ctx.createBiquadFilter();
+                    noiseFilter.type = 'highpass';
+                    noiseFilter.frequency.value = 2500; // 過濾低頻，保留清脆碎裂聲
+                    const gainNoise = ctx.createGain();
+                    gainNoise.gain.setValueAtTime(1, ctx.currentTime);
+                    gainNoise.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                    
+                    noise.connect(noiseFilter); noiseFilter.connect(gainNoise); gainNoise.connect(ctx.destination);
+                    noise.start(ctx.currentTime);
+                }
+            } catch (e) {}
+        }
 
 // 🌟 升級版：處理「播完先繼續」的 Promise 函數 (只播聲)
         function playMediaAndWait(mediaElement) {
@@ -473,8 +712,18 @@
                             let payout_roll = Math.random();
                             let payout = 0;
 
-                            // 7500個＋エゴストラタイム (0.5%)
-                            if (payout_roll < 0.005) {
+                            // 先決定初次獎項
+                            if (payout_roll < 0.005) payout = 7500;
+                            else if (payout_roll < 0.005 + 0.052) payout = 6000;
+                            else if (payout_roll < 0.057 + 0.198) payout = 4500;
+                            else if (payout_roll < 0.255 + 0.380) payout = 3000;
+                            else payout = 1500;
+
+                            // 🌟 播放專屬動畫 (1500無反應, 3000飛波, 4500/6000爆Mon, 7500黑屏)
+                            await playBLRushAnim(payout);
+
+                            // 處理 7500 及其 1G 連 Loop
+                            if (payout === 7500) {
                                 addLog(`7500だけじゃ、終われない！！！！！！！！`, "color-ultimate");
                                 addLog(`🎵 播放專屬動畫 (7500.mp4) 中... 請稍候`, "color-music");
                                 await playVideoPopupAndWait(video7500);
@@ -485,19 +734,29 @@
                                 while (loop_active) {
                                     await sleep(600);
                                     let extra_roll = Math.random();
+                                    let loop_payout = 0;
 
-                                    if (extra_roll < 0.005) {
+                                    if (extra_roll < 0.005) loop_payout = 7500;
+                                    else if (extra_roll < 0.005 + 0.052) loop_payout = 6000;
+                                    else if (extra_roll < 0.057 + 0.198) loop_payout = 4500;
+                                    else if (extra_roll < 0.255 + 0.380) loop_payout = 3000;
+                                    else loop_payout = 1500;
+
+                                    // 🌟 1G 連如果係 3000 以上，再播一次相應動畫！
+                                    await playBLRushAnim(loop_payout);
+
+                                    if (loop_payout === 7500) {
                                         extra_payout += 7500;
                                         addLog(`🔥 エゴストラタイム継続！ ＋7500玉 (計 ${extra_payout}玉)`, "color-ultimate");
-                                    } else if (extra_roll < 0.005 + 0.052) {
+                                    } else if (loop_payout === 6000) {
                                         extra_payout += 6000;
                                         addLog(`💥 エゴストラタイム終了！ ＋6000玉 (計 ${extra_payout}玉)`, "color-ultimate");
                                         loop_active = false;
-                                    } else if (extra_roll < 0.057 + 0.198) {
+                                    } else if (loop_payout === 4500) {
                                         extra_payout += 4500;
                                         addLog(`💥 エゴストラタイム終了！ ＋4500玉 (計 ${extra_payout}玉)`, "color-rush");
                                         loop_active = false;
-                                    } else if (extra_roll < 0.255 + 0.380) {
+                                    } else if (loop_payout === 3000) {
                                         extra_payout += 3000;
                                         addLog(`⚡ エゴストラタイム終了！ ＋3000玉 (計 ${extra_payout}玉)`, "color-rush");
                                         loop_active = false;
@@ -507,34 +766,21 @@
                                         loop_active = false;
                                     }
                                 }
-                                payout = extra_payout;
-                            }
-                            // 6000個 (5.2%)
-                            else if (payout_roll < 0.005 + 0.052) {
-                                payout = 6000;
-                                addLog(`🔥 嫌だ！俺は俺のゴールで！勝ちたい！ 6000玉獲得 !!`, "color-ultimate");
-                            }
-                            // 4500個 (19.8%)
-                            else if (payout_roll < 0.057 + 0.198) {
-                                payout = 4500;
-                                addLog(`💥 嫌だ！俺は俺のゴールで！勝ちたい！ 4500玉獲得 !`, "color-rush");
-                            }
-                            // 3000個 (38.0%)
-                            else if (payout_roll < 0.255 + 0.380) {
-                                payout = 3000;
-                                addLog(`⚡ 俺はストライカーだ！ 3000玉獲得`, "color-rush");
-                            }
-                            // 1500個 (36.5%)
+                                this.session_payout += extra_payout;
+                                addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                            } 
+                            // 處理 6000, 4500, 3000, 1500
                             else {
-                                payout = 1500;
-                                addLog(`⚽ ゴールゴルゴルゴル！ 1500玉獲得`, "color-hit");
-                            }
+                                if (payout === 6000) addLog(`🔥 嫌だ！俺は俺のゴールで！勝ちたい！ 6000玉獲得 !!`, "color-ultimate");
+                                else if (payout === 4500) addLog(`💥 嫌だ！俺は俺のゴールで！勝ちたい！ 4500玉獲得 !`, "color-rush");
+                                else if (payout === 3000) addLog(`⚡ 俺はストライカーだ！ 3000玉獲得`, "color-rush");
+                                else addLog(`⚽ ゴールゴルゴルゴル！ 1500玉獲得`, "color-hit");
 
-                            this.session_payout += payout;
-                            addLog(`💰 累積出玉: ${this.session_payout} 玉`);
-
-                            if (payout !== 7500) {
-                                this.check_and_play_media(payout);
+                                this.session_payout += payout;
+                                addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                                if (payout !== 7500) {
+                                    this.check_and_play_media(payout);
+                                }
                             }
                         }
 
@@ -633,12 +879,20 @@
             if(btnReset) btnReset.disabled = true;
 
             if (!audioUnlocked) {
-                jackpotMedia.load();
-                egoistMedia.load();
-                video7500.load();
-                videoBL1500LT.load();
-                audioUnlocked = true;
+            jackpotMedia.load();
+            egoistMedia.load();
+            video7500.load();
+            videoBL1500LT.load();
+            
+            // 👇 補回解鎖 Blackout 系統音效 👇
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                window.audioCtx = new AudioContextClass();
+                if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
             }
+            
+            audioUnlocked = true;
+        }
 
             addLog("\n=== キックオフ ===", "color-hit");
 
