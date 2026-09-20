@@ -55,8 +55,13 @@
                 if (selectedTitles.includes("ichigeki") && isIchigeki) html = `<span class="effect-ichigeki" style="display: inline-block; position: relative;">${html}</span>`;
                 if (selectedTitles.includes("hell") && isHell) html = `<span class="effect-hell" data-text="${display}" style="display: inline-block; position: relative;">${html}</span>`;
                 
+                
                 // 🌟 自訂裝備判斷
                 if (selectedTitles.includes("bl_legend") && isBl) html = `<span class="effect-bl-legend" style="display: inline-block; position: relative;">${html}</span>`;
+                // 喺自訂稱號 (selectedTitles.includes) 嘅邏輯入面加入：
+                if (selectedTitles.includes("egoist") && userObj.title_egoist) {
+                    html = `<span class="effect-egoist">${html}</span>`;
+                }
                 if (selectedTitles.includes("ghoul_legend") && isGhoul) html = `<span class="effect-ghoul-legend" style="display: inline-block; position: relative;">${html}</span>`;
                 if (selectedTitles.includes("ghoul_charge") && isGhoulCharge) html = `<span class="effect-ghoul-flower" style="display: inline-block; position: relative;">${html}</span>`; // 👈 これを追加
                 if (selectedTitles.includes("lycoris_legend") && isLycoris) html = `<span class="effect-lycoris-legend" style="display: inline-block; position: relative;">${html}</span>`;
@@ -79,6 +84,8 @@
             
             // 🌟 自動疊加判斷
             if (isBl) html = `<span class="effect-bl-legend" style="display: inline-block; position: relative;">${html}</span>`;
+            // 👇 加上呢行！直接用 userObj.title_egoist 判斷，並跟足你原本嘅 style 格式
+            if (userObj.title_egoist) html = `<span class="effect-egoist" style="display: inline-block; position: relative;">${html}</span>`;
             if (isGhoul) html = `<span class="effect-ghoul-legend" style="display: inline-block; position: relative;">${html}</span>`;
             if (isGhoulCharge) html = `<span class="effect-ghoul-flower" style="display: inline-block; position: relative;">${html}</span>`; // 👈 これを追加
             if (isLycoris) html = `<span class="effect-lycoris-legend" style="display: inline-block; position: relative;">${html}</span>`;

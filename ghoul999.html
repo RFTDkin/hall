@@ -472,6 +472,7 @@
                     if (Math.random() < 0.005) {
                         this.session_payout += 7500;
                         addLog(`ドン！！！`, "color-normal");
+                        await sleep(2000);
                         await playBlackout演出();
                         addLog(`🌈 昇格発生！奇跡の 0.5%！ 7500玉獲得 ＋ HYPER喰種RUSH突入！`, "color-ultimate");
                         

@@ -77,7 +77,7 @@ window.showPluginProfile = function (uid) {
         title_runthrough: u.title_runthrough, is_vip: u.is_vip,
         // 🌟 新增資料對接
         title_bl_legend: u.title_bl_legend, title_ghoul_legend: u.title_ghoul_legend,title_ghoul_charge: u.title_ghoul_charge,
-        title_lycoris_legend: u.title_lycoris_legend, title_mushoku_legend: u.title_mushoku_legend,
+        title_lycoris_legend: u.title_lycoris_legend, title_mushoku_legend: u.title_mushoku_legend, title_egoist: u.title_egoist,
         equipped_title: u.equipped_title,
         isSelf: firebase.auth().currentUser && firebase.auth().currentUser.uid === uid
     };
@@ -111,6 +111,7 @@ window.showPluginProfile = function (uid) {
     
     // 🌟 新增機種傳說徽章
     if (u.title_bl_legend) bHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff;">⚽ 俺、はストライカーだ！</div>`;
+    if (u.title_egoist) bHtml += `<div class="badge active" style="border-color: #4B8BF5; color: #4B8BF5;">🧩 エゴイスト</div>`;
     if (u.title_ghoul_legend) bHtml += `<div class="badge active" style="border-color: #ff1744; color: #ff1744;">🩸 僕、は喰種だ</div>`;
     if (u.title_ghoul_charge) bHtml += `<div class="badge active" style="border-color: #fff; color: #ff1744; text-shadow: 0 0 5px rgba(255,0,0,0.5);">🥀 何もできないのは…</div>`;
     if (u.title_lycoris_legend) bHtml += `<div class="badge active" style="border-color: #ff5252; color: #ff5252;">💩 ホットでプレミアムうんこ</div>`;
@@ -123,7 +124,7 @@ window.showPluginProfile = function (uid) {
     let selectorEl = document.getElementById('p-modal-title-selector');
     if (firebase.auth().currentUser && firebase.auth().currentUser.uid === uid) {
         let eq = u.equipped_title || "auto";
-        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.is_vip}-${u.title_bl_legend}-${u.title_ghoul_legend}-${u.title_lycoris_legend}-${u.title_mushoku_legend}`;
+        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.is_vip}-${u.title_bl_legend}-${u.title_egoist}-${u.title_ghoul_legend}-${u.title_lycoris_legend}-${u.title_mushoku_legend}`;
 
         if (selectorEl.getAttribute('data-render-key') !== renderKey) {
             let isAuto = eq === "auto"; let isNone = eq === "none"; let isCustom = !isAuto && !isNone;
@@ -146,6 +147,7 @@ window.showPluginProfile = function (uid) {
                             ${u.is_vip ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 💎 VIP 特権 (紫電)</label><br>` : ''}
                             <!-- 🌟 新增機種稱號裝備選項 -->
                             ${u.title_bl_legend ? `<label><input type="checkbox" class="t-check" value="bl_legend" ${eq.includes('bl_legend') ? 'checked' : ''}> ⚽ 俺、はストライカーだ！</label><br>` : ''}
+                            ${u.title_egoist ? `<label><input type="checkbox" class="t-check" value="egoist" ${eq.includes('egoist') ? 'checked' : ''}> 🧩 エゴイスト</label><br>` : ''}
                             ${u.title_ghoul_legend ? `<label><input type="checkbox" class="t-check" value="ghoul_legend" ${eq.includes('ghoul_legend') ? 'checked' : ''}> 🩸 僕、は喰種だ</label><br>` : ''}
                             ${u.title_ghoul_charge ? `<label><input type="checkbox" class="t-check" value="ghoul_charge" ${eq.includes('ghoul_charge') ? 'checked' : ''}> 🥀 何もできないのは、もう嫌なんだ</label><br>` : ''}
                             ${u.title_lycoris_legend ? `<label><input type="checkbox" class="t-check" value="lycoris_legend" ${eq.includes('lycoris_legend') ? 'checked' : ''}> 💩 プレミアムうんこ</label><br>` : ''}
@@ -396,6 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     title_godpull: currentUserObj.title_godpull, title_runthrough: currentUserObj.title_runthrough,
                     is_vip: currentUserObj.is_vip,
                     title_bl_legend: currentUserObj.title_bl_legend || false,
+                    title_egoist: currentUserObj.title_egoist || false,
                     title_ghoul_legend: currentUserObj.title_ghoul_legend || false,
                     title_ghoul_charge: currentUserObj.title_ghoul_charge || false,
                     title_lycoris_legend: currentUserObj.title_lycoris_legend || false,
@@ -441,6 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             is_vip: data.is_vip || false, isSelf: (auth.currentUser && auth.currentUser.uid === u),
                             // 👇 一次過補齊 5 個機種特效
                             title_bl_legend: data.title_bl_legend || false,
+                            title_egoist: data.title_egoist || false,
                             title_ghoul_legend: data.title_ghoul_legend || false,
                             title_ghoul_charge: data.title_ghoul_charge || false,
                             title_lycoris_legend: data.title_lycoris_legend || false,
@@ -1113,9 +1117,15 @@ setTimeout(() => {
 
                 // 1. ⚽ Blue Lock
                 if (isBlueLock) {
-                    if (translatedText.includes("全回転") || translatedText.includes("7500だけじゃ、終われない")) {
+                    // 原本嘅稱號 (全回転 0.1%)
+                    if (translatedText.includes("全回転")) {
                         titleDb.ref('users/' + uid).update({ title_bl_legend: true });
                         window.alert("🎉 伝説の称号【俺、はストライカーだ！】を獲得しました！\nプロフィールから装備できます！");
+                    }
+                    // 👇 全新エゴイスト稱號 (7500だけじゃ 0.5%)
+                    if (translatedText.includes("7500だけじゃ、終われない")) {
+                        titleDb.ref('users/' + uid).update({ title_egoist: true });
+                        window.alert("🎉 伝説の称号【エゴイスト】を獲得しました！\nプロフィールから装備できます！");
                     }
                 }
                 

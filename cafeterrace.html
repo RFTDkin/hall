@@ -35,12 +35,59 @@
         table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
         table.data-lamp td.hit-payout { color: #ff6090; font-weight: bold; }
         .empty-row { color: #444 !important; }
+
+        /* 🌟 ブラックアウト演出 (女神彩蛋版) 🌟 */
+        .blackout-overlay {
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none; 
+            background: #000;
+            opacity: 0; visibility: hidden;
+        }
+        .blackout-overlay::before {
+            content: ''; position: absolute; inset: 0; z-index: -1;
+            background: 
+                radial-gradient(ellipse 150% 6% at center, #000000 5%, #ff007f 12%, #ffd700 22%, #ff6090 40%, transparent 60%),
+                radial-gradient(ellipse 8% 55% at center, #000000 5%, #ff007f 15%, #ffd700 25%, #ff6090 45%, transparent 65%),
+                #ffffff;
+            opacity: 0;
+            filter: contrast(1.5);
+        }
+        .blackout-overlay.is-active { visibility: visible; animation: blackout-bg 8s forwards; }
+        .blackout-overlay.is-active::before { animation: blackout-flash 8s forwards; }
+        .blackout-overlay.is-active .blackout-message { animation: blackout-text 8s forwards; }
+
+        .blackout-message { display: flex; flex-direction: column; align-items: center; gap: 0.2em; font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.5rem, 5vw, 4rem); line-height: 1.2; letter-spacing: 0.04em; text-align: center; transform: scale(0.8); opacity: 0; }
+        
+        .blackout-rainbow {
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: blackout-rainbow 2s linear infinite; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); font-weight: 900;
+        }
+        @keyframes blackout-rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes blackout-bg { 0% { opacity: 0; } 2%, 85% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        @keyframes blackout-flash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(2); }
+            2% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(2); }
+            10% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+            100% { opacity: 0; }
+        }
+        @keyframes blackout-text { 
+            0%, 33% { opacity: 0; transform: scale(1.35); } 
+            40%, 80% { opacity: 1; transform: scale(1); } 
+            100% { opacity: 0; transform: scale(0.96); } 
+        }
     </style>
     <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+    <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div class="blackout-rainbow" style="font-size: 0.8em;">にゃんにゃんにゃんにゃん</div>
+            <div class="blackout-rainbow" style="font-size: 0.5em;">約1/907000テラスチャージ昇格</div>
+            <div class="blackout-rainbow" style="font-size: 0.9em;">なんでこんなに運がいいの！？おめでとう！！！</div>
+        </div>
+    </div>
+
     <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">e女神のカフェテラス</span></h1>
     <div class="main-container">
         <div class="left-panel">
@@ -67,6 +114,35 @@
 
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
+        let audioUnlocked = false;
+
+        function playBlackout演出() {
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gainNode = ctx.createGain();
+
+                    osc1.type = 'sine'; osc1.frequency.setValueAtTime(200, ctx.currentTime); osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+                    osc2.type = 'square'; osc2.frequency.setValueAtTime(150, ctx.currentTime); osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+                    filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, ctx.currentTime); filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime); gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05); gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+
+                    osc1.connect(gainNode); osc2.connect(filter); filter.connect(gainNode); gainNode.connect(ctx.destination);
+                    osc1.start(ctx.currentTime); osc2.start(ctx.currentTime); osc1.stop(ctx.currentTime + 1.2); osc2.stop(ctx.currentTime + 1.2);
+                }
+            } catch (e) { console.log(e); }
+
+            const overlay = document.getElementById("blackout-overlay");
+            if (!overlay) return sleep(8000);
+            overlay.classList.remove("is-active");
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+            return sleep(8000).then(() => { overlay.classList.remove("is-active"); });
+        }
         class CafeTerrace {
             constructor() { this.state = "NORMAL"; this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0; this.history = []; this.rush_spins = 0; }
 
@@ -74,25 +150,49 @@
                 this.session_spins += 1;
                 if (this.session_spins % 100 === 0) addLog(`現在回轉数: ${this.session_spins}`, "color-normal");
 
-                // 通常時大当り確率 1/399
-                if (Math.random() < 1 / 399.0) {
+                let roll = Math.random();
+
+                // 🎯 路線 1: 通常時大当り確率 (1/399)
+                if (roll < 1 / 399.0) {
                     addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い當選！`, "color-hit");
                     let r = Math.random();
-
                     this.session_payout += 300;
 
-                    // 40%: 300玉 + 女神の交響曲TIME (LT)
                     if (r < 0.40) {
                         addLog("🎀 女神のカフェテラス BONUS 成功！ (300玉)", "color-ultimate");
                         addLog("🌈 女神の交響曲TIME (ST100回) 突入！！", "color-lt");
                         this.session_rush_count = 1;
                         updateUI(); await sleep(2000);
                         await this.play_rush();
-                    } 
-                    // 60%: 300玉 + 通常
-                    else {
+                    } else {
                         addLog("💦 女神のカフェテラス BONUS 失敗... (300玉)", "color-normal");
                         addLog("💀 通常へ戻る", "color-normal");
+                        updateUI(); this.record_history();
+                    }
+                    return true;
+                } 
+                // ⚡ 路線 2: テラスチャージ (1/2721)
+                else if (roll < (1 / 399.0) + (1 / 2721.0)) {
+                    addLog(`\n[${this.session_spins} 回轉] ⚡ テラスチャージ 發生！`, "color-normal");
+                    
+                    // 0.3% 奇蹟昇格判定
+                    if (Math.random() < 0.003) {
+                        this.session_payout += 300;
+                        addLog(`んんんんんんん？？？`, "color-normal");
+                        await sleep(2000);
+                        // 播放神級彩蛋 Blackout
+                        await playBlackout演出();
+                        
+                        addLog(`🌈 約1/907000の奇跡！テラスチャージ昇格発生！`, "color-ultimate");
+                        addLog("🌈 女神の交響曲TIME (ST100回) 突入！！", "color-lt");
+                        
+                        this.session_rush_count = 1;
+                        updateUI(); 
+                        await sleep(1500);
+                        await this.play_rush();
+                    } else {
+                        this.session_payout += 300;
+                        addLog("💦 昇格なし... 300玉獲得 (通常終了)", "color-fall");
                         updateUI(); this.record_history();
                     }
                     return true;
@@ -248,6 +348,18 @@
         async function startPlay() {
             if (isPlaying) return;
             isPlaying = true; btnPlay.disabled = true;
+            
+            // 👇 加入解鎖音效代碼 👇
+            if (!audioUnlocked) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    window.audioCtx = new AudioContextClass();
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                }
+                audioUnlocked = true;
+            }
+            // 👆 加入完畢 👆
+
             addLog("\n=== 女神のカフェテラス 開店！ ===", "color-hit");
             while (isPlaying) {
                 let ended = await game.play_normal(); updateUI();

@@ -1378,6 +1378,7 @@
                     title_runthrough: cu.title_runthrough,
                     is_vip: cu.is_vip,
                     title_bl_legend: cu.title_bl_legend || false,
+                    title_egoist: cu.title_egoist || false,
                     title_ghoul_legend: cu.title_ghoul_legend || false,
                     title_ghoul_charge: cu.title_ghoul_charge || false,
                     title_lycoris_legend: cu.title_lycoris_legend || false,
@@ -1408,6 +1409,7 @@
                     title_runthrough: u.title_runthrough || false,
                     is_vip: u.is_vip || false, 
                     title_bl_legend: u.title_bl_legend || false,
+                    title_egoist: u.title_egoist || false,
                     title_ghoul_legend: u.title_ghoul_legend || false,
                     title_ghoul_charge: u.title_ghoul_charge || false,
                     title_lycoris_legend: u.title_lycoris_legend || false,
@@ -1503,6 +1505,7 @@
                             title_runthrough: usersData[uid].title_runthrough || false,
                             is_vip: usersData[uid].is_vip || false,
                             title_bl_legend: usersData[uid].title_bl_legend || false,
+                            title_egoist: usersData[uid].title_egoist || false,
                             title_ghoul_legend: usersData[uid].title_ghoul_legend || false,
                             title_ghoul_charge: usersData[uid].title_ghoul_charge || false,
                             title_lycoris_legend: usersData[uid].title_lycoris_legend || false,
@@ -1580,6 +1583,7 @@
                             title_runthrough: usersData[uid].title_runthrough || false,
                             is_vip: usersData[uid].is_vip || false,
                             title_bl_legend: usersData[uid].title_bl_legend || false,
+                            title_egoist: usersData[uid].title_egoist || false,
                             title_ghoul_legend: usersData[uid].title_ghoul_legend || false,
                             title_ghoul_charge: usersData[uid].title_ghoul_charge || false,
                             title_lycoris_legend: usersData[uid].title_lycoris_legend || false,
@@ -1624,6 +1628,7 @@
                     title_runthrough: u.title_runthrough || false,
                     is_vip: u.is_vip || false,
                     title_bl_legend: u.title_bl_legend || false,
+                    title_egoist: u.title_egoist || false,
                     title_ghoul_legend: u.title_ghoul_legend || false,
                     title_ghoul_charge: u.title_ghoul_charge || false,
                     title_lycoris_legend: u.title_lycoris_legend || false,
@@ -1703,6 +1708,7 @@
                 title_runthrough: u.title_runthrough,
                 is_vip: u.is_vip, 
                 title_bl_legend: u.title_bl_legend,
+                title_egoist: u.title_egoist,
                 title_ghoul_legend: u.title_ghoul_legend,
                 title_ghoul_charge: u.title_ghoul_charge,
                 title_lycoris_legend: u.title_lycoris_legend,
@@ -1751,6 +1757,7 @@
             if (u.is_vip) badgesHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 8px #00e5ff;">💎 VIP スポンサー</div>`;
             
             if (u.title_bl_legend) badgesHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff;">⚽ 俺、はストライカーだ！</div>`;
+            if (u.title_egoist) badgesHtml += `<div class="badge active" style="border-color: #4B8BF5; color: #4B8BF5;">🧩 エゴイスト</div>`;
             if (u.title_ghoul_legend) badgesHtml += `<div class="badge active" style="border-color: #ff1744; color: #ff1744;">🩸 僕、は喰種だ</div>`;
             if (u.title_ghoul_charge) badgesHtml += `<div class="badge active" style="border-color: #ff1744; color: #ff1744;">🥀 何もできないのは、もう嫌なんだ</div>`;
             if (u.title_lycoris_legend) badgesHtml += `<div class="badge active" style="border-color: #ff5252; color: #ff5252;">💩 ホットでプレミアムうんこ</div>`;
@@ -1762,7 +1769,7 @@
             let selectorEl = document.getElementById('modal-title-selector');
             if (auth.currentUser && auth.currentUser.uid === currentOpenProfileUid) {
                 let eq = u.equipped_title || "auto";
-                let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.is_vip}-${u.title_bl_legend}-${u.title_ghoul_legend}-${u.title_ghoul_charge}-${u.title_lycoris_legend}-${u.title_mushoku_legend}`;
+                let renderKey = `${eq}-${u.has_completed}-...-${u.title_lycoris_legend}-${u.title_mushoku_legend}-${u.title_egoist}`;
                 
                 if (selectorEl.getAttribute('data-render-key') !== renderKey) {
                     let isAuto = eq === "auto";
@@ -1785,6 +1792,7 @@
                                     ${u.title_hell ? `<label><input type="checkbox" class="t-check" value="hell" ${eq.includes('hell') ? 'checked' : ''}> 単発地獄</label><br>` : ''}
                                     ${u.is_vip ? `<label><input type="checkbox" class="t-check" value="ichigeki" ${eq.includes('ichigeki') ? 'checked' : ''}> 💎 VIP 特権 (紫電)</label><br>` : ''}
                                     ${u.title_bl_legend ? `<label><input type="checkbox" class="t-check" value="bl_legend" ${eq.includes('bl_legend') ? 'checked' : ''}> ⚽ 俺、はストライカーだ！</label><br>` : ''}
+                                    ${u.title_egoist ? `<label><input type="checkbox" class="t-check" value="egoist" ${eq.includes('egoist') ? 'checked' : ''}> 🧩 エゴイスト</label><br>` : ''}
                                     ${u.title_ghoul_legend ? `<label><input type="checkbox" class="t-check" value="ghoul_legend" ${eq.includes('ghoul_legend') ? 'checked' : ''}> 🩸 僕、は喰種だ</label><br>` : ''}
                                     ${u.title_ghoul_charge ? `<label><input type="checkbox" class="t-check" value="ghoul_charge" ${eq.includes('ghoul_charge') ? 'checked' : ''}> 🥀 何もできないのは、もう嫌なんだ</label><br>` : ''}
                                     ${u.title_lycoris_legend ? `<label><input type="checkbox" class="t-check" value="lycoris_legend" ${eq.includes('lycoris_legend') ? 'checked' : ''}> 💩 プレミアムうんこ</label><br>` : ''}
@@ -1824,6 +1832,7 @@
                     is_vip: u.is_vip || false,
                     // 👇 補回缺失嘅 4 大傳說稱號，令特效及搜尋功能正常運作 👇
                     title_bl_legend: u.title_bl_legend || false,
+                    title_egoist: u.title_egoist || false, // 👈 補返呢行落去！
                     title_ghoul_legend: u.title_ghoul_legend || false,
                     title_ghoul_charge: u.title_ghoul_charge || false,
                     title_lycoris_legend: u.title_lycoris_legend || false,
@@ -1917,6 +1926,7 @@
                 else if (titleFilter === "vip") matchTitle = u.is_vip === true;
                 // 🌟 加入 4 大傳說過濾邏輯
                 else if (titleFilter === "bl") matchTitle = u.title_bl_legend === true;
+                else if (titleFilter === "egoist") matchTitle = u.title_egoist === true;
                 else if (titleFilter === "ghoul") matchTitle = u.title_ghoul_legend === true;
                 else if (titleFilter === "ghoul_charge") matchTitle = u.title_ghoul_charge === true;
                 else if (titleFilter === "lycoris") matchTitle = u.title_lycoris_legend === true;
@@ -2105,6 +2115,7 @@
                         <option value="vip">💎 VIP スポンサー</option>
                         <!-- 🌟 新增 4 大傳說選項 -->
                         <option value="bl">⚽ 俺、はストライカーだ！</option>
+                        <option value="egoist">🧩 エゴイスト</option>
                         <option value="ghoul">🩸 僕、は喰種だ</option>
                         <option value="ghoul_charge">🥀 何もできないのは、もう嫌なんだ</option>
                         <option value="lycoris">💩 プレミアムうんこ</option>

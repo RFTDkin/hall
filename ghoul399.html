@@ -499,6 +499,7 @@
                     if (r < 0.01) {
                         enterRush = true;
                         addLog(`ドン！！！`, "color-normal"); // 👈 加入 log
+                        await sleep(2000); // 👈 等 2 秒先播黑畫面
                         await playBlackout演出(); // 👈 觸發黑畫面
                         addLog("🎯 ハハハハ！！！素敵よその表情！ 喰種チャージ昇格でRUSH突入！", "color-rush");
                     } else {
