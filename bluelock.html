@@ -323,12 +323,56 @@
             40%, 80% { opacity: 1; transform: scale(1); } 
             100% { opacity: 0; transform: scale(0.96); } 
         }
+
+        /* 🌈 全回轉 (ZenKaiten) 專屬演出 🌈 */
+        #zenkaiten-overlay {
+            position: fixed; inset: 0; background: #ffffff; z-index: 25000;
+            display: none; opacity: 0; transition: opacity 3s ease-in; /* 3秒慢白 Fade out */
+            align-items: center; justify-content: center; flex-direction: column;
+        }
+        /* 唱K歌詞 */
+        #zen-lyrics {
+            font-size: 5vw; color: #00509e; font-weight: 900;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 30px rgba(0, 229, 255, 0.5);
+            opacity: 0; transition: opacity 1s ease-in-out;
+            text-align: center; letter-spacing: 2px;
+            font-family: 'Yu Mincho', "MS Mincho", serif; /* 用明朝體更有感動 feel */
+        }
+        /* 🌈 修復寬度不足導致數字跌落下一行嘅問題 🌈 */
+        #zen-numbers-container {
+            position: absolute; bottom: 30px; right: 30px;
+            width: 45vw; /* 👈 取消固定 250px，改用相對闊度確保夠位 */
+            max-width: 500px;
+            height: 15vw; min-height: 80px;
+            overflow: hidden; 
+            display: flex; justify-content: center; align-items: center;
+        }
+        .zen-num {
+            position: absolute; font-size: 8vw;
+            white-space: nowrap; /* 👈 關鍵！強制所有數字排喺同一行 */
+            color: #ff1744; text-shadow: 0 0 20px #ff1744, 0 0 40px #ff1744;
+            font-weight: 900; font-family: "Arial Black", Impact, sans-serif;
+            transition: transform 1.2s ease-in-out, opacity 1.2s ease-in-out;
+        }
+        /* 數字嘅 3 個位置狀態 */
+        .zen-pos-center { transform: translateY(0); opacity: 1; }
+        .zen-pos-bottom { transform: translateY(100%); opacity: 0; }
+        .zen-pos-top { transform: translateY(-100%); opacity: 0; }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+    <!-- 🎵 隱藏嘅 YouTube 播放器 (實體 iframe 預載，確保 Local Server 都行到) -->
+    <iframe id="yt-player" src="https://www.youtube.com/embed/K-XH333Tofo?enablejsapi=1&controls=0&autoplay=0" style="position:absolute; width:1px; height:1px; top:-9999px; left:-9999px;" frameborder="0" allow="autoplay"></iframe>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <!-- 🌈 全回轉圖層 -->
+    <div id="zenkaiten-overlay" aria-hidden="true">
+        <div id="zen-lyrics"></div>
+        <div id="zen-numbers-container"></div> <!-- 👈 改成 Container -->
+    </div>
 
     <!-- RUSH 專屬演出圖層 -->
     <div id="bl-anim-overlay">
@@ -395,7 +439,152 @@
     </div>
 
     <script>
+        // 🌟 處理 0.1% 究極全回轉演出
+        async function playZenkaiten() {
+            const overlay = document.getElementById('zenkaiten-overlay');
+            const lyricsDiv = document.getElementById('zen-lyrics');
+            const numbersContainer = document.getElementById('zen-numbers-container');
+
+            // 1. 白屏 Fade Out 啟動
+            overlay.style.display = 'flex';
+            void overlay.offsetWidth;
+            overlay.style.opacity = '1';
+
+            await sleep(3000); // 等待白屏完全覆蓋
+
+            // 2. 🎵 播放音樂 (呢段就係發聲嘅關鍵！)
+            if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                ytPlayer.unMute(); // 確保解除靜音
+                ytPlayer.seekTo(0);
+                ytPlayer.playVideo();
+            } else {
+                addLog("⚠️ YouTube 播放失敗，請檢查", "color-fall");
+            }
+
+            // 3. 數字無限 Loop (1 到 7 快速交替滑動)
+            numbersContainer.innerHTML = ''; 
+            let currentEl = document.createElement('div');
+            currentEl.className = 'zen-num zen-pos-center';
+            currentEl.innerText = "1 1 1";
+            numbersContainer.appendChild(currentEl);
+
+            let rolling = true;
+            let nextNum = 2;
+
+            // 用異步函數去行無限數字動畫
+            const rollPromise = (async () => {
+                while (rolling) {
+                    await sleep(1600); // 0.8秒跳一次
+                    if (!rolling) break; 
+                    
+                    let nextEl = document.createElement('div');
+                    nextEl.className = 'zen-num zen-pos-bottom'; 
+                    nextEl.innerText = `${nextNum} ${nextNum} ${nextNum}`;
+                    numbersContainer.appendChild(nextEl);
+
+                    void nextEl.offsetWidth; 
+
+                    let exitClass = (nextNum % 2 === 0) ? 'zen-pos-bottom' : 'zen-pos-top';
+                    currentEl.className = `zen-num ${exitClass}`;
+                    nextEl.className = 'zen-num zen-pos-center'; 
+
+                    setTimeout((el) => { if (el) el.remove(); }, 1200, currentEl);
+                    currentEl = nextEl;
+                    
+                    nextNum = nextNum >= 7 ? 1 : nextNum + 1;
+                }
+            })();
+
+            // 4. 正確歌詞時間軸
+            const lyricsData = [
+                { time: 5000, text: "熟れすぎた果実のように" },
+                { time: 9000, text: "潜りすぎた地下室のように" },
+                { time: 13000, text: "引き返せなくなったみたいだ" },
+                { time: 18000, text: "これはなんていう味？" },
+                { time: 22000, text: "いきさつが複雑すぎて" },
+                { time: 27000, text: "どこから話していいかわからない" },
+                { time: 32000, text: "僕のことをわかってほしいんだよ" },
+                { time: 37000, text: "これはなんていう味？" },
+                { time: 40500, text: "真っ暗闇はこわい" },
+                { time: 44000, text: "もう一歩も踏み出せないんだ" },
+                { time: 49000, text: "座りこんで地面についた手のひらはなん" },
+                { time: 55000, text: "だか冷たい" },
+                { time: 58000, text: "Numbness like a ginger" },
+                { time: 61000, text: "Numbness like a ginger" },
+                { time: 63000, text: "痛いの？違うよ" },
+                { time: 66000, text: "喉が渇いただけじゃないか" },
+                { time: 67500, text: "叶わない夢があっても" },
+                { time: 71000, text: "明けない夜があっても" },
+                { time: 73000, text: "いつかのどこかで答え合わせしようね" },
+                { time: 79000, text: "命はある" },
+                { time: 82000, text: "それっぽっちのことでもおみやげになるから" }
+            ];
+
+            let startTime = Date.now();
+            for (let i = 0; i < lyricsData.length; i++) {
+                let waitTime = lyricsData[i].time - (Date.now() - startTime);
+                if (waitTime > 0) await sleep(waitTime);
+                
+                lyricsDiv.style.opacity = '0';
+                await sleep(500); 
+                
+                lyricsDiv.innerText = lyricsData[i].text;
+                lyricsDiv.style.opacity = '1';
+            }
+
+            // 5. 臨完結前 5 秒 (約第 85 秒)，強制鎖定 777
+            let timeToStop = 85000 - (Date.now() - startTime);
+            if (timeToStop > 0) await sleep(timeToStop);
+
+            rolling = false; 
+            await sleep(800); 
+            
+            // 強制滑入 777
+            let finalEl = document.createElement('div');
+            finalEl.className = 'zen-num zen-pos-bottom'; 
+            finalEl.innerText = "7 7 7";
+            numbersContainer.appendChild(finalEl);
+            void finalEl.offsetWidth;
+            currentEl.className = 'zen-num zen-pos-top';
+            finalEl.className = 'zen-num zen-pos-center';
+            
+            setTimeout((el) => { if(el) el.remove(); }, 1200, currentEl);
+            currentEl = finalEl;
+            
+            await sleep(1000);
+            currentEl.style.transform = "scale(1.5)"; 
+
+            // 6. 完結 (約第 90 秒首歌播完)
+            let timeToEnd = 90000 - (Date.now() - startTime);
+            if (timeToEnd > 0) await sleep(timeToEnd);
+            
+            lyricsDiv.style.opacity = '0';
+            overlay.style.transition = "opacity 2s ease-out";
+            overlay.style.opacity = '0';
+            
+            if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+                ytPlayer.pauseVideo();
+            }
+            
+            await sleep(2000);
+            overlay.style.display = 'none';
+        }
+        
         const sleep = ms => new Promise(r => setTimeout(r, ms));
+        // 🌟 YouTube API 初始化 (保證加載寫法) 🌟
+        let ytPlayer;
+        let ytReady = false;
+
+        window.onYouTubeIframeAPIReady = function() {
+            ytPlayer = new YT.Player('yt-player', {
+                events: { 
+                    'onReady': () => { 
+                        ytReady = true; 
+                        console.log("YouTube 準備就緒！"); 
+                    } 
+                }
+            });
+        };
         const jackpotMedia = document.getElementById("jackpot-media");
         const egoistMedia = document.getElementById("egoist-media");
         const video7500 = document.getElementById("video-7500");
@@ -639,14 +828,14 @@
                 let roll = Math.random();
                 let enterRush = false;
 
-                // 🌈 1500個 + RUSH (0.1%)
+                // 🌈 1500個 + RUSH (0.1%) - 究極全回轉！
                 if (roll < 0.001) {
                     this.session_payout += 1500;
                     enterRush = true;
                     addLog(`\n[${this.session_spins} 回轉] 🎯 図柄揃い當選！！！`, "color-hit");
+                    await playZenkaiten(); // 👈 觸發白屏、音樂、歌詞同 777！
                     addLog("🌈 奇跡の覚醒！全回転 10R (1500玉) 獲得！", "color-ultimate");
-                    addLog(`🎵 播放專屬動畫 (BL1500LT.mp4) 中... 請稍候`, "color-music");
-                    await playVideoPopupAndWait(videoBL1500LT);
+
                 }
                 // ⚽ 1050個-A + RUSH (50%)
                 else if (roll < 0.001 + 0.500) {
@@ -879,20 +1068,22 @@
             if(btnReset) btnReset.disabled = true;
 
             if (!audioUnlocked) {
-            jackpotMedia.load();
-            egoistMedia.load();
-            video7500.load();
-            videoBL1500LT.load();
-            
-            // 👇 補回解鎖 Blackout 系統音效 👇
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (AudioContextClass) {
-                window.audioCtx = new AudioContextClass();
-                if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                jackpotMedia.load();
+                egoistMedia.load();
+                video7500.load();
+                videoBL1500LT.load();
+                
+                // 👇 借玩家撳掣呢一下，瞬間 Play 再 Pause 嚟解鎖 YouTube 權限 👇
+                if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                    try {
+                        ytPlayer.unMute();
+                        ytPlayer.playVideo();
+                        setTimeout(() => { ytPlayer.pauseVideo(); }, 150); // 播 0.15 秒即刻停
+                    } catch(e) {}
+                }
+                
+                audioUnlocked = true;
             }
-            
-            audioUnlocked = true;
-        }
 
             addLog("\n=== キックオフ ===", "color-hit");
 
