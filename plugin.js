@@ -773,6 +773,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     } else {
                         window.alert("🎉【コンプリート機能 発動】🎉\n95,000発到達！\n\n※コンプリート機能により、現在のRUSHは強制終了となります。");
                     }
+                    
+                    // 👇 🌟 加入呢段：真正強制結束所有機台嘅 RUSH 🌟 👇
+                    if (window.game) {
+                        window.game.state = "NORMAL"; // 強制將狀態改為 NORMAL，打破所有機嘅 RUSH while 迴圈
+                        if (typeof window.game.record_history === 'function') {
+                            window.game.record_history(); // 強制寫入最終出玉同連莊履歷
+                        }
+                    }
+                    window.isPlaying = false; // 停止外層 startPlay 迴圈
+                    // 👆 🌟 加入完畢 🌟 👆
+
                     setTimeout(() => {
                         let playBtn = document.getElementById("btn-play");
                         if (playBtn) playBtn.disabled = false;
@@ -1157,15 +1168,9 @@ setTimeout(() => {
                 // 3. 💩 Lycoris Recoil
                 if (isLycoris) {
                     if (earnedBalls >= 30000) {
+                        // 只負責喺 Firebase 幫玩家解鎖稱號
                         titleDb.ref('users/' + uid).update({ title_lycoris_legend: true });
-                        
-                        // 👇 新增防重複鎖 + 延遲彈出
-                        if (!window._lycoris_awarded) {
-                            window._lycoris_awarded = true; // 鎖定，防止同一局彈兩次
-                            setTimeout(() => {
-                                window.alert("🎉 伝説の称号【ホットでプレミアムうんこ】を獲得しました！\nプロフィールから装備できます！");
-                            }, 1500); // 延遲 1.5 秒，等畫面印完晒所有上乗せ先彈
-                        }
+                        // ❌ 刪除咗呢度嘅 setTimeout 同 window.alert，交畀 HTML 嗰邊處理
                     }
                 }
 

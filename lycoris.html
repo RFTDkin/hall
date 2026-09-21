@@ -211,12 +211,71 @@
         .empty-row {
             color: #444 !important;
         }
+
+        /* 💩 3萬發 プレミアムうんこ 專屬演出 💩 */
+        #unko-overlay {
+            position: fixed; inset: 0; z-index: 20000; display: none; 
+            align-items: center; justify-content: center; background: rgba(255,255,255,0);
+            transition: background 2s ease-in; /* 慢白 Fade out */
+            overflow: hidden;
+        }
+        
+        /* 逐句彈出嘅對白 */
+        #unko-text {
+            font-size: 6vw; font-weight: 900; text-align: center;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text;
+            -webkit-text-stroke: 2px #ffffff; filter: drop-shadow(0 0 15px rgba(255,255,255,0.8));
+            opacity: 0; transform: scale(0.8); transition: opacity 0.5s, transform 0.5s;
+            font-family: "Arial Black", Impact, sans-serif;
+            animation: unkoRainbow 2s linear infinite;
+        }
+        @keyframes unkoRainbow { to { background-position: 200% center; } }
+        
+        /* 顯示對白嘅 Active Class */
+        .unko-text-show { opacity: 1 !important; transform: scale(1) !important; }
+
+        /* 🌟 Blackout 演出 🌟 */
+        #unko-overlay.is-blackout { background: #000 !important; transition: none; }
+        #unko-overlay.is-blackout::before {
+            content: ''; position: absolute; inset: 0; z-index: -1;
+            background: radial-gradient(ellipse 150% 6% at center, #000000 5%, #ff00ff 12%, #ffd700 22%, #00ffff 40%, transparent 60%);
+            animation: unkoFlash 6s forwards; filter: contrast(1.5);
+        }
+        /* 🌟 Blackout 閃光 (改慢閃爍時間，更具爆發力) 🌟 */
+        @keyframes unkoFlash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(3); }
+            5% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(3); }
+            20% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+            100% { opacity: 0; }
+        }
+
+        /* 💩 滿天飛屎動畫 (加入 hue-rotate 變成幻彩色屎) */
+        .flying-unko {
+            position: absolute; font-size: 40px; 
+            /* 配合 unkoRainbowColor 令 emoji 本身不斷變色 */
+            animation: unkoExplode ease-out forwards, unkoRainbowColor 1s linear infinite;
+        }
+        @keyframes unkoExplode {
+            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 1; }
+            70% { opacity: 1; } 
+            100% { transform: translate(var(--tx), var(--ty)) scale(var(--s)) rotate(var(--r)); opacity: 0; }
+        }
+        /* 🌈 幻彩濾鏡：令大便與陰影瘋狂變換七色彩虹 */
+        @keyframes unkoRainbowColor {
+            0% { filter: drop-shadow(0 0 15px rgba(255,0,0,0.8)) hue-rotate(0deg); }
+            100% { filter: drop-shadow(0 0 15px rgba(255,0,0,0.8)) hue-rotate(360deg); }
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+    <!-- 💩 プレミアムうんこ 演出圖層 -->
+    <div id="unko-overlay" aria-hidden="true">
+        <div id="unko-text"></div>
+    </div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P リコリス・リコイル (Lycoris Recoil)</span></h1>
 
@@ -265,6 +324,100 @@
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rushMedia = document.getElementById("rush-media");
         let audioUnlocked = false;
+        // 💩 處理 30000 發「プレミアムうんこ」動畫
+        async function playPremiumUnko() {
+            const overlay = document.getElementById('unko-overlay');
+            const textDiv = document.getElementById('unko-text');
+
+            // 1. 白屏 Fade Out
+            overlay.style.display = 'flex';
+            void overlay.offsetWidth;
+            overlay.style.background = 'rgba(255,255,255,1)';
+            await sleep(2000);
+
+            // 2. 逐句對白 (大幅延長時間，拉滿懸念)
+            const msgs = [
+                "やるね",
+                "何でこんなに運がいいの？",
+                "そんなあなたに 私が用意した",
+                "ホットでプレミアムなうんこ",
+                "受け取って"
+            ];
+
+            for (let i = 0; i < msgs.length; i++) {
+                textDiv.innerText = msgs[i];
+                textDiv.classList.add('unko-text-show');
+                await sleep(2800); // 👈 每句停留 2.8 秒，保證玩家慢慢睇清楚
+                textDiv.classList.remove('unko-text-show');
+                await sleep(600);  // 👈 句與句之間停頓 0.6 秒
+            }
+
+            // 3. Blackout 音效 (Ghoul Style)
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator(); const osc2 = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter(); const gainNode = ctx.createGain();
+                    osc1.type = 'sine'; osc1.frequency.setValueAtTime(200, ctx.currentTime); osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+                    osc2.type = 'square'; osc2.frequency.setValueAtTime(150, ctx.currentTime); osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+                    filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, ctx.currentTime); filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime); gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05); gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+                    osc1.connect(gainNode); osc2.connect(filter); filter.connect(gainNode); gainNode.connect(ctx.destination);
+                    osc1.start(ctx.currentTime); osc2.start(ctx.currentTime); osc1.stop(ctx.currentTime + 1.2); osc2.stop(ctx.currentTime + 1.2);
+                }
+            } catch (e) {}
+
+            // 4. Blackout 視覺 + 終極爆屎
+            overlay.classList.add('is-blackout');
+            textDiv.innerHTML = "やったぜ！<br>おめでとう";
+            textDiv.style.transform = "scale(1.5)";
+            textDiv.classList.add('unko-text-show');
+
+            // 💩 激增至 200 嚿屎！
+            for (let i = 0; i < 200; i++) {
+                let unko = document.createElement('div');
+                unko.className = 'flying-unko';
+                unko.innerText = "💩";
+                
+                // 飛得更遠、更大、更誇張
+                let angle = Math.random() * Math.PI * 2;
+                let distance = 500 + Math.random() * 1000; // 擴散距離加倍
+                let tx = Math.cos(angle) * distance;
+                let ty = Math.sin(angle) * distance;
+                let scale = 0.5 + Math.random() * 3.5; // 有啲極大嚿
+                let rot = (Math.random() - 0.5) * 1440; 
+                let dur = 3 + Math.random() * 5; // 動畫時間延長至 3 - 8 秒，慢慢飛
+
+                unko.style.setProperty('--tx', `${tx}px`);
+                unko.style.setProperty('--ty', `${ty}px`);
+                unko.style.setProperty('--s', scale);
+                unko.style.setProperty('--r', `${rot}deg`);
+                unko.style.animationDuration = `${dur}s`;
+
+                overlay.appendChild(unko);
+            }
+
+            // 👈 畀足 10 秒時間玩家欣賞滿天飛屎同截圖！
+            await sleep(10000); 
+
+            // 5. 完結清理
+            overlay.classList.remove('is-blackout');
+            textDiv.classList.remove('unko-text-show');
+            overlay.style.background = 'rgba(255,255,255,0)';
+            
+            // 剷走啲屎
+            document.querySelectorAll('.flying-unko').forEach(el => el.remove());
+
+            await sleep(1000);
+            overlay.style.display = 'none';
+
+            // 🌟 動畫徹底完結先彈 Alert
+            window.alert("🎉 伝説の称号【ホットでプレミアムうんこ】を獲得しました！\nプロフィールから装備できます！\n\n※コンプリート機能により、現在のRUSHは強制終了となります。");
+            
+            // 🌟 回傳 true 代表需要強制結束
+            return true; 
+        }
 
         // 播放影片並等待完結嘅 Function
         // 🌟 正名為 playVideoPopupAndWait，並加入 10 秒防卡死
@@ -420,13 +573,24 @@
                             // 處於上位 Mode B
                             if (Math.random() < 0.50) {
                                 payout = 6000;
+                                let total_loop_payout = 6000; // 用嚟計算今次 Loop 總數
                                 addLog(`🔥 神からのギフト！ 6000玉獲得！`, "color-ultimate");
 
                                 // 50% Loop 追加 3000玉
                                 while (Math.random() < 0.50) {
                                     await sleep(800);
                                     payout += 3000;
+                                    total_loop_payout += 3000;
                                     addLog(`🌈 さらに上乗せ！ +3000玉 (計 ${payout}玉)`, "color-ultimate");
+                                }
+
+                                // 🌟 Loop 完結後，檢查今次上乘せ係咪超過 30000 發
+                                if (total_loop_payout >= 30000) {
+                                    let forceEnd = await playPremiumUnko(); // 等待動畫完結同 Alert 彈出
+                                    if (forceEnd) {
+                                        current_st = 0; // 🌟 真正強制將 ST 歸零
+                                        break; // 🌟 立即跳出 while 迴圈，唔再抽獎
+                                    }
                                 }
                             } else {
                                 payout = 3000;
@@ -531,6 +695,14 @@
 
             if (!audioUnlocked) {
                 rushMedia.load();
+                
+                // 👇 加入音效解鎖 👇
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    window.audioCtx = new AudioContextClass();
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                }
+                
                 audioUnlocked = true;
             }
 
