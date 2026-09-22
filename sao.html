@@ -118,12 +118,90 @@
         table.data-lamp td.hit-rush { color: #ff5252; font-weight: bold; }
         table.data-lamp td.hit-payout { color: #4fc3f7; font-weight: bold; }
         .empty-row { color: #555 !important; }
+
+        .blackout-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            background: #000;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .blackout-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 150% 6% at center, #000 5%, #0011ff 12%, #ffd700 22%, #00aaff 40%, transparent 60%),
+                radial-gradient(ellipse 8% 55% at center, #000 5%, #0011ff 15%, #ffd700 25%, #00aaff 45%, transparent 65%),
+                #fff;
+            opacity: 0;
+            filter: contrast(1.5);
+        }
+
+        .blackout-overlay.is-active { opacity: 1; visibility: visible; }
+        .blackout-overlay.is-active::before { animation: blackout-flash 6s forwards; }
+        .blackout-message {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 1.3em;
+            font-family: "Arial Black", Impact, sans-serif;
+            font-size: clamp(1.8rem, 7vw, 5rem);
+            line-height: 1.2;
+            letter-spacing: 0.04em;
+            text-align: center;
+        }
+
+        .blackout-line {
+            display: none;
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75));
+            font-weight: 900;
+        }
+
+        .blackout-line.is-visible {
+            display: block;
+            animation: blackout-line-pop 0.7s ease-out, blackout-rainbow 2s linear infinite;
+        }
+
+        @keyframes blackout-rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        @keyframes blackout-flash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(2); }
+            2% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(2); }
+            10%, 100% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+        }
+
+        @keyframes blackout-line-pop {
+            0% { opacity: 0; transform: scale(0.65); }
+            100% { opacity: 1; transform: scale(1); }
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+
+    <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div id="blackout-line" class="blackout-line"></div>
+        </div>
+    </div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #4fc3f7;">P ソードアート・オンライン (SAO)</span></h1>
 
@@ -165,6 +243,7 @@
 
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
+        let audioUnlocked = false;
 
         class SaoMachine {
             constructor() {
@@ -193,13 +272,13 @@
                     let r = Math.random();
                     
                     // 1.5% 直行 War of Underworld
-                    if (r < 0.015) {
+                    if (r < 0.999) {
                         let bonus = this.getRandomHugeBonus();
-                        addLog(`\n[${this.session_spins} 回轉] 🌈 Epilogue BONUS (ぼくの英雄)！`, "color-wou");
+                        addLog(`\n[${this.session_spins} 回轉] 🌈 Epilogue BONUS (ぼくの英雄)！全回転！！`, "color-wou");
                         addLog(`✨ ${bonus}個 獲得！`, "color-hit");
                         this.session_payout += bonus;
                         updateUI();
-                        await sleep(1500);
+                        await playHeroBlackout演出();
                         addLog(`🔥 War of Underworld (上位ST) 直行！`, "color-wou");
                         this.state = "WOU";
                         await this.play_rush();
@@ -352,6 +431,59 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        async function playHeroBlackout演出() {
+            const overlay = document.getElementById("blackout-overlay");
+            const line = document.getElementById("blackout-line");
+            const phrases = ["キリト　君なら", "もう一度立てる", "何度だって", "立ち上がれる", "ぼくの英雄"];
+
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === "suspended") await window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gainNode = ctx.createGain();
+
+                    osc1.type = "sine";
+                    osc1.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+                    osc2.type = "square";
+                    osc2.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+                    filter.type = "lowpass";
+                    filter.frequency.setValueAtTime(800, ctx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+                    osc1.connect(gainNode);
+                    osc2.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    osc1.start(ctx.currentTime);
+                    osc2.start(ctx.currentTime);
+                    osc1.stop(ctx.currentTime + 1.2);
+                    osc2.stop(ctx.currentTime + 1.2);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+            if (!overlay || !line) return;
+            overlay.classList.add("is-active");
+            await sleep(3000);
+            for (const phrase of phrases) {
+                line.classList.remove("is-visible");
+                void line.offsetWidth;
+                line.innerText = phrase;
+                line.classList.add("is-visible");
+                await sleep(3000);
+            }
+            line.classList.remove("is-visible");
+            overlay.classList.remove("is-active");
+        }
+
         function updateUI() {
             if (game.state === "NORMAL") {
                 document.getElementById("ui-spins").innerText = game.session_spins;
@@ -385,6 +517,15 @@
             isPlaying = true;
             btnPlay.disabled = true;
             if(btnReset) btnReset.disabled = true;
+
+            if (!audioUnlocked) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    window.audioCtx = new AudioContextClass();
+                    if (window.audioCtx.state === "suspended") await window.audioCtx.resume();
+                }
+                audioUnlocked = true;
+            }
 
             addLog("\n=== LINK START ===", "color-hit");
 
