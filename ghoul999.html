@@ -261,6 +261,96 @@
             40%, 80% { opacity: 1; transform: scale(1); } 
             100% { opacity: 0; transform: scale(0.96); } 
         }
+
+        /* 🌟 彼岸花覺醒演出 CSS 🌟 */
+        .flower-overlay-container {
+            position: fixed; inset: 0; z-index: 25000; background: #050505;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; pointer-events: none;
+        }
+        .flower-overlay-container.is-active { animation: overlay-bg-anim 16s forwards; }
+        .flower-layer { position: absolute; inset: -50px; font-size: 45px; line-height: 1.1; word-break: break-all; overflow: hidden; text-align: center; }
+        .flower-white { color: #e0e0e0; text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff; opacity: 0; }
+        .flower-red { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 30px #cc0000; opacity: 0; }
+        .flower-overlay-container.is-active .flower-white { animation: flower-white-anim 16s forwards; }
+        .flower-overlay-container.is-active .flower-red { animation: flower-red-anim 16s forwards; }
+        
+        .blackout-curtain { position: absolute; inset: 0; background: #000; opacity: 0; z-index: 5; }
+        .flower-overlay-container.is-active .blackout-curtain { animation: curtain-anim 16s forwards; }
+
+        /* 🌟 Rize Eye Flash Sequence 🌟 */
+        .rize-eye-container {
+            position: absolute; inset: 0; z-index: 10;
+            display: flex; align-items: center; justify-content: center; opacity: 0;
+        }
+        .flower-overlay-container.is-active .rize-eye-container { animation: eye-seq-anim 16s forwards; }
+        .flash-bg { position: absolute; inset: 0; background: #fff; opacity: 0; }
+        .flower-overlay-container.is-active .flash-bg { animation: flash-bg-anim 16s forwards; }
+
+        .neon-eye {
+            position: relative; width: 50vw; height: 50vw; max-width: 350px; max-height: 350px;
+            /* 神奇 CSS：100% 0 配合 45度旋轉會變成完美嘅眼睛形狀！ */
+            border-radius: 100% 0; transform: rotate(45deg);
+            box-shadow: inset 0 0 60px #0ff, 0 0 40px #0ff; opacity: 0;
+        }
+        .flower-overlay-container.is-active .neon-eye { animation: neon-eye-anim 16s forwards; }
+
+        .neon-pupil {
+            position: absolute; top: 50%; left: 50%; 
+            width: 18vw; height: 18vw; max-width: 120px; max-height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 10%, #ff0000 30%, #400 70%, #000 90%);
+            box-shadow: 0 0 30px #ff0000;
+        }
+        .flower-overlay-container.is-active .neon-pupil { animation: pupil-anim 16s forwards; }
+
+        .ghoul-text {
+            position: relative; z-index: 15; color: #d50000; font-size: clamp(3rem, 10vw, 6rem);
+            font-family: "Yu Mincho", "MS Mincho", serif; font-weight: bold;
+            text-shadow: 0 0 20px #ff0000, 2px 2px 10px #000; opacity: 0; letter-spacing: 0.1em;
+        }
+        .flower-overlay-container.is-active .ghoul-text { animation: ghoul-text-anim 16s forwards; }
+
+        /* 🌟 精確到小數點嘅 16秒時間軸 🌟 */
+        @keyframes overlay-bg-anim { 0%, 99% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
+        
+        /* 0 - 8秒: 彼岸花由白變紅 */
+        @keyframes flower-white-anim { 0% { opacity: 0; } 10% { opacity: 0.7; filter: blur(0px); } 40% { opacity: 0.7; filter: blur(2px); } 50%, 100% { opacity: 0; } }
+        @keyframes flower-red-anim { 0%, 20% { opacity: 0; } 40% { opacity: 1; filter: blur(0px); } 49% { opacity: 1; filter: blur(0px); transform: scale(1.05); } 50%, 100% { opacity: 0; } }
+        
+        /* 第8秒: 彼岸花熄滅，進入全黑 */
+        @keyframes curtain-anim { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+
+        /* 第8秒 - 10秒 (50% - 62.5%): 2秒超狂眼球閃爍 */
+        @keyframes eye-seq-anim { 0%, 49.9% { opacity: 0; } 50%, 62.5% { opacity: 1; } 63%, 100% { opacity: 0; } }
+        @keyframes flash-bg-anim { 0%, 49.9% { opacity: 0; } 50% { opacity: 1; } 51% { opacity: 0; } 54% { opacity: 0.8; background: #ff0000; } 55%, 100% { opacity: 0; } }
+        
+        @keyframes neon-eye-anim {
+            0%, 50% { opacity: 0; box-shadow: inset 0 0 60px #0ff, 0 0 40px #0ff; transform: rotate(45deg) scale(0.8); }
+            51% { opacity: 1; box-shadow: inset 0 0 60px #0ff, 0 0 40px #0ff; transform: rotate(45deg) scale(1); }
+            54% { box-shadow: inset 0 0 60px #8a2be2, 0 0 40px #8a2be2; transform: rotate(45deg) scale(1.1); } /* 紫色 */
+            58% { box-shadow: inset 0 0 80px #ff0000, 0 0 50px #ff0000; transform: rotate(45deg) scale(1.2); } /* 血紅 */
+            62.5% { opacity: 1; transform: rotate(45deg) scale(1); }
+            63%, 100% { opacity: 0; }
+        }
+        
+        @keyframes pupil-anim {
+            0%, 50% { opacity: 0; transform: translate(-50%, -50%) rotate(-45deg) scale(0.5); }
+            52% { opacity: 1; transform: translate(-50%, -50%) rotate(-45deg) scale(1.5); }
+            55% { transform: translate(-50%, -50%) rotate(-45deg) scale(0.8); background: radial-gradient(circle, #fff 10%, #0ff 30%, #000 90%); box-shadow: 0 0 30px #0ff; }
+            58% { transform: translate(-50%, -50%) rotate(-45deg) scale(1.2); background: radial-gradient(circle, #fff 10%, #ff0000 30%, #400 70%, #000 90%); box-shadow: 0 0 50px #ff0000; }
+            62.5% { opacity: 1; transform: translate(-50%, -50%) rotate(-45deg) scale(1); }
+            63%, 100% { opacity: 0; }
+        }
+
+        /* 11.2秒 (70%): 眼球消失後留白 1.2 秒先彈出文字！ */
+        @keyframes ghoul-text-anim {
+            0%, 68% { opacity: 0; transform: scale(0.8); } 
+            71% { opacity: 1; transform: scale(1); filter: brightness(2.5); }
+            75% { opacity: 1; transform: scale(1); filter: brightness(1); }
+            95% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
@@ -274,6 +364,26 @@
             <div class="blackout-rainbow" style="font-size: 0.7em;">喰種チャージ昇格で<br>RUSH突入！</div>
         </div>
     </div>
+
+    <!-- 🌟 3萬玉OVER 彼岸花覺醒演出用 HTML 🌟 -->
+    <div id="flower-overlay" class="flower-overlay-container" aria-hidden="true">
+        <div class="flower-layer flower-white" id="flower-w"></div>
+        <div class="flower-layer flower-red" id="flower-r"></div>
+        <div class="blackout-curtain"></div>
+        
+        <!-- 🌟 Rize 告知眼球閃爍動畫 (2秒限定) 🌟 -->
+        <div class="rize-eye-container">
+            <div class="flash-bg"></div>
+            <div class="neon-eye">
+                <div class="neon-pupil"></div>
+            </div>
+        </div>
+
+        <div class="ghoul-text">僕は、喰種だ</div>
+    </div>
+    
+    <!-- 🌟 YouTube 隱藏音頻播放器 🌟 -->
+    <div id="yt-audio-player" style="position: absolute; top: -9999px; width: 0; height: 0;"></div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P 東京喰種 999ver</span></h1>
 
@@ -323,6 +433,22 @@
         const rushMedia = document.getElementById("rush-media");
         let audioUnlocked = false;
 
+        // 🌟 注入 YouTube API 🌟
+        const ytScript = document.createElement('script');
+        ytScript.src = "https://www.youtube.com/iframe_api";
+        const firstScript = document.getElementsByTagName('script')[0];
+        firstScript.parentNode.insertBefore(ytScript, firstScript);
+
+        let ytPlayer;
+        let ytReady = false;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-audio-player', {
+                height: '0', width: '0', videoId: 'p0Z8DgA0N34',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'start': 0 },
+                events: { 'onReady': () => { ytReady = true; } }
+            });
+        }
+
         function playBlackout演出(hitNumber = 1) {
             try {
                 if (window.audioCtx) {
@@ -367,6 +493,55 @@
             void overlay.offsetWidth;
             overlay.classList.add("is-active");
             return sleep(6000).then(() => {
+                overlay.classList.remove("is-active");
+            });
+        }
+
+        function playFlowerAnimation() {
+            let fStr = "✿ ".repeat(400);
+            let fw = document.getElementById("flower-w");
+            let fr = document.getElementById("flower-r");
+            if (fw && fw.innerText === "") { fw.innerText = fStr; fr.innerText = fStr; }
+
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    const drone = ctx.createOscillator();
+                    const droneGain = ctx.createGain();
+                    drone.type = 'sine'; 
+                    drone.frequency.setValueAtTime(60, ctx.currentTime);
+                    drone.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 7.8);
+                    
+                    droneGain.gain.setValueAtTime(0, ctx.currentTime);
+                    droneGain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 3);
+                    droneGain.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 7.8);
+                    droneGain.gain.setValueAtTime(0, ctx.currentTime + 7.9); 
+                    
+                    drone.connect(droneGain); droneGain.connect(ctx.destination);
+                    drone.start(ctx.currentTime); drone.stop(ctx.currentTime + 7.9);
+                }
+            } catch (e) {}
+
+            // 🌟 喺 8.0 秒 (眼球出現瞬間) 觸發 YouTube 2秒音效 🌟
+            setTimeout(() => {
+                if (ytReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                    ytPlayer.seekTo(0);
+                    ytPlayer.unMute();
+                    ytPlayer.playVideo();
+                    setTimeout(() => {
+                        ytPlayer.pauseVideo(); // 播完 2 秒即刻停，陷入死寂
+                    }, 2000); 
+                }
+            }, 8000);
+
+            const overlay = document.getElementById("flower-overlay");
+            if (!overlay) return sleep(16000);
+            overlay.classList.remove("is-active");
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+            
+            return sleep(16000).then(() => {
                 overlay.classList.remove("is-active");
             });
         }
@@ -567,9 +742,18 @@
                             }
                         }
 
+                        // 👇 將 while loop 之後嘅結算代碼替換成以下內容 👇
                         this.session_payout += payout;
+                        
+                        // 🌟 修正：淨係計「今次呢一波」嘅 payout (單擊+連續上乘) 係咪超過 3萬玉 🌟
+                        if (payout >= 30000) {
+                            addLog(`🩸 僕は、喰種だ`, "color-ultimate");
+                            await playFlowerAnimation();
+                        }
+
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
                         addLog("🩸 喰MAXループ 継続!!", "color-rush");
+                        // 👆 替換完畢 👆
 
                         current_st = st_max; // ST 回復
                         updateUI();
@@ -665,6 +849,17 @@
                 if (AudioContextClass) {
                     window.audioCtx = new AudioContextClass();
                     if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                }
+                
+                // 🌟 預先解鎖 YouTube 音軌 (點擊瞬間即播即停) 🌟
+                if (ytReady && ytPlayer && typeof ytPlayer.mute === 'function') {
+                    ytPlayer.mute();
+                    ytPlayer.playVideo();
+                    setTimeout(() => {
+                        ytPlayer.pauseVideo();
+                        ytPlayer.seekTo(0);
+                        ytPlayer.unMute();
+                    }, 500);
                 }
                 audioUnlocked = true;
             }

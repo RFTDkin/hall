@@ -112,7 +112,7 @@ window.showPluginProfile = function (uid) {
     // 🌟 新增機種傳說徽章
     if (u.title_bl_legend) bHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff;">⚽ 俺、はストライカーだ！</div>`;
     if (u.title_egoist) bHtml += `<div class="badge active" style="border-color: #4B8BF5; color: #4B8BF5;">🧩 エゴイスト</div>`;
-    if (u.title_ghoul_legend) bHtml += `<div class="badge active" style="border-color: #ff1744; color: #ff1744;">🩸 僕、は喰種だ</div>`;
+    if (u.title_ghoul_legend) bHtml += `<div class="badge active" style="border-color: #ff1744; color: #ff1744;">🩸 僕は、喰種だ</div>`;
     if (u.title_ghoul_charge) bHtml += `<div class="badge active" style="border-color: #fff; color: #ff1744; text-shadow: 0 0 5px rgba(255,0,0,0.5);">🥀 何もできないのは…</div>`;
     if (u.title_lycoris_legend) bHtml += `<div class="badge active" style="border-color: #ff5252; color: #ff5252;">💩 ホットでプレミアムうんこ</div>`;
     if (u.title_mushoku_legend) bHtml += `<div class="badge active" style="border-color: #4fc3f7; color: #4fc3f7;">🪄 ロキシーのパンツ御神体</div>`;
@@ -148,7 +148,7 @@ window.showPluginProfile = function (uid) {
                             <!-- 🌟 新增機種稱號裝備選項 -->
                             ${u.title_bl_legend ? `<label><input type="checkbox" class="t-check" value="bl_legend" ${eq.includes('bl_legend') ? 'checked' : ''}> ⚽ 俺、はストライカーだ！</label><br>` : ''}
                             ${u.title_egoist ? `<label><input type="checkbox" class="t-check" value="egoist" ${eq.includes('egoist') ? 'checked' : ''}> 🧩 エゴイスト</label><br>` : ''}
-                            ${u.title_ghoul_legend ? `<label><input type="checkbox" class="t-check" value="ghoul_legend" ${eq.includes('ghoul_legend') ? 'checked' : ''}> 🩸 僕、は喰種だ</label><br>` : ''}
+                            ${u.title_ghoul_legend ? `<label><input type="checkbox" class="t-check" value="ghoul_legend" ${eq.includes('ghoul_legend') ? 'checked' : ''}> 🩸 僕は、喰種だ</label><br>` : ''}
                             ${u.title_ghoul_charge ? `<label><input type="checkbox" class="t-check" value="ghoul_charge" ${eq.includes('ghoul_charge') ? 'checked' : ''}> 🥀 何もできないのは、もう嫌なんだ</label><br>` : ''}
                             ${u.title_lycoris_legend ? `<label><input type="checkbox" class="t-check" value="lycoris_legend" ${eq.includes('lycoris_legend') ? 'checked' : ''}> 💩 プレミアムうんこ</label><br>` : ''}
                             ${u.title_mushoku_legend ? `<label><input type="checkbox" class="t-check" value="mushoku_legend" ${eq.includes('mushoku_legend') ? 'checked' : ''}> 🪄 ロキシーのパンツ</label><br>` : ''}
@@ -1222,14 +1222,14 @@ setTimeout(() => {
                 
                 // 2. 🩸 東京喰種
                 if (isGhoul) {
-                    // 第一個稱號：30,000玉 (僕、は喰種だ)
+                    // 第一個稱號：30,000玉 (僕は、喰種だ)
                     if (earnedBalls >= 30000) {
                         titleDb.ref('users/' + uid).update({ title_ghoul_legend: true });
                         if (!window._ghoul_awarded) {
                             window._ghoul_awarded = true; 
                             setTimeout(() => {
-                                window.alert("🎉 伝説の称号【僕、は喰種だ】を獲得しました！\nプロフィールから装備できます！");
-                            }, 1500); 
+                                window.alert("🎉 伝説の称号【僕は、喰種だ】を獲得しました！\nプロフィールから装備できます！");
+                            }, 16500); 
                         }
                     }
                     
