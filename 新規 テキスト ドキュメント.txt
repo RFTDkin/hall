@@ -247,3 +247,6 @@ https://RFTDkin.github.io/*
 1.任何一種機台達到3萬玉以上
 
 連續30日完成每日任務,擁有パチンカス稱號
+
+
+<meta name="machine-title" content="新機名">

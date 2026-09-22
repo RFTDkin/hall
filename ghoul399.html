@@ -289,6 +289,14 @@
         </div>
     </div>
 
+    <!-- 🌟 6000+ BONUS ブラックアウト演出用 HTML 🌟 -->
+    <div id="blackout-6000-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div class="blackout-rainbow" style="font-size: 0.6em;">3000を超えればいい</div>
+            <div class="blackout-rainbow" id="blackout-bonus-text" style="font-size: 0.8em;">6000BONUS</div>
+        </div>
+    </div>
+
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P 東京喰種 399ver</span></h1>
 
     <video id="rush-media" src="https://files.catbox.moe/t3rubq.mp4" style="display:none;" preload="auto" playsinline
@@ -386,6 +394,38 @@
 
             // 畫面黑幕與彩色字動畫
             const overlay = document.getElementById("blackout-overlay");
+            if (!overlay) return sleep(6000);
+            overlay.classList.remove("is-active");
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+            return sleep(6000).then(() => {
+                overlay.classList.remove("is-active");
+            });
+        }
+
+        function playBlackout6000演出(payout) {
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gainNode = ctx.createGain();
+
+                    osc1.type = 'sine'; osc1.frequency.setValueAtTime(200, ctx.currentTime); osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+                    osc2.type = 'square'; osc2.frequency.setValueAtTime(150, ctx.currentTime); osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+                    filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, ctx.currentTime); filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime); gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05); gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+
+                    osc1.connect(gainNode); osc2.connect(filter); filter.connect(gainNode); gainNode.connect(ctx.destination);
+                    osc1.start(ctx.currentTime); osc2.start(ctx.currentTime); osc1.stop(ctx.currentTime + 1.2); osc2.stop(ctx.currentTime + 1.2);
+                }
+            } catch (e) { console.log(e); }
+
+            const overlay = document.getElementById("blackout-6000-overlay");
+            document.getElementById("blackout-bonus-text").innerText = `${payout}BONUS`; // 動態顯示出玉
+            
             if (!overlay) return sleep(6000);
             overlay.classList.remove("is-active");
             void overlay.offsetWidth;
@@ -531,24 +571,37 @@
 
                     document.getElementById("ui-spins").innerText = `RUSH中: ${current_spin}/${st_max}`;
 
-                    // RUSH中 大当り確率: 1/95.3
                     if (Math.random() < (1 / 95.3)) {
                         this.session_rush_count += 1;
                         addLog(`\n🎉 [ST ${current_spin}回転] 當選！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
 
-                        // 🌟 先判定出玉數量，決定播邊條影片 🌟
-                        let payout = (Math.random() < 0.03) ? 6000 : 3000;
-                        let videoSrc = (payout === 6000) ? "https://files.catbox.moe/4tpc40.mp4" : "https://files.catbox.moe/t3rubq.mp4";
+                        // 🌟 3% 無限上乘邏輯 🌟
+                        let currentHitPayout = 3000;
+                        if (Math.random() < 0.03) {
+                            currentHitPayout = 6000;
+                            // 繼續抽 3%，抽中就再加 3000，直到抽唔中為止
+                            while (Math.random() < 0.03) {
+                                currentHitPayout += 3000;
+                            }
+                        }
 
-                        rushMedia.src = videoSrc; // 動態切換影片
+                        // 🌟 6000玉以上觸發專屬 Blackout 🌟
+                        if (currentHitPayout >= 6000) {
+                            addLog(`⚡3000を超えればいい！！！`, "color-ultimate");
+                            await playBlackout6000演出(currentHitPayout);
+                        }
+
+                        let videoSrc = (currentHitPayout >= 6000) ? "https://files.catbox.moe/4tpc40.mp4" : "https://files.catbox.moe/t3rubq.mp4";
+
+                        rushMedia.src = videoSrc; 
                         rushMedia.load();
                         addLog(`🎵 播放專屬動畫 (${videoSrc}) 中... 請稍候`, "color-music");
                         await playVideoPopupAndWait(rushMedia);
 
-                        this.session_payout += payout;
+                        this.session_payout += currentHitPayout;
 
-                        if (payout === 6000) {
-                            addLog(`🔥 超絶爆発！ 6000玉獲得！`, "color-ultimate");
+                        if (currentHitPayout >= 6000) {
+                            addLog(`🔥 超絶爆発！ ${currentHitPayout}玉獲得！`, "color-ultimate");
                         } else {
                             addLog(`💥 3000玉獲得！`, "color-hit");
                         }

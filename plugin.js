@@ -340,8 +340,42 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         renderWallet();
 
+        // 🌟 自動辨識現有機台字典 (唔洗逐個改舊 HTML) 🌟
+        const existingMachines = {
+            "bluelock": "P ブルーロック 399ver",
+            "ghoul399": "P 東京喰種 399ver",
+            "ghoul999": "P 東京喰種 999ver",
+            "lycoris": "P リコリス・リコイル",
+            "mushoku": "P 無職転生",
+            "edens": "P EDENS ZERO",
+            "eva": "P エヴァンゲリオン",
+            "hokuto10": "P 北斗の拳10",
+            "hokuto11": "P 北斗の拳11",
+            "seed": "P ガンダムSEED",
+            "slime": "P 転生したらスライムだった件",
+            "takt": "P takt op.",
+            "majo": "P 魔女と野獣",
+            "unicorn": "P ガンダムユニコーン2",
+            "ginpara": "P ギンギラパラダイス",
+            "ise": "P いせれべ",
+            "eighty": "P 86 -エイティシックス-",
+            "madoka": "P まどか☆マギカ",
+            "cafe": "P 女神のカフェテラス",
+            "rezero": "P Re:ゼロから始める異世界生活",
+            "baki": "P バキ2",
+            "gensan": "P 大工の源さん"
+        };
+        
+        let pathName = window.location.pathname.toLowerCase();
+        let matchedKey = Object.keys(existingMachines).find(key => pathName.includes(key));
         let originalTitle = document.title;
-        let machineName = originalTitle.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace('パチンコシミュレーター (', '').replace(/\)/g, '').trim() || "Unknown";
+        
+        // 🌟 優先次序：1. 新機 HTML meta標籤 -> 2. 舊機 URL 字典 -> 3. 原本 Title 兜底
+        let machineName = document.querySelector('meta[name="machine-title"]')?.content 
+            || (matchedKey ? existingMachines[matchedKey] : null)
+            || originalTitle.replace(/【無料】/g, '').replace(/ \| パチンコシミュレーター/g, '').replace(/柏青哥模擬器 \(/g, '').replace('パチンコシミュレーター (', '').replace(/\)/g, '').trim() 
+            || "Unknown";
+            
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
         let pageText = originalTitle + " " + document.body.innerText;
@@ -560,12 +594,56 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderMachineRankings();
                 if (window.currentOpenProfileUid) window.showPluginProfile(window.currentOpenProfileUid);
 
+                // 👇 🌟 加入呢句：每次載入排行榜，自動執垃圾 🌟 👇
+                cleanupMachineRankings(machineName);
+
             } catch (error) {
                 console.error("データの読み込みに失敗しました:", error);
             }
         }
 
         fetchRankingsAndUsers();
+
+        // 🌟 清理多餘排行榜數據 (加入「今日紀錄免死金牌」) 🌟
+        function cleanupMachineRankings(mName) {
+            const ref = db.ref('machine_rankings/' + mName);
+            ref.once('value').then(snap => {
+                if (!snap.exists()) return;
+                let records = [];
+                snap.forEach(child => {
+                    records.push({ key: child.key, payout: child.val().payout || 0, date: child.val().date || "" });
+                });
+                
+                // 依據出玉由大到小排序
+                records.sort((a, b) => b.payout - a.payout);
+                
+                // 取得今日日期字串 (例如 "9/22")
+                const todayDate = getJSTDate();
+                const todayStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
+
+                // 準備保留名單 (Set 可以防止重複加入)
+                let keysToKeep = new Set();
+                
+                // 1. 保留歷史出玉最高嘅頭 12 名
+                for (let i = 0; i < Math.min(12, records.length); i++) {
+                    keysToKeep.add(records[i].key);
+                }
+                
+                // 2. 🛡️ 免死金牌：強制保留所有「今日」嘅紀錄，確保「本日の一撃王」正常運作
+                records.forEach(rec => {
+                    if (rec.date === todayStr) {
+                        keysToKeep.add(rec.key);
+                    }
+                });
+
+                // 執行刪除：唔喺保留名單入面嘅舊垃圾，全部清走
+                records.forEach(rec => {
+                    if (!keysToKeep.has(rec.key)) {
+                        ref.child(rec.key).remove();
+                    }
+                });
+            });
+        }
 
         function disableMachine(msgText = "⛔ 本日の上限に達しました") {
             let playBtn = document.getElementById("btn-play");
@@ -689,7 +767,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                         const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`;
 
-                        db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr });
+                        db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: lastUI_payout, date: dateStr })
+                            .then(() => cleanupMachineRankings(machineName)); // 👈 追加清理呼叫
 
                         db.ref('server_records/daily_best').transaction((curr) => {
                             if (!curr || curr.date !== dateStr || lastUI_payout > curr.payout) {
@@ -750,7 +829,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     const dateStr = `${todayDate.getMonth() + 1}/${todayDate.getDate()}`;
                     const dateKey = `${todayDate.getFullYear()}_${todayDate.getMonth() + 1}_${todayDate.getDate()}`;
 
-                    db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: new_payout, date: dateStr });
+                    db.ref('machine_rankings/' + machineName).push({ user: currentUserName, payout: new_payout, date: dateStr })
+                        .then(() => cleanupMachineRankings(machineName)); // 👈 追加清理呼叫
 
                     db.ref('server_records/daily_best').transaction((curr) => {
                         if (!curr || curr.date !== dateStr || new_payout > curr.payout) {

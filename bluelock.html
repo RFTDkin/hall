@@ -1069,6 +1069,9 @@
             if(btnReset) btnReset.disabled = true;
 
             if (!audioUnlocked) {
+                // 👇 🌟 加入呢句：啟動瀏覽器內建音效引擎，用嚟播爆 Mon 聲 🌟 👇
+                if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
                 jackpotMedia.load();
                 egoistMedia.load();
                 video7500.load();
