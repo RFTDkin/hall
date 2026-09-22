@@ -221,10 +221,10 @@
         @keyframes pantsu-fade { 0%, 55% { opacity: 0; } 60%, 95% { opacity: 1; } 100% { opacity: 0; } }
         @keyframes pantsu-zoom { 0% { transform: scale(0.8); } 100% { transform: scale(1.1); } }
         @keyframes kami-pop { 
-            0% { opacity: 0; transform: scale(0.2) rotate(-10deg); background-position: 0% center; } 
-            20% { opacity: 1; transform: scale(1.2) rotate(5deg); } 
-            50% { opacity: 1; transform: scale(1) rotate(0deg); } 
-            80% { opacity: 0; transform: scale(1.5); } 
+            0% { opacity: 0; transform: scale(calc(var(--s, 1) * 0.2)) rotate(calc(var(--r, 0deg) - 10deg)); background-position: 0% center; } 
+            20% { opacity: 1; transform: scale(calc(var(--s, 1) * 1.2)) rotate(calc(var(--r, 0deg) + 5deg)); } 
+            50% { opacity: 1; transform: scale(var(--s, 1)) rotate(var(--r, 0deg)); } 
+            80% { opacity: 0; transform: scale(calc(var(--s, 1) * 1.5)); } 
             100% { opacity: 0; background-position: 200% center; } 
         }
     </style>
@@ -255,14 +255,9 @@
         <!-- 第 2 階段：御神體與神字 -->
         <div class="pantsu-wrapper" id="roxy-pantsu">
             <img src="rokishipantsu.png" class="pantsu-img" alt="ロキシーのパンツ御神体">
-            <div class="kami-text">神</div>
-            <div class="kami-text" style="top: 10%; left: 15%; animation-delay: 0.2s;">神</div>
-            <div class="kami-text" style="top: 60%; left: 80%; animation-delay: 0.4s;">神</div>
-            <div class="kami-text" style="top: 80%; left: 20%; animation-delay: 0.6s;">神</div>
-            <div class="kami-text" style="top: 20%; left: 70%; animation-delay: 0.8s;">神</div>
         </div>
     </div>
-
+    <!-- 👆 確保呢個 </div> 存在，佢就係用嚟閂埋 roxy-overlay 嘅關鍵！ -->
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ffca28;">e無職転生 〜異世界行ったら本気だす〜</span></h1>
 
     <div class="main-container">
@@ -361,25 +356,56 @@
                     if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
                     const ctx = window.audioCtx;
                     
-                    // 神聖和音 (寶箱發光階段)
+                    // 🌟 修正音效 1：神聖和音 (變柔和、音量大減)
                     const osc1 = ctx.createOscillator(); const gain1 = ctx.createGain();
-                    osc1.type = 'sine'; osc1.frequency.setValueAtTime(440, ctx.currentTime);
-                    osc1.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 5);
-                    gain1.gain.setValueAtTime(0, ctx.currentTime); gain1.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 5);
+                    osc1.type = 'sine'; osc1.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc1.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 5); // C6
+                    gain1.gain.setValueAtTime(0, ctx.currentTime);
+                    gain1.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 3); // 音量由 0.5 壓低到 0.08
+                    gain1.gain.linearRampToValueAtTime(0, ctx.currentTime + 6);
                     osc1.connect(gain1); gain1.connect(ctx.destination);
                     osc1.start(ctx.currentTime); osc1.stop(ctx.currentTime + 6);
 
-                    // 爆發聲 (御神體出現)
+                    // 🌟 修正音效 2：爆發聲 (改用 triangle 波，無咁刺耳)
                     const osc2 = ctx.createOscillator(); const gain2 = ctx.createGain();
-                    osc2.type = 'square'; osc2.frequency.setValueAtTime(150, ctx.currentTime + 6); osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 7);
-                    gain2.gain.setValueAtTime(0, ctx.currentTime + 5.9); gain2.gain.setValueAtTime(1, ctx.currentTime + 6); gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 8);
+                    osc2.type = 'triangle'; 
+                    osc2.frequency.setValueAtTime(800, ctx.currentTime + 6); 
+                    osc2.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 6.5);
+                    gain2.gain.setValueAtTime(0, ctx.currentTime + 5.9); 
+                    gain2.gain.setValueAtTime(0.15, ctx.currentTime + 6); // 音量由 1 壓低到 0.15
+                    gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 7.5);
                     osc2.connect(gain2); gain2.connect(ctx.destination);
-                    osc2.start(ctx.currentTime + 6); osc2.stop(ctx.currentTime + 8);
+                    osc2.start(ctx.currentTime + 6); osc2.stop(ctx.currentTime + 7.5);
                 }
             } catch (e) {}
 
             const overlay = document.getElementById("roxy-overlay");
             if (!overlay) return sleep(10000);
+
+            // 🌟 視覺修正：動態生成 60 個彩色「神」字！
+            const pantsuWrapper = document.getElementById("roxy-pantsu");
+            document.querySelectorAll('.dynamic-kami').forEach(el => el.remove()); // 每次播前清空舊字
+            
+            for (let i = 0; i < 60; i++) {
+                let kami = document.createElement("div");
+                kami.className = "kami-text dynamic-kami";
+                kami.innerText = "神";
+                
+                let topPos = -10 + Math.random() * 100; // 擴展到全畫面
+                let leftPos = -10 + Math.random() * 100;
+                let delay = 6 + (Math.random() * 2); // 確保喺第 6 秒 (寶箱爆開時) 先開始彈出
+                let scale = 0.3 + Math.random() * 1.5; // 大小不一
+                let rotate = (Math.random() - 0.5) * 80; // 隨機傾斜
+                
+                kami.style.top = `${topPos}%`;
+                kami.style.left = `${leftPos}%`;
+                kami.style.animationDelay = `${delay}s`;
+                kami.style.setProperty('--s', scale);
+                kami.style.setProperty('--r', `${rotate}deg`);
+                
+                pantsuWrapper.appendChild(kami);
+            }
+
             overlay.classList.remove("is-active");
             void overlay.offsetWidth;
             overlay.classList.add("is-active");

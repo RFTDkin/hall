@@ -231,6 +231,48 @@
             animation: unkoRainbow 2s linear infinite;
         }
         @keyframes unkoRainbow { to { background-position: 200% center; } }
+
+        /* 🌟 Lycoris 6000 Blackout 演出 CSS 🌟 */
+        .lyco-blackout-container {
+            position: fixed; inset: 0; z-index: 21000; background: #000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; pointer-events: none;
+        }
+        .lyco-blackout-container.is-active { animation: lyco-bg-anim 8s forwards; }
+
+        .lyco-blackout-msg {
+            position: absolute; font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900;
+            font-family: "Yu Mincho", "MS Mincho", serif; text-align: center; white-space: nowrap;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); opacity: 0;
+            animation: lycoRainbow 2s linear infinite;
+        }
+        .lyco-gold {
+            background: linear-gradient(135deg, #fff, #ffd700, #ffaa00, #fffacd);
+            background-size: 200% auto; -webkit-background-clip: text; background-clip: text;
+            filter: drop-shadow(0 0 20px #ffaa00);
+            font-size: clamp(3rem, 8vw, 6rem); letter-spacing: 0.05em;
+        }
+
+        @keyframes lycoRainbow { to { background-position: 200% center; } }
+        @keyframes lyco-bg-anim { 0%, 98% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
+
+        /* 控制三句對白順序：第 1 句 2.5秒，第 2 句 2.5秒，第 3 句 3秒 */
+        .lyco-blackout-container.is-active #lyco-msg-1 { animation: lyco-text-fade 2.5s forwards; }
+        .lyco-blackout-container.is-active #lyco-msg-2 { animation: lyco-text-fade 2.5s forwards 2.5s; }
+        .lyco-blackout-container.is-active #lyco-msg-3 { animation: lyco-text-impact 3s forwards 5s; }
+
+        @keyframes lyco-text-fade { 
+            0% { opacity: 0; transform: scale(0.9); } 
+            20%, 80% { opacity: 1; transform: scale(1); filter: brightness(1.5); } 
+            100% { opacity: 0; transform: scale(1.05); } 
+        }
+        @keyframes lyco-text-impact { 
+            0% { opacity: 0; transform: scale(0.5); filter: brightness(3); } 
+            15%, 90% { opacity: 1; transform: scale(1); filter: brightness(1); } 
+            100% { opacity: 0; transform: scale(1.2); } 
+        }
         
         /* 顯示對白嘅 Active Class */
         .unko-text-show { opacity: 1 !important; transform: scale(1) !important; }
@@ -275,6 +317,13 @@
     <!-- 💩 プレミアムうんこ 演出圖層 -->
     <div id="unko-overlay" aria-hidden="true">
         <div id="unko-text"></div>
+    </div>
+
+    <!-- 🌟 6000玉 ULTIMATE DRIVE Blackout 演出 🌟 -->
+    <div id="lyco-blackout-overlay" class="lyco-blackout-container" aria-hidden="true">
+        <div class="lyco-blackout-msg" id="lyco-msg-1">私は 君と会えて嬉しい</div>
+        <div class="lyco-blackout-msg" id="lyco-msg-2">嬉しい 嬉しい！</div>
+        <div class="lyco-blackout-msg lyco-gold" id="lyco-msg-3">ULTIMATE DRIVE開始</div>
     </div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P リコリス・リコイル (Lycoris Recoil)</span></h1>
@@ -467,6 +516,43 @@
             });
         }
 
+        function playLycorisBlackout() {
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    
+                    // 1. Blackout 瞬間嘅心跳/震撼聲
+                    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(120, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 1.5);
+                    gain.gain.setValueAtTime(0, ctx.currentTime); gain.gain.setValueAtTime(1, ctx.currentTime + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 2);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 2);
+
+                    // 2. 第 5 秒彈出 ULTIMATE DRIVE 嘅神聖爆發聲
+                    setTimeout(() => {
+                        try {
+                            const osc2 = ctx.createOscillator(); const gain2 = ctx.createGain();
+                            osc2.type = 'sine'; osc2.frequency.setValueAtTime(600, ctx.currentTime); osc2.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 1.5);
+                            gain2.gain.setValueAtTime(0, ctx.currentTime); gain2.gain.setValueAtTime(0.8, ctx.currentTime + 0.05); gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 2);
+                            osc2.connect(gain2); gain2.connect(ctx.destination);
+                            osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 2);
+                        } catch(e){}
+                    }, 5000);
+                }
+            } catch (e) {}
+
+            const overlay = document.getElementById("lyco-blackout-overlay");
+            if (!overlay) return sleep(8000);
+            overlay.classList.remove("is-active");
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+
+            return sleep(8000).then(() => {
+                overlay.classList.remove("is-active");
+            });
+        }
+
         class LycorisRecoil {
             constructor() {
                 this.state = "NORMAL";
@@ -574,6 +660,8 @@
                             if (Math.random() < 0.50) {
                                 payout = 6000;
                                 let total_loop_payout = 6000; // 用嚟計算今次 Loop 總數
+                                // 👇 🌟 加入呢句：6000玉確定時觸發 8秒 Blackout 演出 🌟 👇
+                                await playLycorisBlackout();
                                 addLog(`🔥 神からのギフト！ 6000玉獲得！`, "color-ultimate");
 
                                 // 50% Loop 追加 3000玉

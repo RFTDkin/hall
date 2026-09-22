@@ -41,8 +41,36 @@ pluginModalStyle.innerHTML = `
     .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; border: 1px solid #444; background: #222; color: #666; }
     .badge.active { background: #1a1a1a; border-color: #ffd700; color: #ffd700; box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
     .clickable-name { cursor: pointer; border-bottom: 1px dashed #555; padding-bottom: 2px; transition: 0.2s; }
+    // ... 原本嘅 modal css ...
     .clickable-name:hover { filter: brightness(1.3); }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* 👇 🌟 替換成呢段：排行榜稱號完美防爆版面 CSS 🌟 👇 */
+    table.data-lamp td {
+        height: 45px !important; /* 畀多些少呼吸空間 */
+        vertical-align: middle;
+    }
+    table.data-lamp td:nth-child(2) {
+        max-width: 150px;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    /* 🌟 只針對「天上天下」呢個超級巨無霸，用 zoom 連同排版空間一齊縮細！ 🌟 */
+    table.data-lamp td:nth-child(2) .effect-legend {
+        zoom: 0.35; 
+        display: inline-block;
+    }
+    
+    /* 🌟 針對其他帶有巨大背景圖嘅機種傳說稱號，輕微縮細 🌟 */
+    table.data-lamp td:nth-child(2) .effect-ghoul-legend,
+    table.data-lamp td:nth-child(2) .effect-bl-legend,
+    table.data-lamp td:nth-child(2) .effect-lycoris-legend,
+    table.data-lamp td:nth-child(2) .effect-mushoku-legend {
+        zoom: 0.75;
+        display: inline-block;
+    }
+    /* 👆 🌟 替換完畢 🌟 👆 */
 `;
 document.head.appendChild(pluginModalStyle);
 
@@ -379,7 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
         let pageText = originalTitle + " " + document.body.innerText;
-        let spinCost = 1000 / 16; 
+        let spinCost = 1000 / 8; 
 
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 29;
@@ -1263,7 +1291,13 @@ setTimeout(() => {
                         window._mushoku_6000_count = (window._mushoku_6000_count || 0) + 1;
                         if (window._mushoku_6000_count >= 7) {
                             titleDb.ref('users/' + uid).update({ title_mushoku_legend: true });
-                            window.alert("🎉 伝説の称号【ロキシーのパンツ御神体】を獲得しました！\nプロフィールから装備できます！");
+                            // 🌟 修正：延遲 13.5 秒，等整個動畫播完先彈 Alert！
+                            if (!window._mushoku_legend_awarded) {
+                                window._mushoku_legend_awarded = true;
+                                setTimeout(() => {
+                                    window.alert("🎉 伝説の称号【ロキシーのパンツ御神体】を獲得しました！\nプロフィールから装備できます！");
+                                }, 13500); 
+                            }
                         }
                     }
                 }
