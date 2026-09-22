@@ -115,11 +115,74 @@
         table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
         table.data-lamp td.hit-payout { color: #ffeb3b; }
         .empty-row { color: #555 !important; }
+
+        .judgement-overlay {
+            position: fixed; inset: 0; z-index: 19000; display: flex; align-items: center; justify-content: space-around;
+            pointer-events: none; background: #000; opacity: 0; visibility: hidden; padding: 0 8vw;
+        }
+        .judgement-overlay.is-active { opacity: 1; visibility: visible; }
+        .judgement-number {
+            color: #000; font-family: "Arial Black", Impact, sans-serif; font-size: clamp(4rem, 18vw, 12rem);
+            font-weight: 900; line-height: 1; text-shadow: none; transition: color 0.08s, text-shadow 0.08s;
+        }
+        .judgement-number.is-glowing {
+            color: #fff; text-shadow: 0 0 8px #fff, 0 0 25px #ffeb3b, 0 0 55px #ff9800;
+        }
+        .judgement-number.is-result {
+            color: #ffeb3b; text-shadow: 0 0 12px #fff, 0 0 35px #ff9800, 0 0 70px #ffeb3b;
+        }
+
+        .blackout-overlay {
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center;
+            pointer-events: none; background: #000; opacity: 0; visibility: hidden;
+        }
+        .blackout-overlay.is-active { opacity: 1; visibility: visible; }
+        .blackout-overlay::before {
+            content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; filter: contrast(1.5);
+            background:
+                radial-gradient(ellipse 150% 6% at center, #000 5%, #0011ff 12%, #ffd700 22%, #00aaff 40%, transparent 60%),
+                radial-gradient(ellipse 8% 55% at center, #000 5%, #0011ff 15%, #ffd700 25%, #00aaff 45%, transparent 65%),
+                #fff;
+        }
+        .blackout-overlay.is-active::before { animation: blackout-flash 6s forwards; }
+        .blackout-message {
+            display: flex; flex-direction: column; align-items: center; gap: 0.2em;
+            font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.4rem, 5vw, 4rem);
+            line-height: 1.2; letter-spacing: 0.04em; text-align: center;
+        }
+        .blackout-line {
+            display: none; font-weight: 900;
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%; background-clip: text; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75));
+        }
+        .blackout-line.is-visible { display: block; animation: blackout-line-pop 0.7s ease-out, blackout-rainbow 2s linear infinite; }
+        @keyframes blackout-rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes blackout-line-pop { 0% { opacity: 0; transform: scale(0.7); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes blackout-flash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(2); }
+            2% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(2); }
+            10% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+            100% { opacity: 0; }
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 <body>
+
+    <div id="judgement-overlay" class="judgement-overlay" aria-hidden="true">
+        <div id="judgement-3000" class="judgement-number">3000</div>
+        <div id="judgement-9000" class="judgement-number">9000</div>
+    </div>
+
+    <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div class="blackout-line">君の運命は僕が決める</div>
+            <div class="blackout-line">きゅ　きゅ　きゅ　きゅ</div>
+            <div class="blackout-line">９０００BONUS！！</div>
+        </div>
+    </div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #e040fb;">eフィーバー デッドマウント・デスプレイ 魂神9000</span></h1>
     
@@ -300,12 +363,12 @@
                         }
                     }
 
+                    let payout = 0;
                     if (is_win) {
                         this.session_rush_count += 1;
                         konshin_hits += 1;
                         
                         let roll = Math.random();
-                        let payout = 0;
 
                         // 🌟 修正：精確的 3.2% 同 46.8% 分配
                         if (roll < 0.032) {
@@ -322,7 +385,17 @@
                             addLog(`✨ 3000玉 !`, "color-rush");
                         }
 
+                    }
+
+                    await playKonshinJudgement演出(is_win ? payout : 0);
+
+                    if (is_win) {
+
                         this.session_payout += payout;
+
+                        if (payout === 9000) {
+                            await playNineThousandBlackout演出();
+                        }
 
                         addLog(`🎉 魂神の一撃 成功！ (#${konshin_hits}回目)`, "color-konshin");
                         addLog(`💥 本次獲得: ${payout} 玉`);
@@ -391,6 +464,74 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        async function playKonshinJudgement演出(resultPayout) {
+            const overlay = document.getElementById("judgement-overlay");
+            const number3000 = document.getElementById("judgement-3000");
+            const number9000 = document.getElementById("judgement-9000");
+            if (!overlay || !number3000 || !number9000) return;
+
+            number3000.className = "judgement-number";
+            number9000.className = "judgement-number";
+            overlay.classList.add("is-active");
+
+            const delays = [100, 120, 150, 190, 240, 300, 380, 480, 600, 750, 950];
+            let show3000 = true;
+            for (const delay of delays) {
+                number3000.classList.toggle("is-glowing", show3000);
+                number9000.classList.toggle("is-glowing", !show3000);
+                playJudgementTick音效();
+                show3000 = !show3000;
+                await sleep(delay);
+            }
+
+            number3000.classList.remove("is-glowing");
+            number9000.classList.remove("is-glowing");
+            if (resultPayout === 3000) number3000.classList.add("is-result");
+            if (resultPayout === 9000) number9000.classList.add("is-result");
+            await sleep(700);
+            overlay.classList.remove("is-active");
+        }
+
+        function playJudgementTick音效() {
+            try {
+                if (!window.audioCtx) return;
+                if (window.audioCtx.state === "suspended") window.audioCtx.resume();
+                const ctx = window.audioCtx;
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                oscillator.type = "square";
+                oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.08);
+                gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.16, ctx.currentTime + 0.008);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.1);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        async function playNineThousandBlackout演出() {
+            const overlay = document.getElementById("blackout-overlay");
+            const lines = Array.from(document.querySelectorAll("#blackout-overlay .blackout-line"));
+            if (!overlay) return;
+
+            overlay.classList.remove("is-active");
+            lines.forEach(line => line.classList.remove("is-visible"));
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+
+            for (const line of lines) {
+                line.classList.add("is-visible");
+                await sleep(3000);
+                line.classList.remove("is-visible");
+            }
+            overlay.classList.remove("is-active");
+        }
+
         // 🌟 確保只喺 NORMAL 狀態先重置轉數顯示，以免覆蓋 RUSH 轉數 🌟
         function updateUI() {
             if (game.state === "NORMAL") {
@@ -428,6 +569,11 @@
             
             if (!audioUnlocked) {
                 jackpotMedia.load(); 
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    window.audioCtx = new AudioContextClass();
+                    if (window.audioCtx.state === "suspended") await window.audioCtx.resume();
+                }
                 audioUnlocked = true;
             }
             
