@@ -120,12 +120,71 @@
         table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
         table.data-lamp td.hit-payout { color: #ffca28; font-weight: bold; }
         .empty-row { color: #555 !important; }
+
+        .blackout-overlay {
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center; pointer-events: none;
+            background: #000; opacity: 0; visibility: hidden;
+        }
+
+        .blackout-overlay::before {
+            content: ''; position: absolute; inset: 0; z-index: -1;
+            background:
+                radial-gradient(ellipse 150% 6% at center, #000 5%, #0011ff 12%, #ffd700 22%, #00aaff 40%, transparent 60%),
+                radial-gradient(ellipse 8% 55% at center, #000 5%, #0011ff 15%, #ffd700 25%, #00aaff 45%, transparent 65%),
+                #fff;
+            opacity: 0; filter: contrast(1.5);
+        }
+
+        .blackout-overlay.is-active { visibility: visible; animation: blackout-bg 6s forwards; }
+        .blackout-overlay.is-active::before { animation: blackout-flash 6s forwards; }
+        .blackout-message {
+            display: flex; flex-direction: column; align-items: center; gap: 0.2em;
+            font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.5rem, 5vw, 4rem);
+            line-height: 1.2; letter-spacing: 0.04em; text-align: center;
+        }
+
+        .blackout-line {
+            display: none;
+            color: #ffd700;
+            text-shadow: 0 0 5px #fff, 0 0 18px #ff9800;
+            font-weight: 900;
+        }
+
+        .blackout-line.is-visible {
+            display: block;
+            animation: blackout-line-pop 0.7s ease-out;
+        }
+
+        @keyframes blackout-bg {
+            0% { opacity: 0; }
+            2%, 85% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        @keyframes blackout-flash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(2); }
+            2% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(2); }
+            10% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+            100% { opacity: 0; }
+        }
+
+        @keyframes blackout-line-pop {
+            0% { opacity: 0; transform: scale(0.7); }
+            100% { opacity: 1; transform: scale(1); }
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+
+    <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div class="blackout-line">勇者は絶対</div>
+            <div class="blackout-line">負けないだ！！</div>
+        </div>
+    </div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.6em; color: #ffca28;">P 結城友奈は勇者である (大満開RUSH)</span></h1>
 
@@ -167,6 +226,7 @@
 
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
+        let audioUnlocked = false;
 
         class YushaMachine {
             constructor() {
@@ -244,6 +304,7 @@
                         if (Math.random() < 0.25) {
                             addLog(`🌈 限界突破！ 7500個 獲得！！！ (10R×5回)`, "color-ultimate");
                             this.session_payout += 7500;
+                            await playSevenThousandFiveHundredBlackout演出();
                         } else {
                             addLog(`✨ 1500個 獲得！`, "color-hit");
                             this.session_payout += 1500;
@@ -309,6 +370,57 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        async function playSevenThousandFiveHundredBlackout演出() {
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === "suspended") await window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gainNode = ctx.createGain();
+
+                    osc1.type = "sine";
+                    osc1.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+                    osc2.type = "square";
+                    osc2.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+                    filter.type = "lowpass";
+                    filter.frequency.setValueAtTime(800, ctx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+                    osc1.connect(gainNode);
+                    osc2.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    osc1.start(ctx.currentTime);
+                    osc2.start(ctx.currentTime);
+                    osc1.stop(ctx.currentTime + 1.2);
+                    osc2.stop(ctx.currentTime + 1.2);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+            const overlay = document.getElementById("blackout-overlay");
+            const lines = Array.from(document.querySelectorAll("#blackout-overlay .blackout-line"));
+            if (!overlay) return;
+            overlay.classList.remove("is-active");
+            lines.forEach(line => line.classList.remove("is-visible"));
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+
+            for (const line of lines) {
+                line.classList.add("is-visible");
+                await sleep(3000);
+                line.classList.remove("is-visible");
+            }
+            overlay.classList.remove("is-active");
+        }
+
         function updateUI() {
             if (game.state === "NORMAL") {
                 document.getElementById("ui-spins").innerText = game.session_spins;
@@ -342,6 +454,15 @@
             isPlaying = true;
             btnPlay.disabled = true;
             if(btnReset) btnReset.disabled = true;
+
+            if (!audioUnlocked) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    window.audioCtx = new AudioContextClass();
+                    if (window.audioCtx.state === "suspended") await window.audioCtx.resume();
+                }
+                audioUnlocked = true;
+            }
 
             addLog("\n=== 勇者出擊 ===", "color-hit");
 
