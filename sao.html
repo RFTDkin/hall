@@ -250,7 +250,9 @@
             0% { transform: translateX(-100%); }
             10% { transform: translateX(-80%); } /* 啱啱好露出最後一個 0 */
             75% { transform: translateX(-50%); } /* 極度緩慢擠出第二、第三個 0 */
-            85% { transform: translateX(calc(50vw - 50%)); } /* 瞬間飛入正中心！ */
+            80% { transform: translateX(-35%); } /* 第三個數字繼續慢慢出現 */
+            85% { transform: translateX(-20%); } /* 第四個數字先露出一半 */
+            90% { transform: translateX(calc(50vw - 50%)); } /* 最後先瞬間飛入正中心！ */
             100% { transform: translateX(calc(50vw - 50%)); }
         }
     </style>
