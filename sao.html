@@ -190,6 +190,69 @@
             0% { opacity: 0; transform: scale(0.65); }
             100% { opacity: 1; transform: scale(1); }
         }
+
+        /* 🌟 特殊動畫圖層基礎設定 🌟 */
+        .special-overlay {
+            position: fixed; inset: 0; z-index: 25000;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.3s;
+        }
+        .special-overlay.is-active { opacity: 1; visibility: visible; }
+        .special-title { font-size: 2.5em; text-shadow: 0 0 10px currentColor; letter-spacing: 5px; }
+
+        /* 🎰 轉盤樣式 */
+        .roulette-box { position: relative; width: 320px; height: 320px; margin-top: 20px; }
+        .roulette-pointer {
+            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+            font-size: 50px; color: #ff5252; z-index: 10; text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+        }
+        /* 🌟 轉盤中間嘅 +α 樣式 🌟 */
+        .roulette-plus-alpha {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%);
+            font-size: 50px; font-weight: 900; color: #ffea00; 
+            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000; z-index: 5;
+        }
+        .roulette-wheel {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(#161b22 0deg 72deg, #c2185b 72deg 144deg, #161b22 144deg 216deg, #c2185b 216deg 288deg, #161b22 288deg 360deg);
+            border: 6px solid #ffca28; box-shadow: 0 0 30px rgba(255, 202, 40, 0.5);
+            position: relative; overflow: hidden;
+            transition: transform 10s cubic-bezier(0.1, 0.8, 0.2, 1); 
+        }
+        .r-seg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform-origin: center center; }
+        .r-num {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            font-size: 32px; font-weight: 900; color: white; text-shadow: 0 0 8px #000;
+        }
+
+        /* 💨 左至右滑動數字樣式 */
+        .slide-container { 
+            position: relative; /* 🌟 修正疊字：改為 relative，等佢乖乖排喺標題下面 🌟 */
+            width: 100%; 
+            display: flex; justify-content: flex-start; overflow: hidden; 
+            padding: 20px 0; /* 加返少少上下空間，無咁擠迫 */
+        }
+        .slide-number {
+            font-size: clamp(6rem, 15vw, 12rem); font-family: 'Courier New', monospace; font-weight: 900;
+            background: linear-gradient(90deg, #fff, #ffca28, #ff5252); -webkit-background-clip: text; color: transparent;
+            letter-spacing: 5px; filter: drop-shadow(0 0 15px rgba(255, 82, 82, 0.6));
+            /* 預設收埋喺畫面極左邊 (利用自身闊度 100% 完美隱藏) */
+            transform: translateX(-100%); 
+        }
+
+        .special-overlay.is-active .slide-number {
+            animation: creep-reveal 7.5s linear forwards;
+        }
+
+        /* 🌟 神級懸念時間軸：利用自身闊度百分比，確保每次只露一個 0！ 🌟 */
+        @keyframes creep-reveal {
+            0% { transform: translateX(-100%); }
+            10% { transform: translateX(-80%); } /* 啱啱好露出最後一個 0 */
+            75% { transform: translateX(-50%); } /* 極度緩慢擠出第二、第三個 0 */
+            85% { transform: translateX(calc(50vw - 50%)); } /* 瞬間飛入正中心！ */
+            100% { transform: translateX(calc(50vw - 50%)); }
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
@@ -200,6 +263,31 @@
     <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
         <div class="blackout-message">
             <div id="blackout-line" class="blackout-line"></div>
+        </div>
+    </div>
+
+    <!-- 🌟 ぼくの英雄 / 咲け、花たち 專用轉盤動畫 🌟 -->
+    <div id="roulette-overlay" class="special-overlay" aria-hidden="true">
+        <h2 id="roulette-title" class="special-title">ぼくの英雄</h2>
+        <div class="roulette-box">
+            <div class="roulette-pointer">▼</div>
+            <!-- 👇 🌟 加入呢句：轉盤正中央嘅發光 +α 🌟 👇 -->
+            <div class="roulette-plus-alpha">+α</div>
+            <div class="roulette-wheel" id="roulette-wheel">
+                <div class="r-seg" style="transform: rotate(0deg);"><span class="r-num">3000</span></div>
+                <div class="r-seg" style="transform: rotate(72deg);"><span class="r-num">4500</span></div>
+                <div class="r-seg" style="transform: rotate(144deg);"><span class="r-num">6000</span></div>
+                <div class="r-seg" style="transform: rotate(216deg);"><span class="r-num">7500</span></div>
+                <div class="r-seg" style="transform: rotate(288deg);"><span class="r-num">9000</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🌟 SWORD DRIVE 專用左至右滑動數字動畫 🌟 -->
+    <div id="slide-overlay" class="special-overlay" aria-hidden="true">
+        <h2 class="special-title" style="color: #ffca28; margin-bottom: 50px;">SWORD DRIVE 獲得玉數</h2>
+        <div class="slide-container">
+            <div id="slide-number" class="slide-number">6000</div>
         </div>
     </div>
 
@@ -254,10 +342,108 @@
                 this.history = []; 
             }
 
-            // 隨機產生 3000~9000+α 嘅函數
-            getRandomHugeBonus() {
+            // 🌟 1G連ループ演出 (先預測總數，播轉盤，再印 Log)
+            async play_plus_alpha_loop(name) {
                 const options = [3000, 4500, 6000, 7500, 9000];
-                return options[Math.floor(Math.random() * options.length)];
+                let guaranteed = options[Math.floor(Math.random() * options.length)];
+                
+                // 內部預先判定「限界突破」次數
+                let limit_breaks = 0;
+                while (Math.random() < 0.15) { limit_breaks++; }
+                
+                // 🎰 播轉盤動畫！(只顯示保底數字，保留突破驚喜)
+                await playRouletteAnimation(name, guaranteed);
+                
+                addLog(`\n🌈 ${name} 発動！！！`, "color-wou");
+                let current_payout = 0;
+                
+                // 快速消化保底 V-STOCK
+                let stocks = guaranteed / 1500;
+                for (let i = 0; i < stocks; i++) {
+                    await sleep(300); // 動畫已經吊足胃口，印 Log 可以快啲
+                    current_payout += 1500;
+                    this.session_payout += 1500;
+                    this.session_rush_count++; 
+                    addLog(`✨ 1G連 V-STOCK 消化！ (+1500)  [計: ${current_payout}]`, "color-hit");
+                    updateUI();
+                }
+                
+                // 消化隱藏嘅限界突破
+                for (let i = 0; i < limit_breaks; i++) {
+                    await sleep(600);
+                    addLog(`⚡ 限界突破！ +α 1G連発生！！ (+1500)`, "color-wou");
+                    current_payout += 1500;
+                    this.session_payout += 1500;
+                    this.session_rush_count++;
+                    updateUI();
+                }
+                addLog(`👑 ${name} トータル: ${current_payout}個 獲得！`);
+            }
+
+            // 🌟 SWORD DRIVE 專用 (先預測總劇本，播滑動數字，再印 Log)
+            async play_sword_drive_loop() {
+                // 1. 內部生成劇本
+                let driving = true;
+                let script_events = [];
+                let expected_total = 0;
+                
+                while (driving) {
+                    let sd = Math.random();
+                    let current_gain = 0;
+                    let is_to_bonus = false;
+                    let is_in_drive = false;
+                    
+                    if (sd < 0.082) current_gain = 1500;
+                    else if (sd < 0.082 + 0.281) current_gain = 3000;
+                    else if (sd < 0.082 + 0.281 + 0.361) current_gain = 4500;
+                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207) current_gain = 6000;
+                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207 + 0.044) current_gain = 7500;
+                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207 + 0.044 + 0.015) { current_gain = 1500; is_to_bonus = true; } 
+                    else { current_gain = 1500; is_in_drive = true; }
+                    
+                    expected_total += current_gain;
+                    script_events.push({ action: "drive", gain: current_gain, is_to_bonus, is_in_drive });
+                    
+                    if (is_to_bonus) break;
+                    if (is_in_drive) continue;
+                    
+                    while (Math.random() < 0.10) {
+                        expected_total += 1500;
+                        script_events.push({ action: "limit" });
+                    }
+                    driving = false;
+                }
+
+                // 2. 💨 播滑動數字動畫！(直接用預測好嘅總數)
+                await playSlideAnimation(expected_total);
+
+                // 3. 瞬間消化劇本印 Log
+                addLog(`\n🌈 神器解放 SWORD DRIVE 発動！！！`, "color-wou");
+                let display_total = 0;
+                
+                for (let ev of script_events) {
+                    if (ev.action === "drive") {
+                        let chunks = ev.gain / 1500;
+                        for (let i = 0; i < chunks; i++) {
+                            await sleep(250);
+                            display_total += 1500;
+                            this.session_payout += 1500;
+                            this.session_rush_count++;
+                            addLog(`✨ SWORD DRIVE 1G連！ (+1500) [計: ${display_total}]`, "color-hit");
+                            updateUI();
+                        }
+                        if (ev.is_to_bonus) addLog(`✨ DRIVE to BONUS 発生！ (終了)`, "color-hit");
+                        if (ev.is_in_drive) addLog(`🔥 DRIVE in DRIVE 発生！！ (ループ継続)`, "color-wou");
+                    } else if (ev.action === "limit") {
+                        await sleep(500);
+                        display_total += 1500;
+                        this.session_payout += 1500;
+                        this.session_rush_count++;
+                        addLog(`⚡ 限界突破！ +α 1G連発生！！ (+1500) [計: ${display_total}]`, "color-wou");
+                        updateUI();
+                    }
+                }
+                addLog(`👑 SWORD DRIVE トータル: ${display_total}個 獲得！`);
             }
 
             async play_normal() {
@@ -273,12 +459,11 @@
                     
                     // 1.5% 直行 War of Underworld
                     if (r < 0.015) {
-                        let bonus = this.getRandomHugeBonus();
-                        addLog(`\n[${this.session_spins} 回轉] 🌈 Epilogue BONUS (ぼくの英雄)！全回転！！`, "color-wou");
-                        addLog(`✨ ${bonus}個 獲得！`, "color-hit");
-                        this.session_payout += bonus;
-                        updateUI();
+                        addLog(`\n[${this.session_spins} 回轉] 🌈 全回転！！`, "color-wou");
                         await playHeroBlackout演出();
+                        
+                        await this.play_plus_alpha_loop("Epilogue BONUS (ぼくの英雄)");
+                        
                         addLog(`🔥 War of Underworld (上位ST) 直行！`, "color-wou");
                         this.state = "WOU";
                         await this.play_rush();
@@ -326,7 +511,6 @@
 
                         // 右打ち中確率: 1/51.6
                         if (Math.random() < (1 / 51.6)) {
-                            this.session_rush_count++;
                             let used_spin = st_max - st_remaining;
                             addLog(`\n🎯 大当り！ (${used_spin}回転目)`, "color-hit");
                             
@@ -335,43 +519,39 @@
                             if (this.state === "SWORD") {
                                 // --- SWORD RUSH 振分 ---
                                 if (pr < 0.11) {
-                                    let bonus = this.getRandomHugeBonus();
-                                    this.session_payout += bonus;
-                                    addLog(`🌈 咲け、花たち！ ${bonus}個獲得！！！`, "color-wou");
+                                    // 11% 咲け、花たち
+                                    await this.play_plus_alpha_loop("咲け、花たち");
                                     addLog(`🔥 War of Underworld へ昇格！`, "color-wou");
                                     this.state = "WOU";
                                 } else if (pr < 0.11 + 0.11) {
+                                    // 11% 決意の刃・成功
                                     this.session_payout += 1500;
+                                    this.session_rush_count++;
                                     addLog(`✨ 決意の刃 成功！ 1500個獲得！`, "color-hit");
                                     addLog(`🔥 War of Underworld へ昇格！`, "color-wou");
                                     this.state = "WOU";
                                 } else if (pr < 0.11 + 0.11 + 0.33) {
+                                    // 33% 決意の刃・失敗
                                     this.session_payout += 1500;
+                                    this.session_rush_count++;
                                     addLog(`💧 決意の刃 失敗... 1500個獲得`, "color-hit");
                                     addLog(`⚔️ SWORD RUSH 継続`, "color-sword");
                                 } else {
+                                    // 45% BONUS
                                     this.session_payout += 1500;
+                                    this.session_rush_count++;
                                     addLog(`✨ BONUS 1500個獲得`, "color-hit");
                                     addLog(`⚔️ SWORD RUSH 継続`, "color-sword");
                                 }
                             } else {
                                 // --- War of Underworld 振分 ---
                                 if (pr < 0.40) {
-                                    // 40% 發動 SWORD DRIVE (精準比例抽籤)
-                                    let sd = Math.random();
-                                    let sd_bonus = 0;
-                                    if (sd < 0.082) sd_bonus = 1500;
-                                    else if (sd < 0.082 + 0.281) sd_bonus = 3000;
-                                    else if (sd < 0.082 + 0.281 + 0.361) sd_bonus = 4500;
-                                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207) sd_bonus = 6000;
-                                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207 + 0.044) sd_bonus = 7500;
-                                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207 + 0.044 + 0.015) sd_bonus = 9000; // 7500+1500
-                                    else sd_bonus = 10500; // 7500+SWORD DRIVE (簡易化作額外3000)
-
-                                    this.session_payout += sd_bonus;
-                                    addLog(`🌈 神器解放 SWORD DRIVE！ ${sd_bonus}個獲得！！！`, "color-wou");
+                                    // 40% 発動 SWORD DRIVE
+                                    await this.play_sword_drive_loop();
                                 } else {
+                                    // 60% BONUS
                                     this.session_payout += 1500;
+                                    this.session_rush_count++;
                                     addLog(`✨ BONUS 1500個獲得`, "color-hit");
                                 }
                                 addLog(`🔥 War of Underworld 継続！`, "color-wou");
@@ -482,6 +662,67 @@
             }
             line.classList.remove("is-visible");
             overlay.classList.remove("is-active");
+        }
+
+        async function playRouletteAnimation(title, targetAmount) {
+            const overlay = document.getElementById('roulette-overlay');
+            const wheel = document.getElementById('roulette-wheel');
+            const titleEl = document.getElementById('roulette-title');
+            
+            titleEl.innerText = title;
+            titleEl.style.color = title.includes("咲け") ? "#ff5252" : "#ffca28";
+
+            const degMap = { 3000: 0, 4500: -72, 6000: -144, 7500: -216, 9000: -288 };
+            let targetDeg = degMap[targetAmount] || 0;
+            
+            // 🌟 防暈修改：由 6 圈大幅減少至只轉 3 圈
+            let finalRotation = (360 * 6) + targetDeg;
+
+            wheel.style.transition = 'none';
+            wheel.style.transform = `rotate(0deg)`;
+            void wheel.offsetWidth; 
+
+            overlay.classList.add('is-active');
+            
+            // 🌟 節奏修改：配合 CSS 嘅 10 秒動畫
+            wheel.style.transition = 'transform 10s cubic-bezier(0.1, 0.8, 0.2, 1)';
+            wheel.style.transform = `rotate(${finalRotation}deg)`;
+            
+            // 🌟 等待時間加長至 10.5 秒，確保睇住佢慢慢停定
+            await sleep(10500); 
+            wheel.style.boxShadow = "0 0 50px #ff5252, inset 0 0 20px #ffca28"; 
+            await sleep(1500);
+            
+            overlay.classList.remove('is-active');
+            wheel.style.boxShadow = "0 0 30px rgba(255, 202, 40, 0.5)";
+        }
+
+        async function playSlideAnimation(totalAmount) {
+            const overlay = document.getElementById('slide-overlay');
+            const numberEl = document.getElementById('slide-number');
+            
+            numberEl.innerText = totalAmount;
+            
+            // 🌟 修正 Bug：清空內聯樣式，等 CSS 動畫可以正常發揮 🌟
+            numberEl.style.transition = 'none';
+            numberEl.style.animation = 'none';
+            void numberEl.offsetWidth;     // 強制瀏覽器重繪
+            numberEl.style.animation = ''; // <--- 關鍵！解除動畫封印
+            numberEl.style.transform = ''; // <--- 解除位置封印
+
+            overlay.classList.add('is-active');
+            
+            // 等待動畫播完 (7.5秒) + 畀玩家爽 1 秒
+            await sleep(8500); 
+            
+            // 🌟 修正放大效果：必須加入 translateX 以維持正中位置 🌟
+            numberEl.style.transition = 'transform 0.1s';
+            numberEl.style.transform = 'translateX(calc(50vw - 50%)) scale(1.2)';
+            await sleep(100);
+            numberEl.style.transform = 'translateX(calc(50vw - 50%)) scale(1)';
+            await sleep(1500);
+            
+            overlay.classList.remove('is-active');
         }
 
         function updateUI() {
