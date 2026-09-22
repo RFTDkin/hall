@@ -407,7 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
         let pageText = originalTitle + " " + document.body.innerText;
-        let spinCost = 1000 / 8; 
+        let spinCost = 1000 / 16; 
 
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 29;
