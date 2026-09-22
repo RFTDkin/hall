@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>【無料】e無職転生 | パチンコシミュレーター</title>
+    <meta name="machine-title" content="e無職転生">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -164,6 +165,68 @@
             40%, 80% { opacity: 1; transform: scale(1); } 
             100% { opacity: 0; transform: scale(0.96); } 
         }
+
+        /* 🌟 御神體演出 CSS 🌟 */
+        .roxy-overlay-container {
+            position: fixed; inset: 0; z-index: 25000; background: #000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; pointer-events: none; overflow: hidden;
+        }
+        .roxy-overlay-container.is-active { animation: roxy-bg-anim 10s forwards; }
+
+        /* 寶箱動畫 */
+        .chest-wrapper { position: relative; width: 200px; height: 150px; opacity: 0; }
+        .roxy-overlay-container.is-active .chest-wrapper { animation: chest-fade 6s forwards; }
+        
+        .chest-box { position: relative; width: 100%; height: 100%; }
+        .chest-body { position: absolute; bottom: 0; width: 100%; height: 60%; background: linear-gradient(135deg, #d4af37, #8a6b1c); border: 4px solid #5c4000; border-radius: 5px; }
+        .chest-lid { 
+            position: absolute; top: 10%; width: 100%; height: 50%; background: linear-gradient(135deg, #e6c855, #a38222); border: 4px solid #5c4000; border-radius: 10px 10px 0 0;
+            transform-origin: bottom; transform: rotateX(0deg); 
+        }
+        .chest-light {
+            position: absolute; top: 40%; left: 10%; width: 80%; height: 20px;
+            background: #fff; box-shadow: 0 0 40px 20px #ffd700; opacity: 0; border-radius: 50%;
+        }
+        
+        .roxy-overlay-container.is-active .chest-lid { animation: chest-open-anim 6s forwards; }
+        .roxy-overlay-container.is-active .chest-light { animation: chest-light-anim 6s forwards; }
+
+        /* 御神體與神字 */
+        .pantsu-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; }
+        .roxy-overlay-container.is-active .pantsu-wrapper { animation: pantsu-fade 10s forwards; }
+        .pantsu-img { max-width: 80%; max-height: 80%; object-fit: contain; filter: drop-shadow(0 0 30px #ffd700); transform: scale(0.8); }
+        .roxy-overlay-container.is-active .pantsu-img { animation: pantsu-zoom 4s forwards; animation-delay: 6s; }
+
+        .kami-text {
+            position: absolute; color: transparent; font-size: 8rem; font-weight: 900; font-family: "Yu Mincho", "MS Mincho", serif;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000); background-size: 200% auto; -webkit-background-clip: text; background-clip: text;
+            -webkit-text-stroke: 3px #fff; filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8)); opacity: 0;
+        }
+        .roxy-overlay-container.is-active .kami-text { animation: kami-pop 3s infinite; }
+
+        @keyframes roxy-bg-anim { 0%, 98% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
+        @keyframes chest-fade { 0% { opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes chest-open-anim { 
+            0%, 20% { transform: perspective(500px) rotateX(0deg); } 
+            35% { transform: perspective(500px) rotateX(30deg); } 
+            55% { transform: perspective(500px) rotateX(60deg); } 
+            80%, 100% { transform: perspective(500px) rotateX(120deg); } 
+        }
+        @keyframes chest-light-anim {
+            0%, 20% { opacity: 0; } 35% { opacity: 0.3; transform: scale(1); } 55% { opacity: 0.6; transform: scale(1.5); }
+            75% { opacity: 1; transform: scale(3); filter: brightness(2); } 85%, 100% { opacity: 1; transform: scale(50); filter: brightness(5); }
+        }
+        
+        @keyframes pantsu-fade { 0%, 55% { opacity: 0; } 60%, 95% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes pantsu-zoom { 0% { transform: scale(0.8); } 100% { transform: scale(1.1); } }
+        @keyframes kami-pop { 
+            0% { opacity: 0; transform: scale(0.2) rotate(-10deg); background-position: 0% center; } 
+            20% { opacity: 1; transform: scale(1.2) rotate(5deg); } 
+            50% { opacity: 1; transform: scale(1) rotate(0deg); } 
+            80% { opacity: 0; transform: scale(1.5); } 
+            100% { opacity: 0; background-position: 200% center; } 
+        }
     </style>
 <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
@@ -175,6 +238,28 @@
         <div class="blackout-message">
             <div class="blackout-rainbow" style="font-size: 0.8em;">君に朗報だ</div>
             <div class="blackout-rainbow" style="font-size: 0.7em;">6000 BONUS</div>
+        </div>
+    </div>
+
+    <!-- 🌟 御神体專屬 動畫 🌟 -->
+    <div id="roxy-overlay" class="roxy-overlay-container" aria-hidden="true">
+        <!-- 第 1 階段：寶箱 -->
+        <div class="chest-wrapper" id="roxy-chest">
+            <div class="chest-box">
+                <div class="chest-lid"></div>
+                <div class="chest-body"></div>
+                <div class="chest-light"></div>
+            </div>
+        </div>
+        
+        <!-- 第 2 階段：御神體與神字 -->
+        <div class="pantsu-wrapper" id="roxy-pantsu">
+            <img src="rokishipantsu.png" class="pantsu-img" alt="ロキシーのパンツ御神体">
+            <div class="kami-text">神</div>
+            <div class="kami-text" style="top: 10%; left: 15%; animation-delay: 0.2s;">神</div>
+            <div class="kami-text" style="top: 60%; left: 80%; animation-delay: 0.4s;">神</div>
+            <div class="kami-text" style="top: 80%; left: 20%; animation-delay: 0.6s;">神</div>
+            <div class="kami-text" style="top: 20%; left: 70%; animation-delay: 0.8s;">神</div>
         </div>
     </div>
 
@@ -217,6 +302,7 @@
     </div>
 
     <script>
+
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rushMedia = document.getElementById("rush-media");
         let audioUnlocked = false;
@@ -265,6 +351,40 @@
             void overlay.offsetWidth;
             overlay.classList.add("is-active");
             return sleep(6000).then(() => {
+                overlay.classList.remove("is-active");
+            });
+        }
+
+        function playRoxyAnimation() {
+            try {
+                if (window.audioCtx) {
+                    if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+                    const ctx = window.audioCtx;
+                    
+                    // 神聖和音 (寶箱發光階段)
+                    const osc1 = ctx.createOscillator(); const gain1 = ctx.createGain();
+                    osc1.type = 'sine'; osc1.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc1.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 5);
+                    gain1.gain.setValueAtTime(0, ctx.currentTime); gain1.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 5);
+                    osc1.connect(gain1); gain1.connect(ctx.destination);
+                    osc1.start(ctx.currentTime); osc1.stop(ctx.currentTime + 6);
+
+                    // 爆發聲 (御神體出現)
+                    const osc2 = ctx.createOscillator(); const gain2 = ctx.createGain();
+                    osc2.type = 'square'; osc2.frequency.setValueAtTime(150, ctx.currentTime + 6); osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 7);
+                    gain2.gain.setValueAtTime(0, ctx.currentTime + 5.9); gain2.gain.setValueAtTime(1, ctx.currentTime + 6); gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 8);
+                    osc2.connect(gain2); gain2.connect(ctx.destination);
+                    osc2.start(ctx.currentTime + 6); osc2.stop(ctx.currentTime + 8);
+                }
+            } catch (e) {}
+
+            const overlay = document.getElementById("roxy-overlay");
+            if (!overlay) return sleep(10000);
+            overlay.classList.remove("is-active");
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+            
+            return sleep(10000).then(() => {
                 overlay.classList.remove("is-active");
             });
         }
@@ -330,6 +450,7 @@
             async play_rush() {
                 addLog(`\n===== 🪄 無職転生RUSH (ST130回転) 開始 =====`, "color-rush");
                 this.state = "RUSH";
+                this.session_6000_count = 0; // 🌟 每次 RUSH 開始重置 6000玉 次數
                 updateUI();
 
                 let st_remaining = 130;
@@ -350,8 +471,18 @@
 
                         if (br < 0.235) {
                             payout = 6000;
+                            // 🌟 記錄同一次 RUSH 內抽中 6000玉 嘅次數
+                            this.session_6000_count = (this.session_6000_count || 0) + 1;
+                            
                             await playBlackout演出();
                             addLog(`👑 君に朗報だ！ 10R×4回 (6000玉獲得) !!!`, "color-ultimate");
+
+                            // 🌟 第 7 次抽中 6000玉 觸發御神體動畫 🌟
+                            if (this.session_6000_count === 7) {
+                                await sleep(3000); // 停頓 3秒
+                                addLog(`⚡ 神々しい光が...`, "color-ultimate");
+                                await playRoxyAnimation();
+                            }
                         } else if (br < 0.235 + 0.265) {
                             payout = 3000;
                             addLog(`❤️❤️ドキドキBONUS！ 10R×2回 (3000玉獲得) !!`, "color-rush");
