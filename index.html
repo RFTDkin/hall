@@ -1849,6 +1849,8 @@
                     title_ghoul_charge: u.title_ghoul_charge || false,
                     title_lycoris_legend: u.title_lycoris_legend || false,
                     title_mushoku_legend: u.title_mushoku_legend || false,
+                    title_sao_hero: u.title_sao_hero || false,
+                    title_sao_staycool: u.title_sao_staycool || false,
                     equipped_title: u.equipped_title || "auto",
                     isSelf: (auth.currentUser && auth.currentUser.uid === uid)
                 };
@@ -1943,6 +1945,8 @@
                 else if (titleFilter === "ghoul_charge") matchTitle = u.title_ghoul_charge === true;
                 else if (titleFilter === "lycoris") matchTitle = u.title_lycoris_legend === true;
                 else if (titleFilter === "mushoku") matchTitle = u.title_mushoku_legend === true;
+                else if (titleFilter === "sao_hero") matchTitle = u.title_sao_hero === true;
+                else if (titleFilter === "sao_staycool") matchTitle = u.title_sao_staycool === true;
 
                 // 必須同時符合名字同稱號先會顯示出嚟
                 return matchText && matchTitle;
@@ -2132,6 +2136,8 @@
                         <option value="ghoul_charge">🥀 何もできないのは、もう嫌なんだ</option>
                         <option value="lycoris">💩 プレミアムうんこ</option>
                         <option value="mushoku">🪄 ロキシーのパンツ</option>
+                        <option value="sao_hero">🌹 ぼくの英雄</option>
+                        <option value="sao_staycool">⚔️ STAY COOL</option>
                     </select>
                 </div>
             </div>

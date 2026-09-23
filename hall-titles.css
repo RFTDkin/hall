@@ -308,8 +308,8 @@ table.data-lamp td:nth-child(2) .title-effect, #modal-name .title-effect, #p-mod
     top: -5px; 
     left: 50%;
     transform: translateX(-50%); 
-    width: 72px;  
-    height: 58px;
+    width: 52px;  
+    height: 42px;
     /* 重疊尖瓣、側向花冠同捲心，避免讀成向上對稱的蓮花 */
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 100'><defs><linearGradient id='petal' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23ffffff'/><stop offset='25%25' stop-color='%2300ffff'/><stop offset='65%25' stop-color='%23006dff'/><stop offset='100%25' stop-color='%23000d63'/></linearGradient><linearGradient id='deep' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%2300eaff'/><stop offset='55%25' stop-color='%230044c7'/><stop offset='100%25' stop-color='%2300093e'/></linearGradient><filter id='glow'><feDropShadow dx='0' dy='0' stdDeviation='2' flood-color='%2300e5ff' flood-opacity='.9'/></filter></defs><g filter='url(%23glow)' stroke='%23bfffff' stroke-width='1.2' stroke-linejoin='round'><path d='M68 76 C42 83 17 74 12 51 C28 42 48 46 68 76Z' fill='url(%23deep)'/><path d='M70 75 C94 80 119 69 128 48 C108 42 88 48 70 75Z' fill='url(%23deep)'/><path d='M67 70 C43 65 28 47 31 27 C51 30 65 44 67 70Z' fill='url(%23petal)'/><path d='M72 70 C96 64 112 46 109 26 C89 30 76 44 72 70Z' fill='url(%23petal)'/><path d='M69 70 C55 51 58 27 73 12 C84 32 81 53 69 70Z' fill='url(%23petal)'/><path d='M70 72 C58 58 64 40 79 35 C87 51 81 65 70 72Z' fill='url(%23deep)'/><path d='M72 67 C67 56 74 46 85 44 C87 55 81 64 72 67Z' fill='%23001b70'/><path d='M72 63 C70 56 76 51 82 51 C82 58 78 62 72 63Z' fill='%2300dfff' stroke='none'/><path d='M69 75 C63 84 59 91 58 99' fill='none' stroke='%23003eae' stroke-width='3'/><path d='M64 84 C51 80 41 82 35 89 C48 94 57 91 66 87Z' fill='%2300aeea'/><path d='M70 84 C82 79 92 81 99 88 C86 94 77 91 69 88Z' fill='%23005acb'/></g></svg>");
     background-size: contain; 
