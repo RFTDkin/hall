@@ -207,15 +207,17 @@
             position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
             font-size: 50px; color: #ff5252; z-index: 10; text-shadow: 0 4px 10px rgba(0,0,0,0.8);
         }
-        /* 🌟 轉盤中間嘅 +α 樣式 🌟 */
-        .roulette-plus-alpha {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%);
-            font-size: 50px; font-weight: 900; color: #ffea00; 
-            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000; z-index: 5;
-        }
         .roulette-wheel {
             width: 100%; height: 100%; border-radius: 50%;
-            background: conic-gradient(#161b22 0deg 72deg, #c2185b 72deg 144deg, #161b22 144deg 216deg, #c2185b 216deg 288deg, #161b22 288deg 360deg);
+            /* 🌟 改成 6 等份 (每份 60 度)，最後一格加入紅色突顯 9000+α */
+            background: conic-gradient(
+                #161b22 0deg 60deg, 
+                #c2185b 60deg 120deg, 
+                #161b22 120deg 180deg, 
+                #c2185b 180deg 240deg, 
+                #161b22 240deg 300deg, 
+                #ff5252 300deg 360deg
+            );
             border: 6px solid #ffca28; box-shadow: 0 0 30px rgba(255, 202, 40, 0.5);
             position: relative; overflow: hidden;
             transition: transform 10s cubic-bezier(0.1, 0.8, 0.2, 1); 
@@ -273,14 +275,13 @@
         <h2 id="roulette-title" class="special-title">ぼくの英雄</h2>
         <div class="roulette-box">
             <div class="roulette-pointer">▼</div>
-            <!-- 👇 🌟 加入呢句：轉盤正中央嘅發光 +α 🌟 👇 -->
-            <div class="roulette-plus-alpha">+α</div>
             <div class="roulette-wheel" id="roulette-wheel">
                 <div class="r-seg" style="transform: rotate(0deg);"><span class="r-num">3000</span></div>
-                <div class="r-seg" style="transform: rotate(72deg);"><span class="r-num">4500</span></div>
-                <div class="r-seg" style="transform: rotate(144deg);"><span class="r-num">6000</span></div>
-                <div class="r-seg" style="transform: rotate(216deg);"><span class="r-num">7500</span></div>
-                <div class="r-seg" style="transform: rotate(288deg);"><span class="r-num">9000</span></div>
+                <div class="r-seg" style="transform: rotate(60deg);"><span class="r-num">4500</span></div>
+                <div class="r-seg" style="transform: rotate(120deg);"><span class="r-num">6000</span></div>
+                <div class="r-seg" style="transform: rotate(180deg);"><span class="r-num">7500</span></div>
+                <div class="r-seg" style="transform: rotate(240deg);"><span class="r-num">9000</span></div>
+                <div class="r-seg" style="transform: rotate(300deg);"><span class="r-num" style="color: #ffea00; font-size: 26px; top: 10px;">9000<br>+α</span></div>
             </div>
         </div>
     </div>
@@ -344,47 +345,7 @@
                 this.history = []; 
             }
 
-            // 🌟 1G連ループ演出 (先預測總數，播轉盤，再印 Log)
             async play_plus_alpha_loop(name) {
-                const options = [3000, 4500, 6000, 7500, 9000];
-                let guaranteed = options[Math.floor(Math.random() * options.length)];
-                
-                // 內部預先判定「限界突破」次數
-                let limit_breaks = 0;
-                while (Math.random() < 0.15) { limit_breaks++; }
-                
-                // 🎰 播轉盤動畫！(只顯示保底數字，保留突破驚喜)
-                await playRouletteAnimation(name, guaranteed);
-                
-                addLog(`\n🌈 ${name} 発動！！！`, "color-wou");
-                let current_payout = 0;
-                
-                // 快速消化保底 V-STOCK
-                let stocks = guaranteed / 1500;
-                for (let i = 0; i < stocks; i++) {
-                    await sleep(300); // 動畫已經吊足胃口，印 Log 可以快啲
-                    current_payout += 1500;
-                    this.session_payout += 1500;
-                    this.session_rush_count++; 
-                    addLog(`✨ 1G連 V-STOCK 消化！ (+1500)  [計: ${current_payout}]`, "color-hit");
-                    updateUI();
-                }
-                
-                // 消化隱藏嘅限界突破
-                for (let i = 0; i < limit_breaks; i++) {
-                    await sleep(600);
-                    addLog(`⚡ 限界突破！ +α 1G連発生！！ (+1500)`, "color-wou");
-                    current_payout += 1500;
-                    this.session_payout += 1500;
-                    this.session_rush_count++;
-                    updateUI();
-                }
-                addLog(`👑 ${name} トータル: ${current_payout}個 獲得！`);
-            }
-
-            // 🌟 SWORD DRIVE 專用 (先預測總劇本，播滑動數字，再印 Log)
-            async play_sword_drive_loop() {
-                // 1. 內部生成劇本
                 let driving = true;
                 let script_events = [];
                 let expected_total = 0;
@@ -395,55 +356,85 @@
                     let is_to_bonus = false;
                     let is_in_drive = false;
                     
-                    if (sd < 0.082) current_gain = 1500;
-                    else if (sd < 0.082 + 0.281) current_gain = 3000;
-                    else if (sd < 0.082 + 0.281 + 0.361) current_gain = 4500;
-                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207) current_gain = 6000;
-                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207 + 0.044) current_gain = 7500;
-                    else if (sd < 0.082 + 0.281 + 0.361 + 0.207 + 0.044 + 0.015) { current_gain = 1500; is_to_bonus = true; } 
-                    else { current_gain = 1500; is_in_drive = true; }
+                    if (sd < 0.082) { current_gain = 3000; } 
+                    else if (sd < 0.363) { current_gain = 3000; } 
+                    else if (sd < 0.724) { current_gain = 4500; } 
+                    else if (sd < 0.931) { current_gain = 6000; } 
+                    else if (sd < 0.975) { current_gain = 7500; } 
+                    else if (sd < 0.990) { current_gain = 9000; is_to_bonus = true; } 
+                    else { current_gain = 7500; is_in_drive = true; }
                     
                     expected_total += current_gain;
-                    script_events.push({ action: "drive", gain: current_gain, is_to_bonus, is_in_drive });
+                    script_events.push({ gain: current_gain, is_to_bonus, is_in_drive });
                     
-                    if (is_to_bonus) break;
-                    if (is_in_drive) continue;
-                    
-                    while (Math.random() < 0.10) {
-                        expected_total += 1500;
-                        script_events.push({ action: "limit" });
-                    }
-                    driving = false;
+                    if (!is_in_drive) driving = false; 
                 }
 
-                // 2. 💨 播滑動數字動畫！(直接用預測好嘅總數)
+                // 決定轉盤目標：如果中咗 DRIVE in DRIVE (1G連)，直接指去 9000+α
+                let roulette_target = script_events[0].gain;
+                if (script_events[0].is_in_drive) roulette_target = "9000+α";
+                
+                await playRouletteAnimation(name, roulette_target);
+                
+                addLog(`\n🌈 ${name} 発動！！！`, "color-wou");
+                let display_total = 0;
+                
+                for (let ev of script_events) {
+                    this.session_payout += ev.gain;
+                    this.session_rush_count += (ev.gain / 1500); // 內部依然精準計算連莊數
+                    display_total += ev.gain;
+                    
+                    addLog(`✨ 獲得！ (+${ev.gain})  [計: ${display_total}]`, "color-hit");
+                    updateUI();
+                    await sleep(500);
+
+                    if (ev.is_to_bonus) addLog(`✨ ９０００BONUS！！！`, "color-hit");
+                    if (ev.is_in_drive) addLog(`⚡ ９０００✙α！！！`, "color-wou");
+                }
+                addLog(`👑 ${name} トータル: ${display_total}個 獲得！`);
+            }
+
+            async play_sword_drive_loop() {
+                let driving = true;
+                let script_events = [];
+                let expected_total = 0;
+                
+                while (driving) {
+                    let sd = Math.random();
+                    let current_gain = 0;
+                    let is_to_bonus = false;
+                    let is_in_drive = false;
+                    
+                    if (sd < 0.082) { current_gain = 1500; }
+                    else if (sd < 0.363) { current_gain = 3000; } 
+                    else if (sd < 0.724) { current_gain = 4500; } 
+                    else if (sd < 0.931) { current_gain = 6000; } 
+                    else if (sd < 0.975) { current_gain = 7500; } 
+                    else if (sd < 0.990) { current_gain = 9000; is_to_bonus = true; } 
+                    else { current_gain = 7500; is_in_drive = true; }
+                    
+                    expected_total += current_gain;
+                    script_events.push({ gain: current_gain, is_to_bonus, is_in_drive });
+                    
+                    if (!is_in_drive) driving = false; 
+                }
+
                 await playSlideAnimation(expected_total);
 
-                // 3. 瞬間消化劇本印 Log
                 addLog(`\n🌈 神器解放 SWORD DRIVE 発動！！！`, "color-wou");
                 let display_total = 0;
                 
                 for (let ev of script_events) {
-                    if (ev.action === "drive") {
-                        let chunks = ev.gain / 1500;
-                        for (let i = 0; i < chunks; i++) {
-                            await sleep(250);
-                            display_total += 1500;
-                            this.session_payout += 1500;
-                            this.session_rush_count++;
-                            addLog(`✨ SWORD DRIVE 1G連！ (+1500) [計: ${display_total}]`, "color-hit");
-                            updateUI();
-                        }
-                        if (ev.is_to_bonus) addLog(`✨ DRIVE to BONUS 発生！ (終了)`, "color-hit");
-                        if (ev.is_in_drive) addLog(`🔥 DRIVE in DRIVE 発生！！ (ループ継続)`, "color-wou");
-                    } else if (ev.action === "limit") {
-                        await sleep(500);
-                        display_total += 1500;
-                        this.session_payout += 1500;
-                        this.session_rush_count++;
-                        addLog(`⚡ 限界突破！ +α 1G連発生！！ (+1500) [計: ${display_total}]`, "color-wou");
-                        updateUI();
-                    }
+                    this.session_payout += ev.gain;
+                    this.session_rush_count += (ev.gain / 1500);
+                    display_total += ev.gain;
+                    
+                    addLog(`✨ SWORD DRIVE 獲得！ (+${ev.gain}) [計: ${display_total}]`, "color-hit");
+                    updateUI();
+                    await sleep(500);
+
+                    if (ev.is_to_bonus) addLog(`✨ DRIVE to BONUS ！ (9000BONUS)`, "color-hit");
+                    if (ev.is_in_drive) addLog(`🔥 DRIVE in DRIVE 発生！！ (1G連継続)`, "color-wou");
                 }
                 addLog(`👑 SWORD DRIVE トータル: ${display_total}個 獲得！`);
             }
@@ -674,10 +665,10 @@
             titleEl.innerText = title;
             titleEl.style.color = title.includes("咲け") ? "#ff5252" : "#ffca28";
 
-            const degMap = { 3000: 0, 4500: -72, 6000: -144, 7500: -216, 9000: -288 };
+            // 🌟 更新：6個選項，每格相距 60 度
+            const degMap = { 3000: 0, 4500: -60, 6000: -120, 7500: -180, 9000: -240, "9000+α": -300 };
             let targetDeg = degMap[targetAmount] || 0;
             
-            // 🌟 防暈修改：由 6 圈大幅減少至只轉 3 圈
             let finalRotation = (360 * 6) + targetDeg;
 
             wheel.style.transition = 'none';
@@ -705,19 +696,31 @@
             
             numberEl.innerText = totalAmount;
             
-            // 🌟 修正 Bug：清空內聯樣式，等 CSS 動畫可以正常發揮 🌟
+            // 🌟 1. 重置狀態，並將數字「死死地封印住」，唔畀佢行住！
             numberEl.style.transition = 'none';
-            numberEl.style.animation = 'none';
-            void numberEl.offsetWidth;     // 強制瀏覽器重繪
-            numberEl.style.animation = ''; // <--- 關鍵！解除動畫封印
-            numberEl.style.transform = ''; // <--- 解除位置封印
+            numberEl.style.animation = 'none'; 
+            numberEl.style.transform = 'translateX(-100%)'; 
+            void numberEl.offsetWidth;     
 
+            // 🌟 2. 畫面即刻變黑，畀玩家一種「入mode」嘅感覺，但數字未出
             overlay.classList.add('is-active');
             
-            // 等待動畫播完 (7.5秒) + 畀玩家爽 1 秒
-            await sleep(8500); 
+            // 🎵 3. 注入隱藏嘅 YouTube 播放器
+            const ytAudio = document.createElement('div');
+            ytAudio.innerHTML = `<iframe width="0" height="0" src="https://www.youtube.com/embed/5NokjNCbCY4?autoplay=1&start=2&end=9" frameborder="0" allow="autoplay"></iframe>`;
+            document.body.appendChild(ytAudio);
+
+            // ⏳ 4. 關鍵：強制等 1.5 秒！畀時間 YouTube Load 歌
+            await sleep(2000);
+
+            // 🎶 5. 歌差唔多開始響！立刻解除數字封印，開始左至右滑動！
+            numberEl.style.animation = ''; 
+            numberEl.style.transform = ''; 
             
-            // 🌟 修正放大效果：必須加入 translateX 以維持正中位置 🌟
+            // 等待動畫播完 (7.5秒) + 畀玩家爽 0.5 秒
+            await sleep(8000); 
+            
+            // 瞬間飛入正中嘅震撼放大
             numberEl.style.transition = 'transform 0.1s';
             numberEl.style.transform = 'translateX(calc(50vw - 50%)) scale(1.2)';
             await sleep(100);
@@ -725,6 +728,11 @@
             await sleep(1500);
             
             overlay.classList.remove('is-active');
+
+            // 🧹 清理 YouTube 播放器
+            if (document.body.contains(ytAudio)) {
+                ytAudio.remove();
+            }
         }
 
         function updateUI() {
