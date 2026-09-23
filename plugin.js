@@ -420,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.title = originalTitle.replace("柏青哥模擬器", "パチンコシミュレーター");
 
         let pageText = originalTitle + " " + document.body.innerText;
-        let spinCost = 1000 / 16; 
+        let spinCost = 1000 / 17; 
 
         if (pageText.includes("東京喰種 999ver")) spinCost = 1000 / 32;
         else if (pageText.includes("実力至上主義")) spinCost = 1000 / 29;
@@ -436,6 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageText.includes("Re:ゼロ") && pageText.includes("129")) spinCost = 1000 / 16;
         else if (pageText.includes("バキ2")) spinCost = 1000 / 16;
         else if (pageText.includes("大工の源さん")) spinCost = 1000 / 18;
+        else if (pageText.includes("一騎当千")) spinCost = 1000 / 30;
 
         // 🌟 生成排行榜與實時數據同步 🌟
         let currentMachineRankings = [];
@@ -1172,12 +1173,13 @@ setTimeout(() => {
                 let actualSpins = window._lastLoggedSpins || 0;
 
                 const pageName = location.pathname.split('/').pop().toLowerCase();
-                const heavyMachinePages = new Set(['bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html', 'hokuto10.html', 'hokuto11.html', 'mushoku.html', 'seed.html', 'slime.html', 'takt.html', 'majo.html']);
-                const isHeavyMachine = heavyMachinePages.has(pageName) || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣)/i.test(machineTitle);
+        
+                // 👇 將你可能會用到嘅 HTML 檔案名都加晒入去
+                const heavyMachinePages = new Set(['bluelock.html', 'edens.html', 'eva.html', 'ghoul399.html', 'ghoul999.html', 'hokuto10.html', 'hokuto11.html', 'mushoku.html', 'seed.html', 'slime.html', 'takt.html', 'majo.html', 'utaware.html', 'enen2.html', 'sengoku7.html', 'garo12.html', 'kinniku.html', 'cafe.html', 'baki2.html', 'gensan2.html']);
+                
+                // 👇 喺 Regex 度加返 戦国乙女、牙狼、キン肉マン、カフェテラス、バキ、大工の源さん
+                const isHeavyMachine = heavyMachinePages.has(pageName) || /(?:399|999|エヴァンゲリオン|北斗|無職転生|EDENS|SEED|転生したらスライム|takt|タクト|魔女と野獣|うたわれるもの|戦国乙女|牙狼|キン肉マン|カフェテラス|バキ|大工の源さん)/i.test(machineTitle);
 
-                const isCharge = /チャージ|CHARGE/i.test(translatedText);
-                const isRushChallengeEnter = /(チャレンジ|JUDGE|CZ|時短).*?(突入|開始)/.test(translatedText)
-                    || /(突入|開始).*?(チャレンジ|JUDGE|CZ|時短)/.test(translatedText);
                 const isRealRushEnter = /(RUSH|IMPACT MODE|BATTLE|LT|右打ち).*?(突入|直行|開始)/.test(translatedText) && !/チャレンジ|JUDGE|CZ|非突入|失敗/.test(translatedText);
 
                 // ✨ 神の引き

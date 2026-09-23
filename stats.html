@@ -265,6 +265,12 @@
         .tag-ginpara { border-top: 5px solid #e040fb; }
         .tag-sea5 { border-top: 5px solid #00bcd4; }
         .tag-iseleve { border-top: 5px solid #7c4dff; }
+        /* ▼ ここに追加 ▼ */
+        .tag-utaware { border-top: 5px solid #ff9100; }
+        .tag-valkyrie { border-top: 5px solid #ff4500; }
+        .tag-ikkitousen { border-top: 5px solid #9c27b0; }
+        .tag-akudama { border-top: 5px solid #00e676; }
+        
     </style>
     <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
@@ -820,6 +826,42 @@
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="gensan2-max">---</span></div>
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="gensan2-profit">---</span></div>
             <div class="progress-text" id="gensan2-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-utaware" id="card-utaware">
+            <h3 class="machine-title">eフィーバーうたわれるもの</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="utaware-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="utaware-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="utaware-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="utaware-profit">---</span></div>
+            <div class="progress-text" id="utaware-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-valkyrie" id="card-valkyrie">
+            <h3 class="machine-title">e終末のワルキューレ</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="valkyrie-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="valkyrie-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="valkyrie-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="valkyrie-profit">---</span></div>
+            <div class="progress-text" id="valkyrie-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-ikkitousen" id="card-ikkitousen">
+            <h3 class="machine-title">e真・一騎当千</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="ikkitousen-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="ikkitousen-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="ikkitousen-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="ikkitousen-profit">---</span></div>
+            <div class="progress-text" id="ikkitousen-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card tag-akudama" id="card-akudama">
+            <h3 class="machine-title">eアクダマドライブ</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="akudama-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="akudama-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="akudama-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="akudama-profit">---</span></div>
+            <div class="progress-text" id="akudama-prog">待機中...</div>
         </div>
 
     </div>
@@ -3423,6 +3465,215 @@
             return { spins, payout };
         }
 
+        function simUtaware() {
+            let spins = 0, payout = 0;
+            
+            function runRush() {
+                let st = 19; // ST15回 + 残り保留4回
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 13.4) {
+                        // 80%で3000玉、20%でSTリセット(出玉なし)
+                        if (Math.random() < 0.80) {
+                            payout += 3000;
+                        }
+                        st = 19; // ST回復
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                let roll = Math.random();
+                let p_main = 1 / 399.7;       // 図柄揃い
+                let p_charge = 1 / 264.696;   // チャージ
+
+                // 🎯 1. 図柄揃い判定 (1/399.7)
+                if (roll < p_main) {
+                    let r = Math.random();
+                    if (r < 0.01) {
+                        payout += 3000; // 1% 3000玉 + RUSH
+                        if (payout < 95000) runRush();
+                    } else if (r < 0.54) {
+                        payout += 1500; // 53% 1500玉 + RUSH
+                        if (payout < 95000) runRush();
+                    } else {
+                        payout += 1500; // 46% 1500玉 (通常)
+                    }
+                    break;
+                } 
+                // ⚡ 2. チャージ判定 (1/264.696)
+                else if (roll < p_main + p_charge) {
+                    payout += 192; // 2R分の出玉
+                    
+                    // チャージからの 1% 昇格判定
+                    if (Math.random() < 0.01) {
+                        if (payout < 95000) runRush();
+                    }
+                    break; 
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simValkyrie() {
+            let spins = 0, payout = 0;
+
+            function getExtraBonus() {
+                let extra = 0;
+                while (Math.random() < 0.50) {
+                    extra += (Math.random() < 0.50) ? 3000 : 1500;
+                }
+                return extra;
+            }
+
+            function runRush() {
+                let state = 1; // 1: 1戦目, 2: 2戦目, 3: CLIMAX
+                let active = true;
+                while (active && payout < 95000) {
+                    let hitProb = (state === 3) ? (1 / 19.9) : (1 / 39.9);
+                    let fallProb = (state === 3) ? (1 / 58.4) : (1 / 116.8);
+                    let eventRate = hitProb + fallProb;
+
+                    if (Math.random() < (hitProb / eventRate)) {
+                        let r = Math.random();
+                        let isVV = false;
+                        if (state === 1) {
+                            if (r < 0.05) { isVV = true; state = 1; }
+                            else { payout += 1500; state = 2; }
+                        } else if (state === 2) {
+                            if (r < 0.05) { isVV = true; state = 1; }
+                            else { payout += 1500; state = 3; }
+                        } else {
+                            isVV = true; state = 1; // CLIMAX中は確定VV
+                        }
+
+                        if (isVV) {
+                            payout += 3000 + getExtraBonus();
+                        }
+                    } else {
+                        active = false;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 219.9) {
+                    if (Math.random() < 0.26) {
+                        payout += 3000 + getExtraBonus();
+                        if (payout < 95000) runRush();
+                    } else {
+                        payout += 300;
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simIkkitousen() {
+            let spins = 0, payout = 0;
+
+            function runLT() {
+                let st = 134;
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 84.7) {
+                        payout += (Math.random() < 0.50) ? 3000 : 1500;
+                        st = 134;
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
+            function runST() {
+                let st = 100;
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 109.6) {
+                        payout += 1500;
+                        if (Math.random() < 0.50) {
+                            runLT();
+                            return; // 進入 LT 後跳出 ST
+                        } else {
+                            st = 100;
+                        }
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 319.7) {
+                    payout += 300;
+                    if (Math.random() < 0.51) {
+                        if (payout < 95000) runST();
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simAkudama() {
+            let spins = 0, payout = 0;
+
+            function runRush() {
+                let is_lt = false;
+                let hits_10r = 0;
+                let st_remain = 78 + 4; // 初回は78回+残保4
+
+                while (st_remain > 0 && payout < 95000) {
+                    let max_st = is_lt ? 120 : 78;
+                    let current_spin = (max_st + 4) - st_remain + 1;
+                    let is_zan = current_spin > max_st;
+
+                    if (Math.random() < 1 / 85.9) {
+                        // 残り保留当選時は初期状態にリセット
+                        if (is_zan) {
+                            is_lt = false;
+                            hits_10r = 0;
+                        }
+
+                        if (is_lt && !is_zan) {
+                            payout += 3000;
+                            st_remain = 120 + 4;
+                        } else {
+                            if (Math.random() < 0.19) {
+                                // 19% リセット
+                                st_remain = 78 + 4;
+                            } else {
+                                // 81% 1500玉
+                                payout += 1500;
+                                hits_10r++;
+                                if (hits_10r >= 2) {
+                                    is_lt = true;
+                                    st_remain = 120 + 4;
+                                } else {
+                                    st_remain = 78 + 4;
+                                }
+                            }
+                        }
+                    } else {
+                        st_remain--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 319.6) {
+                    payout += 600;
+                    if (payout < 95000) runRush();
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
@@ -3552,13 +3803,17 @@
             await runMachineSim('sao_senkou', simSaoSenkou, 1000 / 17, iterations);
             await runMachineSim('tolove', simTolove, 1000 / 17, iterations); // 1000円=17回転 (預設)
             await runMachineSim('madoka3', simMadoka3, 1000 / 20, iterations);
-            await runMachineSim('kabaneri2', simKabaneri2, 1000 / 16, iterations); // 1000円=16回転 (預設)
+            await runMachineSim('kabaneri2', simKabaneri2, 1000 / 17, iterations); // 1000円=16回転 (預設)
             await runMachineSim('cafeterrace', simCafeterrace, 1000 / 27, iterations); // 1000円=27回転
             await runMachineSim('kinnikuman', simKinnikuman, 1000 / 17, iterations);
             await runMachineSim('tokyorevengers', simTokyoRevengers, 1000 / 16, iterations);
-            await runMachineSim('tokyorevengers_e', simTokyoRevengers_e, 1000 / 16, iterations);
+            await runMachineSim('tokyorevengers_e', simTokyoRevengers_e, 1000 / 17, iterations);
             await runMachineSim('baki2', simBaki2, 1000 / 16, iterations);
             await runMachineSim('gensan2', simGensan2, 1000 / 18, iterations);
+            await runMachineSim('utaware', simUtaware, 1000 / 17, iterations);
+            await runMachineSim('valkyrie', simValkyrie, 1000 / 17, iterations);
+            await runMachineSim('ikkitousen', simIkkitousen, 1000 / 30, iterations);
+            await runMachineSim('akudama', simAkudama, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);
