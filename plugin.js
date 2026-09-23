@@ -66,7 +66,9 @@ pluginModalStyle.innerHTML = `
     table.data-lamp td:nth-child(2) .effect-ghoul-legend,
     table.data-lamp td:nth-child(2) .effect-bl-legend,
     table.data-lamp td:nth-child(2) .effect-lycoris-legend,
-    table.data-lamp td:nth-child(2) .effect-mushoku-legend {
+    table.data-lamp td:nth-child(2) .effect-mushoku-legend,
+    table.data-lamp td:nth-child(2) .effect-sao-hero,
+    table.data-lamp td:nth-child(2) .effect-sao-staycool {
         zoom: 0.75;
         display: inline-block;
     }
@@ -78,7 +80,13 @@ document.head.appendChild(pluginModalStyle);
 window.getPluginPlayerNameHtml = function (userObj, isRank1, uid = null, disableClick = false) {
     const titles = window.globalUsersData || {};
     const equippedTitle = uid && titles[uid] ? titles[uid].equipped_title : "auto";
-    return window.HallShared.getTitleHtml(userObj, {
+    const titleSource = uid && titles[uid];
+    const titleUserObj = titleSource ? {
+        ...userObj,
+        title_sao_hero: !!titleSource.title_sao_hero,
+        title_sao_staycool: !!titleSource.title_sao_staycool
+    } : userObj;
+    return window.HallShared.getTitleHtml(titleUserObj, {
         isRank1,
         uid,
         disableClick,
@@ -106,6 +114,7 @@ window.showPluginProfile = function (uid) {
         // 🌟 新增資料對接
         title_bl_legend: u.title_bl_legend, title_ghoul_legend: u.title_ghoul_legend,title_ghoul_charge: u.title_ghoul_charge,
         title_lycoris_legend: u.title_lycoris_legend, title_mushoku_legend: u.title_mushoku_legend, title_egoist: u.title_egoist,
+        title_sao_hero: u.title_sao_hero, title_sao_staycool: u.title_sao_staycool,
         equipped_title: u.equipped_title,
         isSelf: firebase.auth().currentUser && firebase.auth().currentUser.uid === uid
     };
@@ -144,6 +153,8 @@ window.showPluginProfile = function (uid) {
     if (u.title_ghoul_charge) bHtml += `<div class="badge active" style="border-color: #fff; color: #ff1744; text-shadow: 0 0 5px rgba(255,0,0,0.5);">🥀 何もできないのは…</div>`;
     if (u.title_lycoris_legend) bHtml += `<div class="badge active" style="border-color: #ff5252; color: #ff5252;">💩 ホットでプレミアムうんこ</div>`;
     if (u.title_mushoku_legend) bHtml += `<div class="badge active" style="border-color: #4fc3f7; color: #4fc3f7;">🪄 ロキシーのパンツ御神体</div>`;
+    if (u.title_sao_hero) bHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff;">🌹 ぼくの英雄</div>`;
+    if (u.title_sao_staycool) bHtml += `<div class="badge active" style="border-color: #7c4dff; color: #b388ff;">⚔️ STAY COOL</div>`;
 
     let badgesEl = document.getElementById('p-modal-badges');
     if (badgesEl.innerHTML !== bHtml) badgesEl.innerHTML = bHtml;
@@ -152,7 +163,7 @@ window.showPluginProfile = function (uid) {
     let selectorEl = document.getElementById('p-modal-title-selector');
     if (firebase.auth().currentUser && firebase.auth().currentUser.uid === uid) {
         let eq = u.equipped_title || "auto";
-        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.is_vip}-${u.title_bl_legend}-${u.title_egoist}-${u.title_ghoul_legend}-${u.title_lycoris_legend}-${u.title_mushoku_legend}`;
+        let renderKey = `${eq}-${u.has_completed}-${u.title_godpull}-${u.title_runthrough}-${u.title_hell}-${u.is_vip}-${u.title_bl_legend}-${u.title_egoist}-${u.title_ghoul_legend}-${u.title_lycoris_legend}-${u.title_mushoku_legend}-${u.title_sao_hero}-${u.title_sao_staycool}`;
 
         if (selectorEl.getAttribute('data-render-key') !== renderKey) {
             let isAuto = eq === "auto"; let isNone = eq === "none"; let isCustom = !isAuto && !isNone;
@@ -180,6 +191,8 @@ window.showPluginProfile = function (uid) {
                             ${u.title_ghoul_charge ? `<label><input type="checkbox" class="t-check" value="ghoul_charge" ${eq.includes('ghoul_charge') ? 'checked' : ''}> 🥀 何もできないのは、もう嫌なんだ</label><br>` : ''}
                             ${u.title_lycoris_legend ? `<label><input type="checkbox" class="t-check" value="lycoris_legend" ${eq.includes('lycoris_legend') ? 'checked' : ''}> 💩 プレミアムうんこ</label><br>` : ''}
                             ${u.title_mushoku_legend ? `<label><input type="checkbox" class="t-check" value="mushoku_legend" ${eq.includes('mushoku_legend') ? 'checked' : ''}> 🪄 ロキシーのパンツ</label><br>` : ''}
+                            ${u.title_sao_hero ? `<label><input type="checkbox" class="t-check" value="sao_hero" ${eq.includes('sao_hero') ? 'checked' : ''}> 🌹 ぼくの英雄</label><br>` : ''}
+                            ${u.title_sao_staycool ? `<label><input type="checkbox" class="t-check" value="sao_staycool" ${eq.includes('sao_staycool') ? 'checked' : ''}> ⚔️ STAY COOL</label><br>` : ''}
                         </div>
                     </div>
                     <button onclick="window.saveTitleSettings('${uid}')" style="margin-top: 12px; width: 100%; padding: 8px; background: #00e5ff; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">💾 設定を保存</button>

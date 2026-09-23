@@ -691,6 +691,7 @@
             }
             line.classList.remove("is-visible");
             overlay.classList.remove("is-active");
+            await window.HallShared.awardTitle("title_sao_hero", "🌹 ぼくの英雄");
         }
 
         async function playStayCoolBlackout() {
@@ -745,6 +746,7 @@
 
             line.classList.remove("is-visible");
             overlay.classList.remove("is-active");
+            await window.HallShared.awardTitle("title_sao_staycool", "⚔️ STAY COOL");
         }
 
         async function playRouletteAnimation(title, targetAmount) {

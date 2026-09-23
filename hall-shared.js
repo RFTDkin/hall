@@ -29,6 +29,8 @@
         const isGhoulCharge = !!userObj.title_ghoul_charge;
         const isLycoris = !!userObj.title_lycoris_legend;
         const isMushoku = !!userObj.title_mushoku_legend;
+        const isSaoHero = !!userObj.title_sao_hero;
+        const isSaoStaycool = !!userObj.title_sao_staycool;
 
         const isSupreme = isComplete && !!opts.isRank1;
         const isLegend = isSupreme && isBankrupt && isHell && isGod && isRunthrough && isIchigeki;
@@ -66,6 +68,8 @@
                 if (selectedTitles.includes("ghoul_charge") && isGhoulCharge) html = `<span class="effect-ghoul-flower" style="display: inline-block; position: relative;">${html}</span>`; // 👈 これを追加
                 if (selectedTitles.includes("lycoris_legend") && isLycoris) html = `<span class="effect-lycoris-legend" style="display: inline-block; position: relative;">${html}</span>`;
                 if (selectedTitles.includes("mushoku_legend") && isMushoku) html = `<span class="effect-mushoku-legend" style="display: inline-block; position: relative;">${html}</span>`;
+                if (selectedTitles.includes("sao_hero") && isSaoHero) html = `<span class="effect-sao-hero" style="display: inline-block; position: relative;">${html}</span>`;
+                if (selectedTitles.includes("sao_staycool") && isSaoStaycool) html = `<span class="effect-sao-staycool" style="display: inline-block; position: relative;">${html}</span>`;
 
                 if (selectedTitles.includes("supreme") && isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
                 html = `<span class="title-effect">${html}</span>`;
@@ -75,7 +79,7 @@
         } else {
             if (isBankrupt) html = `<span class="effect-bankrupt" style="display: inline-block; position: relative;">${html}</span>`;
             else if (isComplete) html = `<span class="effect-rainbow" style="display: inline-block; position: relative;">${html}</span>`;
-            else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme && !isBl && !isGhoul && !isLycoris && !isMushoku) html = `<span style="color: ${baseColor};">${html}</span>`;
+            else if (!isGod && !isRunthrough && !isIchigeki && !isHell && !isSupreme && !isBl && !isGhoul && !isLycoris && !isMushoku && !isSaoHero && !isSaoStaycool) html = `<span style="color: ${baseColor};">${html}</span>`;
             
             if (isGod) html = `<span class="effect-godpull" style="display: inline-block; position: relative;">${html}</span>`;
             if (isRunthrough) html = `<span class="effect-runthrough" style="display: inline-block; position: relative;">${html}</span>`;
@@ -90,6 +94,8 @@
             if (isGhoulCharge) html = `<span class="effect-ghoul-flower" style="display: inline-block; position: relative;">${html}</span>`; // 👈 これを追加
             if (isLycoris) html = `<span class="effect-lycoris-legend" style="display: inline-block; position: relative;">${html}</span>`;
             if (isMushoku) html = `<span class="effect-mushoku-legend" style="display: inline-block; position: relative;">${html}</span>`;
+            if (isSaoHero) html = `<span class="effect-sao-hero" style="display: inline-block; position: relative;">${html}</span>`;
+            if (isSaoStaycool) html = `<span class="effect-sao-staycool" style="display: inline-block; position: relative;">${html}</span>`;
 
             if (isSupreme) html = `<span class="effect-supreme" style="display: inline-block; position: relative;">${html}</span>`;
             html = `<span class="title-effect">${html}</span>`;
@@ -118,5 +124,17 @@
         return window.firebase.database().ref('users/' + uid).update({ equipped_title: equippedTitle }).then(() => true);
     }
 
-    window.HallShared = Object.freeze({ firebaseConfig, getTitleHtml, toggleTitleChecks, saveTitleSettings });
+    function awardTitle(titleKey, titleName) {
+        const user = window.firebase && window.firebase.auth && window.firebase.auth().currentUser;
+        if (!user || !window.firebase.database) return Promise.resolve(false);
+        const update = {};
+        update[titleKey] = true;
+        return window.firebase.database().ref('users/' + user.uid).update(update).then(() => {
+            if (window.globalUsersData && window.globalUsersData[user.uid]) window.globalUsersData[user.uid][titleKey] = true;
+            window.alert(`稱號獲得！\n${titleName}`);
+            return true;
+        });
+    }
+
+    window.HallShared = Object.freeze({ firebaseConfig, getTitleHtml, toggleTitleChecks, saveTitleSettings, awardTitle });
 }());

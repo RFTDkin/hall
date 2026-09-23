@@ -1179,7 +1179,13 @@
                 : uid && window.globalUsersData && window.globalUsersData[uid]
                     ? window.globalUsersData[uid].equipped_title || "auto"
                     : "auto";
-            return window.HallShared.getTitleHtml(userObj, {
+            const titleSource = uid && (usersData[uid] || (window.globalUsersData && window.globalUsersData[uid]));
+            const titleUserObj = titleSource ? {
+                ...userObj,
+                title_sao_hero: !!titleSource.title_sao_hero,
+                title_sao_staycool: !!titleSource.title_sao_staycool
+            } : userObj;
+            return window.HallShared.getTitleHtml(titleUserObj, {
                 isRank1,
                 uid,
                 disableClick,
@@ -1713,6 +1719,8 @@
                 title_ghoul_charge: u.title_ghoul_charge,
                 title_lycoris_legend: u.title_lycoris_legend,
                 title_mushoku_legend: u.title_mushoku_legend,
+                title_sao_hero: u.title_sao_hero,
+                title_sao_staycool: u.title_sao_staycool,
                 equipped_title: u.equipped_title, 
                 isSelf: auth.currentUser && auth.currentUser.uid === currentOpenProfileUid 
             };
@@ -1762,6 +1770,8 @@
             if (u.title_ghoul_charge) badgesHtml += `<div class="badge active" style="border-color: #ff1744; color: #ff1744;">🥀 何もできないのは、もう嫌なんだ</div>`;
             if (u.title_lycoris_legend) badgesHtml += `<div class="badge active" style="border-color: #ff5252; color: #ff5252;">💩 ホットでプレミアムうんこ</div>`;
             if (u.title_mushoku_legend) badgesHtml += `<div class="badge active" style="border-color: #4fc3f7; color: #4fc3f7;">🪄 ロキシーのパンツ御神体</div>`;
+            if (u.title_sao_hero) badgesHtml += `<div class="badge active" style="border-color: #00e5ff; color: #00e5ff;">🌹 ぼくの英雄</div>`;
+            if (u.title_sao_staycool) badgesHtml += `<div class="badge active" style="border-color: #7c4dff; color: #b388ff;">⚔️ STAY COOL</div>`;
             
             let badgesEl = document.getElementById('modal-badges');
             if (badgesEl.innerHTML !== badgesHtml) badgesEl.innerHTML = badgesHtml;
@@ -1769,7 +1779,7 @@
             let selectorEl = document.getElementById('modal-title-selector');
             if (auth.currentUser && auth.currentUser.uid === currentOpenProfileUid) {
                 let eq = u.equipped_title || "auto";
-                let renderKey = `${eq}-${u.has_completed}-...-${u.title_lycoris_legend}-${u.title_mushoku_legend}-${u.title_egoist}`;
+                let renderKey = `${eq}-${u.has_completed}-...-${u.title_lycoris_legend}-${u.title_mushoku_legend}-${u.title_egoist}-${u.title_sao_hero}-${u.title_sao_staycool}`;
                 
                 if (selectorEl.getAttribute('data-render-key') !== renderKey) {
                     let isAuto = eq === "auto";
@@ -1797,6 +1807,8 @@
                                     ${u.title_ghoul_charge ? `<label><input type="checkbox" class="t-check" value="ghoul_charge" ${eq.includes('ghoul_charge') ? 'checked' : ''}> 🥀 何もできないのは、もう嫌なんだ</label><br>` : ''}
                                     ${u.title_lycoris_legend ? `<label><input type="checkbox" class="t-check" value="lycoris_legend" ${eq.includes('lycoris_legend') ? 'checked' : ''}> 💩 プレミアムうんこ</label><br>` : ''}
                                     ${u.title_mushoku_legend ? `<label><input type="checkbox" class="t-check" value="mushoku_legend" ${eq.includes('mushoku_legend') ? 'checked' : ''}> 🪄 ロキシーのパンツ</label><br>` : ''}
+                                    ${u.title_sao_hero ? `<label><input type="checkbox" class="t-check" value="sao_hero" ${eq.includes('sao_hero') ? 'checked' : ''}> 🌹 ぼくの英雄</label><br>` : ''}
+                                    ${u.title_sao_staycool ? `<label><input type="checkbox" class="t-check" value="sao_staycool" ${eq.includes('sao_staycool') ? 'checked' : ''}> ⚔️ STAY COOL</label><br>` : ''}
                                 </div>
                             </div>
                             <button onclick="window.saveTitleSettings('${currentOpenProfileUid}')" style="margin-top: 12px; width: 100%; padding: 8px; background: #00e5ff; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">💾 設定を保存</button>
