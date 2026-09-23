@@ -365,12 +365,15 @@
                 this.history = []; 
             }
 
+            // 🌟 ぼくの英雄 / 咲け、花たち (完美 Loop 版)
             async play_plus_alpha_loop(name) {
+                addLog(`\n🌈 ${name} 発動！！！`, "color-wou");
                 let driving = true;
-                let script_events = [];
-                let expected_total = 0;
+                let display_total = 0;
+                let loop_count = 1; // 紀錄係第幾次轉
                 
                 while (driving) {
+                    // 🌟 測試必中 +α 可以將下面改成： let sd = loop_count === 1 ? 0.999 : Math.random();
                     let sd = Math.random();
                     let current_gain = 0;
                     let is_to_bonus = false;
@@ -384,42 +387,49 @@
                     else if (sd < 0.990) { current_gain = 9000; is_to_bonus = true; } 
                     else { current_gain = 7500; is_in_drive = true; }
                     
-                    expected_total += current_gain;
-                    script_events.push({ gain: current_gain, is_to_bonus, is_in_drive });
+                    // 1. 播轉盤 (如果中 1G連，指針向 9000+α)
+                    let roulette_target = is_in_drive ? "9000+α" : current_gain;
+                    let display_title = loop_count > 1 ? `+α 追擊！` : name;
+                    await playRouletteAnimation(display_title, roulette_target);
                     
-                    if (!is_in_drive) driving = false; 
-                }
-
-                // 決定轉盤目標：如果中咗 DRIVE in DRIVE (1G連)，直接指去 9000+α
-                let roulette_target = script_events[0].gain;
-                if (script_events[0].is_in_drive) roulette_target = "9000+α";
-                
-                await playRouletteAnimation(name, roulette_target);
-                
-                addLog(`\n🌈 ${name} 発動！！！`, "color-wou");
-                let display_total = 0;
-                
-                for (let ev of script_events) {
-                    this.session_payout += ev.gain;
-                    this.session_rush_count += (ev.gain / 1500); // 內部依然精準計算連莊數
-                    display_total += ev.gain;
+                    // 2. 如果中 1G連，即刻播 STAY COOL！
+                    if (is_in_drive) {
+                        await playStayCoolBlackout();
+                    }
                     
-                    addLog(`✨ 獲得！ (+${ev.gain})  [計: ${display_total}]`, "color-hit");
-                    updateUI();
-                    await sleep(500);
+                    // 3. 消化今次抽出嚟嘅玉數
+                    let chunks = current_gain / 1500;
+                    for (let i = 0; i < chunks; i++) {
+                        display_total += 1500;
+                        this.session_payout += 1500;
+                        this.session_rush_count++; 
+                        addLog(`✨ V-STOCK 消化！ (+1500)  [計: ${display_total}]`, "color-hit");
+                        updateUI();
+                        await sleep(250);
+                    }
 
-                    if (ev.is_to_bonus) addLog(`✨ ９０００BONUS！！！`, "color-hit");
-                    if (ev.is_in_drive) addLog(`⚡ ９０００✙α！！！`, "color-wou");
+                    if (is_to_bonus) addLog(`✨ ９０００BONUS！！！`, "color-hit");
+                    if (is_in_drive) addLog(`⚡ ９０００✙α！！！ (ループ継続)`, "color-wou");
+                    
+                    // 4. 判斷係咪繼續
+                    if (!is_in_drive) {
+                        driving = false; 
+                    }
+                    loop_count++;
                 }
+                
                 addLog(`👑 ${name} トータル: ${display_total}個 獲得！`);
             }
 
+            // 🌟 SWORD DRIVE 專用 (完美 Loop 版)
             async play_sword_drive_loop() {
+                addLog(`\n🌈 神器解放 SWORD DRIVE 発動！！！`, "color-wou");
                 let driving = true;
-                let script_events = [];
-                let expected_total = 0;
+                let display_total = 0;
+                let loop_count = 1;
                 
                 while (driving) {
+                    // 🌟 測試必中 DRIVE in DRIVE 可以將下面改成： let sd = loop_count === 1 ? 0.999 : Math.random();
                     let sd = Math.random();
                     let current_gain = 0;
                     let is_to_bonus = false;
@@ -433,29 +443,35 @@
                     else if (sd < 0.990) { current_gain = 9000; is_to_bonus = true; } 
                     else { current_gain = 7500; is_in_drive = true; }
                     
-                    expected_total += current_gain;
-                    script_events.push({ gain: current_gain, is_to_bonus, is_in_drive });
+                    // 1. 播滑動數字
+                    await playSlideAnimation(current_gain);
                     
-                    if (!is_in_drive) driving = false; 
+                    // 2. 如果中 DRIVE in DRIVE，數字顯示 7500 後突襲 STAY COOL！
+                    if (is_in_drive) {
+                        await playStayCoolBlackout();
+                    }
+                    
+                    // 3. 消化今次抽出嚟嘅玉數
+                    let chunks = current_gain / 1500;
+                    for (let i = 0; i < chunks; i++) {
+                        display_total += 1500;
+                        this.session_payout += 1500;
+                        this.session_rush_count++;
+                        addLog(`✨ SWORD DRIVE 獲得！ (+1500) [計: ${display_total}]`, "color-hit");
+                        updateUI();
+                        await sleep(250);
+                    }
+
+                    if (is_to_bonus) addLog(`✨ DRIVE to BONUS ！ (9000BONUS)`, "color-hit");
+                    if (is_in_drive) addLog(`🔥 DRIVE in DRIVE 発生！！ (1G連継続)`, "color-wou");
+                    
+                    // 4. 判斷係咪繼續
+                    if (!is_in_drive) {
+                        driving = false; 
+                    }
+                    loop_count++;
                 }
-
-                await playSlideAnimation(expected_total);
-
-                addLog(`\n🌈 神器解放 SWORD DRIVE 発動！！！`, "color-wou");
-                let display_total = 0;
                 
-                for (let ev of script_events) {
-                    this.session_payout += ev.gain;
-                    this.session_rush_count += (ev.gain / 1500);
-                    display_total += ev.gain;
-                    
-                    addLog(`✨ SWORD DRIVE 獲得！ (+${ev.gain}) [計: ${display_total}]`, "color-hit");
-                    updateUI();
-                    await sleep(500);
-
-                    if (ev.is_to_bonus) addLog(`✨ DRIVE to BONUS ！ (9000BONUS)`, "color-hit");
-                    if (ev.is_in_drive) addLog(`🔥 DRIVE in DRIVE 発生！！ (1G連継続)`, "color-wou");
-                }
                 addLog(`👑 SWORD DRIVE トータル: ${display_total}個 獲得！`);
             }
 
@@ -673,6 +689,60 @@
                 line.classList.add("is-visible");
                 await sleep(3000);
             }
+            line.classList.remove("is-visible");
+            overlay.classList.remove("is-active");
+        }
+
+        async function playStayCoolBlackout() {
+            const overlay = document.getElementById("blackout-overlay");
+            const line = document.getElementById("blackout-line");
+
+            if (!overlay || !line) return;
+
+            // 🎵 用返「ぼくの英雄」嗰個沉穩低頻嘅經典 Blackout 音效
+            try {
+                if (window.audioCtx && window.audioCtx.state !== "suspended") {
+                    const ctx = window.audioCtx;
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const filter = ctx.createBiquadFilter();
+                    const gainNode = ctx.createGain();
+
+                    osc1.type = "sine";
+                    osc1.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc1.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+                    osc2.type = "square";
+                    osc2.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc2.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.2);
+                    filter.type = "lowpass";
+                    filter.frequency.setValueAtTime(800, ctx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+                    osc1.connect(gainNode);
+                    osc2.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    osc1.start(ctx.currentTime);
+                    osc2.start(ctx.currentTime);
+                    osc1.stop(ctx.currentTime + 1.2);
+                    osc2.stop(ctx.currentTime + 1.2);
+                }
+            } catch (e) {}
+
+            // 設定文字為兩行嘅 STAY COOL
+            line.innerHTML = "STAY<br>COOL";
+            line.classList.remove("is-visible");
+            void line.offsetWidth;
+
+            // 觸發全黑同彩虹字體動畫
+            overlay.classList.add("is-active");
+            line.classList.add("is-visible");
+
+            // 畀玩家欣賞 3 秒
+            await sleep(3000);
+
             line.classList.remove("is-visible");
             overlay.classList.remove("is-active");
         }
