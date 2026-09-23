@@ -364,9 +364,8 @@
 </head>
 
 <body>
-    <!-- 🎵 隱藏嘅 YouTube 播放器 (實體 iframe 預載，確保 Local Server 都行到) -->
-    <iframe id="yt-player" src="https://www.youtube.com/embed/K-XH333Tofo?enablejsapi=1&controls=0&autoplay=0" style="position:absolute; width:1px; height:1px; top:-9999px; left:-9999px;" frameborder="0" allow="autoplay"></iframe>
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- 🎵 隱藏嘅 YouTube 播放器 -->
+    <div id="yt-player" style="position:absolute; width:1px; height:1px; top:-9999px; left:-9999px;"></div>
 
     <!-- 🌈 全回轉圖層 -->
     <div id="zenkaiten-overlay" aria-hidden="true">
@@ -453,8 +452,9 @@
             await sleep(3000); // 等待白屏完全覆蓋
 
             // 2. 🎵 播放音樂 (呢段就係發聲嘅關鍵！)
-            if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+            if (ytReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
                 ytPlayer.unMute(); // 確保解除靜音
+                ytPlayer.setVolume(100);
                 ytPlayer.seekTo(0);
                 ytPlayer.playVideo();
             } else {
@@ -572,15 +572,40 @@
         }
         
         const sleep = ms => new Promise(r => setTimeout(r, ms));
+        // 🌟 用同 ghoul999 一樣嘅方式動態載入 YouTube API，避免 F5 後初始化競速 🌟
+        const ytScript = document.createElement('script');
+        ytScript.src = "https://www.youtube.com/iframe_api";
+        const firstScript = document.getElementsByTagName('script')[0];
+        firstScript.parentNode.insertBefore(ytScript, firstScript);
+
         // 🌟 YouTube API 初始化 (保證加載寫法) 🌟
         let ytPlayer;
         let ytReady = false;
+        let ytUnlockRequested = false;
+        let ytAudioUnlocked = false;
+
+        function unlockYouTubeAudio() {
+            if (!ytReady || !ytPlayer || typeof ytPlayer.playVideo !== 'function' || ytAudioUnlocked) return;
+
+            ytPlayer.mute();
+            ytPlayer.playVideo();
+            ytAudioUnlocked = true;
+            setTimeout(() => {
+                ytPlayer.pauseVideo();
+                ytPlayer.seekTo(0);
+                ytPlayer.unMute();
+                ytPlayer.setVolume(100);
+            }, 500);
+        }
 
         window.onYouTubeIframeAPIReady = function() {
             ytPlayer = new YT.Player('yt-player', {
+                height: '1', width: '1', videoId: 'K-XH333Tofo',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'start': 0, 'playsinline': 1, 'enablejsapi': 1 },
                 events: { 
                     'onReady': () => { 
                         ytReady = true; 
+                        if (ytUnlockRequested) unlockYouTubeAudio();
                         console.log("YouTube 準備就緒！"); 
                     } 
                 }
@@ -1077,14 +1102,9 @@
                 video7500.load();
                 videoBL1500LT.load();
                 
-                // 👇 借玩家撳掣呢一下，瞬間 Play 再 Pause 嚟解鎖 YouTube 權限 👇
-                if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                    try {
-                        ytPlayer.unMute();
-                        ytPlayer.playVideo();
-                        setTimeout(() => { ytPlayer.pauseVideo(); }, 150); // 播 0.15 秒即刻停
-                    } catch(e) {}
-                }
+                // 👇 借玩家撳掣呢一下解鎖 YouTube，API 延遲 ready 時由 onReady 補做 👇
+                ytUnlockRequested = true;
+                unlockYouTubeAudio();
                 
                 audioUnlocked = true;
             }
