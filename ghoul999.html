@@ -273,6 +273,18 @@
         .flower-white { color: #e0e0e0; text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff; opacity: 0; }
         .flower-red { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 30px #cc0000; opacity: 0; }
         .flower-overlay-container.is-active .flower-white { animation: flower-white-anim 16s forwards; }
+        .flower-message {
+            position: absolute; top: 50%; left: 50%; z-index: 6; display: flex; align-items: center; justify-content: center;
+            transform: translate(-50%, -50%);
+            min-width: min(90vw, 760px); min-height: 2.2em; padding: 0.35em 0.6em;
+            background: #050505; color: #d50000; font-family: "Yu Mincho", "MS Mincho", serif;
+            font-size: clamp(1.4rem, 4.5vw, 3.2rem); font-weight: bold; letter-spacing: 0.08em;
+            text-align: center; text-shadow: 0 0 10px #ff0000; white-space: nowrap;
+        }
+        .flower-message span { position: absolute; opacity: 0; }
+        .flower-overlay-container.is-active .flower-message { animation: flower-message-bg-anim 16s forwards; }
+        .flower-overlay-container.is-active .flower-message span:first-child { animation: flower-message-first-anim 16s forwards; }
+        .flower-overlay-container.is-active .flower-message span:last-child { animation: flower-message-second-anim 16s forwards; }
         .flower-overlay-container.is-active .flower-red { animation: flower-red-anim 16s forwards; }
         
         .blackout-curtain { position: absolute; inset: 0; background: #000; opacity: 0; z-index: 5; }
@@ -317,6 +329,9 @@
         /* 0 - 8秒: 彼岸花由白變紅 */
         @keyframes flower-white-anim { 0% { opacity: 0; } 10% { opacity: 0.7; filter: blur(0px); } 40% { opacity: 0.7; filter: blur(2px); } 50%, 100% { opacity: 0; } }
         @keyframes flower-red-anim { 0%, 20% { opacity: 0; } 40% { opacity: 1; filter: blur(0px); } 49% { opacity: 1; filter: blur(0px); transform: scale(1.05); } 50%, 100% { opacity: 0; } }
+            @keyframes flower-message-bg-anim { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+            @keyframes flower-message-first-anim { 0%, 24% { opacity: 1; } 25%, 100% { opacity: 0; } }
+            @keyframes flower-message-second-anim { 0%, 24% { opacity: 0; } 25%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
         
         /* 第8秒: 彼岸花熄滅，進入全黑 */
         @keyframes curtain-anim { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
@@ -380,10 +395,14 @@
         </div>
 
         <div class="ghoul-text">僕は、喰種だ</div>
+            <div class="flower-message">
+                <span>間違ってるのは僕じゃない</span>
+                <span>間違ってるのはこの世界だ</span>
+            </div>
     </div>
     
     <!-- 🌟 YouTube 隱藏音頻播放器 🌟 -->
-    <div id="yt-audio-player" style="position: absolute; top: -9999px; width: 0; height: 0;"></div>
+    <div id="yt-audio-player" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px;"></div>
 
     <h1>🎰 柏青哥模擬器 <br><span style="font-size: 0.5em; color: #ffffff;">P 東京喰種 999ver</span></h1>
 
@@ -441,11 +460,31 @@
 
         let ytPlayer;
         let ytReady = false;
+        let ytUnlockRequested = false;
+        let ytAudioUnlocked = false;
+
+        function unlockYouTubeAudio() {
+            if (!ytReady || !ytPlayer || typeof ytPlayer.playVideo !== 'function' || ytAudioUnlocked) return;
+
+            ytPlayer.mute();
+            ytPlayer.playVideo();
+            ytAudioUnlocked = true;
+            setTimeout(() => {
+                ytPlayer.pauseVideo();
+                ytPlayer.seekTo(0);
+                ytPlayer.unMute();
+                ytPlayer.setVolume(100);
+            }, 500);
+        }
+
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('yt-audio-player', {
-                height: '0', width: '0', videoId: 'p0Z8DgA0N34',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'start': 0 },
-                events: { 'onReady': () => { ytReady = true; } }
+                height: '1', width: '1', videoId: 'p0Z8DgA0N34',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'start': 0, 'playsinline': 1, 'enablejsapi': 1 },
+                events: { 'onReady': () => {
+                    ytReady = true;
+                    if (ytUnlockRequested) unlockYouTubeAudio();
+                } }
             });
         }
 
@@ -528,6 +567,7 @@
                 if (ytReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
                     ytPlayer.seekTo(0);
                     ytPlayer.unMute();
+                    ytPlayer.setVolume(100);
                     ytPlayer.playVideo();
                     setTimeout(() => {
                         ytPlayer.pauseVideo(); // 播完 2 秒即刻停，陷入死寂
@@ -851,16 +891,9 @@
                     if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
                 }
                 
-                // 🌟 預先解鎖 YouTube 音軌 (點擊瞬間即播即停) 🌟
-                if (ytReady && ytPlayer && typeof ytPlayer.mute === 'function') {
-                    ytPlayer.mute();
-                    ytPlayer.playVideo();
-                    setTimeout(() => {
-                        ytPlayer.pauseVideo();
-                        ytPlayer.seekTo(0);
-                        ytPlayer.unMute();
-                    }, 500);
-                }
+                // 🌟 預先解鎖 YouTube 音軌 (API 延遲 ready 時會由 onReady 補做) 🌟
+                ytUnlockRequested = true;
+                unlockYouTubeAudio();
                 audioUnlocked = true;
             }
 
