@@ -140,12 +140,70 @@
         table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
         table.data-lamp td.hit-payout { color: #ff1744; }
         .empty-row { color: #444 !important; }
+
+        .judgement-overlay {
+            position: fixed; inset: 0; z-index: 19000; display: flex; align-items: center; justify-content: space-around;
+            pointer-events: none; background: #000; opacity: 0; visibility: hidden; padding: 0 8vw;
+        }
+        .judgement-overlay.is-active { opacity: 1; visibility: visible; }
+        .judgement-number {
+            color: #000; font-family: "Arial Black", Impact, sans-serif; font-size: clamp(4rem, 18vw, 12rem);
+            font-weight: 900; line-height: 1; text-shadow: none; transition: color 0.08s, text-shadow 0.08s;
+        }
+        .judgement-number.is-glowing { color: #fff; text-shadow: 0 0 8px #fff, 0 0 25px #ffeb3b, 0 0 55px #ff9800; }
+        .judgement-number.is-result { color: #ffeb3b; text-shadow: 0 0 12px #fff, 0 0 35px #ff9800, 0 0 70px #ffeb3b; }
+
+        .blackout-overlay {
+            position: fixed; inset: 0; z-index: 20000; display: flex; align-items: center; justify-content: center;
+            pointer-events: none; background: #000; opacity: 0; visibility: hidden;
+        }
+        .blackout-overlay.is-active { opacity: 1; visibility: visible; }
+        .blackout-overlay::before {
+            content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; filter: contrast(1.5);
+            background:
+                radial-gradient(ellipse 150% 6% at center, #000 5%, #0011ff 12%, #ffd700 22%, #00aaff 40%, transparent 60%),
+                radial-gradient(ellipse 8% 55% at center, #000 5%, #0011ff 15%, #ffd700 25%, #00aaff 45%, transparent 65%),
+                #fff;
+        }
+        .blackout-overlay.is-active::before { animation: blackout-flash 6s forwards; }
+        .blackout-message {
+            display: flex; flex-direction: column; align-items: center; gap: 0.2em;
+            font-family: "Arial Black", Impact, sans-serif; font-size: clamp(1.4rem, 5vw, 4rem);
+            line-height: 1.2; letter-spacing: 0.04em; text-align: center;
+        }
+        .blackout-line {
+            display: none; font-weight: 900;
+            background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #c500ff, #ff0000);
+            background-size: 200% 100%; background-clip: text; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75));
+        }
+        .blackout-line.is-visible { display: block; animation: blackout-line-pop 0.7s ease-out, blackout-rainbow 2s linear infinite; }
+        @keyframes blackout-rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes blackout-line-pop { 0% { opacity: 0; transform: scale(0.7); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes blackout-flash {
+            0% { opacity: 0; transform: scale(0.2) scaleY(0.05); filter: brightness(2); }
+            2% { opacity: 1; transform: scale(1) scaleY(1); filter: brightness(2); }
+            10% { opacity: 0; transform: scale(1.5) scaleY(2); filter: brightness(1); }
+            100% { opacity: 0; }
+        }
     </style>
     <link rel="stylesheet" href="mobile.css">
     <link rel="stylesheet" href="hall-titles.css">
 </head>
 
 <body>
+
+    <div id="judgement-overlay" class="judgement-overlay" aria-hidden="true">
+        <div id="judgement-1500" class="judgement-number">1500</div>
+        <div id="judgement-7500" class="judgement-number">7500</div>
+    </div>
+
+    <div id="blackout-overlay" class="blackout-overlay" aria-hidden="true">
+        <div class="blackout-message">
+            <div id="garo-blackout-lt" class="blackout-line">魔戒CHANCE LT突入!</div>
+            <div id="garo-blackout-bonus" class="blackout-line">おめでとう<br>7500BONUS！</div>
+        </div>
+    </div>
 
     <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">e牙狼12 (1/349.99)</span></h1>
 
@@ -246,12 +304,16 @@
                 addLog(`\n===== ⚔️ 極限7500バトル (1回転勝負) =====`, "color-ultimate");
                 await sleep(2000); // 停頓營造緊張感
 
-                if (Math.random() < 0.50) {
+                const battleSuccess = Math.random() < 0.50;
+                await playGaroJudgement演出(battleSuccess ? 7500 : 1500);
+
+                if (battleSuccess) {
                     this.session_rush_count += 1;
                     this.session_payout += 7500;
                     addLog(`🌈 牙狼剣を押し込め！！ 撃破大成功！`, "color-garo");
                     addLog(`👑 10R×5回 7500個獲得 ＆ 魔戒CHANCE LT 発動！！`, "color-ultimate");
                     addLog(`💰 累積出玉: ${this.session_payout} 個`);
+                    await playGaroBlackout演出("lt");
                     updateUI();
                     await sleep(1500);
                     await this.play_makai_lt();
@@ -283,6 +345,7 @@
                         addLog(`🌈 超魔戒BONUS！！ 10R×5回 7500個獲得！ (總 ${this.session_rush_count + 1}連)`, "color-ultimate");
                         addLog(`💰 累積出玉: ${this.session_payout} 個`);
                         addLog("🐺 魔戒CHANCE LT 継続!!", "color-garo");
+                        await playGaroBlackout演出("bonus");
                         updateUI();
                     } else if (lt_roll < 0.76) {
                         // 51% で 1500個継続
@@ -342,6 +405,73 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        async function playGaroJudgement演出(resultPayout) {
+            const overlay = document.getElementById("judgement-overlay");
+            const number1500 = document.getElementById("judgement-1500");
+            const number7500 = document.getElementById("judgement-7500");
+            if (!overlay || !number1500 || !number7500) return;
+
+            number1500.className = "judgement-number";
+            number7500.className = "judgement-number";
+            overlay.classList.add("is-active");
+
+            const delays = [100, 120, 150, 190, 240, 300, 380, 480, 600, 750, 950];
+            let show1500 = true;
+            for (const delay of delays) {
+                number1500.classList.toggle("is-glowing", show1500);
+                number7500.classList.toggle("is-glowing", !show1500);
+                playGaroJudgementTick音效();
+                show1500 = !show1500;
+                await sleep(delay);
+            }
+
+            number1500.classList.remove("is-glowing");
+            number7500.classList.remove("is-glowing");
+            if (resultPayout === 1500) number1500.classList.add("is-result");
+            if (resultPayout === 7500) number7500.classList.add("is-result");
+            await sleep(700);
+            overlay.classList.remove("is-active");
+        }
+
+        function playGaroJudgementTick音效() {
+            try {
+                if (!window.audioCtx) return;
+                if (window.audioCtx.state === "suspended") window.audioCtx.resume();
+                const ctx = window.audioCtx;
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                oscillator.type = "square";
+                oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.08);
+                gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.16, ctx.currentTime + 0.008);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.1);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        async function playGaroBlackout演出(mode = "lt") {
+            const overlay = document.getElementById("blackout-overlay");
+            const lines = Array.from(document.querySelectorAll("#blackout-overlay .blackout-line"));
+            const selectedLine = document.getElementById(mode === "bonus" ? "garo-blackout-bonus" : "garo-blackout-lt");
+            if (!overlay || !selectedLine) return;
+
+            overlay.classList.remove("is-active");
+            lines.forEach(line => line.classList.remove("is-visible"));
+            void overlay.offsetWidth;
+            overlay.classList.add("is-active");
+
+            selectedLine.classList.add("is-visible");
+            await sleep(3000);
+            selectedLine.classList.remove("is-visible");
+            overlay.classList.remove("is-active");
+        }
+
         function updateUI() {
             if (game.state === "NORMAL") {
                 document.getElementById("ui-spins").innerText = game.session_spins;
@@ -374,6 +504,14 @@
             if (isPlaying) return;
             isPlaying = true;
             btnPlay.disabled = true;
+
+            if (!window.audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    window.audioCtx = new AudioContextClass();
+                    if (window.audioCtx.state === "suspended") await window.audioCtx.resume();
+                }
+            }
 
             addLog("\n=== ゲーム開始 ===", "color-hit");
 
