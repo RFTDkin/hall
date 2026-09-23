@@ -335,6 +335,26 @@
     <script>
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         let audioUnlocked = false;
+        let youtubeApiPromise;
+
+        function loadYouTubeApi() {
+            if (window.YT && window.YT.Player) return Promise.resolve();
+            if (youtubeApiPromise) return youtubeApiPromise;
+
+            youtubeApiPromise = new Promise(resolve => {
+                const previousReady = window.onYouTubeIframeAPIReady;
+                window.onYouTubeIframeAPIReady = () => {
+                    if (previousReady) previousReady();
+                    resolve();
+                };
+
+                const script = document.createElement('script');
+                script.src = 'https://www.youtube.com/iframe_api';
+                document.head.appendChild(script);
+            });
+
+            return youtubeApiPromise;
+        }
 
         class SaoMachine {
             constructor() {
@@ -451,7 +471,7 @@
                     let r = Math.random();
                     
                     // 1.5% 直行 War of Underworld
-                    if (r < 0.015) {
+                    if (r < 0.999) {
                         addLog(`\n[${this.session_spins} 回轉] 🌈 全回転！！`, "color-wou");
                         await playHeroBlackout演出();
                         
@@ -705,15 +725,41 @@
             // 🌟 2. 畫面即刻變黑，畀玩家一種「入mode」嘅感覺，但數字未出
             overlay.classList.add('is-active');
             
-            // 🎵 3. 注入隱藏嘅 YouTube 播放器
+            // 🎵 3. 等 YouTube 真正進入 PLAYING，唔只係等 iframe 載入
             const ytAudio = document.createElement('div');
-            ytAudio.innerHTML = `<iframe width="0" height="0" src="https://www.youtube.com/embed/5NokjNCbCY4?autoplay=1&start=2&end=9" frameborder="0" allow="autoplay"></iframe>`;
+            ytAudio.style.cssText = 'position: fixed; width: 1px; height: 1px; left: -9999px; top: -9999px;';
+            const playerHost = document.createElement('div');
+            ytAudio.appendChild(playerHost);
             document.body.appendChild(ytAudio);
 
-            // ⏳ 4. 關鍵：強制等 1.5 秒！畀時間 YouTube Load 歌
-            await sleep(2000);
+            await loadYouTubeApi();
+            let player;
+            await new Promise(resolve => {
+                let settled = false;
+                const finish = () => {
+                    if (settled) return;
+                    settled = true;
+                    resolve();
+                };
 
-            // 🎶 5. 歌差唔多開始響！立刻解除數字封印，開始左至右滑動！
+                player = new YT.Player(playerHost, {
+                    width: '1',
+                    height: '1',
+                    videoId: '5NokjNCbCY4',
+                    playerVars: { autoplay: 1, start: 2, end: 9, controls: 0, playsinline: 1 },
+                    events: {
+                        onReady: event => event.target.playVideo(),
+                        onStateChange: event => {
+                            if (event.data === YT.PlayerState.PLAYING) finish();
+                        }
+                    }
+                });
+
+                // Autoplay 被瀏覽器封鎖時，唔好令動畫永久停住。
+                setTimeout(finish, 2000);
+            });
+
+            // 🎶 歌已開始（或 autoplay 被封鎖後超時），先解除數字封印
             numberEl.style.animation = ''; 
             numberEl.style.transform = ''; 
             
@@ -730,9 +776,8 @@
             overlay.classList.remove('is-active');
 
             // 🧹 清理 YouTube 播放器
-            if (document.body.contains(ytAudio)) {
-                ytAudio.remove();
-            }
+            if (player) player.destroy();
+            ytAudio.remove();
         }
 
         function updateUI() {
