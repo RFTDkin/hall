@@ -198,6 +198,7 @@
 
             <div style="margin-bottom: 15px;">
                 <button id="btn-play" onclick="startPlay()">▶️ 開始勇者任務</button>
+                <label><input type="checkbox" id="disable-effects"> 演出OFF</label>
                 
             </div>
 
@@ -371,6 +372,7 @@
         }
 
         async function playSevenThousandFiveHundredBlackout演出() {
+            if (document.getElementById("disable-effects").checked) return;
             try {
                 if (window.audioCtx) {
                     if (window.audioCtx.state === "suspended") await window.audioCtx.resume();

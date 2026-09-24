@@ -217,6 +217,7 @@
 
             <div style="margin-bottom: 15px;">
                 <button id="btn-play" onclick="startPlay()">▶️ 遊技開始</button>
+                <label><input type="checkbox" id="disable-effects"> 演出OFF</label>
             </div>
 
             <div class="log-container" id="log-box"></div>
@@ -406,6 +407,7 @@
         }
 
         async function playGaroJudgement演出(resultPayout) {
+            if (document.getElementById("disable-effects").checked) return;
             const overlay = document.getElementById("judgement-overlay");
             const number1500 = document.getElementById("judgement-1500");
             const number7500 = document.getElementById("judgement-7500");
@@ -456,6 +458,7 @@
         }
 
         async function playGaroBlackout演出(mode = "lt") {
+            if (document.getElementById("disable-effects").checked) return;
             const overlay = document.getElementById("blackout-overlay");
             const lines = Array.from(document.querySelectorAll("#blackout-overlay .blackout-line"));
             const selectedLine = document.getElementById(mode === "bonus" ? "garo-blackout-bonus" : "garo-blackout-lt");

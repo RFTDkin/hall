@@ -198,6 +198,7 @@
 
             <div style="margin-bottom: 15px;">
                 <button id="btn-play" onclick="startPlay()">▶️ 開始抽機</button>
+                <label><input type="checkbox" id="disable-effects"> 演出OFF</label>
                 
             </div>
 
@@ -465,6 +466,7 @@
         }
 
         async function playKonshinJudgement演出(resultPayout) {
+            if (document.getElementById("disable-effects").checked) return;
             const overlay = document.getElementById("judgement-overlay");
             const number3000 = document.getElementById("judgement-3000");
             const number9000 = document.getElementById("judgement-9000");
@@ -515,6 +517,7 @@
         }
 
         async function playNineThousandBlackout演出() {
+            if (document.getElementById("disable-effects").checked) return;
             const overlay = document.getElementById("blackout-overlay");
             const lines = Array.from(document.querySelectorAll("#blackout-overlay .blackout-line"));
             if (!overlay) return;
