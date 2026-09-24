@@ -47,7 +47,7 @@ pluginModalStyle.innerHTML = `
     
     /* 👇 🌟 替換成呢段：排行榜稱號完美防爆版面 CSS 🌟 👇 */
     table.data-lamp td {
-        height: 45px !important; /* 畀多些少呼吸空間 */
+        height: 45px !important; 
         vertical-align: middle;
     }
     table.data-lamp td:nth-child(2) {
@@ -56,21 +56,46 @@ pluginModalStyle.innerHTML = `
         text-align: center;
     }
 
-    /* 🌟 只針對「天上天下」呢個超級巨無霸，用 zoom 連同排版空間一齊縮細！ 🌟 */
+    /* 🌟 天上天下 (終極)：zoom 縮細 0.35 倍，字體反向放大 2.8 倍 🌟 */
     table.data-lamp td:nth-child(2) .effect-legend {
         zoom: 0.35; 
         display: inline-block;
+        font-size: 2.8em !important; /* 👈 補償縮放，令字體回復正常 */
     }
     
-    /* 🌟 針對其他帶有巨大背景圖嘅機種傳說稱號，輕微縮細 🌟 */
+    /* 🌟 天上天下 (普通)：zoom 縮細 0.55 倍，字體反向放大 1.8 倍 🌟 */
+    table.data-lamp td:nth-child(2) .effect-supreme {
+        zoom: 0.55; 
+        display: inline-block;
+        font-size: 1.8em !important; /* 👈 補償縮放 */
+    }
+
+    /* 🌟 其他機種傳說稱號：zoom 縮細 0.75 倍，字體反向放大 1.35 倍 🌟 */
     table.data-lamp td:nth-child(2) .effect-ghoul-legend,
     table.data-lamp td:nth-child(2) .effect-bl-legend,
     table.data-lamp td:nth-child(2) .effect-lycoris-legend,
     table.data-lamp td:nth-child(2) .effect-mushoku-legend,
     table.data-lamp td:nth-child(2) .effect-sao-hero,
-    table.data-lamp td:nth-child(2) .effect-sao-staycool {
+    table.data-lamp td:nth-child(2) .effect-sao-staycool,
+    table.data-lamp td:nth-child(2) .effect-egoist,
+    table.data-lamp td:nth-child(2) .effect-ghoul-flower {
         zoom: 0.75;
         display: inline-block;
+        font-size: 1.35em !important; /* 👈 補償縮放 */
+    }
+
+    /* 🌟 防止多重稱號疊加時比例相乘 🌟 */
+    table.data-lamp td:nth-child(2) [class^="effect-"] [class^="effect-"],
+    table.data-lamp td:nth-child(2) [class*=" effect-"] [class*=" effect-"],
+    table.data-lamp td:nth-child(2) [class^="effect-"] [class*=" effect-"],
+    table.data-lamp td:nth-child(2) [class*=" effect-"] [class^="effect-"] {
+        zoom: 1 !important;
+        font-size: 1em !important; /* 👈 防止內部字體被二次放大 */
+    }
+
+    /* 🌟 專門收服 エゴイスト 嘅 LUCK 碎片畫布 (用你覺得最順眼嘅 0.80) 🌟 */
+    table.data-lamp td:nth-child(2) .effect-egoist::after {
+        transform: translate(-50%, -50%) scale(0.80) !important;
     }
     /* 👆 🌟 替換完畢 🌟 👆 */
 `;
