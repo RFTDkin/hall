@@ -702,6 +702,15 @@
             <div class="progress-text" id="rezero2_129-prog">待機中...</div>
         </div>
 
+        <div class="machine-card" id="card-rezero_onigakari2" style="border-top: 5px solid #b785f6;">
+            <h3 class="machine-title">e Re:ゼロ 鬼がかり2</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="rezero_onigakari2-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="rezero_onigakari2-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="rezero_onigakari2-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="rezero_onigakari2-profit">---</span></div>
+            <div class="progress-text" id="rezero_onigakari2-prog">待機中...</div>
+        </div>
+
         <div class="machine-card tag-railgun" id="card-railgun" style="border-top: 5px solid #00e5ff;">
             <h3 class="machine-title">eとある科学の超電磁砲</h3>
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="railgun-spins">---</span></div>
@@ -862,6 +871,33 @@
             <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="akudama-max">---</span></div>
             <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="akudama-profit">---</span></div>
             <div class="progress-text" id="akudama-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card" id="card-symphogear4" style="border-top: 5px solid #ff1744;">
+            <h3 class="machine-title">e戦姫絶唱シンフォギア4F</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="symphogear4-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="symphogear4-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="symphogear4-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="symphogear4-profit">---</span></div>
+            <div class="progress-text" id="symphogear4-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card" id="card-azurlane2" style="border-top: 5px solid #00e5ff;">
+            <h3 class="machine-title">eアズールレーン2</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="azurlane2-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="azurlane2-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="azurlane2-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="azurlane2-profit">---</span></div>
+            <div class="progress-text" id="azurlane2-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card" id="card-accelworld" style="border-top: 5px solid #00e676;">
+            <h3 class="machine-title">eアクセル・ワールド</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="accelworld-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="accelworld-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="accelworld-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="accelworld-profit">---</span></div>
+            <div class="progress-text" id="accelworld-prog">待機中...</div>
         </div>
 
     </div>
@@ -2675,6 +2711,60 @@
             return { spins, payout };
         }
 
+        function simRezeroOnigakari2() {
+            let spins = 0, payout = 0;
+            
+            function runOnigakari2Rush() {
+                let st_max = 144;
+                let current_st = st_max;
+
+                while (current_st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 99.9) {
+                        let r = Math.random();
+                        
+                        // 1. 結算當前呢一轉
+                        if (r < 0.25) payout += 6000;
+                        else if (r < 0.80) payout += 1500;
+                        else if (r < 0.86) payout += 300;
+                        // (剩餘 14% 係 ST Reset，無出玉)
+
+                        // 2. 即時結算 4 粒保留 (Horyu)
+                        for (let i = 0; i < 4; i++) {
+                            if (Math.random() < 1 / 99.9) {
+                                let hr = Math.random();
+                                if (hr < 0.25) payout += 6000;
+                                else if (hr < 0.80) payout += 1500;
+                                else if (hr < 0.86) payout += 300;
+                            }
+                        }
+                        
+                        // 3. 所有保留連處理完畢，ST 先至重置回復 144
+                        current_st = st_max;
+                    } else {
+                        current_st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1 / 349.9) {
+                    let r = Math.random();
+                    if (r < 0.10) {
+                        payout += 3000;
+                        if (payout < 95000) runOnigakari2Rush();
+                    } else if (r < 0.55) {
+                        payout += 1500;
+                        if (payout < 95000) runOnigakari2Rush();
+                    } else {
+                        payout += 1500;
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         function simRailgun() {
             let spins = 0, payout = 0;
             
@@ -3674,6 +3764,212 @@
             return { spins, payout };
         }
 
+        function simSymphogear4() {
+            let spins = 0, payout = 0;
+            
+            function runSymphoRush(initial_st) {
+                let current_st = initial_st;
+                
+                while (current_st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 10.9) {
+                        let processing_v_stock = true;
+                        let next_st = 15;
+                        
+                        while(processing_v_stock) {
+                            let r = Math.random();
+                            if (r < 0.05) {
+                                payout += 3000;
+                                // 繼續迴圈抽 V-STOCK
+                            } else if (r < 0.10) {
+                                payout += 3000;
+                                next_st = 10000;
+                                processing_v_stock = false;
+                            } else if (r < 0.50) {
+                                payout += 3000;
+                                next_st = 15;
+                                processing_v_stock = false;
+                            } else if (r < 0.55) {
+                                payout += 1500;
+                                // 繼續迴圈抽 V-STOCK
+                            } else if (r < 0.60) {
+                                payout += 1500;
+                                next_st = 10000;
+                                processing_v_stock = false;
+                            } else {
+                                payout += 1500;
+                                next_st = 15;
+                                processing_v_stock = false;
+                            }
+                        }
+                        current_st = next_st;
+                    } else {
+                        current_st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                
+                // 圖柄當選 (1/399.7)
+                if (Math.random() < 1 / 399.7) {
+                    payout += 1500;
+                    if (Math.random() < 0.50) runSymphoRush(15);
+                    break;
+                }
+                
+                // 戰姬 Charge (1/266.4)
+                if (Math.random() < 1 / 266.4) {
+                    payout += 192;
+                    if (Math.random() < 0.001) {
+                        runSymphoRush(15);
+                    }
+                    break; // Charge 算作大當り，會重置轉數
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simAzurLane2() {
+            let spins = 0, payout = 0;
+            
+            function runAzurRush() {
+                let rush_active = true;
+                
+                while (rush_active && payout < 95000) {
+                    let r_win = Math.random();
+                    let r_fall = Math.random();
+                    
+                    // 大当り (1/21.9)
+                    if (r_win < 1 / 21.9) {
+                        payout += 3000;
+                    } 
+                    // 転落 (1/71.7)
+                    else if (r_fall < 1 / 71.7) {
+                        rush_active = false;
+                        // 残り保留4個の引き戻し
+                        for (let i = 0; i < 4; i++) {
+                            if (Math.random() < 1 / 21.9) {
+                                payout += 3000;
+                                rush_active = true; // 引き戻し成功でRUSH復帰
+                                break; 
+                            }
+                        }
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                
+                // 1/169.9 通常時 ATTACK
+                if (Math.random() < 1 / 169.9) {
+                    // ATTACK出玉 320〜790個 (平均550として計算)
+                    let attack_payout = Math.floor(Math.random() * (790 - 320 + 1)) + 320;
+                    payout += attack_payout;
+                    
+                    // 30% 成功で決戦BIG BONUS (1500玉)
+                    if (Math.random() < 0.30) {
+                        payout += 1500;
+                        // 50% 突破でRUSH
+                        if (Math.random() < 0.50) {
+                            runAzurRush();
+                        }
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simAccelWorld() {
+            let spins = 0, payout = 0;
+
+            function runLastAttack(isChallenge) {
+                for(let i=0; i<2; i++) {
+                    if (Math.random() < 1/36.7) {
+                        if (isChallenge) payout += 1500;
+                        else payout += (Math.random() < 0.0051) ? 6000 : 1500;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function runLT() {
+                let inLT = true;
+                while(inLT && payout < 95000) {
+                    // LT前半 (平均11回)
+                    let firstHalfHit = false;
+                    for(let i=0; i<11; i++) {
+                        if (Math.random() < 1/36.7) {
+                            payout += 6000;
+                            firstHalfHit = true;
+                            break;
+                        }
+                    }
+                    if (firstHalfHit) continue; // ループ継続
+
+                    // LT後半
+                    let inSecondHalf = true;
+                    let secondHalfHit = false;
+                    while(inSecondHalf) {
+                        let rWin = Math.random();
+                        let rFall = Math.random();
+                        
+                        if (rWin < 1/36.7) {
+                            payout += (Math.random() < 0.0051) ? 6000 : 1500;
+                            secondHalfHit = true;
+                            inSecondHalf = false;
+                        } else if (rFall < 1/65.8) {
+                            inSecondHalf = false; // 転落
+                        }
+                    }
+                    if (secondHalfHit) continue;
+                    
+                    // 転落後のLAST ATTACK
+                    if (runLastAttack(false)) continue;
+                    
+                    inLT = false; // 終了
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < 1/184.6) {
+                    let r = Math.random();
+                    if (r < 0.005) {
+                        payout += 1500;
+                        runLT(); // LT直行
+                    } else if (r < 0.70) {
+                        payout += 300;
+                        // LTチャレンジ
+                        let inChallenge = true;
+                        let challengeHit = false;
+                        while(inChallenge) {
+                            if (Math.random() < 1/36.7) {
+                                payout += 1500;
+                                challengeHit = true;
+                                inChallenge = false;
+                            } else if (Math.random() < 1/9.4) {
+                                inChallenge = false;
+                            }
+                        }
+                        
+                        if (challengeHit) {
+                            runLT();
+                        } else {
+                            if (runLastAttack(true)) runLT(); // 引き戻し成功
+                        }
+                    } else {
+                        payout += 300; // 通常終了
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
@@ -3796,6 +4092,8 @@
             await runMachineSim('iseleve', simIseleve, 1000 / 27, iterations);
             await runMachineSim('rezero2', simRezero2, 1000 / 17, iterations);
             await runMachineSim('rezero2_129', simRezero2_129, 1000 / 16, iterations); // 1000円=17回転
+            // 加入鬼がかり2 (千円16回轉 -> 1000 / 16)
+            await runMachineSim('rezero_onigakari2', simRezeroOnigakari2, 1000 / 16, iterations);
             await runMachineSim('railgun', simRailgun, 1000 / 17, iterations);
             await runMachineSim('eightysix', simEightySix, 1000 / 20, iterations);
             await runMachineSim('otome7', simOtome7, 1000 / 17, iterations);
@@ -3814,6 +4112,12 @@
             await runMachineSim('valkyrie', simValkyrie, 1000 / 17, iterations);
             await runMachineSim('ikkitousen', simIkkitousen, 1000 / 30, iterations);
             await runMachineSim('akudama', simAkudama, 1000 / 17, iterations);
+            // 加入シンフォギア4F (千円17回轉)
+            await runMachineSim('symphogear4', simSymphogear4, 1000 / 18, iterations);
+            // 加入アズールレーン2 (千円17回轉)
+            await runMachineSim('azurlane2', simAzurLane2, 1000 / 17, iterations);
+            // 加入アクセル・ワールド (千円17回轉設定)
+            await runMachineSim('accelworld', simAccelWorld, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);

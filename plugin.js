@@ -428,8 +428,12 @@ document.addEventListener("DOMContentLoaded", () => {
             "madoka": "P まどか☆マギカ",
             "cafe": "P 女神のカフェテラス",
             "rezero": "P Re:ゼロから始める異世界生活",
+            "rezero_onigakari2": "e Re:ゼロから始める異世界生活 鬼がかり2",
             "baki": "P バキ2",
-            "gensan": "P 大工の源さん"
+            "gensan": "P 大工の源さん",
+            "symphogear4": "eフィーバー戦姫絶唱シンフォギア4F",
+            "azurlane2": "eアズールレーンTHE ANIMATION2",
+            "accelworld": "eアクセル・ワールド"
         };
         
         let pathName = window.location.pathname.toLowerCase();
@@ -459,6 +463,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageText.includes("まどか☆マギカ")) spinCost = 1000 / 20;
         else if (pageText.includes("カフェテラス")) spinCost = 1000 / 27;
         else if (pageText.includes("Re:ゼロ") && pageText.includes("129")) spinCost = 1000 / 16;
+        else if (pageText.includes("鬼がかり2")) spinCost = 1000 / 16;
         else if (pageText.includes("バキ2")) spinCost = 1000 / 16;
         else if (pageText.includes("大工の源さん")) spinCost = 1000 / 18;
         else if (pageText.includes("一騎当千")) spinCost = 1000 / 30;
