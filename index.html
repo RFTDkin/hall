@@ -2269,6 +2269,12 @@
             </div>
         </div>
     </div>
+<script>
+    if (new URLSearchParams(window.location.search).get('sponsor') === '1') {
+        const sponsorModal = document.getElementById('sponsor-modal');
+        if (sponsorModal) sponsorModal.style.display = 'flex';
+    }
+</script>
 </body>
 
 </html>

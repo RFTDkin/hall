@@ -762,7 +762,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     📺 広告を見て +4000回転 解鎖
                 </button>
                 
-                <div style="margin: 15px 0; color: #777; font-size: 0.9em;">— 或者 —</div>
+                <div style="margin: 15px 0; color: #777; font-size: 0.9em;">— もしくは —</div>
                 
                 <button id="btn-sponsor-popup" style="
                     background: #00e676; color: #000; border: none; padding: 14px 20px;
@@ -805,8 +805,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // 綁定贊助按鈕事件
             document.getElementById('btn-sponsor-popup').onclick = function() {
-                window.open('index_3.html', '_blank'); 
-                alert("前往大堂贊助區中... 取得 VIP 密碼並聯絡開發者即可永久免廣告！");
+                window.location.href = 'index.html?sponsor=1';
             };
         }
 
