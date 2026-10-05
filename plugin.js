@@ -723,24 +723,66 @@ document.addEventListener("DOMContentLoaded", () => {
                 playBtn.disabled = true;
                 playBtn.innerText = msgText;
             }
-            showRewardAdButton();
+            showLimitPopup();
         }
 
-        function showRewardAdButton() {
-            if (document.getElementById("btn-reward-ad")) return;
-            const playBtn = document.getElementById("btn-play");
-            const container = playBtn ? playBtn.parentNode : null;
-            if (!container) return;
+        // 🌟 全新雙按鈕 Popup 限制視窗 🌟
+        function showLimitPopup() {
+            if (document.getElementById('spin-limit-overlay')) return;
 
-            const adBtn = document.createElement("button");
-            adBtn.id = "btn-reward-ad";
-            adBtn.innerText = "📺 広告を見て +4000回転 解鎖";
-            adBtn.style.cssText = "background-color: #ff9100; color: #fff; border: 1px solid #ffea00; box-shadow: 0 0 10px #ff9100;";
+            // 建立半透明黑色遮罩層
+            const overlay = document.createElement('div');
+            overlay.id = 'spin-limit-overlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.85); z-index: 10000;
+                display: flex; justify-content: center; align-items: center;
+                animation: fadeIn 0.2s;
+            `;
 
-            adBtn.onclick = () => {
+            // 建立彈出視窗
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                background: #111; border: 2px solid #00e5ff; border-radius: 10px;
+                padding: 25px; text-align: center; max-width: 400px; width: 90%;
+                color: #fff; box-shadow: 0 0 20px rgba(0,229,255,0.5);
+            `;
+
+            // 視窗內容 (加入雙按鈕)
+            popup.innerHTML = `
+                <h2 style="color: #00e5ff; margin-top: 0; font-size: 1.5em;">⚠️ 本日の上限に達しました</h2>
+                <p style="margin-bottom: 20px; color: #ccc; font-size: 1.1em;">本日の回転数が上限に達しました。<br>以下から選択してください：</p>
+                
+                <button id="btn-watch-ad-popup" style="
+                    background: #ff1744; color: white; border: none; padding: 14px 20px;
+                    font-size: 1.1em; border-radius: 5px; cursor: pointer; width: 100%;
+                    margin-bottom: 12px; font-weight: bold; transition: 0.2s;
+                    box-shadow: 0 0 10px rgba(255,23,68,0.5);
+                " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    📺 広告を見て +4000回転 解鎖
+                </button>
+                
+                <div style="margin: 15px 0; color: #777; font-size: 0.9em;">— 或者 —</div>
+                
+                <button id="btn-sponsor-popup" style="
+                    background: #00e676; color: #000; border: none; padding: 14px 20px;
+                    font-size: 1.1em; border-radius: 5px; cursor: pointer; width: 100%;
+                    font-weight: bold; transition: 0.2s;
+                    box-shadow: 0 0 10px rgba(0,230,118,0.5);
+                " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    ☕ 個人開発者を支援して VIP 永久解鎖、無限の回転数を獲得
+                </button>
+            `;
+
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+
+            // 綁定睇廣告按鈕事件
+            const adBtn = document.getElementById('btn-watch-ad-popup');
+            adBtn.onclick = function() {
                 adBtn.disabled = true;
                 window.open(ADSTERRA_DIRECT_LINK, '_blank');
-
+                
                 let secondsLeft = 15;
                 adBtn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
 
@@ -750,6 +792,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         adBtn.innerText = `⏳ 広告確認中 (${secondsLeft}s)...`;
                     } else {
                         clearInterval(countdown);
+                        document.body.removeChild(overlay);
+                        
                         userData.max_allowed_spins += 4000;
                         userRef.update({ max_allowed_spins: userData.max_allowed_spins }).then(() => {
                             window.alert("🎉 認証成功！上限が +4000回転 追加されました！\n(システムを再起動します)");
@@ -758,7 +802,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 }, 1000);
             };
-            container.appendChild(adBtn);
+
+            // 綁定贊助按鈕事件
+            document.getElementById('btn-sponsor-popup').onclick = function() {
+                window.open('index_3.html', '_blank'); 
+                alert("前往大堂贊助區中... 取得 VIP 密碼並聯絡開發者即可永久免廣告！");
+            };
         }
 
         setTimeout(() => { if (userData.daily_spins >= userData.max_allowed_spins) disableMachine(); }, 500);
@@ -782,8 +831,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         playBtn.disabled = false;
                         playBtn.innerText = "▶️ 遊技開始";
                     }
-                    let adBtn = document.getElementById("btn-reward-ad");
-                    if (adBtn) adBtn.remove();
+                    // 取代原本嘅 adBtn.remove()
+                    let overlay = document.getElementById("spin-limit-overlay");
+                    if (overlay) overlay.remove();
                 }
                 
                 originalUpdateUI();
