@@ -1410,3 +1410,41 @@ window.saveTitleSettings = function (uid) {
     window.HallShared.saveTitleSettings(uid)
         .then(saved => { if (saved) { alert("✅ 称号の表示設定を保存しました！"); location.reload(); } });
 };
+
+// 全域統一載入 Adsterra 廣告 (Social Bar + 底部 Banner)
+(function() {
+    // 1. 載入 Social Bar (負責高 CPM，有頻率限制)
+    if (!document.getElementById('adsterra-social-bar')) {
+        var socialScript = document.createElement('script');
+        socialScript.type = 'text/javascript';
+        socialScript.id = 'adsterra-social-bar';
+        // 記得換成你 Social Bar 嘅專屬 src 網址
+        socialScript.src = 'https://pl30889981.profitableratecpmnetwork.com/98/a0/4d/98a04d1830666a6d0a70a7f326135330.js'; 
+        document.body.appendChild(socialScript);
+    }
+
+    // 2. 載入 底部常駐 Banner (負責穩定曝光，適合長時間掛機)
+    if (!document.getElementById('adsterra-sticky-banner')) {
+        // 建立底部固定區塊 (半透明黑底，確保廣告清晰)
+        var bannerContainer = document.createElement('div');
+        bannerContainer.id = 'adsterra-sticky-banner';
+        bannerContainer.style.cssText = "position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; height: 50px;";
+        
+        // 設定 Banner 參數 (呢度用返你截圖入面嘅 Banner Key)
+        window.atOptions = {
+            'key' : 'ead8f1e5fdd30faaed33da77b3333cf4', // 如果有新 Key 請喺度換
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+        };
+        
+        // 載入 Banner 執行檔
+        var bannerScript = document.createElement('script');
+        bannerScript.type = 'text/javascript';
+        bannerScript.src = '//www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js';
+        
+        bannerContainer.appendChild(bannerScript);
+        document.body.appendChild(bannerContainer);
+    }
+})();
