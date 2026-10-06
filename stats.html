@@ -774,6 +774,15 @@
             <div class="progress-text" id="madoka3-prog">待機中...</div>
         </div>
 
+        <div class="machine-card" id="card-magireco" style="border-top: 5px solid #ff80ab;">
+            <h3 class="machine-title">eマギアレコード外伝</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="magireco-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="magireco-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="magireco-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="magireco-profit">---</span></div>
+            <div class="progress-text" id="magireco-prog">待機中...</div>
+        </div>
+
         <div class="machine-card" id="card-kabaneri2" style="border-top: 5px solid #ff9800;">
             <h3 class="machine-title">e甲鉄城のカバネリ2</h3>
             <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="kabaneri2-spins">---</span></div>
@@ -3146,6 +3155,79 @@
             return { spins, payout };
         }
 
+        function simMagireco() {
+            let spins = 0, payout = 0;
+
+            function getVConnectPayout() {
+                let r = Math.random() * 100;
+                if (r < 2.0) return 4000;
+                if (r < 5.0) return 3600;
+                if (r < 9.0) return 3200;
+                if (r < 19.0) return 2800;
+                if (r < 34.0) return 2400;
+                if (r < 52.3) return 2000;
+                if (r < 79.0) return 1600;
+                if (r < 94.0) return 1200;
+                return 800;
+            }
+
+            function get1GProb(p) {
+                if (p === 4000) return 1.00;
+                if (p === 3600) return 0.85;
+                if (p === 3200) return 0.70;
+                if (p === 2800) return 0.50;
+                if (p === 2400) return 0.40;
+                if (p === 2000) return 0.21;
+                if (p === 1600) return 0.15;
+                return 0.00;
+            }
+
+            function runVConnect() {
+                let is1G = true;
+                while (is1G && payout < 95000) {
+                    let p = getVConnectPayout();
+                    payout += p;
+                    if (Math.random() < get1GProb(p)) {
+                        is1G = true;
+                    } else {
+                        is1G = false;
+                    }
+                }
+            }
+
+            function runRush() {
+                let st = 140;
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < 1 / 97.0) {
+                        runVConnect();
+                        st = 140; // ST リセット
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                let roll = Math.random();
+                let pMain = 1 / 399.9;
+                let pCharge = 1 / 2785.0; // 合算約 1/349 になるように設定
+
+                if (roll < pMain) {
+                    payout += 1000; // 図柄揃い
+                    if (Math.random() < 0.50 && payout < 95000) {
+                        runVConnect(); // RUSH突入時はVコネクトBONUS 1回保証
+                        if (payout < 95000) runRush();
+                    }
+                    break;
+                } else if (roll < pMain + pCharge) {
+                    payout += 200; // マギレポチャージ
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         function simKabaneri2() {
             let spins = 0, payout = 0;
 
@@ -4101,6 +4183,7 @@
             await runMachineSim('sao_senkou', simSaoSenkou, 1000 / 17, iterations);
             await runMachineSim('tolove', simTolove, 1000 / 17, iterations); // 1000円=17回転 (預設)
             await runMachineSim('madoka3', simMadoka3, 1000 / 20, iterations);
+            await runMachineSim('magireco', simMagireco, 1000 / 17, iterations);
             await runMachineSim('kabaneri2', simKabaneri2, 1000 / 17, iterations); // 1000円=16回転 (預設)
             await runMachineSim('cafeterrace', simCafeterrace, 1000 / 27, iterations); // 1000円=27回転
             await runMachineSim('kinnikuman', simKinnikuman, 1000 / 17, iterations);
