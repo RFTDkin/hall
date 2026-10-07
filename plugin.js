@@ -1442,7 +1442,7 @@ window.saveTitleSettings = function (uid) {
         // 載入 Banner 執行檔
         var bannerScript = document.createElement('script');
         bannerScript.type = 'text/javascript';
-        bannerScript.src = '//www.highperformanceformat.com/ead8f1e5fdd30faaed33da77b3333cf4/invoke.js';
+        bannerScript.src = 'https://bicea.org/22/ead8f1e5fdd30faaed33da77b3333cf4';
         
         bannerContainer.appendChild(bannerScript);
         document.body.appendChild(bannerContainer);
