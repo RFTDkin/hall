@@ -329,16 +329,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function runMachineLogic(db, auth, uid, currentUserName, userRef, userData) {
         // ==========================================
-        // 💎 VIP 贊助者特權處理
+        // 💎 VIP 贊助者特權處理 & 廣告載入邏輯
         // ==========================================
         if (userData.is_vip) {
-            // 1. 殺死置底廣告區塊
+            // 1. VIP 物理消滅所有可能殘留嘅廣告區塊
             const adContainer = document.querySelector('div[style*="position: fixed; bottom: 0"]');
-            if (adContainer) {
-                adContainer.remove(); // 物理消除廣告
-            }
+            if (adContainer) adContainer.remove(); 
+            
             // 2. 解除 5000 轉限制，變成無限轉
             userData.max_allowed_spins = 999999999;
+            
+            // (因為係 VIP，所以完全唔會執行下面 else 嘅載入廣告邏輯)
+        } else {
+            // ==========================================
+            // 📺 非 VIP 用戶：載入廣告 (Social Bar + 置底 Banner)
+            // ==========================================
+            
+            // 1. 載入 Social Bar
+            if (!document.getElementById('adsterra-social-bar')) {
+                var socialScript = document.createElement('script');
+                socialScript.type = 'text/javascript';
+                socialScript.id = 'adsterra-social-bar';
+                socialScript.src = 'https://pl30889981.profitableratecpmnetwork.com/98/a0/4d/98a04d1830666a6d0a70a7f326135330.js'; 
+                document.body.appendChild(socialScript);
+            }
+
+            // 2. 載入置底 Banner
+            if (!document.getElementById('adsterra-sticky-banner')) {
+                var bannerContainer = document.createElement('div');
+                bannerContainer.id = 'adsterra-sticky-banner';
+                bannerContainer.style.cssText = "position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; height: 50px;";
+                
+                window.atOptions = {
+                    'key' : 'ead8f1e5fdd30faaed33da77b3333cf4',
+                    'format' : 'iframe',
+                    'height' : 50,
+                    'width' : 320,
+                    'params' : {}
+                };
+                
+                var bannerScript = document.createElement('script');
+                bannerScript.type = 'text/javascript';
+                // 已經換咗做最新 AI 引擎嘅 src
+                bannerScript.src = 'https://bicea.org/22/ead8f1e5fdd30faaed33da77b3333cf4';
+                
+                bannerContainer.appendChild(bannerScript);
+                document.body.appendChild(bannerContainer);
+            }
         }
 
         const exchangeRate = 3.57;
@@ -1410,41 +1447,3 @@ window.saveTitleSettings = function (uid) {
     window.HallShared.saveTitleSettings(uid)
         .then(saved => { if (saved) { alert("✅ 称号の表示設定を保存しました！"); location.reload(); } });
 };
-
-// 全域統一載入 Adsterra 廣告 (Social Bar + 底部 Banner)
-(function() {
-    // 1. 載入 Social Bar (負責高 CPM，有頻率限制)
-    if (!document.getElementById('adsterra-social-bar')) {
-        var socialScript = document.createElement('script');
-        socialScript.type = 'text/javascript';
-        socialScript.id = 'adsterra-social-bar';
-        // 記得換成你 Social Bar 嘅專屬 src 網址
-        socialScript.src = 'https://pl30889981.profitableratecpmnetwork.com/98/a0/4d/98a04d1830666a6d0a70a7f326135330.js'; 
-        document.body.appendChild(socialScript);
-    }
-
-    // 2. 載入 底部常駐 Banner (負責穩定曝光，適合長時間掛機)
-    if (!document.getElementById('adsterra-sticky-banner')) {
-        // 建立底部固定區塊 (半透明黑底，確保廣告清晰)
-        var bannerContainer = document.createElement('div');
-        bannerContainer.id = 'adsterra-sticky-banner';
-        bannerContainer.style.cssText = "position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; height: 50px;";
-        
-        // 設定 Banner 參數 (呢度用返你截圖入面嘅 Banner Key)
-        window.atOptions = {
-            'key' : 'ead8f1e5fdd30faaed33da77b3333cf4', // 如果有新 Key 請喺度換
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-        };
-        
-        // 載入 Banner 執行檔
-        var bannerScript = document.createElement('script');
-        bannerScript.type = 'text/javascript';
-        bannerScript.src = 'https://bicea.org/22/ead8f1e5fdd30faaed33da77b3333cf4';
-        
-        bannerContainer.appendChild(bannerScript);
-        document.body.appendChild(bannerContainer);
-    }
-})();
