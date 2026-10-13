@@ -112,6 +112,7 @@
                 while (this.state !== "NORMAL") {
                     // RUSH(ST47+4) または LT(ST80+4)
                     let max_spins = this.state === "LT" ? 84 : 51;
+                    let main_st = this.state === "LT" ? 80 : 47;
                     
                     if (this.state === "RUSH") {
                         addLog(`\n===== 🧟 奴RUSH (ST47+4回転) =====`, "color-rush");
@@ -123,14 +124,29 @@
                     let hit = false;
                     for (this.rush_spins = 1; this.rush_spins <= max_spins; this.rush_spins++) {
                         await sleep(40);
-                        let remaining = max_spins - this.rush_spins;
-                        document.getElementById("ui-spins").innerText = `残り: ${remaining}/${max_spins}`;
+                        
+                        // 🌟 新增：區分 ST 同 殘保留 嘅邏輯
+                        let isReserve = this.rush_spins > main_st;
+                        let phaseName = isReserve ? '残保留' : 'ST';
+                        let current_spin_in_phase = isReserve ? (this.rush_spins - main_st) : this.rush_spins;
+                        
+                        if (!isReserve) {
+                            // ST中顯示
+                            document.getElementById("ui-spins").innerText = `ST中: ${current_spin_in_phase}/${main_st}`;
+                        } else {
+                            // 殘保留顯示 + 寫入 Log 增加緊張感
+                            document.getElementById("ui-spins").innerText = `残保留: ${current_spin_in_phase}/4`;
+                            addLog(`⏳ 残保留 ${current_spin_in_phase}回転目...`, "color-normal");
+                            await sleep(250); // 殘保加少少 delay 更有 Feel
+                        }
 
                         // 1/32.4 大当り抽選
                         if (Math.random() < 1 / 32.4) {
                             hit = true;
                             this.session_rush_count += 1;
-                            addLog(`\n🎉 [ST ${this.rush_spins}回転目] 奴RUSH中BONUS！ (總 ${this.session_rush_count}連)`, "color-hit");
+                            
+                            // 🌟 喺 Log 清楚顯示係 ST 定 殘保留 當選[cite: 18]
+                            addLog(`\n🎉 [${phaseName} ${current_spin_in_phase}回転目] 奴RUSH中BONUS！ (總 ${this.session_rush_count}連)`, "color-hit");
                             
                             let payoutData = this.getRightPayout();
                             this.session_payout += payoutData.balls;
@@ -138,7 +154,7 @@
                             let pColor = payoutData.balls >= 1200 ? "color-lt" : "color-hit";
                             addLog(`▶ ${payoutData.name}大当り！ ${payoutData.balls}玉 獲得！`, pColor);
                             
-                            // ST47中で当たれば必ずLT(奴RUSH SUPER)へ
+                            // 只要喺 RUSH (ST47+4) 中當選，必升格 LT
                             if (this.state === "RUSH") {
                                 await sleep(500);
                                 addLog(`🚀 ラッキートリガー発動！！ 奴RUSH SUPER昇格！！`, "color-lt");
