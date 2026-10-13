@@ -909,6 +909,24 @@
             <div class="progress-text" id="accelworld-prog">待機中...</div>
         </div>
 
+        <div class="machine-card" id="card-bandori" style="border-top: 5px solid #ff4081;">
+            <h3 class="machine-title">Pバンドリ</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="bandori-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="bandori-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="bandori-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="bandori-profit">---</span></div>
+            <div class="progress-text" id="bandori-prog">待機中...</div>
+        </div>
+
+        <div class="machine-card" id="card-hotd3" style="border-top: 5px solid #ff1744;">
+            <h3 class="machine-title">e 学園黙示録HOTD3</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="hotd3-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="hotd3-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="hotd3-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="hotd3-profit">---</span></div>
+            <div class="progress-text" id="hotd3-prog">待機中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -4052,6 +4070,91 @@
             return { spins, payout };
         }
 
+        function simBandori() {
+            let spins = 0, payout = 0;
+            let pMain = 1 / 319.6;
+            let pRush = 1 / 95.1;
+
+            function runRush(state) {
+                let st = 150;
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < pRush) {
+                        st = 150; // ST リセット
+                        if (state === "GBF") {
+                            // GBF中の大当りは特図1割合で抽選後、EXへ昇格
+                            if (Math.random() < 0.02) payout += 1500;
+                            else payout += 300;
+                            state = "EX"; 
+                        } else {
+                            // EX中の大当りはオール1500発
+                            payout += 1500;
+                        }
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < pMain) {
+                    // 初当り特図1振り分け
+                    if (Math.random() < 0.02) {
+                        payout += 1500;
+                        runRush("EX");
+                    } else {
+                        payout += 300;
+                        runRush("GBF");
+                    }
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
+        function simHotd3() {
+            let spins = 0, payout = 0;
+            let pMain = 1 / 299.2;
+            let pRush = 1 / 32.4;
+
+            function getRightPayout() {
+                let r = Math.random() * 100;
+                if (r < 40) return 1200;
+                if (r < 41) return 960;
+                if (r < 44) return 840;
+                if (r < 50) return 720;
+                return 360;
+            }
+
+            function runRush(isLT) {
+                let st = isLT ? 84 : 51;
+                while (st > 0 && payout < 95000) {
+                    if (Math.random() < pRush) {
+                        payout += getRightPayout();
+                        st = 84; // 当たれば必ずLT(84回転)に突入/再セット
+                    } else {
+                        st--;
+                    }
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < pMain) {
+                    payout += 660;
+                    let roll = Math.random();
+                    if (roll < 0.005) { // 0.5% LT直行
+                        runRush(true);
+                    } else if (roll < 0.50) { // 49.5% 奴RUSH
+                        runRush(false);
+                    }
+                    // 残り50%は通常終了
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
@@ -4201,6 +4304,8 @@
             await runMachineSim('azurlane2', simAzurLane2, 1000 / 17, iterations);
             // 加入アクセル・ワールド (千円17回轉設定)
             await runMachineSim('accelworld', simAccelWorld, 1000 / 17, iterations);
+            await runMachineSim('bandori', simBandori, 1000 / 17, iterations);
+            await runMachineSim('hotd3', simHotd3, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);
