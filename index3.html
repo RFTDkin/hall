@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【無料】eとある魔術の禁書目録3 | パチンコシミュレーター</title>
+    <meta name="machine-title" content="e禁書目録3">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b1c3a; color: #eeeeee; text-align: center; padding-bottom: 60px; margin: 0; padding: 20px; }
+        h1 { color: #00e5ff; text-shadow: 0 0 15px rgba(0, 229, 255, 0.7); font-weight: 900; letter-spacing: 2px; }
+        .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
+        .left-panel, .right-panel { flex: 1; min-width: 320px; }
+        .left-panel { max-width: 500px; }
+        .right-panel { max-width: 400px; }
+        .stats-board { background-color: #12244a; border: 2px solid #00e5ff; border-radius: 10px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-around; font-size: 1.1em; box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.5); }
+        .stat-item span { display: block; font-weight: bold; color: #40c4ff; font-size: 1.3em; margin-top: 5px; }
+        button { background: linear-gradient(180deg, #00b0ff 0%, #005cb2 100%); color: white; border: 1px solid #80d8ff; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; transition: transform 0.1s, box-shadow 0.2s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 15px #00e5ff; }
+        button:disabled { background: #1a2a5a; border-color: #444; color: #777; cursor: not-allowed; transform: scale(1); box-shadow: none; }
+        .log-container { background-color: #000000; border: 1px solid #00e5ff; border-radius: 5px; height: 400px; overflow-y: auto; padding: 10px; text-align: left; font-family: 'Courier New', Courier, monospace; line-height: 1.5; }
+        .log-entry { margin: 5px 0; }
+        .color-hit { color: #00e5ff; font-weight: bold; }
+        .color-normal { color: #bdbdbd; }
+        .color-fall { color: #757575; font-weight: bold; }
+        .color-phase1 { color: #ff9100; font-weight: bold; text-shadow: 0 0 5px #ff9100; } /* 前半: 橙色 */
+        .color-phase2 { color: #d500f9; font-weight: bold; text-shadow: 0 0 5px #d500f9; } /* 後半: 紫色 */
+        .color-phase3 { color: #00e676; font-weight: bold; text-shadow: 0 0 5px #00e676; } /* 最終: 綠色 */
+        .color-3000 { color: #ffea00; font-weight: 900; text-shadow: 0 0 15px #ffea00; font-size: 1.1em; } 
+        .data-lamp-container { background-color: #12244a; border: 3px solid #00e5ff; border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
+        .data-lamp-title { color: #40c4ff; margin-top: 0; margin-bottom: 15px; text-align: center; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 5px #40c4ff; letter-spacing: 2px; }
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #005cb2; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #003c8f; color: #ffea00; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #0d1b38; }
+        table.data-lamp td.hit-spins { color: #ffea00; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #00e5ff; font-weight: bold; }
+        .empty-row { color: #444 !important; }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="hall-titles.css">
+</head>
+<body>
+    <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">eとある魔術の禁書目録3</span></h1>
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 幻想殺し (PLAY)</button>
+            </div>
+            <div class="log-container" id="log-box"></div>
+        </div>
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead><tr><th>前次</th><th>當選回轉数</th><th>連莊数</th><th>獲得出玉</th></tr></thead>
+                    <tbody id="history-tbody"><tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        class Index3 {
+            constructor() { this.state = "NORMAL"; this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0; this.history = []; this.rush_spins = 0; }
+
+            async play_normal() {
+                this.session_spins += 1;
+                if (this.session_spins % 100 === 0) addLog(`現在回轉数: ${this.session_spins}`, "color-normal");
+
+                // 1/348 初当り抽選
+                if (Math.random() < 1 / 348) {
+                    this.session_rush_count = 1;
+                    this.session_payout += 1500; // 初当りはALL1500
+                    
+                    if (Math.random() < 0.50) {
+                        addLog(`\n[${this.session_spins} 回轉] 🌈 とある魔術の限界突破BONUS！ (1500玉)`, "color-3000");
+                        addLog("🚀 ST131回転 直行！！", "color-hit");
+                        updateUI(); await sleep(1500);
+                        await this.play_rush(); 
+                    } else {
+                        addLog(`\n[${this.session_spins} 回轉] 🎯 最終決戦BONUS... (1500玉)`, "color-hit");
+                        addLog("💀 演出失敗... 通常へ戻る", "color-fall");
+                        updateUI(); this.record_history();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            async play_rush() {
+                this.state = "RUSH";
+                let max_spins = 131;
+                
+                while (this.state !== "NORMAL") {
+                    addLog(`\n===== ⚡ とある魔術のST (トータル131回転) =====`, "color-hit");
+                    updateUI();
+                    
+                    let hit = false;
+                    for (this.rush_spins = 1; this.rush_spins <= max_spins; this.rush_spins++) {
+                        await sleep(40);
+                        let remaining = max_spins - this.rush_spins;
+                        document.getElementById("ui-spins").innerText = `ST残り: ${remaining}/${max_spins}`;
+
+                        let phase = "";
+                        let p = 0;
+                        
+                        // 段階に応じた確率と演出の切り替え
+                        if (this.rush_spins <= 30) {
+                            phase = "PHASE1"; p = 1 / 99;
+                            if (this.rush_spins === 1) addLog(`\n🔥 前半30回転 [LIMIT BREAK CHANCE] (1/99)`, "color-phase1");
+                        } else if (this.rush_spins <= 130) {
+                            phase = "PHASE2"; p = 1 / 128;
+                            if (this.rush_spins === 31) addLog(`\n🟣 後半100回転 [とある魔術の最強激突] (1/128)`, "color-phase2");
+                        } else {
+                            phase = "PHASE3"; p = 1 / 4;
+                            if (this.rush_spins === 131) {
+                                addLog(`\n🟢 最終回転 [LAST CHANCE] (1/4)`, "color-phase3");
+                                await sleep(1000); // 最後の1回転は緊張感アップ
+                            }
+                        }
+
+                        // 大当り抽選
+                        if (Math.random() < p) {
+                            hit = true;
+                            this.session_rush_count += 1;
+                            addLog(`\n🎉 [ST ${this.rush_spins}回転目] 当選！ (總 ${this.session_rush_count}連)`, "color-hit");
+                            
+                            if (phase === "PHASE1") {
+                                // 前半: 50% 3000+α, 50% 1500
+                                if (Math.random() < 0.50) {
+                                    this.session_payout += 3000;
+                                    addLog(`🌈 超限界殺しBONUS！！ 3000玉 獲得！`, "color-3000");
+                                    updateUI(); await sleep(800);
+                                    
+                                    // 50%ループ上乗せ
+                                    let loop_count = 0;
+                                    while(Math.random() < 0.50) {
+                                        loop_count++;
+                                        this.session_payout += 1500;
+                                        addLog(`   ⚡ さらに限界突破！ +1500玉！ (計+${loop_count*1500})`, "color-3000");
+                                        updateUI(); await sleep(600);
+                                    }
+                                } else {
+                                    this.session_payout += 1500;
+                                    addLog(`▶ 限界殺しBONUS！ 1500玉 獲得`, "color-phase1");
+                                }
+                            } else if (phase === "PHASE2") {
+                                // 後半: オール3000
+                                this.session_payout += 3000;
+                                addLog(`🟣 とある魔術の幻想BONUS！！ 3000玉 獲得！`, "color-3000");
+                            } else if (phase === "PHASE3") {
+                                // 最終回転: 出玉なし、STリセットのみ
+                                addLog(`🟢 LAST CHANCE 成功！！ 出玉なし (STリスタート)`, "color-phase3");
+                                // 連荘数にはカウントされるが、出玉は増えない
+                            }
+                            
+                            addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                            updateUI(); await sleep(1000);
+                            addLog(`⚡ ST継続！！`, "color-hit");
+                            break; // ST再セットのためループを抜ける
+                        }
+                    }
+
+                    if (!hit) {
+                        document.getElementById("ui-spins").innerText = `終了`;
+                        addLog(`\n💀 ST駆け抜け... (終了)`, "color-fall");
+                        addLog(`📈 總連莊数: ${this.session_rush_count}連`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                        this.state = "NORMAL"; 
+                        this.record_history(); 
+                        updateUI();
+                    }
+                }
+            }
+
+            record_history() {
+                this.history.unshift({ spins: this.session_spins, rush: this.session_rush_count, payout: this.session_payout });
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+                this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0; this.state = "NORMAL";
+            }
+        }
+
+        let game = new Index3();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div"); div.className = `log-entry ${className}`; div.innerText = text;
+            logBox.appendChild(div); logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") document.getElementById("ui-spins").innerText = game.session_spins;
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) { historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`; return; }
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `<td>${label}</td><td class="hit-spins">${record.spins}</td><td class="hit-rush">${record.rush}</td><td class="hit-payout">${record.payout}</td>`;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true; btnPlay.disabled = true;
+            addLog("\n=== その幻想をぶち殺す！ 稼働開始！ ===", "color-hit");
+            while (isPlaying) {
+                let ended = await game.play_normal(); updateUI();
+                if (game.session_spins % 100 === 0 && game.state === "NORMAL") await sleep(10);
+                if (ended) { isPlaying = false; break; }
+            }
+            btnPlay.disabled = false; btnPlay.innerText = "▶️ プレイ続行";
+        }
+    </script>
+    <script src="hall-shared.js"></script>
+    <script src="plugin.js"></script>
+</body>
+</html>

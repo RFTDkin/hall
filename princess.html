@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【無料】eプリンセスプリンシパル | パチンコシミュレーター</title>
+    <meta name="machine-title" content="eプリンセスP">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a0f2e; color: #eeeeee; text-align: center; padding-bottom: 60px; margin: 0; padding: 20px; }
+        h1 { color: #d500f9; text-shadow: 0 0 15px rgba(213, 0, 249, 0.7); font-weight: 900; letter-spacing: 2px; }
+        .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
+        .left-panel, .right-panel { flex: 1; min-width: 320px; }
+        .left-panel { max-width: 500px; }
+        .right-panel { max-width: 400px; }
+        .stats-board { background-color: #261447; border: 2px solid #d500f9; border-radius: 10px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-around; font-size: 1.1em; box-shadow: inset 0 0 15px rgba(213, 0, 249, 0.5); }
+        .stat-item span { display: block; font-weight: bold; color: #ff4081; font-size: 1.3em; margin-top: 5px; }
+        button { background: linear-gradient(180deg, #aa00ff 0%, #6200ea 100%); color: white; border: 1px solid #d500f9; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; transition: transform 0.1s, box-shadow 0.2s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 15px #d500f9; }
+        button:disabled { background: #311b58; border-color: #444; color: #777; cursor: not-allowed; transform: scale(1); box-shadow: none; }
+        .log-container { background-color: #000000; border: 1px solid #d500f9; border-radius: 5px; height: 400px; overflow-y: auto; padding: 10px; text-align: left; font-family: 'Courier New', Courier, monospace; line-height: 1.5; }
+        .log-entry { margin: 5px 0; }
+        .color-hit { color: #d500f9; font-weight: bold; text-shadow: 0 0 5px #d500f9; }
+        .color-normal { color: #bdbdbd; }
+        .color-fall { color: #757575; font-weight: bold; }
+        .color-phase1 { color: #ff1744; font-weight: bold; text-shadow: 0 0 5px #ff1744; } /* 前半: 赤 */
+        .color-phase2 { color: #00e5ff; font-weight: bold; text-shadow: 0 0 5px #00e5ff; } /* 後半: 青 */
+        .color-reset { color: #00e676; font-weight: bold; } /* リセット: 緑 */
+        .color-10500 { color: #ffea00; font-weight: 900; text-shadow: 0 0 15px #ffea00; font-size: 1.1em; } 
+        .data-lamp-container { background-color: #261447; border: 3px solid #d500f9; border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(213, 0, 249, 0.5); }
+        .data-lamp-title { color: #ff4081; margin-top: 0; margin-bottom: 15px; text-align: center; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 5px #ff4081; letter-spacing: 2px; }
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #aa00ff; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #4a148c; color: #ffea00; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #1a0f2e; }
+        table.data-lamp td.hit-spins { color: #ffea00; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #d500f9; font-weight: bold; }
+        .empty-row { color: #444 !important; }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="hall-titles.css">
+</head>
+<body>
+    <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffffff;">eプリンセスプリンシパル</span></h1>
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ ミッション開始</button>
+            </div>
+            <div class="log-container" id="log-box"></div>
+        </div>
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead><tr><th>前次</th><th>當選回轉数</th><th>連莊数</th><th>獲得出玉</th></tr></thead>
+                    <tbody id="history-tbody"><tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        class Princess {
+            constructor() { this.state = "NORMAL"; this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0; this.history = []; this.rush_spins = 0; }
+
+            async play_normal() {
+                this.session_spins += 1;
+                if (this.session_spins % 100 === 0) addLog(`現在回轉数: ${this.session_spins}`, "color-normal");
+
+                // 1/319.6 初当り抽選
+                if (Math.random() < 1 / 319.6) {
+                    this.session_rush_count = 1;
+                    this.session_payout += 1500; // 初当りはALL1500
+                    
+                    if (Math.random() < 0.50) {
+                        addLog(`\n[${this.session_spins} 回轉] 🌈 白鳩BONUS！ (1500玉)`, "color-hit");
+                        addLog("🚀 SPY RUSH (ST14回転) 突入！！", "color-hit");
+                        updateUI(); await sleep(1500);
+                        await this.play_rush(); 
+                    } else {
+                        addLog(`\n[${this.session_spins} 回轉] 🎯 白鳩BONUS... (1500玉)`, "color-hit");
+                        addLog("💀 ミッション失敗... 通常へ戻る", "color-fall");
+                        updateUI(); this.record_history();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            async play_rush() {
+                this.state = "RUSH";
+                let max_spins = 14;
+                
+                while (this.state !== "NORMAL") {
+                    addLog(`\n===== 👑 SPY RUSH (ST14回転) =====`, "color-hit");
+                    updateUI();
+                    
+                    let hit = false;
+                    for (this.rush_spins = 1; this.rush_spins <= max_spins; this.rush_spins++) {
+                        await sleep(400); // 短期決戦なので少しディレイ長め
+                        let remaining = max_spins - this.rush_spins;
+                        document.getElementById("ui-spins").innerText = `ST残り: ${remaining}/${max_spins}`;
+
+                        let phase = "";
+                        if (this.rush_spins <= 10) {
+                            phase = "PHASE1";
+                            if (this.rush_spins === 1) addLog(`\n🔥 ST前半 (1～10回転) [大当りで50%が6000玉以上!]`, "color-phase1");
+                        } else {
+                            phase = "PHASE2";
+                            if (this.rush_spins === 11) addLog(`\n🔵 ST後半 (11～14回転) [当たればリセット or 1500玉]`, "color-phase2");
+                        }
+
+                        // 1/10.6 大当り抽選
+                        if (Math.random() < 1 / 10.6) {
+                            hit = true;
+                            this.session_rush_count += 1;
+                            addLog(`\n🎉 [ST ${this.rush_spins}回転目] ターゲット確保！ (總 ${this.session_rush_count}連)`, "color-hit");
+                            
+                            let r = Math.random();
+                            if (phase === "PHASE1") {
+                                // 前半: 25% 10500玉, 25% 6000玉, 50% 1500玉
+                                if (r < 0.25) {
+                                    addLog(`🌈 極限の任務達成！！ 10R×7回 BONUS！！`, "color-10500");
+                                    await sleep(800);
+                                    for(let i=1; i<=7; i++) {
+                                        this.session_payout += 1500;
+                                        addLog(`   💥 ${i}発目... 計+${i*1500}玉！`, "color-10500");
+                                        updateUI(); await sleep(500);
+                                    }
+                                    addLog(`▶ 圧倒的一撃！ 10500玉 獲得！`, "color-10500");
+                                } else if (r < 0.50) {
+                                    addLog(`🔥 超大型任務達成！！ 10R×4回 BONUS！！`, "color-phase1");
+                                    await sleep(800);
+                                    for(let i=1; i<=4; i++) {
+                                        this.session_payout += 1500;
+                                        addLog(`   💥 ${i}発目... 計+${i*1500}玉！`, "color-phase1");
+                                        updateUI(); await sleep(500);
+                                    }
+                                    addLog(`▶ 一撃 6000玉 獲得！`, "color-phase1");
+                                } else {
+                                    this.session_payout += 1500;
+                                    addLog(`▶ 10R BONUS！ 1500玉 獲得`, "color-hit");
+                                }
+                            } else {
+                                // 後半: 約66% STリセット, 約34% 1500玉
+                                if (r < 0.66) {
+                                    addLog(`🟢 チャレンジ成功！ ST回数リセット (出玉なし)`, "color-reset");
+                                } else {
+                                    this.session_payout += 1500;
+                                    addLog(`🔵 10R BONUS！ 1500玉 獲得`, "color-phase2");
+                                }
+                            }
+                            
+                            addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                            updateUI(); await sleep(1000);
+                            addLog(`⚡ RUSH継続！！`, "color-hit");
+                            break; // ST再セットのためループを抜ける
+                        }
+                    }
+
+                    if (!hit) {
+                        document.getElementById("ui-spins").innerText = `終了`;
+                        addLog(`\n💀 ミッション失敗... (終了)`, "color-fall");
+                        addLog(`📈 總連莊数: ${this.session_rush_count}連`);
+                        addLog(`💰 最終出玉: ${this.session_payout} 玉`);
+                        this.state = "NORMAL"; 
+                        this.record_history(); 
+                        updateUI();
+                    }
+                }
+            }
+
+            record_history() {
+                this.history.unshift({ spins: this.session_spins, rush: this.session_rush_count, payout: this.session_payout });
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+                this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0; this.state = "NORMAL";
+            }
+        }
+
+        let game = new Princess();
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div"); div.className = `log-entry ${className}`; div.innerText = text;
+            logBox.appendChild(div); logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") document.getElementById("ui-spins").innerText = game.session_spins;
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) { historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`; return; }
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `<td>${label}</td><td class="hit-spins">${record.spins}</td><td class="hit-rush">${record.rush}</td><td class="hit-payout">${record.payout}</td>`;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true; btnPlay.disabled = true;
+            addLog("\n=== eプリンセスプリンシパル 稼働開始！ ===", "color-hit");
+            while (isPlaying) {
+                let ended = await game.play_normal(); updateUI();
+                if (game.session_spins % 100 === 0 && game.state === "NORMAL") await sleep(10);
+                if (ended) { isPlaying = false; break; }
+            }
+            btnPlay.disabled = false; btnPlay.innerText = "▶️ プレイ続行";
+        }
+    </script>
+    <script src="hall-shared.js"></script>
+    <script src="plugin.js"></script>
+</body>
+</html>
