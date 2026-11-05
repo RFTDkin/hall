@@ -4482,13 +4482,15 @@
         function simPrincess() {
             let spins = 0, payout = 0;
             let pMain = 1 / 319.6;
-            let pRush = 1 / 10.6;
 
             function runRush() {
                 let state = "RUSH";
                 while (state === "RUSH" && payout < 95000) {
                     let hit = false;
                     for (let i = 1; i <= 14; i++) {
+                        // 🌟 修正：前半 1/25.7，後半 1/4.56
+                        let pRush = (i <= 10) ? (1 / 25.7) : (1 / 4.56);
+                        
                         if (Math.random() < pRush) {
                             hit = true;
                             let r = Math.random();
@@ -4499,8 +4501,11 @@
                                 else payout += 1500;
                             } else {
                                 // 後半: 66% リセット, 34% 1500玉
-                                if (r >= 0.66) payout += 1500;
-                                // リセットの場合は出玉加算なしでループを抜けるだけ
+                                if (r >= 0.66) {
+                                    // リセットの場合は出玉加算なし
+                                } else {
+                                    payout += 1500;
+                                }
                             }
                             break;
                         }

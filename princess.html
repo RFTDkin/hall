@@ -117,15 +117,18 @@
                             if (this.rush_spins === 11) addLog(`\n🔵 ST後半 (11～14回転) [当たればリセット or 1500玉]`, "color-phase2");
                         }
 
-                        // 1/10.6 大当り抽選
-                        if (Math.random() < 1 / 10.6) {
+                        // 🌟 修正：根據前後半套用真實內部機率
+                        let pRush = (phase === "PHASE1") ? (1 / 25.7) : (1 / 4.56);
+
+                        // 內部真實大当り抽選
+                        if (Math.random() < pRush) {
                             hit = true;
                             this.session_rush_count += 1;
                             addLog(`\n🎉 [ST ${this.rush_spins}回転目] ターゲット確保！ (總 ${this.session_rush_count}連)`, "color-hit");
                             
                             let r = Math.random();
                             if (phase === "PHASE1") {
-                                // 前半: 25% 10500玉, 25% 6000玉, 50% 1500玉
+                                // 前半(1/25.7): 25% 10500玉, 25% 6000玉, 50% 1500玉
                                 if (r < 0.25) {
                                     addLog(`🌈 極限の任務達成！！ 10R×7回 BONUS！！`, "color-10500");
                                     await sleep(800);
@@ -149,7 +152,7 @@
                                     addLog(`▶ 10R BONUS！ 1500玉 獲得`, "color-hit");
                                 }
                             } else {
-                                // 後半: 約66% STリセット, 約34% 1500玉
+                                // 後半(1/4.56): 約66% STリセット, 約34% 1500玉
                                 if (r < 0.66) {
                                     addLog(`🟢 チャレンジ成功！ ST回数リセット (出玉なし)`, "color-reset");
                                 } else {
