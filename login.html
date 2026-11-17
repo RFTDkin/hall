@@ -67,12 +67,19 @@
             if (!/^[a-zA-Z0-9]+$/.test(loginId)) {
                 return alert("IDは半角英数字のみ使用可能です！");
             }
+            
+            // 🔴 1. 禁用按鈕，防止玩家瘋狂連撳
+            const submitBtn = document.getElementById("submit-btn");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "処理中...";
 
-            // FirebaseのEmail要件を回避するためのダミードメイン
             const dummyEmail = loginId + "@phall.local";
 
             if (isRegisterMode) {
-                if (!username) return alert("プレイヤー名を入力してください！");
+                if (!username) {
+                    submitBtn.disabled = false; submitBtn.innerText = "登録する"; // 🟢 恢復按鈕
+                    return alert("プレイヤー名を入力してください！");
+                }
                 
                 auth.createUserWithEmailAndPassword(dummyEmail, password)
                     .then((userCredential) => {
@@ -89,6 +96,10 @@
                         window.location.href = "index.html";
                     })
                     .catch((error) => {
+                        // 🟢 2. 發生錯誤時，恢復按鈕等佢可以再試
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "登録する";
+                        
                         if (error.code === 'auth/email-already-in-use') {
                             alert("このIDはすでに使用されています。");
                         } else if (error.code === 'auth/weak-password') {
@@ -101,6 +112,10 @@
                 auth.signInWithEmailAndPassword(dummyEmail, password)
                     .then(() => { window.location.href = "index.html"; })
                     .catch((error) => {
+                        // 🟢 3. 發生錯誤時，恢復按鈕
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "ログイン";
+                        
                         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                             alert("IDまたはパスワードが間違っています。");
                         } else {

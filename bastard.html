@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【無料】eフィーバーBASTARD暗黒の破壊神| パチンコシミュレーター</title>
+    <meta name="machine-title" content="eフィーバーBASTARD!! -暗黒の破壊神-">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #140508; color: #eeeeee; text-align: center; padding-bottom: 60px; margin: 0; padding: 20px; }
+        h1 { color: #ff1744; text-shadow: 0 0 15px rgba(255, 23, 68, 0.8), 0 0 25px #ff9100; font-weight: 900; letter-spacing: 2px; }
+        .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
+        .left-panel, .right-panel { flex: 1; min-width: 320px; }
+        .left-panel { max-width: 500px; }
+        .right-panel { max-width: 400px; }
+        .stats-board { background-color: #24090e; border: 2px solid #ff1744; border-radius: 10px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-around; font-size: 1.1em; box-shadow: inset 0 0 15px rgba(255, 23, 68, 0.5); }
+        .stat-item span { display: block; font-weight: bold; color: #ffea00; font-size: 1.3em; margin-top: 5px; }
+        button { background: linear-gradient(180deg, #ff1744 0%, #880e4f 100%); color: white; border: 1px solid #ffea00; padding: 12px 25px; font-size: 1.1em; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; transition: transform 0.1s, box-shadow 0.2s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 15px #ff1744; }
+        button:disabled { background: #3b121a; border-color: #444; color: #777; cursor: not-allowed; transform: scale(1); box-shadow: none; }
+        .log-container { background-color: #000000; border: 1px solid #ff1744; border-radius: 5px; height: 420px; overflow-y: auto; padding: 10px; text-align: left; font-family: 'Courier New', Courier, monospace; line-height: 1.5; }
+        .log-entry { margin: 5px 0; }
+        .color-hit { color: #ff5252; font-weight: bold; text-shadow: 0 0 5px #ff1744; }
+        .color-normal { color: #bdbdbd; }
+        .color-fall { color: #757575; font-weight: bold; }
+        .color-rush { color: #ff9100; font-weight: bold; text-shadow: 0 0 5px #ff9100; }
+        .color-super { color: #d500f9; font-weight: bold; text-shadow: 0 0 8px #d500f9; }
+        .color-zanhoryu { color: #00e5ff; font-weight: bold; }
+        .color-uwanose { color: #ffea00; font-weight: 900; text-shadow: 0 0 12px #ff1744, 0 0 20px #ffea00; font-size: 1.08em; }
+        .data-lamp-container { background-color: #24090e; border: 3px solid #ff1744; border-radius: 8px; padding: 15px; box-shadow: 0 0 15px rgba(255, 23, 68, 0.4); }
+        .data-lamp-title { color: #ffea00; margin-top: 0; margin-bottom: 15px; text-align: center; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 5px #ff1744; letter-spacing: 2px; }
+        table.data-lamp { width: 100%; border-collapse: collapse; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        table.data-lamp th, table.data-lamp td { border: 1px solid #b71c1c; padding: 10px 5px; text-align: center; }
+        table.data-lamp th { background-color: #6a0018; color: #ffea00; font-size: 0.9em; }
+        table.data-lamp tr:nth-child(even) { background-color: #140508; }
+        table.data-lamp td.hit-spins { color: #ffea00; font-weight: bold; }
+        table.data-lamp td.hit-rush { color: #00e676; font-weight: bold; }
+        table.data-lamp td.hit-payout { color: #ff5252; font-weight: bold; }
+        .empty-row { color: #444 !important; }
+    </style>
+    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="hall-titles.css">
+</head>
+<body>
+    <h1>🎰 パチンコシミュレーター <br><span style="font-size: 0.5em; color: #ffea00;">eフィーバーバスタード -暗黒の破壊神- (1/399.9)</span></h1>
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="stats-board">
+                <div class="stat-item">當前轉數 <span id="ui-spins">0</span></div>
+                <div class="stat-item">本次出玉 <span id="ui-payout">0</span></div>
+                <div class="stat-item">本次連莊 <span id="ui-rush">0</span></div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <button id="btn-play" onclick="startPlay()">▶️ 遊技開始</button>
+            </div>
+            <div class="log-container" id="log-box"></div>
+        </div>
+        <div class="right-panel">
+            <div class="data-lamp-container">
+                <h3 class="data-lamp-title">DATA LAMP (最近10次)</h3>
+                <table class="data-lamp">
+                    <thead><tr><th>前次</th><th>當選回轉数</th><th>連莊数</th><th>獲得出玉</th></tr></thead>
+                    <tbody id="history-tbody"><tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        class Bastard {
+            constructor() {
+                this.state = "NORMAL"; // NORMAL, RUSH, SUPER_RUSH
+                this.session_spins = 0;
+                this.session_payout = 0;
+                this.session_rush_count = 0;
+                this.history = [];
+            }
+
+            // 🔥 核心機能：Bonus消化＆保留連「無上限上乗せ」エンジン
+            async digestBonusWithUwanose(initialRounds, initialLabel, isZanhoryu = false) {
+                let pendingRounds = initialRounds;
+                let totalBonusPayout = 0;
+                let digestedCount = 0;
+                let uwanoseCount = 0;
+
+                addLog(`▶ ${initialLabel} (${initialRounds * 1500}玉) 消化開始！`, "color-hit");
+
+                while (pendingRounds > 0 && this.state !== "NORMAL") {
+                    digestedCount++;
+                    pendingRounds--;
+                    this.session_payout += 1500;
+                    totalBonusPayout += 1500;
+
+                    if (digestedCount === 1) {
+                        addLog(`   💥 1発目消化 (+1500玉)`, "color-normal");
+                    } else {
+                        addLog(`   💥 ${digestedCount}発目消化 (計 ${totalBonusPayout}玉)`, "color-uwanose");
+                    }
+                    updateUI();
+                    await sleep(320);
+
+                    // 還有剩餘10R消化時，保留格會空出並即刻補入新保留(第5・第6保留...)進行1/10.8先讀抽選！
+                    if (pendingRounds > 0 && this.state !== "NORMAL") {
+                        if (Math.random() < 1 / 10.8) {
+                            uwanoseCount++;
+                            this.session_rush_count += 1;
+
+                            if (this.state === "RUSH") {
+                                // バスタードRUSH中保留連：50% 3000玉(超RUSH昇格) / 50% 1500玉
+                                if (Math.random() < 0.50) {
+                                    this.state = "SUPER_RUSH";
+                                    pendingRounds += 2;
+                                    addLog(`⚡⚡ 【保留連上乗せ ${uwanoseCount}回目】超絶破天荒3000追加！！ (+2発ストック＆超RUSH昇格！)`, "color-uwanose");
+                                } else {
+                                    pendingRounds += 1;
+                                    addLog(`⚡ 【保留連上乗せ ${uwanoseCount}回目】BASTARD FEVER追加！！ (+1発ストック！)`, "color-uwanose");
+                                }
+                            } else if (this.state === "SUPER_RUSH") {
+                                // 超バスタードRUSH中保留連：30% 4500玉 / 70% 3000玉
+                                if (Math.random() < 0.30) {
+                                    pendingRounds += 3;
+                                    addLog(`🌈🔥 【保留連上乗せ ${uwanoseCount}回目】超絶破天荒4500追加！！ (+3発ストック！)`, "color-uwanose");
+                                } else {
+                                    pendingRounds += 2;
+                                    addLog(`⚡⚡ 【保留連上乗せ ${uwanoseCount}回目】超絶破天荒3000追加！！ (+2発ストック！)`, "color-uwanose");
+                                }
+                            }
+                            updateUI();
+                            await sleep(500);
+                        }
+                    }
+                }
+
+                if (uwanoseCount > 0) {
+                    addLog(`👑 驚異の保留連上乗せ決着！！ 一撃獲得：${totalBonusPayout.toLocaleString()} 玉！！`, "color-uwanose");
+                }
+            }
+
+            async play_normal() {
+                this.session_spins += 1;
+                if (this.session_spins % 100 === 0) addLog(`現在回轉数: ${this.session_spins}`, "color-normal");
+
+                // 通常時合算 1/349.9 (図柄揃い 1/399.9 + 2Rチャージ 約1/2798.5)
+                if (Math.random() < 1 / 349.9) {
+                    const isZugara = Math.random() < (349.9 / 399.9);
+
+                    if (isZugara) {
+                        this.session_rush_count = 1;
+                        if (Math.random() < 0.50) {
+                            // 50%：10R×2回 (3000個) + バスタードRUSH突入
+                            addLog(`\n[${this.session_spins} 回轉] 🌈 7図柄揃い / 演出成功！ 超絶破天荒3000！！`, "color-hit");
+                            this.state = "RUSH";
+                            await this.digestBonusWithUwanose(2, "初当り超絶破天荒3000");
+                            addLog("🔥 バスタードRUSH (ST10回転+残保留4個) 突入！！", "color-rush");
+                            updateUI(); await sleep(1000);
+                            await this.play_rush();
+                        } else {
+                            // 50%：10R (1500個) + 通常へ
+                            this.session_payout += 1500;
+                            addLog(`\n[${this.session_spins} 回轉] 🎯 FEVER！ (10R・1500玉)`, "color-hit");
+                            addLog("💀 演出失敗... 通常へ戻る", "color-fall");
+                            updateUI(); this.record_history();
+                        }
+                        return true;
+                    } else {
+                        // 2R ラーズちゃーじ (300玉)
+                        this.session_rush_count = 1;
+                        this.session_payout += 300;
+                        if (Math.random() < 0.02) {
+                            addLog(`\n[${this.session_spins} 回轉] ⚡ ラーズちゃーじ (300玉) から昇格発生！！`, "color-hit");
+                            this.state = "RUSH";
+                            addLog("🔥 バスタードRUSH (ST10回転+残保留4個) 突入！！", "color-rush");
+                            updateUI(); await sleep(1000);
+                            await this.play_rush();
+                        } else {
+                            addLog(`\n[${this.session_spins} 回轉] ⚡ ラーズちゃーじ (2R・300玉) → 通常へ戻る`, "color-fall");
+                            updateUI();
+                            this.record_history(); // 👈 寫入 Data Lamp 並重置轉數
+                        }
+                        return true; // 👈 停止自動抽獎，等玩家再按「プレイ続行」
+                    }
+                }
+                return false;
+            }
+
+            async play_rush() {
+                while (this.state !== "NORMAL") {
+                    const isSuper = (this.state === "SUPER_RUSH");
+                    const modeTitle = isSuper ? "👑 超バスタードRUSH (3000 or 4500)" : "🔥 バスタードRUSH (50%で超RUSH昇格)";
+                    const modeColor = isSuper ? "color-super" : "color-rush";
+                    addLog(`\n===== ${modeTitle} =====`, modeColor);
+                    updateUI();
+
+                    let hit = false;
+
+                    // 1. ST 10回転 (1/10.8)
+                    for (let i = 1; i <= 10; i++) {
+                        if (this.state === "NORMAL") return;
+                        await sleep(400);
+                        document.getElementById("ui-spins").innerText = `ST残り: ${10 - i}/10`;
+
+                        if (Math.random() < 1 / 10.8) {
+                            hit = true;
+                            this.session_rush_count += 1;
+                            addLog(`\n🎉 [ST ${i}回転目] 大当り！！ (總 ${this.session_rush_count}連)`, "color-hit");
+
+                            if (!isSuper) {
+                                // バスタードRUSH中：50% 3000玉(超RUSH昇格) / 50% 1500玉(RUSH継続)
+                                if (Math.random() < 0.50) {
+                                    this.state = "SUPER_RUSH";
+                                    addLog(`🌟 超バスタードRUSH 昇格決定！！`, "color-super");
+                                    await this.digestBonusWithUwanose(2, "超絶破天荒3000");
+                                } else {
+                                    await this.digestBonusWithUwanose(1, "BASTARD FEVER");
+                                }
+                            } else {
+                                // 超バスタードRUSH中：30% 4500玉 / 70% 3000玉
+                                if (Math.random() < 0.30) {
+                                    await this.digestBonusWithUwanose(3, "🔥 超絶破天荒4500");
+                                } else {
+                                    await this.digestBonusWithUwanose(2, "超絶破天荒3000");
+                                }
+                            }
+                            addLog(`💰 累積出玉: ${this.session_payout.toLocaleString()} 玉`);
+                            updateUI(); await sleep(700);
+                            break;
+                        }
+                    }
+
+                    // 2. 残り保留 4個 (1/10.8) - 当たれば状態共通で1500個＆超RUSH突入
+                    if (!hit && this.state !== "NORMAL") {
+                        addLog(`\n🔵 ラストチャンス！ 残り保留 4個 (当選で超RUSH突入)`, "color-zanhoryu");
+                        for (let j = 1; j <= 4; j++) {
+                            if (this.state === "NORMAL") return;
+                            await sleep(250);
+                            document.getElementById("ui-spins").innerText = `残保留: ${4 - j}/4`;
+                            addLog(`💠 残保留 ${j}個目...`, "color-zanhoryu");
+
+                            if (Math.random() < 1 / 10.8) {
+                                hit = true;
+                                this.session_rush_count += 1;
+                                this.state = "SUPER_RUSH";
+                                addLog(`\n🎉 [残保留 ${j}個目] 引き戻し成功！！ 超RUSH突入！！ (總 ${this.session_rush_count}連)`, "color-super");
+                                await this.digestBonusWithUwanose(1, "残保留BONUS", true);
+                                addLog(`💰 累積出玉: ${this.session_payout.toLocaleString()} 玉`);
+                                updateUI(); await sleep(700);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!hit && this.state !== "NORMAL") {
+                        document.getElementById("ui-spins").innerText = `終了`;
+                        addLog(`\n💀 RUSH終了...`, "color-fall");
+                        addLog(`📈 總連莊数: ${this.session_rush_count}連`);
+                        addLog(`💰 最終出玉: ${this.session_payout.toLocaleString()} 玉`);
+                        this.state = "NORMAL";
+                        this.record_history();
+                        updateUI();
+                    }
+                }
+            }
+
+            record_history() {
+                this.history.unshift({ spins: this.session_spins, rush: this.session_rush_count, payout: this.session_payout });
+                if (this.history.length > 10) this.history.pop();
+                renderHistoryTable(this.history);
+                this.session_spins = 0; this.session_payout = 0; this.session_rush_count = 0; this.state = "NORMAL";
+            }
+        }
+
+        let game = new Bastard();
+        window.game = game;
+        let isPlaying = false;
+        const logBox = document.getElementById("log-box");
+        const btnPlay = document.getElementById("btn-play");
+        const historyTbody = document.getElementById("history-tbody");
+
+        function addLog(text, className = "") {
+            const div = document.createElement("div"); div.className = `log-entry ${className}`; div.innerText = text;
+            logBox.appendChild(div); logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            if (game.state === "NORMAL") document.getElementById("ui-spins").innerText = game.session_spins;
+            document.getElementById("ui-payout").innerText = game.session_payout;
+            document.getElementById("ui-rush").innerText = game.session_rush_count;
+        }
+
+        function renderHistoryTable(historyData) {
+            historyTbody.innerHTML = "";
+            if (historyData.length === 0) { historyTbody.innerHTML = `<tr><td colspan="4" class="empty-row">- 無紀錄 -</td></tr>`; return; }
+            historyData.forEach((record, index) => {
+                const tr = document.createElement("tr");
+                let label = index === 0 ? "前回" : index === 1 ? "前々回" : `${index + 1}回前`;
+                tr.innerHTML = `<td>${label}</td><td class="hit-spins">${record.spins}</td><td class="hit-rush">${record.rush}</td><td class="hit-payout">${record.payout}</td>`;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        async function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true; btnPlay.disabled = true;
+            addLog("\n=== eフィーバーバスタード 稼働開始！ ===", "color-hit");
+            while (isPlaying) {
+                let ended = await game.play_normal(); updateUI();
+                if (game.session_spins % 100 === 0 && game.state === "NORMAL") await sleep(10);
+                if (ended) { isPlaying = false; break; }
+            }
+            btnPlay.disabled = false; btnPlay.innerText = "▶️ プレイ続行";
+        }
+    </script>
+    <script src="hall-shared.js"></script>
+    <script src="plugin.js"></script>
+</body>
+</html>
