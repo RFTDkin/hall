@@ -4615,8 +4615,8 @@
                     const isZugara = Math.random() < (349.9 / 399.9);
                     if (isZugara) {
                         if (Math.random() < 0.50) {
+                            payout += 3000; // 👈 改為直接加 3000 玉，不觸發保留連
                             state = "RUSH";
-                            digestWithUwanose(2);
                             runRush();
                         } else {
                             payout += 1500;

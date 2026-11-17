@@ -148,10 +148,10 @@
                     if (isZugara) {
                         this.session_rush_count = 1;
                         if (Math.random() < 0.50) {
-                            // 50%：10R×2回 (3000個) + バスタードRUSH突入
-                            addLog(`\n[${this.session_spins} 回轉] 🌈 7図柄揃い / 演出成功！ 超絶破天荒3000！！`, "color-hit");
+                            // 50%：10R×2回 (3000個) + バスタードRUSH突入（初當り不觸發保留連上乗せ）
+                            this.session_payout += 3000;
+                            addLog(`\n[${this.session_spins} 回轉] 🌈 7図柄揃い / 演出成功！ 超絶破天荒3000！！ (3000玉)`, "color-hit");
                             this.state = "RUSH";
-                            await this.digestBonusWithUwanose(2, "初当り超絶破天荒3000");
                             addLog("🔥 バスタードRUSH (ST10回転+残保留4個) 突入！！", "color-rush");
                             updateUI(); await sleep(1000);
                             await this.play_rush();
