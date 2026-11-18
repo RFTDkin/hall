@@ -241,6 +241,7 @@
                         addLog(`\n🎉 [RUSH ${current_spin_in_rush}回転] 當選！ (總 ${this.session_rush_count + 1}連)`, "color-hit");
                         addLog(`🚀 OVERSHOT BIG BONUS (約3000玉)`, "color-ultimate");
                         addLog(`💰 累積出玉: ${this.session_payout} 玉`);
+                        current_spin_in_rush = 0; // 👈 中獎後重置RUSH回轉數
                         updateUI();
                         await sleep(800);
                     } 
@@ -260,6 +261,7 @@
                                 addLog(`🚀 OVERSHOT BIG BONUS (約3000玉)`, "color-ultimate");
                                 addLog(`🌊 共同戦線RUSH 復帰！`, "color-rush");
                                 recovered = true;
+                                current_spin_in_rush = 0; // 👈 保留拉回後亦重置RUSH回轉數
                                 updateUI();
                                 await sleep(1000);
                                 break; // 引き戻し成功でループを抜けてRUSH継続
