@@ -1017,6 +1017,15 @@
             <div class="progress-text" id="juou-prog">待機中...</div>
         </div>
 
+        <div class="machine-card" id="card-assaultlily" style="border-top: 5px solid #ff4081;">
+            <h3 class="machine-title">eアサルトリリィ</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="assaultlily-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="assaultlily-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="assaultlily-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="assaultlily-profit">---</span></div>
+            <div class="progress-text" id="assaultlily-prog">待機中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -4810,6 +4819,70 @@
             return { spins, payout };
         }
 
+        function simAssaultLily() {
+            let spins = 0, payout = 0;
+            const pMain = 1 / 164.4;
+            const pReach = 1 / 65.5;
+            let skill = null;
+
+            function awardBonus() {
+                const r = Math.random();
+                if (r < 0.1043) payout += 4500;
+                else if (r < 0.5005) payout += 3000;
+                else payout += 1500;
+
+                const rs = Math.random();
+                if (rs < 0.184) skill = "CHARISMA";
+                else if (rs < 0.312) skill = "KAMISHUKU";
+                else if (rs < 0.367) skill = "ANGEL";
+                else skill = null;
+            }
+
+            function resolveJudge(guaranteed) {
+                if (guaranteed || Math.random() < 0.83) {
+                    awardBonus();
+                    return "HIT";
+                }
+                return Math.random() < 0.5365 ? "RESET" : "MISS";
+            }
+
+            function runRush() {
+                let active = true;
+                while (active && payout < 95000) {
+                    if (skill === "KAMISHUKU" || skill === "ANGEL") {
+                        const guaranteed = (skill === "ANGEL");
+                        skill = null;
+                        const res = resolveJudge(guaranteed);
+                        if (res === "HIT" || res === "RESET") continue;
+                    }
+
+                    let roundEnded = false;
+                    for (let i = 1; i <= 100; i++) {
+                        if (Math.random() < pReach) {
+                            const hasCharisma = (skill === "CHARISMA");
+                            if (hasCharisma) skill = null;
+                            const res = resolveJudge(hasCharisma);
+                            if (res === "HIT" || res === "RESET") {
+                                roundEnded = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!roundEnded) active = false;
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < pMain) {
+                    payout += 300;
+                    if (Math.random() < 0.253) runRush();
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
@@ -4971,6 +5044,7 @@
             await runMachineSim('nyanko', simNyanko, 1000 / 17, iterations);
             await runMachineSim('granbelm', simGranbelm, 1000 / 17, iterations);
             await runMachineSim('juou', simJuou, 1000 / 26, iterations);
+            await runMachineSim('assaultlily', simAssaultLily, 1000 / 17, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);
