@@ -1008,6 +1008,15 @@
             <div class="progress-text" id="granbelm-prog">待機中...</div>
         </div>
 
+        <div class="machine-card" id="card-juou" style="border-top: 5px solid #ff9100;">
+            <h3 class="machine-title">e獣王</h3>
+            <div class="stat-row"><span class="stat-label">平均初当り回転:</span><span class="stat-value val-spins" id="juou-spins">---</span></div>
+            <div class="stat-row"><span class="stat-label">平均獲得出玉:</span><span class="stat-value val-payout" id="juou-payout">---</span></div>
+            <div class="stat-row"><span class="stat-label">最大一撃出玉:</span><span class="stat-value val-max" id="juou-max">---</span></div>
+            <div class="stat-row"><span class="stat-label">プレイヤー累計収支:</span><span class="stat-value val-profit" id="juou-profit">---</span></div>
+            <div class="progress-text" id="juou-prog">待機中...</div>
+        </div>
+
     </div>
 
     <script>
@@ -4748,6 +4757,59 @@
             return { spins, payout };
         }
 
+        function simJuou() {
+            let spins = 0, payout = 0;
+            const pMain = 1 / 319.7;
+            const pSt = 1 / 144.7;
+            const pScBall = 1 / 4.69;
+
+            function runSavannaChance() {
+                let active = true;
+                while (active && payout < 95000) {
+                    let hits = 0;
+                    for (let b = 0; b < 5; b++) {
+                        if (Math.random() < pScBall) hits++;
+                    }
+                    if (hits > 0) payout += hits * 1500;
+                    else active = false;
+                }
+            }
+
+            function runRush() {
+                let active = true;
+                while (active && payout < 95000) {
+                    let hit = false;
+                    for (let i = 1; i <= 100; i++) {
+                        if (Math.random() < pSt) {
+                            hit = true;
+                            payout += 1500;
+                            const r = Math.random();
+                            if (r >= 0.33 && r < 0.50) {
+                                payout += 1500; // 3000個
+                            } else if (r >= 0.50) {
+                                const rSc = Math.random();
+                                let extraHits = rSc < 0.05 ? 4 : rSc < 0.25 ? 3 : 2;
+                                payout += extraHits * 1500;
+                                runSavannaChance();
+                            }
+                            break;
+                        }
+                    }
+                    if (!hit) active = false;
+                }
+            }
+
+            while (true) {
+                spins++;
+                if (Math.random() < pMain) {
+                    payout += 300;
+                    if (Math.random() < 0.50) runRush();
+                    break;
+                }
+            }
+            return { spins, payout };
+        }
+
         async function runMachineSim(idPrefix, simFunc, spinCost, iterations) {
             const card = document.getElementById(`card-${idPrefix}`);
             const elSpins = document.getElementById(`${idPrefix}-spins`);
@@ -4908,6 +4970,7 @@
             await runMachineSim('bastard', simBastard, 1000 / 17, iterations);
             await runMachineSim('nyanko', simNyanko, 1000 / 17, iterations);
             await runMachineSim('granbelm', simGranbelm, 1000 / 17, iterations);
+            await runMachineSim('juou', simJuou, 1000 / 26, iterations);
 
             // 🌟 跑完之後，根據解鎖狀態更新按鈕文字 🌟
             btns.forEach(btn => btn.disabled = false);

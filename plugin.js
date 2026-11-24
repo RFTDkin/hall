@@ -505,6 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (pageText.includes("大工の源さん")) spinCost = 1000 / 18;
         else if (pageText.includes("一騎当千")) spinCost = 1000 / 30;
         else if (pageText.includes("プリンセスプリンシパル")) spinCost = 1000 / 16;
+        else if (pageText.includes("獣王")) spinCost = 1000 / 26;
 
         // 🌟 生成排行榜與實時數據同步 🌟
         let currentMachineRankings = [];
